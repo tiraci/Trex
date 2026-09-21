@@ -1,7 +1,7 @@
-#!/bin/sh
-# Install the `oximux` CLI and its relay.
+﻿#!/bin/sh
+# Install the `TREX` CLI and its relay.
 #
-#   curl -fsSL https://raw.githubusercontent.com/nhtera/OxiMux/main/scripts/install-cli.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/tiraci/Trex/main/scripts/install-cli.sh | sh
 #
 # What this trusts, and what it cannot
 # ------------------------------------
@@ -19,20 +19,20 @@
 # most people run on a machine with no minisign.
 #
 # The installed binary does NOT inherit this weakness: it carries the same key
-# compiled in and every `oximux update` from here on verifies the signature or
+# compiled in and every `TREX update` from here on verifies the signature or
 # refuses outright. This is trust-on-first-install, and only that.
 #
 # POSIX sh on purpose — /bin/sh is dash on Debian and Ubuntu.
 
 set -eu
 
-REPO="nhtera/OxiMux"
+REPO="tiraci/Trex"
 # Overridable so the installer itself can be tested against a local fake
 # release. Unlike the compiled updater — where the equivalent override is
 # debug-build-only, because a release binary must carry no way to repoint its
 # own trust chain — this costs nothing: anyone who can set an environment
 # variable for this script can equally well edit the script.
-BASE_URL="${OXIMUX_INSTALL_BASE_URL:-https://github.com/${REPO}/releases}"
+BASE_URL="${TREX_INSTALL_BASE_URL:-https://github.com/${REPO}/releases}"
 LATEST="${BASE_URL}/latest/download"
 
 # release-pubkey: the base64 body of the minisign .pub file. Managed by
@@ -41,7 +41,7 @@ LATEST="${BASE_URL}/latest/download"
 RELEASE_PUBKEY="RWQ4owMUFazkg7fHezLB688BjTGDGJBBQ4EPLVbLDp8baal1VsMJ71FJ"
 
 DEFAULT_DIR="${HOME}/.local/bin"
-INSTALL_DIR="${OXIMUX_INSTALL_DIR:-$DEFAULT_DIR}"
+INSTALL_DIR="${TREX_INSTALL_DIR:-$DEFAULT_DIR}"
 REQUIRE_SIGNATURE=0
 
 die() {
@@ -55,13 +55,13 @@ need() {
 
 usage() {
     cat <<EOF
-Install the oximux CLI.
+Install the TREX CLI.
 
   --dir <path>           where to install (default: ${DEFAULT_DIR})
   --require-signature    fail unless the manifest signature is verified
   -h, --help             this
 
-Environment: OXIMUX_INSTALL_DIR is the same as --dir.
+Environment: TREX_INSTALL_DIR is the same as --dir.
 EOF
 }
 
@@ -191,7 +191,7 @@ manifest_version() {
 
 TARGET="$(detect_target)"
 
-TMP="$(mktemp -d 2>/dev/null || mktemp -d -t oximux)"
+TMP="$(mktemp -d 2>/dev/null || mktemp -d -t TREX)"
 # Set once the staging directory inside the install dir exists; cleaned up on
 # every exit path so a failed install leaves nothing behind that a later run
 # could mistake for a verified binary.
@@ -199,7 +199,7 @@ STAGE=""
 cleanup() { rm -rf "$TMP"; [ -n "$STAGE" ] && rm -rf "$STAGE"; return 0; }
 trap cleanup EXIT INT TERM
 
-echo "oximux: installing for ${TARGET}"
+echo "TREX: installing for ${TARGET}"
 
 fetch "${LATEST}/manifest.json" "${TMP}/manifest.json" \
     || die "could not download the release manifest — is there a published release?"
@@ -210,21 +210,21 @@ if [ "$RELEASE_PUBKEY" = "UNSET" ]; then
     if [ "$REQUIRE_SIGNATURE" -eq 1 ]; then
         die "this installer carries no release key, so --require-signature cannot be satisfied"
     fi
-    echo "oximux: WARNING — this installer carries no release key; falling back to checksum-only trust." >&2
+    echo "TREX: WARNING — this installer carries no release key; falling back to checksum-only trust." >&2
 elif command -v minisign >/dev/null 2>&1; then
     fetch "${LATEST}/manifest.json.minisig" "${TMP}/manifest.json.minisig" \
         || die "the release has no manifest signature"
-    printf 'untrusted comment: oximux release key\n%s\n' "$RELEASE_PUBKEY" > "${TMP}/release.pub"
+    printf 'untrusted comment: TREX release key\n%s\n' "$RELEASE_PUBKEY" > "${TMP}/release.pub"
     minisign -V -p "${TMP}/release.pub" -x "${TMP}/manifest.json.minisig" \
         -m "${TMP}/manifest.json" >/dev/null \
         || die "the release manifest signature did NOT verify. Do not retry blindly — this is what a tampered release looks like. Check https://github.com/${REPO}/releases"
-    echo "oximux: manifest signature verified"
+    echo "TREX: manifest signature verified"
 elif [ "$REQUIRE_SIGNATURE" -eq 1 ]; then
     die "minisign is not installed and --require-signature was given (brew install minisign / apt install minisign)"
 else
-    echo "oximux: WARNING — minisign is not installed, so the release signature was NOT checked." >&2
-    echo "oximux:           Falling back to the manifest's sha256 over TLS. Install minisign and" >&2
-    echo "oximux:           re-run with --require-signature for the full check." >&2
+    echo "TREX: WARNING — minisign is not installed, so the release signature was NOT checked." >&2
+    echo "TREX:           Falling back to the manifest's sha256 over TLS. Install minisign and" >&2
+    echo "TREX:           re-run with --require-signature for the full check." >&2
 fi
 
 # --- the asset ---------------------------------------------------------------
@@ -242,7 +242,7 @@ case "$ARCHIVE" in
     */*|*'\'*|*..*|-*|'') die "the manifest names an unsafe archive path: ${ARCHIVE}" ;;
 esac
 
-echo "oximux: downloading ${VERSION} (${ARCHIVE})"
+echo "TREX: downloading ${VERSION} (${ARCHIVE})"
 # Built from the *signed* version and file name rather than read out of the
 # manifest as a URL, so a manifest can never name a download host of its own.
 fetch "${BASE_URL}/download/v${VERSION}/${ARCHIVE}" "${TMP}/${ARCHIVE}" \
@@ -254,13 +254,13 @@ GOT_SHA="$(printf '%s' "$GOT_SHA" | tr 'ABCDEF' 'abcdef')"
 WANT_SHA="$(printf '%s' "$WANT_SHA" | tr 'ABCDEF' 'abcdef')"
 [ "$GOT_SHA" = "$WANT_SHA" ] \
     || die "checksum mismatch for ${ARCHIVE}: expected ${WANT_SHA}, got ${GOT_SHA}"
-echo "oximux: checksum ok"
+echo "TREX: checksum ok"
 
 # --- install ----------------------------------------------------------------
 
 mkdir -p "${TMP}/unpack"
 tar -xzf "${TMP}/${ARCHIVE}" -C "${TMP}/unpack" || die "could not unpack ${ARCHIVE}"
-for bin in oximux oximux-relay; do
+for bin in TREX trex-relay; do
     [ -f "${TMP}/unpack/${bin}" ] || die "${ARCHIVE} does not contain ${bin}"
 done
 
@@ -277,16 +277,16 @@ INSTALL_DIR=$(CDPATH= cd "$INSTALL_DIR" && pwd) || die "could not resolve ${INST
 # lands one and not the other leaves an installation that cannot talk to itself.
 # Doing the two moves in a simple loop would produce exactly that whenever the
 # second one fails, so this is the same two-pass swap-with-rollback that
-# `oximux update` performs, for the same reason.
+# `TREX update` performs, for the same reason.
 #
 # Staging INSIDE the install directory is load-bearing: a rename is only atomic
 # within one filesystem, and /tmp is very often not the same filesystem as
 # ~/.local/bin. The cross-filesystem copy happens here, before anything
 # installed is disturbed.
-STAGE="${INSTALL_DIR}/.oximux-install-$$"
+STAGE="${INSTALL_DIR}/.trex-install-$$"
 rm -rf "$STAGE"
 mkdir -p "$STAGE" || die "could not stage into ${INSTALL_DIR} — no write access?"
-for bin in oximux oximux-relay; do
+for bin in TREX trex-relay; do
     cp "${TMP}/unpack/${bin}" "${STAGE}/${bin}" \
         || die "could not stage ${bin} into ${INSTALL_DIR} — no write access?"
     chmod 755 "${STAGE}/${bin}"
@@ -296,7 +296,7 @@ done
 # but its name CAN be vacated — which is why this is "move aside, then move in"
 # rather than "move over".
 moved=""
-for bin in oximux oximux-relay; do
+for bin in TREX trex-relay; do
     [ -e "${INSTALL_DIR}/${bin}" ] || continue
     if mv "${INSTALL_DIR}/${bin}" "${STAGE}/${bin}.old"; then
         moved="${moved} ${bin}"
@@ -311,7 +311,7 @@ done
 # Pass 2: move the new binaries into the vacated names. Undo pass 2 first on
 # failure, so pass 1's undo finds its destinations free.
 placed=""
-for bin in oximux oximux-relay; do
+for bin in TREX trex-relay; do
     if mv "${STAGE}/${bin}" "${INSTALL_DIR}/${bin}"; then
         placed="${placed} ${bin}"
     else
@@ -323,7 +323,7 @@ for bin in oximux oximux-relay; do
     fi
 done
 
-echo "oximux: installed ${VERSION} to ${INSTALL_DIR}"
+echo "TREX: installed ${VERSION} to ${INSTALL_DIR}"
 
 case ":${PATH}:" in
     *":${INSTALL_DIR}:"*) ;;

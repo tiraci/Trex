@@ -1,4 +1,4 @@
-//! omp adapter (`omp` CLI, a Pi fork).
+﻿//! omp adapter (`omp` CLI, a Pi fork).
 //!
 //! Spawns the `omp` interactive TUI in a PTY. This is the *terminal* face of
 //! omp; its structured-chat face is `omp --mode rpc-ui`, which lives in
@@ -102,7 +102,7 @@ impl CliAgentAdapter for OmpAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::{AgentAdapter, SessionResumption};
+    use trex_core::{AgentAdapter, SessionResumption};
 
     fn cfg() -> AgentSessionConfig {
         AgentSessionConfig {

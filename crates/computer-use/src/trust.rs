@@ -1,4 +1,4 @@
-//! User-anchored trust for a driver binary no publisher will vouch for.
+﻿//! User-anchored trust for a driver binary no publisher will vouch for.
 //!
 //! # Why this exists alongside [`crate::verify`]
 //!
@@ -32,7 +32,7 @@
 //!   which is precisely what an unsigned auto-updating tool invites.
 //!
 //! The trust decision moves to the person who can actually make it: they choose
-//! the install route, and OxiMux enforces what they chose.
+//! the install route, and TREX enforces what they chose.
 //!
 //! # The pin is on the bytes, not the path
 //!
@@ -399,7 +399,7 @@ mod tests {
 
     #[test]
     fn a_pin_survives_a_round_trip_through_the_file() {
-        // Two independent handles, as OxiMux and a later process would be.
+        // Two independent handles, as TREX and a later process would be.
         let f = Fixture::new();
         f.store.approve(&f.binary).expect("approve");
 

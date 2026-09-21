@@ -1,4 +1,4 @@
-//! Live-activity extraction from a session log tail.
+﻿//! Live-activity extraction from a session log tail.
 //!
 //! For a Running agent the UI wants one dim line: what tool is it on right
 //! now ("Bash: cargo test…"). The CLI journals every assistant message —
@@ -153,12 +153,12 @@ mod tests {
         );
         let new = assistant_line(
             "2026-06-11T23:59:50Z",
-            r#"{"type":"tool_use","name":"Bash","input":{"command":"cargo test -p oximux-agents"}}"#,
+            r#"{"type":"tool_use","name":"Bash","input":{"command":"cargo test -p trex-agents"}}"#,
         );
         let tail = format!("{old}\n{new}\n");
         let a = parse_activity_from_tail(&tail, NOW).unwrap();
         assert_eq!(a.tool, "Bash");
-        assert_eq!(a.label(), "Bash: cargo test -p oximux-agents");
+        assert_eq!(a.label(), "Bash: cargo test -p trex-agents");
     }
 
     #[test]

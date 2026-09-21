@@ -1,4 +1,4 @@
-//! Proves the host accept *loop* ([`serve_host`]) over real iroh QUIC: it serves
+﻿//! Proves the host accept *loop* ([`serve_host`]) over real iroh QUIC: it serves
 //! more than one connection in sequence (a single-`accept` host could only ever
 //! serve the first) and stops promptly when its shutdown signal fires. The
 //! per-connection correctness (pair/list/backlog/command) is covered by
@@ -9,12 +9,12 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use futures::future::join;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::{StubConnection, ThreadEvent};
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot};
-use oximux_remote_iroh::{IrohConnector, bind_client, bind_host, serve_host, start_host};
-use oximux_remote_proto::PairingTicket;
-use oximux_remote_session::{ClientSigner, Connector, RemoteSession};
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::{StubConnection, ThreadEvent};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot};
+use trex_remote_iroh::{IrohConnector, bind_client, bind_host, serve_host, start_host};
+use trex_remote_proto::PairingTicket;
+use trex_remote_session::{ClientSigner, Connector, RemoteSession};
 
 const SECRET: [u8; 16] = [0x22; 16];
 const NOW: u64 = 1_700_000_000;

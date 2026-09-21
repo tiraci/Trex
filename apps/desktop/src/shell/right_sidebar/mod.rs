@@ -1,4 +1,4 @@
-//! RightSidebar — tab-switchable activity-bar panel replacing the fixed git column.
+﻿//! RightSidebar — tab-switchable activity-bar panel replacing the fixed git column.
 //!
 //! Owns the StatusPoller lifetime, mirrors poll state for the status bar,
 //! and dispatches to Explorer / Search / Source Control tab bodies.
@@ -16,9 +16,9 @@ use gpui::{
     AppContext, Context, Entity, InteractiveElement, IntoElement, ParentElement, Pixels, Render,
     Styled, Task, Window, div, px,
 };
-use oximux_git::{PollState, Repository, StatusPoller};
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::{SettingsRepo, WorktreeSettingsRepo};
+use trex_git::{PollState, Repository, StatusPoller};
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::{SettingsRepo, WorktreeSettingsRepo};
 
 use crate::git_state_cache::GitStateCache;
 use crate::scm_layout_settings;
@@ -30,7 +30,7 @@ use crate::shell::right_sidebar::layout::DEFAULT_PANEL_WIDTH;
 use crate::shell::right_sidebar::tab::{RightTab, TabVisibility, visible_tabs};
 use crate::shell::search_panel::SearchPanel;
 use crate::shell::source_control::{PanelConfig, SourceControlPanel};
-use oximux_editor::FileTree;
+use trex_editor::FileTree;
 
 /// Configuration bundle for `RightSidebar::new_for_test`. Keeps the test
 /// constructor under the 7-argument clippy limit.
@@ -604,7 +604,7 @@ impl Render for RightSidebar {
         // This view holds a palette and nothing else, so `appearance::sync`
         // does not fit — and without a pull the sidebar ground stays in the
         // old theme while every panel inside it repaints.
-        self.theme = oximux_settings::appearance::theme(cx);
+        self.theme = trex_settings::appearance::theme(cx);
         let theme = self.theme;
 
         // NOTE: on_action handlers for sidebar keybindings are registered on

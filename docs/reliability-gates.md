@@ -1,4 +1,4 @@
-# Reliability gates
+﻿# Reliability gates
 
 A **gate** is a reliability claim with its evidence attached. The ledger lives at
 [`config/reliability-gates.toml`](../config/reliability-gates.toml) and is
@@ -10,7 +10,7 @@ cargo run -p xtask -- reliability-gates
 
 ## Why this exists
 
-OxiMux plan documents have twice carried a "VERIFIED" row that was false. Once
+TREX plan documents have twice carried a "VERIFIED" row that was false. Once
 the evidence was a truncated `ls` that showed the first screenful and was read as
 the whole set. Once it was an API that genuinely existed — just not on the host
 that mattered.
@@ -105,7 +105,7 @@ Two traps the fields cannot express, both live in this repo today, both recorded
 in `coverage_notes` on the rows they affect:
 
 - **A test can pass without asserting anything.** The `wire_skew_e2e` suite
-  returns early when `OXIMUX_SKEW_CLI` is unset, so the Linux and Windows CLI
+  returns early when `TREX_SKEW_CLI` is unset, so the Linux and Windows CLI
   steps report it green having tested nothing. Only the macOS skew step is
   evidence.
 - **A test can be flaky in one direction.** `spawn_args_reach_child_process`

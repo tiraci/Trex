@@ -1,6 +1,6 @@
-//! `oximux ls` and `oximux projects ls` — the host's sessions and projects.
+﻿//! `TREX ls` and `TREX projects ls` — the host's sessions and projects.
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::client::{Client, rpc_failure, unexpected_reply};

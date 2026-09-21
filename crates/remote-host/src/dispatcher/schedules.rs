@@ -1,4 +1,4 @@
-//! The schedule RPC handlers — create, list, delete, toggle, and read run
+﻿//! The schedule RPC handlers — create, list, delete, toggle, and read run
 //! history for the desktop's scheduled agent runs.
 //!
 //! Unlike the session RPCs these name no session, so they scope on device *tier*
@@ -12,15 +12,15 @@
 //! The store itself is gpui-free and process-spawn-free (SQLite rows only), so
 //! these handlers call it directly, without the view-layer seam `launcher` and
 //! `rewinder` need. Wire ↔ store conversion lives here, keeping `remote-proto`
-//! free of any `oximux-agents` dependency.
+//! free of any `trex-agents` dependency.
 
 use chrono::{DateTime, Local, TimeZone, Timelike};
 
-use oximux_agents::schedule::{NewSchedule, Recurrence, Schedule, ScheduleRun, describe};
-use oximux_remote_proto::messages::{
+use trex_agents::schedule::{NewSchedule, Recurrence, Schedule, ScheduleRun, describe};
+use trex_remote_proto::messages::{
     RecurrenceV2Wire, RecurrenceWire, ScheduleRunWire, ScheduleV2Wire, ScheduleWire,
 };
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;
@@ -122,7 +122,7 @@ impl Dispatcher {
         cwd: String,
         prompt: String,
         agent_id: Option<String>,
-        recurrence: Result<Recurrence, oximux_agents::schedule::RecurrenceError>,
+        recurrence: Result<Recurrence, trex_agents::schedule::RecurrenceError>,
     ) -> Result<Schedule, RpcError> {
         if !self.auth.may_manage_schedules(peer) {
             return Err(RpcError::Unauthorized);
@@ -355,7 +355,7 @@ fn recurrence_to_wire_v2(r: &Recurrence) -> RecurrenceV2Wire {
 
 /// Wire → validated store recurrence. Goes through the constructors, not the
 /// enum literals, so the floor and the time/weekday checks bite here.
-fn from_wire(w: RecurrenceWire) -> Result<Recurrence, oximux_agents::schedule::RecurrenceError> {
+fn from_wire(w: RecurrenceWire) -> Result<Recurrence, trex_agents::schedule::RecurrenceError> {
     match w {
         RecurrenceWire::EveryMinutes { minutes } => Recurrence::every_minutes(minutes),
         RecurrenceWire::DailyAt { hour, minute } => Recurrence::daily_at(hour, minute),
@@ -372,7 +372,7 @@ fn from_wire(w: RecurrenceWire) -> Result<Recurrence, oximux_agents::schedule::R
 /// goes through constructors rather than enum literals.
 fn from_wire_v2(
     w: RecurrenceV2Wire,
-) -> Result<Recurrence, oximux_agents::schedule::RecurrenceError> {
+) -> Result<Recurrence, trex_agents::schedule::RecurrenceError> {
     match w {
         RecurrenceV2Wire::EveryMinutes { minutes } => Recurrence::every_minutes(minutes),
         RecurrenceV2Wire::DailyAt { hour, minute } => Recurrence::daily_at(hour, minute),

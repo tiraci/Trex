@@ -1,4 +1,4 @@
-//! Parser for `git status --porcelain=v2 --branch -z`.
+﻿//! Parser for `git status --porcelain=v2 --branch -z`.
 //!
 //! Format reference: `man git-status` → "Porcelain Format Version 2".
 //!
@@ -24,7 +24,7 @@
 //!   `! <path>`                                                         ignored
 
 use crate::error::{GitError, Result};
-use oximux_core::{
+use trex_core::{
     ConflictKind, FileStatus, GitState, IndexStatus, RenameInfo, RenameKind, WorktreeStatus,
 };
 use std::path::PathBuf;

@@ -1,4 +1,4 @@
-//! Replacing the installed binaries — all of them, or none.
+﻿//! Replacing the installed binaries — all of them, or none.
 //!
 //! The CLI and the relay speak a mutually-authenticated handshake that is
 //! versioned in lockstep, so an update that lands one and not the other leaves
@@ -194,7 +194,7 @@ fn staged_of(replacements: &[Replacement], installed: &Path) -> PathBuf {
 fn backup_path(installed: &Path) -> PathBuf {
     let mut suffix = [0u8; 4];
     rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut suffix);
-    let name = installed.file_name().unwrap_or_else(|| OsStr::new("oximux")).to_string_lossy();
+    let name = installed.file_name().unwrap_or_else(|| OsStr::new("TREX")).to_string_lossy();
     let hex: String = suffix.iter().map(|b| format!("{b:02x}")).collect();
     installed.with_file_name(format!("{name}{BACKUP_INFIX}{hex}"))
 }
@@ -303,7 +303,7 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let plan = install(
             dir.path(),
-            &[("oximux", "cli v1", "cli v2"), ("oximux-relay", "relay v1", "relay v2")],
+            &[("TREX", "cli v1", "cli v2"), ("trex-relay", "relay v1", "relay v2")],
         );
         let left = swap_all(&plan).expect("swaps");
 
@@ -330,7 +330,7 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let mut plan = install(
             dir.path(),
-            &[("oximux", "cli v1", "cli v2"), ("oximux-relay", "relay v1", "relay v2")],
+            &[("TREX", "cli v1", "cli v2"), ("trex-relay", "relay v1", "relay v2")],
         );
         fs::remove_file(&plan[1].staged).expect("remove");
         plan[1].staged = plan[0].staged.clone();
@@ -348,9 +348,9 @@ mod tests {
     #[test]
     fn a_binary_that_is_not_installed_yet_is_placed_alongside() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let mut plan = install(dir.path(), &[("oximux", "cli v1", "cli v2")]);
-        let fresh = dir.path().join("oximux-relay");
-        let staged_relay = dir.path().join(".oximux-relay.new");
+        let mut plan = install(dir.path(), &[("TREX", "cli v1", "cli v2")]);
+        let fresh = dir.path().join("trex-relay");
+        let staged_relay = dir.path().join(".trex-relay.new");
         fs::write(&staged_relay, "relay v2").expect("write");
         plan.push(Replacement { installed: fresh.clone(), staged: staged_relay });
 
@@ -364,13 +364,13 @@ mod tests {
     #[test]
     fn rolling_back_removes_a_binary_that_had_nothing_to_restore() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let staged_relay = dir.path().join(".oximux-relay.new");
+        let staged_relay = dir.path().join(".trex-relay.new");
         fs::write(&staged_relay, "relay v2").expect("write");
-        let fresh = dir.path().join("oximux-relay");
+        let fresh = dir.path().join("trex-relay");
         // The relay is placed first, then the CLI's move fails — same shared-
         // staged-file construction as above.
         let mut plan = vec![Replacement { installed: fresh.clone(), staged: staged_relay }];
-        plan.extend(install(dir.path(), &[("oximux", "cli v1", "cli v2")]));
+        plan.extend(install(dir.path(), &[("TREX", "cli v1", "cli v2")]));
         plan[1].staged = plan[0].staged.clone();
 
         swap_all(&plan).expect_err("must fail");
@@ -382,15 +382,15 @@ mod tests {
     #[test]
     fn the_sweep_removes_our_backups_and_nothing_else() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let ours = dir.path().join("oximux.exe.old-deadbeef");
-        let relay = dir.path().join("oximux-relay.old-01020304");
+        let ours = dir.path().join("TREX.exe.old-deadbeef");
+        let relay = dir.path().join("trex-relay.old-01020304");
         let theirs = dir.path().join("notes.old-01020304");
-        let live = dir.path().join("oximux");
+        let live = dir.path().join("TREX");
         for path in [&ours, &relay, &theirs, &live] {
             fs::write(path, "x").expect("write");
         }
 
-        sweep_backups(dir.path(), |name| name.starts_with("oximux"));
+        sweep_backups(dir.path(), |name| name.starts_with("TREX"));
 
         assert!(!ours.exists() && !relay.exists(), "our backups are swept");
         assert!(theirs.exists(), "another program's file must survive");
@@ -398,7 +398,7 @@ mod tests {
     }
 
     /// The desktop app's filter. Its install directory holds `rg.exe` and
-    /// `onnxruntime.dll` beside the oximux binaries, so a name-prefix rule
+    /// `onnxruntime.dll` beside the TREX binaries, so a name-prefix rule
     /// would strand exactly the backups Windows most often cannot delete.
     #[test]
     fn a_caller_that_owns_the_whole_directory_sweeps_every_backup() {
@@ -411,7 +411,7 @@ mod tests {
 
         sweep_backups(dir.path(), |_| true);
 
-        assert!(!dll.exists(), "a non-oximux backup is still ours to sweep");
+        assert!(!dll.exists(), "a non-TREX backup is still ours to sweep");
         assert!(live.exists(), "the installed library must survive");
     }
 
@@ -422,8 +422,8 @@ mod tests {
     fn a_backup_whose_original_is_missing_is_put_back_not_deleted() {
         let dir = tempfile::tempdir().expect("tempdir");
         let orphaned = dir.path().join("onnxruntime.dll.old-deadbeef");
-        let superseded = dir.path().join("oximux.exe.old-01020304");
-        let live = dir.path().join("oximux.exe");
+        let superseded = dir.path().join("TREX.exe.old-01020304");
+        let live = dir.path().join("TREX.exe");
         for path in [&orphaned, &superseded, &live] {
             fs::write(path, "x").expect("write");
         }
@@ -444,13 +444,13 @@ mod tests {
 
     #[test]
     fn backup_names_do_not_collide() {
-        let path = Path::new("/tmp/oximux");
+        let path = Path::new("/tmp/TREX");
         let a = backup_path(path);
         let b = backup_path(path);
         assert_ne!(a, b);
         for name in [&a, &b] {
             let name = name.file_name().unwrap().to_string_lossy().to_string();
-            assert!(name.starts_with("oximux.old-"), "{name}");
+            assert!(name.starts_with("TREX.old-"), "{name}");
         }
     }
 
@@ -462,7 +462,7 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let locked = dir.path().join("bin");
         fs::create_dir(&locked).expect("mkdir");
-        let plan = install(&locked, &[("oximux", "cli v1", "cli v2")]);
+        let plan = install(&locked, &[("TREX", "cli v1", "cli v2")]);
         fs::set_permissions(&locked, fs::Permissions::from_mode(0o500)).expect("chmod");
 
         let outcome = swap_all(&plan);

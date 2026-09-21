@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 /// Diff-body line count at or below which syntax highlighting runs inline on
 /// the render thread. Optimized syntect is ~0.3 ms/line, so this caps the
@@ -15,7 +15,7 @@ const SYNC_HIGHLIGHT_THRESHOLD: usize = 250;
 impl Render for DiffView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let palette_before = self.theme.choice;
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // The cached plan holds tokens with baked r/g/b, so unlike every other
         // surface a fresh `Theme` is not enough here — the diff would keep the
         // previous palette's code colours until something else invalidated it.
@@ -63,7 +63,7 @@ impl Render for DiffView {
                 // instantly, then a background pass (spawned below) rebuilds the
                 // colored plan off the UI thread and swaps it in — syntect on a
                 // near-budget diff is ~1 s of work that must never block paint.
-                let mut spawn_async: Option<(Vec<oximux_core::FileDiff>, bool)> = None;
+                let mut spawn_async: Option<(Vec<trex_core::FileDiff>, bool)> = None;
                 let built = match &self.state {
                     DiffViewState::Ready {
                         diffs, expanded, ..
@@ -89,8 +89,8 @@ impl Render for DiffView {
                         // Stageable change regions per file — full-file context
                         // makes one giant hunk, so the renderer docks a chip bar
                         // per region (git add -p granularity) using these.
-                        let regions: Vec<Vec<oximux_core::ChangeRegion>> =
-                            diffs.iter().map(oximux_core::change_regions).collect();
+                        let regions: Vec<Vec<trex_core::ChangeRegion>> =
+                            diffs.iter().map(trex_core::change_regions).collect();
                         // Hollow-vs-solid gutter slivers: only the combined view
                         // carries per-file group tags, so staged files render
                         // hollow there. Single-file / commit / range views pass

@@ -1,4 +1,4 @@
-//! AI commit-message generation lifecycle for the sparkles button.
+﻿//! AI commit-message generation lifecycle for the sparkles button.
 //!
 //! Owns the `AiState` enum + the `CommitArea` methods that drive
 //! it (`set_staged_snapshot`, `is_generating_ai`,
@@ -7,9 +7,9 @@
 //! file-size cap; the methods are still on `CommitArea` via a
 //! re-opened `impl` block — call sites are unchanged.
 //!
-//! Dispatches through [`oximux_agents::commit_message::generate`]
+//! Dispatches through [`trex_agents::commit_message::generate`]
 //! which routes to one of three backends based on the user's
-//! [`oximux_settings::CommitMessageAiSettings`]:
+//! [`trex_settings::CommitMessageAiSettings`]:
 //!
 //! - **Off**: sparkles button hides; this method is unreachable.
 //! - **Heuristic**: pure local generator over the staged file list.
@@ -43,11 +43,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use gpui::{Context, Task, Window};
-use oximux_agents::commit_message::{
+use trex_agents::commit_message::{
     self, AgentConfig, AgentId, GenerateError, Mode, StagedContext,
 };
-use oximux_core::FileStatus;
-use oximux_settings::{CommitMessageAiMode, CommitMessageAiSettings};
+use trex_core::FileStatus;
+use trex_settings::{CommitMessageAiMode, CommitMessageAiSettings};
 
 use crate::shell::source_control::commit_area::{CommitArea, CommitStatus};
 
@@ -361,14 +361,14 @@ async fn run_generation(
                     if staged.is_empty() {
                         Err(GenerateError::NothingStaged)
                     } else {
-                        Ok(oximux_agents::commit_message_heuristic::generate_heuristic(
+                        Ok(trex_agents::commit_message_heuristic::generate_heuristic(
                             &staged,
                         ))
                     }
                 }
                 Mode::Off => Err(GenerateError::Disabled),
                 Mode::Agent(_) => Err(GenerateError::Run(
-                    oximux_agents::commit_message::GenerationError::SpawnFailed {
+                    trex_agents::commit_message::GenerationError::SpawnFailed {
                         label: "agent".to_string(),
                         message: "no tokio runtime available".to_string(),
                     },
@@ -379,7 +379,7 @@ async fn run_generation(
     let (tx, rx) = tokio::sync::oneshot::channel();
     handle.spawn(async move {
         let context = match &mode {
-            Mode::Agent(_) => match oximux_git::staged_context::fetch(&workdir).await {
+            Mode::Agent(_) => match trex_git::staged_context::fetch(&workdir).await {
                 Ok(Some(c)) => StagedContext {
                     branch: c.branch,
                     summary: c.summary,
@@ -392,7 +392,7 @@ async fn run_generation(
                 }
                 Err(err) => {
                     let _ = tx.send(Err(GenerateError::Run(
-                        oximux_agents::commit_message::GenerationError::SpawnFailed {
+                        trex_agents::commit_message::GenerationError::SpawnFailed {
                             label: "agent".to_string(),
                             message: format!("staged diff fetch failed: {err}"),
                         },
@@ -411,7 +411,7 @@ async fn run_generation(
     match rx.await {
         Ok(r) => r,
         Err(_) => Err(GenerateError::Run(
-            oximux_agents::commit_message::GenerationError::SpawnFailed {
+            trex_agents::commit_message::GenerationError::SpawnFailed {
                 label: "agent".to_string(),
                 message: "generation task dropped without producing a result".to_string(),
             },

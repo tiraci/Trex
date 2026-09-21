@@ -1,6 +1,6 @@
-//! Domain types for parsed git diffs.
+﻿//! Domain types for parsed git diffs.
 //!
-//! Mirrors the shape `parse_unified_diff` (in `oximux-git`) produces — no
+//! Mirrors the shape `parse_unified_diff` (in `trex-git`) produces — no
 //! parsing logic lives here so any crate can consume `FileDiff` without
 //! pulling in tokio or the git CLI wrappers.
 //!

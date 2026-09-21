@@ -1,10 +1,10 @@
-//! Agent status hooks for Claude Code (on by default).
+﻿//! Agent status hooks for Claude Code (on by default).
 //!
 //! On by default (`status_hooks_enabled` in `agent_launch.toml` defaults to
 //! `true`); disabled via the **Settings → Agents** "Status hooks" toggle. The
-//! env var `OXIMUX_STATUS_HOOKS=1` force-enables regardless of the flag (a
+//! env var `trex_STATUS_HOOKS=1` force-enables regardless of the flag (a
 //! debug escape hatch). When on, a Claude Code agent is launched with a
-//! `--settings` block that wires four hooks to the `oximux agent-status` CLI:
+//! `--settings` block that wires four hooks to the `TREX agent-status` CLI:
 //!
 //! - `UserPromptSubmit` → `--state working` (`{"state":"working","prompt":<text>}`)
 //!   — fires the instant the user submits, carrying the prompt that becomes the
@@ -18,9 +18,9 @@
 //! - `Stop`         → `--state idle` (`{"state":"idle"}`)
 //!
 //! The CLI reads the hook event JSON on stdin (for the tool name / prompt),
-//! reads `OXIMUX_PTY_ID` (injected by the relay at spawn), and asks the relay to
-//! emit an OSC-9999 status packet on that PTY's output stream. OxiMux's scanner
-//! (`oximux-agents` `osc_sideband`) decodes it into structured agent status.
+//! reads `trex_PTY_ID` (injected by the relay at spawn), and asks the relay to
+//! emit an OSC-9999 status packet on that PTY's output stream. TREX's scanner
+//! (`trex-agents` `osc_sideband`) decodes it into structured agent status.
 //!
 //! Why a relay round-trip and not a `/dev/tty` write: Claude runs hook commands
 //! detached (new session, no controlling terminal), so `/dev/tty` is `ENXIO`.
@@ -42,7 +42,7 @@ use std::path::Path;
 
 use serde_json::{Value, json};
 
-const ENABLE_ENV: &str = "OXIMUX_STATUS_HOOKS";
+const ENABLE_ENV: &str = "TREX_STATUS_HOOKS";
 
 /// Cap the reported tool name so a pathological hook payload can't bloat the
 /// OSC-9999 packet. The scanner caps again, but trimming at the source is free.
@@ -57,7 +57,7 @@ const MAX_PROMPT_LEN: usize = 200;
 /// rendered line, so a tight source cap keeps the OSC-9999 packet small.
 const MAX_MSG_LEN: usize = 200;
 
-/// True when the env override forces status hooks on (`OXIMUX_STATUS_HOOKS=1`),
+/// True when the env override forces status hooks on (`trex_STATUS_HOOKS=1`),
 /// independent of the persisted Settings toggle. A debug escape hatch — the
 /// primary control is the `status_hooks_enabled` setting, OR-combined with this
 /// at the injection site.
@@ -68,9 +68,9 @@ pub fn env_forced() -> bool {
 }
 
 /// Build the `--settings` JSON string wiring the three status hooks to
-/// `oximux agent-status`, merging the user's existing global hooks so the
+/// `TREX agent-status`, merging the user's existing global hooks so the
 /// key-replace semantics of `--settings` don't disable them. `binary_path` is
-/// the absolute path to the running `oximux` binary (resolved via
+/// the absolute path to the running `TREX` binary (resolved via
 /// `current_exe`) — the hook invokes it as a short-lived CLI.
 pub fn build_settings_json(binary_path: &Path) -> String {
     build_settings_json_with(read_user_hooks(), binary_path)
@@ -87,14 +87,14 @@ fn build_settings_json_with(user_hooks: Option<Value>, binary_path: &Path) -> St
 }
 
 /// One status hook: which agent event drives it, an optional tool matcher, and
-/// the `oximux agent-status` command line it runs.
+/// the `TREX agent-status` command line it runs.
 pub(crate) struct HookSpec {
     pub event: &'static str,
     pub matcher: Option<&'static str>,
     pub command: String,
 }
 
-/// The status hooks wiring Claude's events to the `oximux agent-status` CLI.
+/// The status hooks wiring Claude's events to the `TREX agent-status` CLI.
 ///
 /// The single source of truth for both the per-spawn `--settings` JSON and the
 /// global `~/.claude/settings.json` install — so the COMMAND STRINGS are
@@ -384,11 +384,11 @@ pub fn build_status_payload(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::AgentOscScanner;
-    use oximux_core::AgentSidebandState;
+    use trex_agents::AgentOscScanner;
+    use trex_core::AgentSidebandState;
 
     fn binary_path() -> &'static Path {
-        Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux")
+        Path::new("/Applications/trex.app/Contents/MacOS/TREX")
     }
 
     #[test]
@@ -505,7 +505,7 @@ mod tests {
 
     #[test]
     fn embedded_single_quote_in_path_is_escaped() {
-        let json = build_settings_json_with(None, Path::new("/Users/O'X/oximux"));
+        let json = build_settings_json_with(None, Path::new("/Users/O'X/TREX"));
         let v: Value = serde_json::from_str(&json).unwrap();
         let cmd = v["hooks"]["Stop"][0]["hooks"][0]["command"].as_str().unwrap();
         assert!(cmd.contains("'\\''"), "single quote must be shell-escaped: {cmd}");
@@ -616,7 +616,7 @@ mod tests {
         // (no text), then the final assistant turn with the text reply. We must
         // skip the tool-only turn and return the last TEXT reply, collapsed.
         let dir = std::env::temp_dir();
-        let path = dir.join(format!("oximux-transcript-test-{}.jsonl", std::process::id()));
+        let path = dir.join(format!("trex-transcript-test-{}.jsonl", std::process::id()));
         let mut f = std::fs::File::create(&path).unwrap();
         writeln!(f, r#"{{"type":"user","message":{{"content":"hi"}}}}"#).unwrap();
         writeln!(

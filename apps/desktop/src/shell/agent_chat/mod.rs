@@ -1,9 +1,9 @@
-//! Agent Chat view — a dedicated tab that renders a Claude Code session as a
+﻿//! Agent Chat view — a dedicated tab that renders a Claude Code session as a
 //! structured chat thread (user/assistant bubbles, streaming text, collapsible
 //! thinking, tool-call lines) instead of a raw terminal.
 //!
 //! It owns a [`ChatThread`] (the gpui-free conversation model from
-//! `oximux-agents`) plus a live [`AgentConnection`] to a headless `claude`
+//! `trex-agents`) plus a live [`AgentConnection`] to a headless `claude`
 //! subprocess. Decoded events arrive on a background channel; a foreground task
 //! folds each into the thread and repaints. The raw-PTY terminal agent path is
 //! untouched — this is an additive second surface.
@@ -308,7 +308,7 @@ fn fold_probe_result(
 /// probe fold re-applies it live once the catalog lands).
 fn claude_fast_mode_to_apply(stored: Option<bool>, model: Option<&str>) -> Option<bool> {
     let on = stored?;
-    let catalog = oximux_agents::thread::shared_claude_catalog()?;
+    let catalog = trex_agents::thread::shared_claude_catalog()?;
     let wire = model.map(str::to_string).or_else(|| catalog.default_wire.clone())?;
     catalog.supports_fast_mode(&wire).then_some(on)
 }
@@ -370,7 +370,7 @@ pub enum AgentChatEvent {
         session_id: String,
         entries: Vec<ThreadEntry>,
         slash_commands: Vec<String>,
-        session_meta: oximux_agents::thread::SessionMeta,
+        session_meta: trex_agents::thread::SessionMeta,
         thinking_level: ThinkingLevel,
     },
     /// The signed-out banner's "Open terminal to sign in" control was clicked;
@@ -518,21 +518,21 @@ use attention::attention_for_event;
 use computer_use::ScreenControl;
 pub use computer_use::clear_stale_screen_control_grants;
 use screen_consent::ScreenPrompt;
-use oximux_agents::session_registry::{ChoiceKind, RemoteChoice, SessionMeta};
+use trex_agents::session_registry::{ChoiceKind, RemoteChoice, SessionMeta};
 use crate::shell::context_env::SurfaceIds;
 use crate::shell::pane_content::PaneContent;
 use crate::shell::pane_group::PaneGroup;
 use crate::shell::terminal_view::TerminalView;
-use oximux_agents::thread::pi::posture::{self as pi_posture, PiPosture};
-use oximux_agents::thread::{
+use trex_agents::thread::pi::posture::{self as pi_posture, PiPosture};
+use trex_agents::thread::{
     probe_catalog, AgentConnection, AssistantMessage, AuthMethodKind, ChatBackend, ChatImage,
     ChatThread, ConnectSpec, FeatureControl, FeatureKind, FeatureValue, PermissionDecision,
     PermissionSuggestion, ProbedCatalog, QuestionAnswers, QuestionRequest, ThreadEntry,
     ThreadEvent, ToolCall, ToolCallStatus, ToolDetail, Transport, TurnUsage,
 };
-use oximux_core::{AgentAdapter, AgentSessionId};
-use oximux_git::GitCmd;
-use oximux_settings::{AgentLaunchSettings, Density, Theme, Typography};
+use trex_core::{AgentAdapter, AgentSessionId};
+use trex_git::GitCmd;
+use trex_settings::{AgentLaunchSettings, Density, Theme, Typography};
 
 /// A transcript-only **import bridge**: an OpenCode / Pi session opened as a
 /// chat tab for its history, with NO live connection (these providers have no
@@ -657,7 +657,7 @@ pub struct AgentChatView {
     /// so a toggle/select reflects immediately (mirroring how `model`/`effort`
     /// hold the pick), instead of waiting for the backend to echo the new value —
     /// some ACP agents apply `set_config` without echoing it back.
-    feature_values: HashMap<String, oximux_agents::thread::FeatureValue>,
+    feature_values: HashMap<String, trex_agents::thread::FeatureValue>,
     /// Set once the event channel closes (process exit / EOF). Disables sending.
     disconnected: bool,
     /// True after the user pressed Stop: the turn was interrupted and the child
@@ -838,11 +838,11 @@ pub struct AgentChatView {
     env_input_subs: Vec<Subscription>,
     /// Git checkpoint engine for this chat's `cwd`, or `None` when the dir isn't
     /// a git repo (or git is too old). Shared into background tasks via `Arc`.
-    checkpoint_engine: Option<Arc<oximux_git::checkpoint::CheckpointEngine>>,
+    checkpoint_engine: Option<Arc<trex_git::checkpoint::CheckpointEngine>>,
     /// The checkpoint taken when the CURRENT (in-flight) turn was sent, held so
     /// the turn-end compare can decide whether the rewind "files" affordance
     /// should light up. Cleared at each new send and after a rewind.
-    pre_turn_checkpoint: Option<(usize, oximux_git::checkpoint::CheckpointSha)>,
+    pre_turn_checkpoint: Option<(usize, trex_git::checkpoint::CheckpointSha)>,
     /// Open rewind-confirm card, rendered above the composer.
     rewind_confirm: Option<rewind_menu::RewindConfirm>,
     /// True while a rewind's background half (stop → fork → restore) runs; gates
@@ -923,7 +923,7 @@ pub struct AgentChatView {
     /// non-git project, since `git worktree add` can't possibly work there.
     is_git_project: bool,
     /// While `unbound`: the user has opted into running this draft's first send
-    /// inside a freshly created git worktree (branch `oximux/<slug>`) instead of
+    /// inside a freshly created git worktree (branch `TREX/<slug>`) instead of
     /// the project root. Cleared once the worktree exists (or the user opts out
     /// via the failure banner's "continue without a worktree" fallback).
     worktree_draft_enabled: bool,
@@ -932,7 +932,7 @@ pub struct AgentChatView {
     /// create-on-demand pattern). `None` while the toggle is off.
     worktree_slug_input: Option<Entity<InputState>>,
     /// Repaints the chat on every keystroke in the slug field so the live
-    /// `oximux/<slug>` / validation-error preview stays in sync.
+    /// `TREX/<slug>` / validation-error preview stays in sync.
     _worktree_slug_sub: Option<Subscription>,
     /// State of the last worktree-create attempt for this draft.
     worktree_create_state: roster::WorktreeCreateState,
@@ -940,7 +940,7 @@ pub struct AgentChatView {
     /// failed) — resent automatically on success, or via the failure banner's
     /// "continue without a worktree" fallback. Cleared once actually sent.
     pending_worktree_send: Option<(String, Vec<ChatImage>)>,
-    /// `oximux/<slug>` once the worktree exists, folded into the post-bind tab
+    /// `TREX/<slug>` once the worktree exists, folded into the post-bind tab
     /// label (see `bind_now`) so the tab shows the branch, not just the
     /// picked agent's name.
     worktree_branch_label: Option<String>,
@@ -1056,7 +1056,7 @@ impl AgentChatView {
         session_id: Option<String>,
         entries: Vec<ThreadEntry>,
         slash_commands: Vec<String>,
-        session_meta: oximux_agents::thread::SessionMeta,
+        session_meta: trex_agents::thread::SessionMeta,
         thinking_level: ThinkingLevel,
         posture: RestoredPosture,
         theme: Theme,
@@ -1230,7 +1230,7 @@ impl AgentChatView {
         if self.backend.transport != Transport::StreamJson {
             return None;
         }
-        match self.feature_values.get(oximux_agents::thread::FEATURE_FAST_MODE) {
+        match self.feature_values.get(trex_agents::thread::FEATURE_FAST_MODE) {
             Some(FeatureValue::Bool(on)) => Some(*on),
             _ => None,
         }
@@ -1248,7 +1248,7 @@ impl AgentChatView {
             return;
         };
         if let Some(conn) = self.connection.as_ref()
-            && let Err(e) = conn.set_feature(oximux_agents::thread::FEATURE_FAST_MODE, FeatureValue::Bool(on))
+            && let Err(e) = conn.set_feature(trex_agents::thread::FEATURE_FAST_MODE, FeatureValue::Bool(on))
         {
             tracing::warn!(error = %e, "could not re-apply claude fast mode");
         }
@@ -1283,13 +1283,13 @@ impl AgentChatView {
     /// for a non-omp chat or when the picker was never touched (restore then
     /// applies the deliberate Write default — the spawn flag stays explicit
     /// either way, so omp's own yolo default is unreachable).
-    fn omp_posture_snapshot(&self) -> Option<oximux_agents::thread::omp::posture::OmpPosture> {
+    fn omp_posture_snapshot(&self) -> Option<trex_agents::thread::omp::posture::OmpPosture> {
         if self.backend.transport != Transport::OmpRpc {
             return None;
         }
-        match self.feature_values.get(oximux_agents::thread::omp::posture::FEATURE_APPROVALS) {
+        match self.feature_values.get(trex_agents::thread::omp::posture::FEATURE_APPROVALS) {
             Some(FeatureValue::Choice(wire)) => {
-                oximux_agents::thread::omp::posture::OmpPosture::from_wire(wire)
+                trex_agents::thread::omp::posture::OmpPosture::from_wire(wire)
             }
             _ => None,
         }
@@ -1505,7 +1505,7 @@ impl AgentChatView {
                 // The resume runs through the generic `Custom` adapter, which
                 // spawns `custom_command`'s argv verbatim.
                 let cmd = self.backend.acp_command.as_deref()?;
-                let preset = oximux_settings::ACP_PRESETS.iter().find(|p| p.command == cmd)?;
+                let preset = trex_settings::ACP_PRESETS.iter().find(|p| p.command == cmd)?;
                 if preset.interactive_resume.is_none()
                     || !is_safe_resume_session_id(&session_id)
                 {
@@ -3433,15 +3433,15 @@ impl AgentChatView {
         // builds is already the consent one. Purely a classification — whether
         // it is *allowed* is the policy's business, below.
         if let ThreadEvent::PermissionRequested { tool_name, kind, .. } = &mut ev
-            && oximux_agent_core::screen_tools::is_computer_use_tool(tool_name)
+            && trex_agent_core::screen_tools::is_computer_use_tool(tool_name)
         {
-            *kind = oximux_agents::thread::PermissionKind::Screen;
+            *kind = trex_agents::thread::PermissionKind::Screen;
         }
         let was_active = self.thread.turn_active;
         self.thread.apply(&ev);
         self.note_screen_activity(&ev);
         // Screen-control calls are decided here because this is the only point
-        // OxiMux is in their path at all — the driver is a separate process the
+        // TREX is in their path at all — the driver is a separate process the
         // agent talks to directly. Runs after the fold so the card exists to be
         // resolved, and answers nothing that isn't a screen-control tool.
         if let ThreadEvent::PermissionRequested { request_id, tool_use_id, tool_name, input, .. } =
@@ -3615,7 +3615,7 @@ impl AgentChatView {
                     }
                     this.thread.attach_checkpoint(user_index, sha.0.clone());
                     this.pre_turn_checkpoint =
-                        Some((user_index, oximux_git::checkpoint::CheckpointSha(sha.0)));
+                        Some((user_index, trex_git::checkpoint::CheckpointSha(sha.0)));
                     cx.notify();
                 });
             }
@@ -4884,7 +4884,7 @@ impl Focusable for AgentChatView {
 
 impl Render for AgentChatView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Once per frame, before anything decodes: attachment images are cached
         // by the render path, which has no `Window` to release them with, so the
         // cache is allowed over budget until here. Overshooting by one frame of
@@ -5140,7 +5140,7 @@ impl Render for AgentChatView {
             .on_drop(cx.listener(|this, paths: &ExternalPaths, window, cx| {
                 this.attach_paths(paths.paths().to_vec(), window, cx);
             }))
-            // The same, for a drag that started in OxiMux's own file explorer.
+            // The same, for a drag that started in TREX's own file explorer.
             // The explorer emits `FilePathDragPayload` while Finder emits
             // `ExternalPaths`, so the surface has to register both — but they
             // converge on one handler, or the two drop sources drift apart.

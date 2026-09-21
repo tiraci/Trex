@@ -1,4 +1,4 @@
-//! Project group renderer — header row (folder icon, name, count chip,
+﻿//! Project group renderer — header row (folder icon, name, count chip,
 //! hover-visible "+" button) followed by zero or more Workspace rows.
 //!
 //! The "+" button always sets the project as active first, then
@@ -10,8 +10,8 @@ use gpui::{
     ParentElement, SharedString, StatefulInteractiveElement, Styled, WeakEntity, div, px, svg,
 };
 use gpui_component::input::InputState;
-use oximux_core::{AgentStatus, Project, Workspace};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{AgentStatus, Project, Workspace};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::OpenWorkspaceCreate;
 use crate::shell::agent_presentation::AmbientAgent;
@@ -947,12 +947,12 @@ mod tests {
         Workspace {
             id: id.to_string(),
             project_id: project_id.to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: id.to_string(),
             slug: id.to_string(),
-            branch: format!("oximux/{id}"),
+            branch: format!("TREX/{id}"),
             worktree_path: format!("/tmp/{project_id}/{id}"),
             status: "active".to_string(),
             created_at: "2026-05-21T00:00:00Z".to_string(),
@@ -968,7 +968,7 @@ mod tests {
 
     #[test]
     fn plan_count_matches_workspace_list_len() {
-        let p = project("p1", "OxiMux");
+        let p = project("p1", "TREX");
         let ws = vec![workspace("a", "p1"), workspace("b", "p1")];
         let plan = build_project_group_plan(&p, &ws, true, false);
         assert_eq!(plan.workspace_count, 2);
@@ -976,7 +976,7 @@ mod tests {
 
     #[test]
     fn plan_carries_active_flag() {
-        let p = project("p1", "OxiMux");
+        let p = project("p1", "TREX");
         let active = build_project_group_plan(&p, &[], true, false);
         let inactive = build_project_group_plan(&p, &[], false, false);
         assert!(active.is_active);
@@ -985,21 +985,21 @@ mod tests {
 
     #[test]
     fn plan_empty_workspace_list_is_zero_count() {
-        let p = project("p1", "OxiMux");
+        let p = project("p1", "TREX");
         let plan = build_project_group_plan(&p, &[], true, false);
         assert_eq!(plan.workspace_count, 0);
     }
 
     #[test]
     fn plan_name_matches_project_name() {
-        let p = project("p1", "OxiMux");
+        let p = project("p1", "TREX");
         let plan = build_project_group_plan(&p, &[], true, false);
-        assert_eq!(plan.project_name, "OxiMux");
+        assert_eq!(plan.project_name, "TREX");
     }
 
     #[test]
     fn plan_carries_collapsed_flag() {
-        let p = project("p1", "OxiMux");
+        let p = project("p1", "TREX");
         let collapsed = build_project_group_plan(&p, &[], false, true);
         let expanded = build_project_group_plan(&p, &[], false, false);
         assert!(collapsed.is_collapsed);
@@ -1018,7 +1018,7 @@ mod tests {
                 .fold(2166136261u32, |h, b| (h ^ b as u32).wrapping_mul(16777619));
             (h % 360) as f32 / 360.0
         }
-        for id in ["oximux", "graphify-rs", "abc-123", ""] {
+        for id in ["TREX", "graphify-rs", "abc-123", ""] {
             let c = project_identity_hue(id);
             assert!(
                 (c.h - fnv1a_hue(id)).abs() < f32::EPSILON,
@@ -1030,8 +1030,8 @@ mod tests {
         }
         // Same id always yields the same colour across calls.
         assert_eq!(
-            project_identity_hue("oximux"),
-            project_identity_hue("oximux")
+            project_identity_hue("TREX"),
+            project_identity_hue("TREX")
         );
     }
 }

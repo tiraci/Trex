@@ -1,4 +1,4 @@
-//! GPUI card painter for the rich two-line workspace card.
+﻿//! GPUI card painter for the rich two-line workspace card.
 //!
 //! Consumes a `WorkspaceCardPlan` (pure, computed by `workspace_row.rs`) and
 //! emits the GPUI element tree. Kept in this file so `workspace_row.rs` stays
@@ -20,8 +20,8 @@ use gpui::{
     div, prelude::FluentBuilder, px, svg,
 };
 use gpui_component::input::{Enter as InputEnter, Escape as InputEscape, Input, InputState};
-use oximux_core::{WorkPhase, Workspace};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{WorkPhase, Workspace};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::left_rail::LeftRail;
 use crate::shell::left_rail::worktree_stats::{

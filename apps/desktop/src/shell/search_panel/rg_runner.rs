@@ -1,4 +1,4 @@
-//! `ripgrep --json` subprocess driver.
+﻿//! `ripgrep --json` subprocess driver.
 //!
 //! Spawns `rg` with the user's options, stream-parses NDJSON via Tokio
 //! line reader, and assembles a `SearchResults` value. Kills the child as
@@ -7,7 +7,7 @@
 //! Path representation is "text-only" for v1 — non-UTF8 paths are dropped
 //! with a trace warning rather than supported via the `bytes` variant.
 
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 use serde::Deserialize;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -194,7 +194,7 @@ where
         let evt: RgEvent = match serde_json::from_str(&line) {
             Ok(e) => e,
             Err(e) => {
-                tracing::trace!(target: "oximux_app::search_panel", error = %e, "skip malformed rg line");
+                tracing::trace!(target: "trex_app::search_panel", error = %e, "skip malformed rg line");
                 continue;
             }
         };

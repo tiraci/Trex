@@ -1,5 +1,5 @@
-[package]
-name = "oximux-remote-session"
+﻿[package]
+name = "trex-remote-session"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -15,8 +15,8 @@ rust-version.workspace = true
 # `ChatThread` + runs the reconnect state machine. `mobile-core` (uniffi) will
 # wrap this; iroh becomes one `Transport` impl underneath it.
 [dependencies]
-oximux-remote-proto = { workspace = true }
-oximux-agent-core = { workspace = true }
+trex-remote-proto = { workspace = true }
+trex-agent-core = { workspace = true }
 ed25519-dalek = { workspace = true }
 rand = { workspace = true }
 anyhow = { workspace = true }
@@ -31,9 +31,9 @@ async-trait = { workspace = true }
 [dev-dependencies]
 # The full-loop integration test drives this client against the real host
 # dispatcher over the in-memory loopback transport.
-oximux-remote-proto = { workspace = true, features = ["testing"] }
-oximux-remote-host = { workspace = true }
-oximux-agents = { workspace = true }
+trex-remote-proto = { workspace = true, features = ["testing"] }
+trex-remote-host = { workspace = true }
+trex-agents = { workspace = true }
 futures = { workspace = true }
 serde_json = { workspace = true }
 # The terminal seam hands back a tokio mpsc receiver, so the fake source in the

@@ -1,8 +1,8 @@
-//! Unified diff parser for `git diff -p` output.
+﻿//! Unified diff parser for `git diff -p` output.
 //!
 //! Pure sync function on `&str` → `Vec<FileDiff>`. Called from async
 //! `Repository::diff_*` methods after the `git` process has run. No tokio,
-//! no I/O, no GPUI — domain types live in `oximux_core::git_diff`.
+//! no I/O, no GPUI — domain types live in `trex_core::git_diff`.
 //!
 //! SECURITY: v1 only consumes diff text produced locally by `git diff` on a
 //! validated `Repository`, so this parser is not a trust boundary. If a
@@ -31,7 +31,7 @@
 //! transition is one-way per file, driven by the first `@@` line.
 
 use crate::error::GitError;
-use oximux_core::{
+use trex_core::{
     DiffHunk, DiffLine, DiffLineKind, DiffStatus, FileDiff, LARGE_DIFF_LINE_THRESHOLD,
 };
 use std::path::PathBuf;

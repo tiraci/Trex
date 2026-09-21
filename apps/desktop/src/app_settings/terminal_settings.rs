@@ -1,4 +1,4 @@
-//! App-side loader + live-reload watcher for [`TerminalSettings`].
+﻿//! App-side loader + live-reload watcher for [`TerminalSettings`].
 //!
 //! On startup we read `terminal.toml` from the app data dir (seeding a
 //! commented default if absent), install it as a GPUI global, and mirror the
@@ -18,10 +18,10 @@ use notify_debouncer_full::{
     DebounceEventResult, FileIdMap, new_debouncer,
     notify::{RecommendedWatcher, RecursiveMode},
 };
-use oximux_settings::TerminalSettings;
+use trex_settings::TerminalSettings;
 use tokio::sync::mpsc;
 
-use oximux_shell_env::ResolvedShell;
+use trex_shell_env::ResolvedShell;
 
 use crate::shell::terminal_view::{
     set_shell_integration_enabled, set_spawn_scrollback, set_spawn_shell_resolved,
@@ -100,7 +100,7 @@ fn apply(cx: &mut App, settings: TerminalSettings) {
 /// Turn the terminal settings into the shell a new pane should spawn.
 ///
 /// A non-empty free-form `shell` override wins on every platform. Otherwise,
-/// on Windows, the [`WindowsShell`](oximux_settings::WindowsShell) choice is
+/// on Windows, the [`WindowsShell`](trex_settings::WindowsShell) choice is
 /// resolved to a concrete program + argv + env (Git Bash detection, pwsh vs
 /// inbox PowerShell). Off Windows there is nothing to resolve — `None` lets
 /// the spawn fall back to the inherited `$SHELL` / POSIX default.
@@ -114,7 +114,7 @@ fn resolve_spawn_shell(settings: &TerminalSettings) -> Option<ResolvedShell> {
         });
     }
     #[cfg(windows)]
-    let resolved = Some(oximux_shell_env::resolve_windows_shell(
+    let resolved = Some(trex_shell_env::resolve_windows_shell(
         settings.windows_shell,
         settings.windows_powershell,
     ));

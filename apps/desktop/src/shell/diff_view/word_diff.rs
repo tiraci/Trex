@@ -1,4 +1,4 @@
-//! Word-level diff for paired Removed/Added rows inside a hunk.
+﻿//! Word-level diff for paired Removed/Added rows inside a hunk.
 //!
 //! Whole-line red / whole-line green is loud and lies when the edit is one
 //! word. `pair_runs` walks a hunk's row list and groups consecutive Removed
@@ -18,7 +18,7 @@
 //! whole-line tint behavior. The 1:1 constraint keeps the heuristic from
 //! lying about which line "became" which under heavy edits.
 
-use oximux_core::DiffLineKind;
+use trex_core::DiffLineKind;
 use similar::{ChangeTag, TextDiff};
 
 /// One contiguous slice of a line's content, tagged with the op that

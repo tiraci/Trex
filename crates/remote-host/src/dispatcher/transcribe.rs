@@ -1,4 +1,4 @@
-//! The voice-transcription handler — decode one recorded clip to text.
+﻿//! The voice-transcription handler — decode one recorded clip to text.
 //!
 //! Unlike the schedule and session RPCs this names no session and changes no
 //! state: it is a composer utility, so it gates on the authenticated connection
@@ -13,7 +13,7 @@
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD;
 
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::transcribe::TranscribeError;

@@ -1,4 +1,4 @@
-//! Project picker modal — recent list + native folder picker.
+﻿//! Project picker modal — recent list + native folder picker.
 //!
 //! Cmd+O opens. Shows `app_state.recent_projects` snapshot + a leading
 //! "Open Folder…" affordance. Clicking the affordance fires
@@ -18,11 +18,11 @@ use gpui::{
     App, Context, EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement,
     KeyDownEvent, MouseButton, ParentElement, Render, Styled, Window, div, px,
 };
-use oximux_core::Project;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::Project;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
-use oximux_storage::ProjectRepo;
+use trex_storage::ProjectRepo;
 
 /// Width of the modal card.
 const MODAL_WIDTH: f32 = 560.0;
@@ -65,7 +65,7 @@ pub(crate) const DEFAULT_BRANCH_FALLBACK: &str = "main";
 /// refusable because a folder is not a repository — plain folders are a
 /// supported kind of project.
 pub async fn detect_default_branch(path: &Path) -> String {
-    let Ok(repo) = oximux_git::Repository::open(path).await else {
+    let Ok(repo) = trex_git::Repository::open(path).await else {
         return DEFAULT_BRANCH_FALLBACK.to_string();
     };
     repo.default_branch()
@@ -287,7 +287,7 @@ impl Focusable for ProjectPickerModal {
 
 impl Render for ProjectPickerModal {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }
@@ -501,7 +501,7 @@ mod tests {
 
     #[test]
     fn name_from_path_handles_trailing_slash() {
-        assert_eq!(name_from_path(Path::new("/var/lib/oximux/")), "oximux");
+        assert_eq!(name_from_path(Path::new("/var/lib/TREX/")), "TREX");
     }
 
     #[test]
@@ -518,7 +518,7 @@ mod tests {
 
     #[test]
     fn insert_or_touch_inserts_when_new() {
-        let db = oximux_storage::open_memory().expect("memory");
+        let db = trex_storage::open_memory().expect("memory");
         let repo = ProjectRepo::new(db);
         let project = repo
             .insert_or_touch("Acme", "/p/acme", DEFAULT_BRANCH_FALLBACK)
@@ -529,7 +529,7 @@ mod tests {
 
     #[test]
     fn insert_or_touch_recovers_existing_on_duplicate_path() {
-        let db = oximux_storage::open_memory().expect("memory");
+        let db = trex_storage::open_memory().expect("memory");
         let repo = ProjectRepo::new(db);
         let first = repo
             .insert("Acme", "/p/acme", "main")

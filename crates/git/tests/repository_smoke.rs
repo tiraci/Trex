@@ -1,15 +1,15 @@
-//! Integration smoke tests for `Repository::open` + `Repository::status`.
+﻿//! Integration smoke tests for `Repository::open` + `Repository::status`.
 //!
 //! These require `git` on PATH (host runner + CI provide it). They build a
 //! throwaway repo in a tempdir, perform a few mutations, and verify the
 //! observable state.
 
-use oximux_git::{GitError, Repository};
+use trex_git::{GitError, Repository};
 use std::fs;
 use tempfile::tempdir;
 
 async fn git(repo: &std::path::Path, args: &[&str]) {
-    let _ = oximux_git::GitCmd::new(repo)
+    let _ = trex_git::GitCmd::new(repo)
         .args(args.iter().copied())
         .run()
         .await
@@ -30,7 +30,7 @@ async fn open_rejects_non_repo() {
 
 #[tokio::test]
 async fn open_rejects_missing_path() {
-    let err = Repository::open("/no/such/path/oximux/test")
+    let err = Repository::open("/no/such/path/TREX/test")
         .await
         .expect_err("missing path should reject");
     assert!(matches!(err, GitError::NotARepo { .. }));

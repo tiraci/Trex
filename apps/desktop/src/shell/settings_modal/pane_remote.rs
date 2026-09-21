@@ -1,5 +1,5 @@
-//! Remote-control pane — one master switch that exposes running agent sessions to
-//! the OxiMux mobile app and, while on, binds the in-app iroh host so a phone can
+﻿//! Remote-control pane — one master switch that exposes running agent sessions to
+//! the TREX mobile app and, while on, binds the in-app iroh host so a phone can
 //! pair. The toggle flips the shared [`RemoteControl`] global's `enabled` flag and
 //! starts/stops the host: enabling binds an endpoint off-thread (on the tokio
 //! runtime) and publishes a `PairingTicket` back here; disabling stops the host and
@@ -34,8 +34,8 @@ use gpui::{
     AnyElement, Image, ImageFormat, ImageSource, InteractiveElement, IntoElement, MouseButton,
     ParentElement, Styled, div, img, px, svg,
 };
-use oximux_remote_proto::PairingTicket;
-use oximux_settings::{Density, Theme, Typography};
+use trex_remote_proto::PairingTicket;
+use trex_settings::{Density, Theme, Typography};
 
 use tokio::sync::broadcast;
 
@@ -46,7 +46,7 @@ use super::layout::{
     SettingEntry, card_surface, entries_card, entry, section_card, section_title,
 };
 use crate::remote_control::{PAIRING_WINDOW_SECS, RemoteControl};
-use oximux_remote_host::PairingEvent;
+use trex_remote_host::PairingEvent;
 
 /// The pairing sub-view's state. Held on the modal; `None` means the pane is at
 /// rest and, by construction, that no pairing code is live.
@@ -329,7 +329,7 @@ fn pairing_ticket(cx: &mut gpui::Context<SettingsModal>) -> Option<PairingTicket
 /// mentions the handshake secret.
 fn status_text(enabled: bool, host_ready: bool, devices: usize, exposed: usize) -> String {
     if !enabled {
-        return "Turn on to expose your running agent sessions to the OxiMux mobile app. \
+        return "Turn on to expose your running agent sessions to the TREX mobile app. \
                 Applies to sessions started after it's enabled."
             .to_string();
     }
@@ -656,7 +656,7 @@ fn pairing_view(
                     div()
                         .text_size(px(typography.t_body_sm))
                         .text_color(theme.fg_base)
-                        .child("Scan this from the OxiMux app on your phone."),
+                        .child("Scan this from the TREX app on your phone."),
                 )
                 .child(
                     div()
@@ -810,7 +810,7 @@ fn done_chip(
 ///
 /// The QR alone is a dead end whenever a camera can't be pointed at the screen —
 /// a simulator, a phone with a broken camera, or a Mac being driven remotely. The
-/// mobile app already accepts a pasted `oximux://connect?ticket=…` (its manual
+/// mobile app already accepts a pasted `TREX://connect?ticket=…` (its manual
 /// path), so the link was expected on this end and simply had no affordance.
 ///
 /// The link carries the same one-time secret the QR encodes, so this widens where
@@ -928,7 +928,7 @@ fn device_state_label(revoked: bool, last_seen: Option<u64>) -> String {
 /// Revoking takes effect on a running host immediately (per-RPC recheck) and is
 /// persisted, so it survives a restart.
 fn devices_section(
-    devices: Vec<oximux_remote_host::DeviceInfo>,
+    devices: Vec<trex_remote_host::DeviceInfo>,
     local_on: bool,
     theme: Theme,
     density: Density,
@@ -957,7 +957,7 @@ fn devices_section(
                             div()
                                 .text_size(px(typography.t_body_sm))
                                 .text_color(theme.fg_base)
-                                .child("This computer — oximux CLI"),
+                                .child("This computer — TREX CLI"),
                         )
                         .child(
                             div()
@@ -990,7 +990,7 @@ fn devices_section(
     }
 
     for (idx, device) in devices.into_iter().enumerate() {
-        let oximux_remote_host::DeviceInfo { pubkey, name, read_only, last_seen, revoked } = device;
+        let trex_remote_host::DeviceInfo { pubkey, name, read_only, last_seen, revoked } = device;
         // One pubkey per closure below; each needs its own copy.
         let revoke_key = pubkey;
         let forget_key = pubkey;
@@ -1112,7 +1112,7 @@ pub(super) fn entries(
     vec![
         entry(
             "Allow remote access",
-            "Expose running agent sessions so the OxiMux mobile app can view and drive them.",
+            "Expose running agent sessions so the TREX mobile app can view and drive them.",
             remote_toggle(theme, cx),
         ),
         entry(
@@ -1128,7 +1128,7 @@ pub(super) fn entries(
         // outgrows its neighbours is the kind that stops wrapping cleanly.
         entry(
             "Allow local CLI access",
-            "Let the oximux command view and drive sessions over a local socket, never \
+            "Let the TREX command view and drive sessions over a local socket, never \
              the network. Any program running as you — agents included — can use it too.",
             local_toggle(theme, cx),
         ),
@@ -1244,7 +1244,7 @@ fn start_host(this: &mut SettingsModal, cx: &mut gpui::Context<SettingsModal>, t
     // Bind on the tokio runtime (iroh needs it), then publish the handle back.
     let (tx, rx) = tokio::sync::oneshot::channel();
     handle.spawn(async move {
-        let _ = tx.send(oximux_remote_iroh::start_host(dispatcher, secret, endpoint_secret).await);
+        let _ = tx.send(trex_remote_iroh::start_host(dispatcher, secret, endpoint_secret).await);
     });
     cx.spawn(async move |this, cx| {
         if let Ok(Ok(host)) = rx.await {

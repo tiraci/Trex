@@ -1,15 +1,15 @@
-//! A deterministic mock ACP **agent** that requires an ENV-VAR credential — for
-//! verifying OxiMux's EnvVar-auth "respawn with env, then authenticate" flow.
+﻿//! A deterministic mock ACP **agent** that requires an ENV-VAR credential — for
+//! verifying TREX's EnvVar-auth "respawn with env, then authenticate" flow.
 //!
 //! It advertises one `env_var`-kind auth method at `initialize` (variable
-//! `OXIMUX_MOCK_KEY`) and fails `session/new` with `AuthRequired` (-32000) until
+//! `trex_MOCK_KEY`) and fails `session/new` with `AuthRequired` (-32000) until
 //! BOTH the env var is present in its process environment AND the client has
 //! `authenticate`d. Because a running process can't gain env after it spawned, a
 //! client that only calls `authenticate` on the original process never gets in —
 //! it must RESPAWN the agent with the var set, then authenticate. The companion
 //! `acp_env_auth_smoke` drives it.
 //!
-//! Build:  `cargo build -p oximux-agents --example mock_acp_env_auth_agent`
+//! Build:  `cargo build -p trex-agents --example mock_acp_env_auth_agent`
 //! Binary: `target/debug/examples/mock_acp_env_auth_agent`
 
 use std::sync::Arc;
@@ -26,7 +26,7 @@ use agent_client_protocol::{Agent, Client, ConnectionTo, Dispatch, Error, Respon
 /// JSON-RPC `AuthRequired`.
 const AUTH_REQUIRED: i32 = -32000;
 /// The env var this agent's credential rides in.
-const KEY_VAR: &str = "OXIMUX_MOCK_KEY";
+const KEY_VAR: &str = "TREX_MOCK_KEY";
 
 /// Whether the credential is actually present in THIS process's environment —
 /// true only after a respawn that set it, never on the original env-less spawn.

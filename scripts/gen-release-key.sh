@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # Mint the release signing keypair — once, ever, per key generation.
 #
 # The public half is written into the three places that must agree:
@@ -33,7 +33,7 @@ OUT_DIR=""
 
 usage() {
     cat <<EOF
-Mint the OxiMux release signing keypair.
+Mint the TREX release signing keypair.
 
   --rotate           replace an existing key (read docs/release-signing.md first)
   --out-dir <path>   where to write the secret key (default: a mktemp dir)
@@ -75,8 +75,8 @@ if [ -n "$OUT_DIR" ]; then
 else
     OUT_DIR="$(mktemp -d)"
 fi
-SECRET="${OUT_DIR}/oximux-release.key"
-PUBLIC="${OUT_DIR}/oximux-release.pub"
+SECRET="${OUT_DIR}/trex-release.key"
+PUBLIC="${OUT_DIR}/trex-release.pub"
 
 [ -e "$SECRET" ] && { echo "error: ${SECRET} already exists; refusing to overwrite" >&2; exit 1; }
 
@@ -168,5 +168,5 @@ NOW DO THIS, then destroy the file:
        rm -P ${SECRET}
 
 The secret is NOT in the repository and must never be. Anyone holding it can
-sign a release that every installed oximux will accept.
+sign a release that every installed TREX will accept.
 EOF

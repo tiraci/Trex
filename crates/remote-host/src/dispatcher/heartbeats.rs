@@ -1,4 +1,4 @@
-//! The heartbeat RPC handlers — a session's own recurring wake-ups.
+﻿//! The heartbeat RPC handlers — a session's own recurring wake-ups.
 //!
 //! These share the schedule store with [`super::schedules`] but not its gates.
 //! An ordinary schedule is a deferred *spawn*, so it wants full scope; a
@@ -13,9 +13,9 @@
 //! read from its proven scope; anyone else must name one, which is then
 //! scope-checked like any other session id.
 
-use oximux_agents::schedule::{NewSchedule, Recurrence, Schedule, ScheduleTarget, describe};
-use oximux_remote_proto::messages::{CreateHeartbeatReq, HeartbeatWire, RecurrenceWire};
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_agents::schedule::{NewSchedule, Recurrence, Schedule, ScheduleTarget, describe};
+use trex_remote_proto::messages::{CreateHeartbeatReq, HeartbeatWire, RecurrenceWire};
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;
@@ -166,7 +166,7 @@ fn to_wire(s: &Schedule, session_id: &str) -> HeartbeatWire {
 
 /// Wire → validated recurrence, through the constructors so the interval floor
 /// and the time checks bite here rather than in the store.
-fn from_wire(w: RecurrenceWire) -> Result<Recurrence, oximux_agents::schedule::RecurrenceError> {
+fn from_wire(w: RecurrenceWire) -> Result<Recurrence, trex_agents::schedule::RecurrenceError> {
     match w {
         RecurrenceWire::EveryMinutes { minutes } => Recurrence::every_minutes(minutes),
         RecurrenceWire::DailyAt { hour, minute } => Recurrence::daily_at(hour, minute),

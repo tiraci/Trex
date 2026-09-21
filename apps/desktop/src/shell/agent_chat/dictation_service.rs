@@ -1,4 +1,4 @@
-//! Process-wide voice-dictation service.
+﻿//! Process-wide voice-dictation service.
 //!
 //! Owns the single [`DictationController`] (one recording session at a time) and
 //! the [`ModelManager`], installed as a GPUI [`Global`] at app boot. A composer
@@ -18,12 +18,12 @@ use std::sync::{Arc, Mutex};
 use futures::StreamExt;
 use gpui::{App, BorrowAppContext, Global, WeakEntity, Window};
 use gpui_component::WindowExt as _;
-use oximux_dictation::feedback::Cue;
-use oximux_dictation::{
+use trex_dictation::feedback::Cue;
+use trex_dictation::{
     DictationController, DictationEvent, ModelManager, ModelPaths, ModelStatus, Readiness,
 };
-use oximux_remote_host::AudioTranscriber;
-use oximux_settings::{DictationSettings, ModelUnloadTimeout};
+use trex_remote_host::AudioTranscriber;
+use trex_settings::{DictationSettings, ModelUnloadTimeout};
 
 use super::composer::ComposerView;
 use super::dictation_hud::DictationHud;
@@ -194,16 +194,16 @@ fn post_process_transcript(cx: &App, text: String) -> String {
     // Fix casing FIRST, for models that can only emit uppercase (the dedicated
     // Vietnamese zipformers): their raw output would otherwise type SHOUTING TEXT
     // at the cursor. It must precede custom-words — running it after would undo
-    // the dictionary's capitalization ("OxiMux" → "Oximux").
-    let text = match oximux_dictation::spec_for(&settings.model_id) {
-        Some(spec) if spec.uppercase_output => oximux_dictation::text_filter::sentence_case(&text),
+    // the dictionary's capitalization ("TREX" → "TREX").
+    let text = match trex_dictation::spec_for(&settings.model_id) {
+        Some(spec) if spec.uppercase_output => trex_dictation::text_filter::sentence_case(&text),
         _ => text,
     };
     // Filter next so fillers/phantoms don't get fuzzy-matched to a custom word,
     // then correct the surviving words toward the dictionary.
     let filtered =
-        oximux_dictation::text_filter::filter(&text, &settings.language, settings.filler_filter_enabled);
-    oximux_dictation::custom_words::apply(
+        trex_dictation::text_filter::filter(&text, &settings.language, settings.filler_filter_enabled);
+    trex_dictation::custom_words::apply(
         &filtered,
         &settings.custom_words,
         settings.word_correction_threshold,
@@ -291,7 +291,7 @@ fn play_feedback(cx: &App, cue: Cue) {
         .map(|s| s.audio_feedback_enabled)
         .unwrap_or(false);
     if on {
-        oximux_dictation::feedback::play(cue);
+        trex_dictation::feedback::play(cue);
     }
 }
 
@@ -384,7 +384,7 @@ pub fn download(cx: &App, id: &str) {
     let manager = Arc::clone(&svc.manager);
     let id = id.to_string();
     std::thread::Builder::new()
-        .name("oximux-model-download".into())
+        .name("trex-model-download".into())
         .spawn(move || {
             if let Err(e) = manager.download_blocking(&id, &cancel) {
                 tracing::warn!(model = %id, %e, "model download failed");

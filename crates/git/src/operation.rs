@@ -1,4 +1,4 @@
-//! Long-running-git-operation detection.
+﻿//! Long-running-git-operation detection.
 //!
 //! Git lets the user start a merge / rebase / cherry-pick / revert /
 //! bisect that may pause mid-flight (waiting for conflict resolution,
@@ -18,7 +18,7 @@
 //!
 //! [`Repository::git_dir`]: crate::Repository
 
-use oximux_core::GitOperation;
+use trex_core::GitOperation;
 
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;

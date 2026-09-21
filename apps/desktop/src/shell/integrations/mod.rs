@@ -1,6 +1,6 @@
-//! Integrations — the external CLIs OxiMux calls out to, and their health.
+﻿//! Integrations — the external CLIs TREX calls out to, and their health.
 //!
-//! **Why this exists at all.** Half of OxiMux's surfaces are wrappers around a
+//! **Why this exists at all.** Half of TREX's surfaces are wrappers around a
 //! command-line tool: Source Control is `git`, the Tasks page is `gh` or
 //! `glab`, Search is `rg`. When one of those is absent the surface does not
 //! break loudly — it goes quiet. An empty Tasks page looks exactly like a repo

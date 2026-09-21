@@ -1,4 +1,4 @@
-//! Merge with auto-stash recovery.
+﻿//! Merge with auto-stash recovery.
 //!
 //! The single entry point — [`Repository::merge_branch`] — runs
 //! `git merge --no-edit <branch>`, honoring the user's `merge.ff` config (no
@@ -13,7 +13,7 @@
 //! `Repository` at the PROJECT ROOT — `merge_branch` merges the named branch
 //! into the repository it is called on, so opening the worktree instead would
 //! merge main into the feature branch. The pre-flight that guards it lives in
-//! `oximux-worktree-ops::merge`.
+//! `trex-worktree-ops::merge`.
 //!
 //! Error-recovery contract (locked 2026-05-17, Q1):
 //! When the merge fails with a NonZero exit (e.g. unknown branch) AFTER an
@@ -25,7 +25,7 @@
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;
 use crate::repository::Repository;
-use oximux_core::{MergeOutcome, StashRef};
+use trex_core::{MergeOutcome, StashRef};
 use std::path::PathBuf;
 
 /// The `-m` text `merge_branch` gives its auto-stash.
@@ -35,12 +35,12 @@ use std::path::PathBuf;
 /// hours later must match `git stash list` on this string. Hard-coding it a
 /// second time at the call site would let the two drift apart silently, and the
 /// symptom would be a recovery notice that can never resolve.
-pub const AUTO_STASH_MESSAGE: &str = "oximux: auto-stash before merge";
+pub const AUTO_STASH_MESSAGE: &str = "TREX: auto-stash before merge";
 
 impl Repository {
     /// Merge `branch` into the current HEAD with auto-stash recovery.
     ///
-    /// Called by `oximux_worktree_ops::merge::apply_merge`, the one
+    /// Called by `trex_worktree_ops::merge::apply_merge`, the one
     /// non-test caller, which the desktop's `Merge into <default>` row action
     /// reaches through `shell/workspace/merge_ops.rs`; that layer re-reads
     /// HEAD and the operation sentinels first and turns the outcome into the
@@ -108,7 +108,7 @@ impl Repository {
             && let Err(pop_err) = self.stash_pop(&stash).await
         {
             tracing::warn!(
-                target: "oximux_git::merge",
+                target: "trex_git::merge",
                 stash = %stash.ref_string(),
                 merge_err = %stderr,
                 pop_err = ?pop_err,
@@ -166,7 +166,7 @@ impl Repository {
     /// workdir-relative; callers that need absolute paths join with
     /// `self.workdir()`. `pub` (not `pub(crate)`) so the SCM panel's
     /// conflict-banner "Open all in editor" button can iterate them
-    /// without depending on `oximux-git` internals.
+    /// without depending on `trex-git` internals.
     pub async fn list_conflicting_paths(&self) -> Result<Vec<PathBuf>> {
         let out = GitCmd::new(self.workdir())
             .args(["diff", "--name-only", "--diff-filter=U"])
@@ -201,7 +201,7 @@ async fn finish_clean(
         Ok(()) => false,
         Err(pop_err) => {
             tracing::warn!(
-                target: "oximux_git::merge",
+                target: "trex_git::merge",
                 stash = %stash.ref_string(),
                 pop_err = ?pop_err,
                 "merge succeeded but auto-stash pop failed — stash ref preserved on stack"

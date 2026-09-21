@@ -1,8 +1,8 @@
-//! Unit tests for `row_render::build_row_plan`.
+﻿//! Unit tests for `row_render::build_row_plan`.
 
-use oximux_app::shell::file_explorer::row_render::{NodeIcon, build_row_plan};
-use oximux_app::shell::file_explorer::status_display::BadgeStatus;
-use oximux_app::shell::file_explorer::tree_state::TreeNode;
+use trex_app::shell::file_explorer::row_render::{NodeIcon, build_row_plan};
+use trex_app::shell::file_explorer::status_display::BadgeStatus;
+use trex_app::shell::file_explorer::tree_state::TreeNode;
 use std::path::PathBuf;
 
 fn file_node(name: &str, depth: usize) -> TreeNode {

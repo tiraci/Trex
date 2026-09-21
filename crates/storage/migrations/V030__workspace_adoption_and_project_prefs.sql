@@ -1,15 +1,15 @@
--- V030: two side tables for external worktree discovery.
+﻿-- V030: two side tables for external worktree discovery.
 --
 -- `workspace_adoptions` records that a workspace row was ADOPTED — created
 -- from a worktree that already existed on disk, made by `git worktree add`
--- in a terminal or by another tool — rather than provisioned by OxiMux. The
+-- in a terminal or by another tool — rather than provisioned by TREX. The
 -- distinction matters after adoption, not only at it: every later script
--- action resolves `.oximux/scripts.toml` from the row's directory, and
+-- action resolves `.trex/scripts.toml` from the row's directory, and
 -- `Delete` runs that directory's cleanup script with no consent step. A
 -- directory somebody else set up may carry scripts the user has never read,
 -- so an adopted row is `unvetted` until the user clears it explicitly. The
 -- create path never inserts here; a row with no adoption row was minted by
--- OxiMux and is vetted by construction.
+-- TREX and is vetted by construction.
 --
 -- `project_prefs` holds the one per-project preference this needs — whether
 -- to hide the "untracked worktrees" group for a repo where it is noise. A

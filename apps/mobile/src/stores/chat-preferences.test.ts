@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useChatPreferences } from '@/stores/chat-preferences';
 
@@ -27,18 +27,18 @@ describe('useChatPreferences', () => {
   it('applies and persists the tool-detail choice', () => {
     useChatPreferences.getState().setToolDetail('detailed');
     expect(useChatPreferences.getState().toolDetail).toBe('detailed');
-    expect(setItem).toHaveBeenCalledWith('@oximux:tool-detail', 'detailed');
+    expect(setItem).toHaveBeenCalledWith('@TREX:tool-detail', 'detailed');
   });
 
   it('persists the thinking toggle as a flag string', () => {
     useChatPreferences.getState().setAutoExpandThinking(true);
     expect(useChatPreferences.getState().autoExpandThinking).toBe(true);
-    expect(setItem).toHaveBeenCalledWith('@oximux:auto-expand-thinking', '1');
+    expect(setItem).toHaveBeenCalledWith('@TREX:auto-expand-thinking', '1');
   });
 
   it('restores stored values on load', async () => {
     getItem.mockImplementation((key: string) =>
-      Promise.resolve(key === '@oximux:tool-detail' ? 'detailed' : '1')
+      Promise.resolve(key === '@TREX:tool-detail' ? 'detailed' : '1')
     );
     await useChatPreferences.getState().load();
     const state = useChatPreferences.getState();
@@ -49,7 +49,7 @@ describe('useChatPreferences', () => {
 
   it('falls back to overview for an unrecognised stored detail', async () => {
     getItem.mockImplementation((key: string) =>
-      Promise.resolve(key === '@oximux:tool-detail' ? 'verbose' : '0')
+      Promise.resolve(key === '@TREX:tool-detail' ? 'verbose' : '0')
     );
     await useChatPreferences.getState().load();
     expect(useChatPreferences.getState().toolDetail).toBe('overview');

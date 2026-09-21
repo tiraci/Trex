@@ -1,6 +1,6 @@
-//! Where OxiMux keeps its files, decided once.
+﻿//! Where TREX keeps its files, decided once.
 //!
-//! Ten modules used to spell `dirs::data_dir().map(|d| d.join("dev.nhtera.oximux"))`
+//! Ten modules used to spell `dirs::data_dir().map(|d| d.join("dev.tiraci.trex"))`
 //! themselves, each with a copy of the bundle identifier and a comment asking
 //! the reader to keep it in lockstep with `main.rs`. That worked while there
 //! was one platform convention to encode. It stops working the moment there are
@@ -15,9 +15,9 @@ use std::path::{Path, PathBuf};
 ///
 /// Must stay in lockstep with `CFBundleIdentifier` in `assets/Info.plist` —
 /// that one is not Rust and cannot be checked by anything.
-pub const APP_DATA_SUBDIR: &str = "dev.nhtera.oximux";
+pub const APP_DATA_SUBDIR: &str = "dev.tiraci.trex";
 
-/// The app's data root: settings TOMLs, `oximux.db`, the relay's socket/pid/
+/// The app's data root: settings TOMLs, `trex.db`, the relay's socket/pid/
 /// token, session snapshots.
 ///
 /// `data_local_dir` rather than `data_dir`: the two are the same directory on
@@ -62,7 +62,7 @@ pub fn data_dir() -> Option<PathBuf> {
             // Same leaf as the real root, one throwaway parent up, so the
             // path conventions built on that leaf still hold here.
             let dir = std::env::temp_dir()
-                .join(format!("oximux-test-data-{}", std::process::id()))
+                .join(format!("trex-test-data-{}", std::process::id()))
                 .join(APP_DATA_SUBDIR);
             let _ = std::fs::create_dir_all(&dir);
             dir
@@ -74,7 +74,7 @@ pub fn data_dir() -> Option<PathBuf> {
 /// Close the data root to every other account on the machine, on every boot.
 ///
 /// Everything [`data_dir`] holds is private to the person running the app:
-/// `oximux.db` is every transcript of every project, `computer-use-grants.json`
+/// `trex.db` is every transcript of every project, `computer-use-grants.json`
 /// records which agent may drive this desktop, and the relay's token is a live
 /// credential. None of it was ever meant to be world-readable, but until this
 /// existed none of it was closed either — the directory was created with the
@@ -92,14 +92,14 @@ pub fn data_dir() -> Option<PathBuf> {
 /// the platform has no data directory to resolve — there is no directory to
 /// protect, and failing here would block boot over a hypothetical.
 ///
-/// `oximux serve` (headless) must make the same call on its own data root; it
+/// `TREX serve` (headless) must make the same call on its own data root; it
 /// cannot reach this module, so it calls
-/// [`oximux_owner_only::prepare_owner_only_dir`] directly.
+/// [`trex_owner_only::prepare_owner_only_dir`] directly.
 pub fn harden_data_dir() -> std::io::Result<()> {
     let Some(dir) = data_dir() else {
         return Ok(());
     };
-    oximux_owner_only::prepare_owner_only_dir(&dir)
+    trex_owner_only::prepare_owner_only_dir(&dir)
 }
 
 /// Scratch space: downloaded updates, model archives mid-extraction. Anything
@@ -228,7 +228,7 @@ mod tests {
     /// between the two reads as "host unreachable" with both sides healthy.
     #[test]
     fn control_socket_convention_matches_the_data_dir() {
-        assert_eq!(real_data_dir(), oximux_remote_local::default_runtime_dir());
+        assert_eq!(real_data_dir(), trex_remote_local::default_runtime_dir());
     }
 
     /// A test run must not write into the real data root.
@@ -262,7 +262,7 @@ mod tests {
         // world-readable by an older build, holding the file that matters.
         let dir = base.path().join(APP_DATA_SUBDIR);
         std::fs::create_dir_all(&dir).expect("seed dir");
-        std::fs::write(dir.join("oximux.db"), b"transcripts").expect("seed db");
+        std::fs::write(dir.join("trex.db"), b"transcripts").expect("seed db");
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
@@ -272,14 +272,14 @@ mod tests {
 
         // Exactly what `harden_data_dir` does, against a directory a test may
         // own — it resolves the real profile path, which a test must not touch.
-        oximux_owner_only::prepare_owner_only_dir(&dir).expect("harden");
+        trex_owner_only::prepare_owner_only_dir(&dir).expect("harden");
 
         assert!(
-            oximux_owner_only::is_dir_restricted_to_owner(&dir).expect("read back"),
+            trex_owner_only::is_dir_restricted_to_owner(&dir).expect("read back"),
             "the data root must be owner-only with no listener ever bound"
         );
         assert_eq!(
-            std::fs::read(dir.join("oximux.db")).expect("db survives"),
+            std::fs::read(dir.join("trex.db")).expect("db survives"),
             b"transcripts".to_vec(),
             "hardening must not disturb existing state"
         );
@@ -307,7 +307,7 @@ mod tests {
     /// Scratch pair of directories standing in for roaming and local.
     fn dirs_pair(tag: &str) -> (PathBuf, PathBuf) {
         let base = std::env::temp_dir().join(format!(
-            "oximux-adopt-{tag}-{}-{:?}",
+            "trex-adopt-{tag}-{}-{:?}",
             std::process::id(),
             std::thread::current().id()
         ));

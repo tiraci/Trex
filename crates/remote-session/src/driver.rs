@@ -1,4 +1,4 @@
-//! The connection maintainer: dials via a [`Connector`], establishes a session,
+﻿//! The connection maintainer: dials via a [`Connector`], establishes a session,
 //! hands it to the app, and — when the link drops — reconnects per the
 //! [`Reconnect`] policy (backing off through an injected [`Sleeper`]) until it
 //! succeeds or the budget is spent.
@@ -19,7 +19,7 @@ use std::time::Duration;
 use async_trait::async_trait;
 use futures::channel::oneshot;
 use futures::future::{Either, select};
-use oximux_remote_proto::PairingTicket;
+use trex_remote_proto::PairingTicket;
 
 use crate::connector::Connector;
 use crate::error::SessionError;

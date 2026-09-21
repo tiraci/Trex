@@ -1,4 +1,4 @@
-//! Changed-files view — section routing + section header. Pure helpers;
+﻿//! Changed-files view — section routing + section header. Pure helpers;
 //! the stateful entity lives in `super::GitPanel`. Per-row rendering
 //! (status badge, name + rename arrow, diff counts, conflict sub-label,
 //! hover-action cluster) lives in `row_renderer`. Splitting them keeps
@@ -18,8 +18,8 @@ use gpui_component::{
     Disableable as _, Icon, IconName, Sizable as _,
     button::{Button, ButtonVariants as _},
 };
-use oximux_core::{CombinedDiffScope, FileStatus, IndexStatus, ViewMode, WorktreeStatus};
-use oximux_settings::{Density, Motion, Theme, Typography};
+use trex_core::{CombinedDiffScope, FileStatus, IndexStatus, ViewMode, WorktreeStatus};
+use trex_settings::{Density, Motion, Theme, Typography};
 use std::collections::HashSet;
 use std::path::PathBuf;
 

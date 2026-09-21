@@ -1,4 +1,4 @@
-//! Empty-state card for the Source Control panel.
+﻿//! Empty-state card for the Source Control panel.
 //!
 //! Rendered when the working tree is clean (no staged / unstaged /
 //! untracked files) AND there are no unresolved conflicts. Replaces
@@ -57,7 +57,7 @@ impl SourceControlPanel {
         // card (branch icon + headline + 3 CTAs) never paints; the
         // user falls through to `GitPanel`'s plainer internal
         // placeholder instead, which is what's been happening.
-        use oximux_core::{IndexStatus, WorktreeStatus};
+        use trex_core::{IndexStatus, WorktreeStatus};
         !state.files.iter().any(|f| {
             !matches!(f.index, IndexStatus::Ignored)
                 && !matches!(f.worktree, WorktreeStatus::Ignored)

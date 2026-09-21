@@ -1,4 +1,4 @@
-//! Restore-path shape validation + corrupt-payload preservation.
+﻿//! Restore-path shape validation + corrupt-payload preservation.
 //!
 //! A persisted layout blob can be damaged two ways: it fails to parse
 //! (truncated mid-autosave), or it parses but violates a tree invariant
@@ -125,10 +125,10 @@ pub fn validate_persisted_tabs(snap: &PersistedTabs) -> Result<(), RestoreShapeE
 }
 
 /// Where rejected layout payloads are preserved for manual recovery.
-/// `OXIMUX_CORRUPT_LAYOUTS_DIR` overrides the default (used by tests and
+/// `trex_CORRUPT_LAYOUTS_DIR` overrides the default (used by tests and
 /// crash drills to keep artifacts out of the real data dir).
 pub fn corrupt_layouts_dir() -> Option<PathBuf> {
-    if let Ok(p) = std::env::var("OXIMUX_CORRUPT_LAYOUTS_DIR")
+    if let Ok(p) = std::env::var("TREX_CORRUPT_LAYOUTS_DIR")
         && !p.is_empty()
     {
         return Some(PathBuf::from(p));
@@ -382,7 +382,7 @@ mod tests {
     #[test]
     fn preserve_writes_and_trims_to_three() {
         let dir = std::env::temp_dir().join(format!(
-            "oximux-corrupt-test-{}",
+            "trex-corrupt-test-{}",
             std::process::id()
         ));
         let _ = std::fs::remove_dir_all(&dir);

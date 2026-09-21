@@ -1,4 +1,4 @@
-//! One answer to "how should GFM markdown be styled", shared by every surface
+﻿//! One answer to "how should GFM markdown be styled", shared by every surface
 //! that renders it.
 //!
 //! # Why this is not a `Default::default()`
@@ -21,7 +21,7 @@
 
 use gpui_component::highlighter::HighlightTheme;
 use gpui_component::text::TextViewStyle;
-use oximux_settings::Theme;
+use trex_settings::Theme;
 
 /// The GFM renderer's style under `theme`'s polarity.
 ///

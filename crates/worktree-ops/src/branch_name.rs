@@ -1,25 +1,25 @@
-//! The one place a [`GitSettings`] and a slug become a branch name.
+﻿//! The one place a [`GitSettings`] and a slug become a branch name.
 //!
-//! Five sites used to write `format!("oximux/{slug}")` — the git layer, this
+//! Five sites used to write `format!("TREX/{slug}")` — the git layer, this
 //! crate's create path, the workspace dialog's preview, the chat pill's
 //! preview, and the chat pill's actual create. A sixth arrived with rename.
 //! Six copies of a rule is six chances for the preview to promise one branch
 //! and the create to make another, and the user only finds out afterwards, in
 //! `git branch`.
 //!
-//! **Why here and not in `oximux-settings`.** Resolving
+//! **Why here and not in `trex-settings`.** Resolving
 //! [`BranchPrefixMode::GitUsername`] means running `git config user.name`.
-//! `oximux-settings` has no git dependency and must not gain one: it is on
-//! `oximux-cli`'s dependency path, and pulling the git process layer through
-//! that edge is the coupling `oximux-worktree-ops` was extracted to avoid.
+//! `trex-settings` has no git dependency and must not gain one: it is on
+//! `trex-cli`'s dependency path, and pulling the git process layer through
+//! that edge is the coupling `trex-worktree-ops` was extracted to avoid.
 //! Spawning a bare `std::process::Command` from the settings crate instead
 //! would dodge `GitCmd` — and with it `no_window`, flashing a console on
 //! Windows. So the serde shape lives there and the resolution lives here,
 //! in a crate that already depends on both.
 
-use oximux_git::Repository;
-use oximux_git::worktree::derive_slug;
-use oximux_settings::git::{BranchPrefixMode, GitSettings};
+use trex_git::Repository;
+use trex_git::worktree::derive_slug;
+use trex_settings::git::{BranchPrefixMode, GitSettings};
 
 /// Resolve the configured prefix to actual text, or `None` for no prefix.
 ///
@@ -27,8 +27,8 @@ use oximux_settings::git::{BranchPrefixMode, GitSettings};
 /// of them is an error: this runs on the create path, and a branch that cannot
 /// be named is a worktree that cannot be made. An unset `user.name`, a
 /// username that slugifies to nothing, a custom prefix someone typed a `~`
-/// into — each falls back to [`DEFAULT_PREFIX`](oximux_settings::git::DEFAULT_PREFIX),
-/// which is the prefix every existing OxiMux branch already carries.
+/// into — each falls back to [`DEFAULT_PREFIX`](trex_settings::git::DEFAULT_PREFIX),
+/// which is the prefix every existing TREX branch already carries.
 ///
 /// [`BranchPrefixMode::None`] is the one case that yields `None`, and it means
 /// what it says — the branch is the bare slug. It is a choice, not a failure,
@@ -71,7 +71,7 @@ pub fn resolve_prefix_with(settings: &GitSettings, username: Option<&str>) -> Op
 fn sanitize_prefix(raw: &str) -> String {
     let trimmed = raw.trim();
     if trimmed.is_empty() {
-        return oximux_settings::git::DEFAULT_PREFIX.to_string();
+        return trex_settings::git::DEFAULT_PREFIX.to_string();
     }
     let slug = derive_slug(trimmed);
     // `derive_slug` substitutes `"workspace"` for an input with nothing usable
@@ -79,7 +79,7 @@ fn sanitize_prefix(raw: &str) -> String {
     // user's branches under a word they never typed, so the shipped prefix is
     // the better failure.
     if slug.is_empty() || slug == "workspace" {
-        return oximux_settings::git::DEFAULT_PREFIX.to_string();
+        return trex_settings::git::DEFAULT_PREFIX.to_string();
     }
     slug
 }
@@ -95,8 +95,8 @@ pub fn branch_name(prefix: Option<&str>, slug: &str) -> String {
 /// The prefix segment of an existing branch name, or `None` when it has none.
 ///
 /// The inverse of [`branch_name`], and the answer for any mutation of a branch
-/// that already exists: renaming `nhtera/fix-lgoin` must produce
-/// `nhtera/fix-login`, not whatever the *current* setting would mint. A rename
+/// that already exists: renaming `tiraci/fix-lgoin` must produce
+/// `tiraci/fix-login`, not whatever the *current* setting would mint. A rename
 /// is a correction to a name, not a decision to re-file someone's work under a
 /// different convention — and doing it silently, as part of fixing a typo, is
 /// how a repository ends up with one worktree's history split across two
@@ -114,7 +114,7 @@ pub async fn resolve_branch_name(settings: &GitSettings, repo: &Repository, slug
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_settings::git::DEFAULT_PREFIX;
+    use trex_settings::git::DEFAULT_PREFIX;
 
     fn with(mode: BranchPrefixMode, custom: &str) -> GitSettings {
         GitSettings {
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn a_plain_username_becomes_a_plain_prefix() {
-        assert_eq!(sanitize_prefix("nhtera"), "nhtera");
+        assert_eq!(sanitize_prefix("tiraci"), "tiraci");
     }
 
     #[test]
@@ -144,7 +144,7 @@ mod tests {
             for bad in ['~', '^', ':', '@', '{', '}', '/'] {
                 assert!(!out.contains(bad), "{raw:?} produced {out:?}");
             }
-            assert!(oximux_git::worktree::validate_slug(&out).is_ok(), "{raw:?} → {out:?}");
+            assert!(trex_git::worktree::validate_slug(&out).is_ok(), "{raw:?} → {out:?}");
         }
     }
 
@@ -172,7 +172,7 @@ mod tests {
     /// branch to another prefix.
     #[test]
     fn a_prefix_survives_the_round_trip_that_a_rename_makes() {
-        for prefix in [Some("oximux"), Some("nhtera"), None] {
+        for prefix in [Some("TREX"), Some("tiraci"), None] {
             let joined = branch_name(prefix, "fix-lgoin");
             assert_eq!(split_prefix(&joined), prefix, "{joined:?}");
             let renamed = branch_name(split_prefix(&joined), "fix-login");
@@ -189,7 +189,7 @@ mod tests {
         for raw in ["", "feat", "/feat"] {
             assert_eq!(split_prefix(raw), None, "{raw:?}");
             let rejoined = branch_name(split_prefix(raw), "feat");
-            assert!(oximux_git::worktree::validate_branch_name(&rejoined).is_ok(), "{raw:?}");
+            assert!(trex_git::worktree::validate_branch_name(&rejoined).is_ok(), "{raw:?}");
         }
     }
 
@@ -215,7 +215,7 @@ mod tests {
     #[test]
     fn none_means_a_bare_slug_not_a_degraded_prefix() {
         assert_eq!(branch_name(None, "feat"), "feat");
-        assert_eq!(branch_name(Some("oximux"), "feat"), "oximux/feat");
+        assert_eq!(branch_name(Some("TREX"), "feat"), "TREX/feat");
     }
 
     /// Whatever the mode and whatever the input, the joined name has to be
@@ -224,14 +224,14 @@ mod tests {
     /// than a settings problem the user could act on.
     #[test]
     fn every_resolvable_prefix_produces_a_valid_branch_name() {
-        for custom in ["oximux", "Ada Lovelace", "", "!!!", "a~b", "team/sub"] {
+        for custom in ["TREX", "Ada Lovelace", "", "!!!", "a~b", "team/sub"] {
             let s = with(BranchPrefixMode::Custom, custom);
             let name = branch_name(Some(&sanitize_prefix(&s.custom_prefix)), "feat");
             assert!(
-                oximux_git::worktree::validate_branch_name(&name).is_ok(),
+                trex_git::worktree::validate_branch_name(&name).is_ok(),
                 "custom {custom:?} produced {name:?}"
             );
         }
-        assert!(oximux_git::worktree::validate_branch_name(&branch_name(None, "feat")).is_ok());
+        assert!(trex_git::worktree::validate_branch_name(&branch_name(None, "feat")).is_ok());
     }
 }

@@ -1,4 +1,4 @@
-//! Per-poll event processing extracted from `runtime_impl::poll_loop`.
+﻿//! Per-poll event processing extracted from `runtime_impl::poll_loop`.
 //!
 //! `process_poll_events` is the inner body of the poll loop: drain a batch of
 //! `TerminalEvent`s, advance the `StatusMachine` (regex path) and the
@@ -20,8 +20,8 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 
-use oximux_core::{AgentSnapshot, AgentStatus, SidebandDetail};
-use oximux_pty::{TerminalEvent, TerminalSessionId};
+use trex_core::{AgentSnapshot, AgentStatus, SidebandDetail};
+use trex_pty::{TerminalEvent, TerminalSessionId};
 use tokio::sync::watch;
 
 use crate::osc_sideband::AgentOscScanner;
@@ -76,7 +76,7 @@ pub fn process_poll_events(
                     // Observable signal that an OSC-9999 packet was received and
                     // decoded — the one link in the emission→scanner path that
                     // can't be unit-tested (needs a live agent emitting to the
-                    // PTY). `RUST_LOG=oximux_agents=debug` surfaces it.
+                    // PTY). `RUST_LOG=trex_agents=debug` surfaces it.
                     tracing::debug!(
                         state = ?sb.state,
                         tool = ?sb.detail.tool_name,
@@ -180,7 +180,7 @@ mod tests {
     use super::*;
     use std::sync::Arc;
 
-    use oximux_core::AgentStatus;
+    use trex_core::AgentStatus;
 
     use crate::cli::adapter::StatusPattern;
 

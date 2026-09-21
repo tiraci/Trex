@@ -1,4 +1,4 @@
-//! Stage / unstage operations — file-level and hunk-level.
+﻿//! Stage / unstage operations — file-level and hunk-level.
 //!
 //! File ops wrap `git add` / `git restore --staged` / `git restore`.
 //! Hunk ops rebuild a minimal unified-diff patch from a `FileDiff` plus a
@@ -11,7 +11,7 @@
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;
 use crate::repository::Repository;
-use oximux_core::{DiffLineKind, DiffStatus, FileDiff};
+use trex_core::{DiffLineKind, DiffStatus, FileDiff};
 use std::ffi::OsString;
 use std::path::Path;
 
@@ -314,7 +314,7 @@ fn writeln_to_vec(out: &mut Vec<u8>, args: std::fmt::Arguments<'_>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::{DiffHunk, DiffLine, DiffStatus, FileDiff};
+    use trex_core::{DiffHunk, DiffLine, DiffStatus, FileDiff};
     use std::path::PathBuf;
 
     fn modified(path: &str, hunks: Vec<DiffHunk>) -> FileDiff {

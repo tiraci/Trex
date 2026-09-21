@@ -1,4 +1,4 @@
-//! The gate the incremental parser rests on.
+﻿//! The gate the incremental parser rests on.
 //!
 //! Every document below is streamed one character at a time, and after **every
 //! single character** the incrementally-built tree is compared against a full
@@ -14,7 +14,7 @@
 //! window or add the construct to the always-full set. A green parity test is
 //! the only evidence that "reparse the last two blocks" is sound at all.
 
-use oximux_markdown::{IncrementalParser, parse_full};
+use trex_markdown::{IncrementalParser, parse_full};
 
 /// Stream `doc` one character at a time, asserting agreement at every prefix.
 fn assert_parity(name: &str, doc: &str) {

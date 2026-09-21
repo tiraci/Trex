@@ -1,8 +1,8 @@
-//! Dialling a paired host over iroh, and the client half of its auth
+﻿//! Dialling a paired host over iroh, and the client half of its auth
 //! handshake.
 //!
 //! The handshake is written here rather than reused from `remote-session`
-//! because that crate's [`RemoteSession`](oximux_remote_session::RemoteSession)
+//! because that crate's [`RemoteSession`](trex_remote_session::RemoteSession)
 //! owns a demux pump: it multiplexes RPCs against a live event stream, which is
 //! exactly right for the phone and exactly wrong for a CLI whose every verb
 //! already drives one framed transport directly. What IS reused is everything
@@ -16,11 +16,11 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use oximux_remote_proto::messages::{AuthProveReq, ConnectReq, RegisterReq};
-use oximux_remote_proto::pairing::PairingTicket;
-use oximux_remote_proto::proto::{Request, Response};
-use oximux_remote_proto::{Transport, registration_proof};
-use oximux_remote_session::{ClientSigner, Connector};
+use trex_remote_proto::messages::{AuthProveReq, ConnectReq, RegisterReq};
+use trex_remote_proto::pairing::PairingTicket;
+use trex_remote_proto::proto::{Request, Response};
+use trex_remote_proto::{Transport, registration_proof};
+use trex_remote_session::{ClientSigner, Connector};
 
 use crate::cli::exit;
 use crate::output::Failure;
@@ -38,7 +38,7 @@ const DIAL_CEILING: Duration = Duration::from_secs(20);
 fn unreachable(detail: impl std::fmt::Display) -> Failure {
     Failure::new("unreachable", exit::UNREACHABLE, format!("could not reach the host: {detail}"))
         .with_steps([
-            "check the host is running (`oximux serve`, or the desktop app)".into(),
+            "check the host is running (`TREX serve`, or the desktop app)".into(),
             "both ends need network access; a first connection may take a few seconds".into(),
         ])
 }
@@ -53,11 +53,11 @@ pub async fn dial(
     deadline: tokio::time::Instant,
 ) -> Result<Arc<dyn Transport>, Failure> {
     let deadline = deadline.min(tokio::time::Instant::now() + DIAL_CEILING);
-    let endpoint = tokio::time::timeout_at(deadline, oximux_remote_iroh::bind_client())
+    let endpoint = tokio::time::timeout_at(deadline, trex_remote_iroh::bind_client())
         .await
         .map_err(|_| unreachable("timed out binding a local endpoint"))?
         .map_err(unreachable)?;
-    let connector = oximux_remote_iroh::IrohConnector::new(endpoint, endpoint_id)
+    let connector = trex_remote_iroh::IrohConnector::new(endpoint, endpoint_id)
         .map_err(unreachable)?;
     tokio::time::timeout_at(deadline, connector.connect())
         .await
@@ -137,9 +137,9 @@ fn unexpected_handshake_reply(expected: &'static str, got: &Response) -> Failure
 pub async fn hello(
     transport: &dyn Transport,
     deadline: tokio::time::Instant,
-) -> Result<oximux_remote_proto::messages::HelloAckWire, Failure> {
-    use oximux_remote_proto::messages::HelloReq;
-    use oximux_remote_proto::proto::{MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, is_compatible};
+) -> Result<trex_remote_proto::messages::HelloAckWire, Failure> {
+    use trex_remote_proto::messages::HelloReq;
+    use trex_remote_proto::proto::{MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, is_compatible};
 
     let req = Request::Hello(HelloReq { protocol_version: PROTOCOL_VERSION });
     let ack = match call(transport, req, deadline).await? {
@@ -229,8 +229,8 @@ pub async fn authenticate(
 /// at this point `Unauthorized` almost always means the enrollment is gone
 /// (revoked host-side, or the local key was regenerated), not that the caller
 /// lacks scope for one verb.
-fn pairing_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
-    use oximux_remote_proto::proto::RpcError;
+fn pairing_failure(err: trex_remote_proto::proto::RpcError) -> Failure {
+    use trex_remote_proto::proto::RpcError;
     match err {
         RpcError::Unauthorized => Failure::new(
             "denied",
@@ -239,7 +239,7 @@ fn pairing_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
         )
         .with_steps([
             "the pairing may have been revoked, or the ticket already redeemed".into(),
-            "mint a fresh ticket on the host (`oximux pair-new`) and pair again".into(),
+            "mint a fresh ticket on the host (`TREX pair-new`) and pair again".into(),
         ]),
         RpcError::IncompatibleVersion { host_version, host_min_compatible } => Failure::new(
             "incompatible",
@@ -247,7 +247,7 @@ fn pairing_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
             format!(
                 "the host speaks protocol v{host_version} (min v{host_min_compatible}); \
                  this CLI speaks v{}",
-                oximux_remote_proto::proto::PROTOCOL_VERSION
+                trex_remote_proto::proto::PROTOCOL_VERSION
             ),
         )
         .with_steps(["update whichever side is older".into()]),
@@ -262,11 +262,11 @@ fn now_secs() -> u64 {
         .unwrap_or(0)
 }
 
-/// Read a ticket from either an `oximux://connect?ticket=…` URL or the bare
+/// Read a ticket from either an `TREX://connect?ticket=…` URL or the bare
 /// base64url the QR encodes, so pasting either works.
 pub fn parse_ticket(raw: &str) -> Result<PairingTicket, Failure> {
     let raw = raw.trim();
-    let parsed = if raw.starts_with(oximux_remote_proto::pairing::CONNECT_URL_PREFIX) {
+    let parsed = if raw.starts_with(trex_remote_proto::pairing::CONNECT_URL_PREFIX) {
         PairingTicket::from_url(raw)
     } else {
         PairingTicket::decode(raw)
@@ -276,7 +276,7 @@ pub fn parse_ticket(raw: &str) -> Result<PairingTicket, Failure> {
     parsed.map_err(|e| {
         Failure::new("ticket", exit::USAGE, format!("that is not a valid pairing ticket: {e}"))
             .with_steps([
-                "paste the whole `oximux://connect?ticket=…` link, or the ticket alone".into(),
+                "paste the whole `TREX://connect?ticket=…` link, or the ticket alone".into(),
                 "tickets are short-lived — mint a fresh one if this has been sitting around".into(),
             ])
     })

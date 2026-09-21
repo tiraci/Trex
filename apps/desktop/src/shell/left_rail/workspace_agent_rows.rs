@@ -1,4 +1,4 @@
-//! The "N agents" disclosure rendered under a workspace row.
+﻿//! The "N agents" disclosure rendered under a workspace row.
 //!
 //! A workspace with more than one agent gets a compact, clickable summary
 //! line — a grouped status cluster (one `[dot] count` chip per indicator
@@ -19,8 +19,8 @@ use gpui::{
     Transformation, WeakEntity, div, percentage, px, svg,
 };
 use gpui_component::Icon;
-use oximux_core::AgentStatus;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::AgentStatus;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::agent_presentation::{adapter_icon_path, agent_verb};
 use crate::shell::left_rail::{LeftRail, RailAgentRow, RailAgentTarget};
@@ -365,7 +365,7 @@ pub fn render_workspace_agent_disclosure(
 /// The row's current sideband detail: live from the status channel for a tracked
 /// row, or the carried `ambient_detail` for an ambient row (which has no
 /// channel). Owned so callers don't hold the `watch` borrow across the render.
-fn row_detail(row: &RailAgentRow) -> Option<oximux_core::SidebandDetail> {
+fn row_detail(row: &RailAgentRow) -> Option<trex_core::SidebandDetail> {
     let mut detail = match &row.status_rx {
         Some(rx) => rx.borrow().detail.clone(),
         None => row.ambient_detail.clone(),
@@ -609,8 +609,8 @@ fn render_agent_sub_row(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::AgentStatusStream;
-    use oximux_core::{AgentSnapshot, AgentStatus};
+    use trex_agents::AgentStatusStream;
+    use trex_core::{AgentSnapshot, AgentStatus};
     use tokio::sync::watch;
 
     fn live_rx(status: AgentStatus) -> (watch::Sender<AgentSnapshot>, AgentStatusStream) {
@@ -736,7 +736,7 @@ mod tests {
 
     /// Build a live row whose snapshot carries the given detail. The sender is
     /// dropped here; a `watch` receiver still reads the last value after that.
-    fn row_with_detail(detail: oximux_core::SidebandDetail) -> RailAgentRow {
+    fn row_with_detail(detail: trex_core::SidebandDetail) -> RailAgentRow {
         let (tx, rx) = live_rx(AgentStatus::Running);
         tx.send(AgentSnapshot {
             status: AgentStatus::Running,
@@ -748,7 +748,7 @@ mod tests {
 
     #[test]
     fn live_title_leads_with_prompt() {
-        let detail = oximux_core::SidebandDetail {
+        let detail = trex_core::SidebandDetail {
             prompt: Some("add a readme section".into()),
             tool_name: Some("Edit".into()),
             tool_input_summary: Some("README.md".into()),
@@ -761,7 +761,7 @@ mod tests {
 
     #[test]
     fn live_title_prompt_only() {
-        let detail = oximux_core::SidebandDetail {
+        let detail = trex_core::SidebandDetail {
             prompt: Some("  hi  ".into()),
             ..Default::default()
         };
@@ -772,7 +772,7 @@ mod tests {
 
     #[test]
     fn live_title_activity_only_is_not_a_prompt() {
-        let detail = oximux_core::SidebandDetail {
+        let detail = trex_core::SidebandDetail {
             tool_name: Some("Bash".into()),
             tool_input_summary: Some("cargo test".into()),
             ..Default::default()
@@ -804,7 +804,7 @@ mod tests {
     fn live_prompt_prefers_live_over_persisted() {
         // When both exist, the live (current-turn) prompt wins over the stale
         // persisted one.
-        let detail = oximux_core::SidebandDetail {
+        let detail = trex_core::SidebandDetail {
             prompt: Some("live prompt".into()),
             ..Default::default()
         };
@@ -827,7 +827,7 @@ mod tests {
 
     /// A LIVE idle row whose channel carries the given detail (the post-Stop
     /// snapshot: status Idle + last assistant message).
-    fn idle_row_with_detail(detail: oximux_core::SidebandDetail) -> RailAgentRow {
+    fn idle_row_with_detail(detail: trex_core::SidebandDetail) -> RailAgentRow {
         let (tx, rx) = live_rx(AgentStatus::Idle);
         tx.send(AgentSnapshot {
             status: AgentStatus::Idle,
@@ -842,7 +842,7 @@ mod tests {
         // Idle + an assistant reply = the reference cockpit's "done": the row
         // must report completed (emerald check) and surface the reply as its
         // secondary, NOT the bare "Idle" state label.
-        let detail = oximux_core::SidebandDetail {
+        let detail = trex_core::SidebandDetail {
             prompt: Some("hi".into()),
             last_message: Some("All set — tests pass.".into()),
             ..Default::default()
@@ -867,7 +867,7 @@ mod tests {
         // An ambient row has no status channel; its tool/message come from the
         // carried `ambient_detail`. A completed ambient turn reads as done too.
         let mut r = row(true, AgentStatus::Idle, None);
-        r.ambient_detail = Some(oximux_core::SidebandDetail {
+        r.ambient_detail = Some(trex_core::SidebandDetail {
             prompt: Some("hi 2".into()),
             last_message: Some("Ready when you are.".into()),
             ..Default::default()
@@ -895,7 +895,7 @@ mod tests {
         let (tx, rx) = live_rx(AgentStatus::Idle);
         tx.send(AgentSnapshot {
             status: AgentStatus::Idle,
-            detail: Some(oximux_core::SidebandDetail {
+            detail: Some(trex_core::SidebandDetail {
                 last_message: Some("Fresh reply.".into()),
                 ..Default::default()
             }),
@@ -908,7 +908,7 @@ mod tests {
 
     #[test]
     fn live_title_collapses_multiline_prompt() {
-        let detail = oximux_core::SidebandDetail {
+        let detail = trex_core::SidebandDetail {
             prompt: Some("fix the bug\n\nin the parser".into()),
             ..Default::default()
         };

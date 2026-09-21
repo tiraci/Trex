@@ -1,10 +1,10 @@
-//! The headless [`SessionLauncher`]: spawn an agent, learn its session id from
+﻿//! The headless [`SessionLauncher`]: spawn an agent, learn its session id from
 //! `SessionInit`, register it, and hand the stream to a pump. No tab, no view
 //! — the pump is the whole "UI".
 //!
 //! **Every agent this host spawns is confined to its own session.** Before the
 //! child exists it is granted a local-control credential and handed it in its
-//! environment, so the `oximux` CLI it runs reaches that one conversation
+//! environment, so the `TREX` CLI it runs reaches that one conversation
 //! rather than the whole host. The ordering is the awkward part: a session's id
 //! arrives with the agent's own `SessionInit`, *after* the environment is
 //! fixed, so the credential is minted under an opaque handle and re-pointed at
@@ -15,13 +15,13 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::{ConnectSpec, ThreadEvent, Transport, connect};
-use oximux_remote_host::{LaunchError, SessionLauncher};
-use oximux_remote_local::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::{ConnectSpec, ThreadEvent, Transport, connect};
+use trex_remote_host::{LaunchError, SessionLauncher};
+use trex_remote_local::{
     LocalControlListener, SESSION_ENV_VAR, SESSION_TOKEN_ENV_VAR, generate_token,
 };
-use oximux_storage::SettingsRepo;
+use trex_storage::SettingsRepo;
 
 use super::blob::ChatBlob;
 use super::catalog::SessionIndex;
@@ -151,7 +151,7 @@ impl HeadlessLauncher {
 
 /// What the blocking spawn half hands back to the async half.
 struct Spawned {
-    conn: Arc<dyn oximux_agents::thread::AgentConnection>,
+    conn: Arc<dyn trex_agents::thread::AgentConnection>,
     events: std::sync::mpsc::Receiver<ThreadEvent>,
     /// Everything read while waiting for init, `SessionInit` included, in order.
     buffered: Vec<ThreadEvent>,
@@ -255,7 +255,7 @@ impl SessionLauncher for HeadlessLauncher {
         // model at the command line, so a switch afterwards would bail for
         // exactly Claude and Codex. See `SessionLauncher::create`.
         let mut spec = ConnectSpec::for_backend(
-            &oximux_agents::thread::ChatBackend::from(transport),
+            &trex_agents::thread::ChatBackend::from(transport),
             cwd.clone(),
             model.map(str::to_string),
             None,
@@ -270,7 +270,7 @@ impl SessionLauncher for HeadlessLauncher {
         // behind its back.
         let chosen = uuid::Uuid::new_v4().to_string();
         spec.fresh_session_id = Some(chosen.clone());
-        // Granted before the child exists, so the very first `oximux` call it
+        // Granted before the child exists, so the very first `TREX` call it
         // makes is already confined. The handle is scoped to nothing until the
         // rebind below — a spawn that dies before it is registered therefore
         // leaves a credential that reaches no session at all.

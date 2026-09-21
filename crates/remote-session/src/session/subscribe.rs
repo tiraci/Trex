@@ -1,9 +1,9 @@
-//! Opening a session's live stream. The pushed frames are read off the demux
+﻿//! Opening a session's live stream. The pushed frames are read off the demux
 //! event stream ([`RemoteSession::take_events`]); the fold lives in
 //! [`crate::subscription`].
 
-use oximux_remote_proto::HostEvent;
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::HostEvent;
+use trex_remote_proto::proto::{Request, Response};
 
 use super::{RemoteSession, Result};
 use crate::error::SessionError;

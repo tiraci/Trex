@@ -1,4 +1,4 @@
-//! User-tunable AI commit-message generation settings, loaded from
+﻿//! User-tunable AI commit-message generation settings, loaded from
 //! `commit_message_ai.toml` in the app data dir and held as a GPUI
 //! [`Global`] so the commit composer reads one source of truth.
 //!
@@ -9,7 +9,7 @@
 //! Live-reload: a file watcher (in the app crate) reparses on change
 //! and swaps the global. The commit composer reads the mode at click
 //! time, so a mid-session edit takes effect on the next sparkles
-//! click without restarting OxiMux.
+//! click without restarting TREX.
 
 #[cfg(feature = "gpui")]
 use gpui::Global;
@@ -55,7 +55,7 @@ pub struct AgentSettings {
     pub model: String,
     /// Optional thinking-effort level. Use the empty string to
     /// omit. Supported values depend on the model (see
-    /// `oximux_agents::commit_message::spec`).
+    /// `trex_agents::commit_message::spec`).
     pub thinking_level: String,
     /// Optional user-supplied prompt suffix appended verbatim to
     /// the base prompt (style overrides like Conventional Commits,

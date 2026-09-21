@@ -1,4 +1,4 @@
-// Generate assets/dmg-background.tiff — the backdrop for the release DMG's
+﻿// Generate assets/dmg-background.tiff — the backdrop for the release DMG's
 // Finder window (see scripts/make-dmg.sh for the icon layout that must stay
 // in sync with the arrow drawn here).
 //
@@ -19,7 +19,7 @@
 //
 // Layout contract (window 660x400, image 660x350, icon size 128,
 // coordinates are icon CENTERS in create-dmg's top-left origin):
-//   OxiMux.app icon      at (165, 190)
+//   trex.app icon      at (165, 190)
 //   Applications alias   at (495, 190)
 //   dashed guide arrow   between them, centered at (330, 190)
 
@@ -93,7 +93,7 @@ func render(scale: CGFloat) -> NSBitmapImageRep {
 
     // Caption under the arrow, well clear of Finder's own icon labels.
     NSGraphicsContext.current?.cgContext.setLineDash(phase: 0, lengths: [])
-    let caption = "Drag OxiMux to Applications" as NSString
+    let caption = "Drag TREX to Applications" as NSString
     let attrs: [NSAttributedString.Key: Any] = [
         .font: NSFont.systemFont(ofSize: 13, weight: .medium),
         .foregroundColor: NSColor(calibratedRed: 0.45, green: 0.47, blue: 0.51, alpha: 1),

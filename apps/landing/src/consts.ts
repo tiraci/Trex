@@ -1,13 +1,13 @@
-/**
+﻿/**
  * Single source of truth for facts that appear in more than one place on the
  * page. Everything here is verifiable against the repo README, LICENSE, or
  * docs/system-architecture.md. Nothing is invented marketing precision.
  */
 
 export const SITE = {
-  name: "OxiMux",
-  url: "https://oximux.erai.dev",
-  repo: "https://github.com/nhtera/OxiMux",
+  name: "TREX",
+  url: "https://TREX.erai.dev",
+  repo: "https://github.com/tiraci/Trex",
   tagline: "Many agents. One native cockpit.",
   heroLines: ["Many agents.", "One native cockpit."],
   description:
@@ -23,9 +23,9 @@ export const SITE = {
    * landing the reader on the release page to hunt through fifteen assets.
    */
   downloads: {
-    mac: "https://github.com/nhtera/OxiMux/releases/latest/download/OxiMux-macos-arm64.dmg",
+    mac: "https://github.com/tiraci/Trex/releases/latest/download/trex-macos-arm64.dmg",
     windows:
-      "https://github.com/nhtera/OxiMux/releases/latest/download/OxiMux-windows-x64-setup.exe",
+      "https://github.com/tiraci/Trex/releases/latest/download/trex-windows-x64-setup.exe",
   },
 } as const;
 
@@ -37,12 +37,12 @@ export const SITE = {
  */
 export const CLI = {
   install:
-    "curl -fsSL https://raw.githubusercontent.com/nhtera/OxiMux/main/scripts/install-cli.sh | sh",
-  docs: "https://github.com/nhtera/OxiMux/blob/main/docs/cli-reference.md",
+    "curl -fsSL https://raw.githubusercontent.com/tiraci/Trex/main/scripts/install-cli.sh | sh",
+  docs: "https://github.com/tiraci/Trex/blob/main/docs/cli-reference.md",
 } as const;
 
 /**
- * Agents OxiMux can drive today. Sourced from the README capability list and
+ * Agents TREX can drive today. Sourced from the README capability list and
  * crates/agents (AgentRuntime trait plus provider adapters).
  *
  * One list, two surfaces. The hero strip renders the entries that carry an
@@ -96,12 +96,12 @@ export const SUBSTRATE = [
 
 export const FAQ = [
   {
-    q: "Is OxiMux free?",
+    q: "Is TREX free?",
     a: "Yes. It is open source under Apache-2.0. You bring your own agent CLIs and your own credentials.",
   },
   {
     q: "Does my code leave my machine?",
-    a: "No. Agents run as local subprocesses and talk to their own providers exactly as they would in your terminal. OxiMux does not proxy inference, store credentials, or upload your repository anywhere.",
+    a: "No. Agents run as local subprocesses and talk to their own providers exactly as they would in your terminal. TREX does not proxy inference, store credentials, or upload your repository anywhere.",
   },
   {
     q: "Which agents are supported?",
@@ -109,7 +109,7 @@ export const FAQ = [
   },
   {
     q: "Do I need new API keys or a new subscription?",
-    a: "No. OxiMux launches each provider's own CLI as a subprocess, so it uses whatever plan and login that CLI already has. Nothing is resold.",
+    a: "No. TREX launches each provider's own CLI as a subprocess, so it uses whatever plan and login that CLI already has. Nothing is resold.",
   },
   {
     q: "What platforms does it run on?",

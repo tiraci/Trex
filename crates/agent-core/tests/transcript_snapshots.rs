@@ -1,4 +1,4 @@
-//! Pinned transcripts for every committed Claude fixture.
+﻿//! Pinned transcripts for every committed Claude fixture.
 //!
 //! This is the baseline the assembler extraction (plan phase 4) is measured
 //! against: the mappers are about to be rewritten, and the only thing that must
@@ -12,14 +12,14 @@
 //! log:
 //!
 //! ```text
-//! UPDATE_TRANSCRIPT_SNAPSHOTS=1 cargo test -p oximux-agent-core --features test-support
+//! UPDATE_TRANSCRIPT_SNAPSHOTS=1 cargo test -p trex-agent-core --features test-support
 //! ```
 
-use oximux_agent_core::thread::event::ThreadEvent;
-use oximux_agent_core::thread::invariants;
-use oximux_agent_core::thread::snapshot::assert_transcript_snapshot;
-use oximux_agent_core::thread::state::ChatThread;
-use oximux_agent_core::thread::stream_json::decode_line;
+use trex_agent_core::thread::event::ThreadEvent;
+use trex_agent_core::thread::invariants;
+use trex_agent_core::thread::snapshot::assert_transcript_snapshot;
+use trex_agent_core::thread::state::ChatThread;
+use trex_agent_core::thread::stream_json::decode_line;
 
 /// Every fixture in `src/thread/testdata/`. Listed rather than globbed so a new
 /// fixture is a deliberate addition to this baseline — a glob would silently

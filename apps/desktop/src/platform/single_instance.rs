@@ -1,6 +1,6 @@
-//! Single-instance guard for the GUI process.
+﻿//! Single-instance guard for the GUI process.
 //!
-//! Two OxiMux GUI processes pointed at the same on-disk data directory race on
+//! Two TREX GUI processes pointed at the same on-disk data directory race on
 //! the per-window layout store (`terminal_tabs:*`, `pane_relay_ids`,
 //! `open_windows`) and both attach the same relay PTYs, so the second launch
 //! silently clobbers the first's persisted session — a terminal saved by one
@@ -10,7 +10,7 @@
 //! instance to the foreground and bows out instead of booting a second racing
 //! window set.
 //!
-//! The lock mechanics live in [`oximux_single_instance`], shared with the
+//! The lock mechanics live in [`trex_single_instance`], shared with the
 //! headless host's own role locks; what stays here is the GUI-only half —
 //! which file names the GUI role, and how a contender raises the holder's
 //! window on each platform. The companion only short-circuits the GUI boot
@@ -19,11 +19,11 @@
 
 use std::path::{Path, PathBuf};
 
-pub use oximux_single_instance::{AcquireOutcome, SingleInstanceGuard, try_acquire};
+pub use trex_single_instance::{AcquireOutcome, SingleInstanceGuard, try_acquire};
 
 /// Lock file name under the app data directory. Sits alongside the relay
 /// `relay-v9.{sock,pid,token}` files — same placement convention.
-pub const LOCK_FILENAME: &str = "oximux-gui.lock";
+pub const LOCK_FILENAME: &str = "trex-gui.lock";
 
 /// Resolve the GUI lock path inside a given data directory.
 pub fn lock_path_in(data_dir: &Path) -> PathBuf {
@@ -61,7 +61,7 @@ pub fn activate_existing_instance(pid: u32) {
 /// message id for every process on the desktop, which is what lets two
 /// unrelated instances agree on one without sharing anything else.
 #[cfg(windows)]
-pub const ACTIVATE_MESSAGE: &str = "OxiMuxActivate";
+pub const ACTIVATE_MESSAGE: &str = "TREXActivate";
 
 /// Ask the running instance to raise its windows.
 ///

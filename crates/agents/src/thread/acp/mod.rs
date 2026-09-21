@@ -1,4 +1,4 @@
-//! `AcpConnection` — drives an external agent that speaks the **Agent Client
+﻿//! `AcpConnection` — drives an external agent that speaks the **Agent Client
 //! Protocol** (Gemini via `gemini --experimental-acp`) and surfaces decoded
 //! [`ThreadEvent`]s on a channel, so an ACP agent lights up the same chat UI as
 //! Claude/Codex with no view changes.
@@ -128,7 +128,7 @@ pub(crate) struct AcpState {
     pub auth_methods: Vec<super::event::AuthMethodInfo>,
     /// Set while a `session/load` is replaying the agent's history: per spec the
     /// agent re-sends its full transcript as ordinary `session/update`
-    /// notifications BEFORE the load response resolves. OxiMux already repaints
+    /// notifications BEFORE the load response resolves. TREX already repaints
     /// its own persisted blob, so the notification handler drops those
     /// transcript-bearing replays while this is set (control updates still pass).
     pub replaying: bool,

@@ -1,4 +1,4 @@
-//! Stopping the process behind a port.
+﻿//! Stopping the process behind a port.
 //!
 //! **Why the panel offers this at all.** "Port 3000 is already in use" is the
 //! most common way a dev server fails to start, and the fix is always the
@@ -57,7 +57,7 @@ impl Refusal {
                 format!("Nothing is listening on {port} any more")
             }
             Self::ProtectedProcess => {
-                "OxiMux will not stop its own process".to_string()
+                "TREX will not stop its own process".to_string()
             }
             Self::Denied => format!("Not allowed to stop the process on {port}"),
         }
@@ -66,7 +66,7 @@ impl Refusal {
 
 /// Pids this app must never signal, whatever a row says.
 ///
-/// The app itself and its parent: OxiMux binds no TCP port of its own, so
+/// The app itself and its parent: TREX binds no TCP port of its own, so
 /// neither should ever reach this code — which is exactly why the guard is
 /// cheap enough to keep. A future feature that does listen (a preview server,
 /// the remote-control bridge) would otherwise ship a button that quits the app.
@@ -127,7 +127,7 @@ pub(crate) fn stop_listener(
 /// Whether `pid` still holds `port`. A scoped query — the pid is known, so
 /// there is no reason to read the whole machine's table to answer this.
 fn still_listening(pid: u32, port: u16) -> bool {
-    oximux_proc_ports::listening_ports_of(&[pid])
+    trex_proc_ports::listening_ports_of(&[pid])
         .iter()
         .any(|row| row.port == port)
 }

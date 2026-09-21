@@ -1,4 +1,4 @@
-//! Terminal attach over the FFI: the RPC methods, and the pump that forwards
+﻿//! Terminal attach over the FFI: the RPC methods, and the pump that forwards
 //! pushed frames to the app's [`TerminalSink`].
 //!
 //! The core stays out of terminal *rendering* entirely — it forwards raw bytes
@@ -9,7 +9,7 @@
 use std::sync::Arc;
 
 use futures::StreamExt;
-use oximux_remote_session::{TerminalPush, TerminalStream};
+use trex_remote_session::{TerminalPush, TerminalStream};
 
 use crate::callbacks::TerminalSink;
 use crate::client::{MobileClient, Shared};

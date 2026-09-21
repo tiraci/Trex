@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+﻿use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
@@ -8,7 +8,7 @@ use interprocess::local_socket::ListenerOptions;
 use interprocess::local_socket::tokio::Stream;
 use interprocess::local_socket::tokio::prelude::*;
 use interprocess::local_socket::{GenericFilePath, GenericNamespaced, ToFsName, ToNsName};
-use oximux_relay_proto::{
+use trex_relay_proto::{
     Endpoint, ErrCode, Frame, HelloAck, HelloChallenge, NONCE_LEN, Nonce, Notification,
     PROTOCOL_VERSION, Request, Response, client_proof, endpoint_for, proofs_match, server_proof,
 };
@@ -322,7 +322,7 @@ fn write_pid_file(path: &std::path::Path) -> Result<()> {
     // anyway so that "everything the relay writes beside its socket is
     // owner-only" holds without exceptions to remember, and so a tampered value
     // cannot drive the supervisor's liveness check.
-    oximux_owner_only::restrict_file(path)
+    trex_owner_only::restrict_file(path)
         .with_context(|| format!("restrict pid file {}", path.display()))?;
     Ok(())
 }

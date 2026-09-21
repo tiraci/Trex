@@ -1,4 +1,4 @@
-//! First-run onboarding — the gate deciding whether the welcome wizard opens.
+﻿//! First-run onboarding — the gate deciding whether the welcome wizard opens.
 //!
 //! The wizard itself (entity + views) lives in sibling modules; this file owns
 //! the persisted completion flag and the boot-time decision. The decision is
@@ -22,10 +22,10 @@ use std::time::{Duration, Instant};
 use gpui::{AppContext as _, Context, Entity, EventEmitter, FocusHandle, Subscription, Window};
 use gpui_component::searchable_list::SearchableVec;
 use gpui_component::select::{SelectEvent, SelectState};
-use oximux_agents::thread::{probe_catalog, ChatBackend, ConnectSpec};
-use oximux_agents::AdapterRegistry;
-use oximux_settings::{AgentLaunchSettings, Density, OpenMode, Theme, Typography};
-use oximux_storage::SettingsRepo;
+use trex_agents::thread::{probe_catalog, ChatBackend, ConnectSpec};
+use trex_agents::AdapterRegistry;
+use trex_settings::{AgentLaunchSettings, Density, OpenMode, Theme, Typography};
+use trex_storage::SettingsRepo;
 
 use agent_step::{AgentRow, ModelSource, OnboardModelItem};
 
@@ -273,9 +273,9 @@ impl OnboardingWizard {
         cx.spawn_in(window, async move |this, cx| {
             let detect = async {
                 let entries = registry.detect_available().await;
-                let mut presets = Vec::with_capacity(oximux_settings::ACP_PRESETS.len());
-                for preset in oximux_settings::ACP_PRESETS {
-                    presets.push((preset.id, oximux_agents::cli::which_on_path(preset.command).await));
+                let mut presets = Vec::with_capacity(trex_settings::ACP_PRESETS.len());
+                for preset in trex_settings::ACP_PRESETS {
+                    presets.push((preset.id, trex_agents::cli::which_on_path(preset.command).await));
                 }
                 (entries, presets)
             };
@@ -681,7 +681,7 @@ mod tests {
         // A user-configured entry is NOT overwritten with preset wiring.
         let mut launch = AgentLaunchSettings::default();
         launch.entry_mut("opencode").acp_command = "my-custom-opencode".to_string();
-        launch.entry_mut("opencode").transport = oximux_settings::Transport::Acp;
+        launch.entry_mut("opencode").transport = trex_settings::Transport::Acp;
         apply_finish(&mut launch, "opencode", Some("m"), OpenMode::Chat);
         assert_eq!(launch.for_agent("opencode").unwrap().acp_command, "my-custom-opencode");
     }

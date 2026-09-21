@@ -1,4 +1,4 @@
-//! Pure (cx-free) renderers for chat transcript pieces.
+﻿//! Pure (cx-free) renderers for chat transcript pieces.
 //!
 //! Each function builds the *static* content of one bubble kind — user text,
 //! the assistant's markdown body, a thinking block body, or the one-line
@@ -10,8 +10,8 @@ use gpui::prelude::FluentBuilder as _;
 use gpui::{AnyElement, Hsla, IntoElement, ParentElement, SharedString, Styled, div, px};
 use gpui_component::text::TextView;
 use gpui_component::{ActiveTheme, clipboard::Clipboard, h_flex};
-use oximux_agents::thread::{ToolCall, ToolCallStatus};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::{ToolCall, ToolCallStatus};
+use trex_settings::{Density, Theme, Typography};
 use serde_json::Value;
 
 use super::markdown_render::{FindMark, MarkdownStyle};

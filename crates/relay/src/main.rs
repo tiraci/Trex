@@ -1,10 +1,10 @@
-use std::path::{Path, PathBuf};
+﻿use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
 use anyhow::{Context, Result, bail};
 #[cfg(unix)]
-use oximux_relay::host_lookup::{self, Identity, LookupWatch, Verdict};
-use oximux_relay::{DEFAULT_IDLE_TIMEOUT, ServerConfig, run_server};
+use trex_relay::host_lookup::{self, Identity, LookupWatch, Verdict};
+use trex_relay::{DEFAULT_IDLE_TIMEOUT, ServerConfig, run_server};
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{EnvFilter, fmt};
@@ -73,23 +73,23 @@ fn parse_args() -> Result<ParsedArgs> {
 
 fn print_help() {
     println!(
-        "oximux-relay — PTY-owning daemon for OxiMux\n\
+        "trex-relay — PTY-owning daemon for TREX\n\
          \n\
-         USAGE:\n    oximux-relay --socket <path> --token <path> [--pid-file <path>] [--log-dir <path>] [--checkpoint-dir <path>]\n\
+         USAGE:\n    trex-relay --socket <path> --token <path> [--pid-file <path>] [--log-dir <path>] [--checkpoint-dir <path>]\n\
          \n\
          FLAGS:\n  --socket   <path>   unix-domain socket to bind\n  --token    <path>   token file (0600) for client auth\n  --pid-file <path>   write own PID for supervisor liveness probes\n  --log-dir  <path>   write daily-rotated JSON logs to this directory\n  --checkpoint-dir <path>  disk scrollback checkpoints root (default: <socket dir>/checkpoints)"
     );
 }
 
-// Compose the env filter. Precedence: explicit `OXIMUX_RELAY_LOG` wins;
-// otherwise `OXIMUX_RELAY_TRACE=1` opens the per-byte trace path; bare
+// Compose the env filter. Precedence: explicit `trex_RELAY_LOG` wins;
+// otherwise `trex_RELAY_TRACE=1` opens the per-byte trace path; bare
 // default is `info` so daily logs stay readable under load (the plan
 // budgets 86 GiB/day worst case if everything traces at byte level).
 fn compose_env_filter() -> EnvFilter {
-    if let Ok(f) = EnvFilter::try_from_env("OXIMUX_RELAY_LOG") {
+    if let Ok(f) = EnvFilter::try_from_env("TREX_RELAY_LOG") {
         return f;
     }
-    let trace_on = std::env::var("OXIMUX_RELAY_TRACE")
+    let trace_on = std::env::var("TREX_RELAY_TRACE")
         .map(|v| matches!(v.as_str(), "1" | "true" | "on"))
         .unwrap_or(false);
     if trace_on {
@@ -145,7 +145,7 @@ fn init_tracing(log_dir: Option<&Path>) -> Option<WorkerGuard> {
     };
 
     #[cfg(target_os = "macos")]
-    let oslog_layer = Some(tracing_oslog::OsLogger::new("dev.nhtera.oximux", "relay"));
+    let oslog_layer = Some(tracing_oslog::OsLogger::new("dev.tiraci.trex", "relay"));
     // `Identity` rather than a concrete `fmt::Layer`: this sits partway up a
     // `Layered` stack, and naming `Layer<Registry>` pins the subscriber type to
     // the bottom of that stack instead of wherever it actually composes.
@@ -285,13 +285,13 @@ async fn watch_host_lookup(boot_healthy: bool) {
     }
 }
 
-// The session-marker scrub lives in `oximux-shell-env` (one list, three
-// consumers: the desktop app, this daemon, and `oximux serve`). The daemon
+// The session-marker scrub lives in `trex-shell-env` (one list, three
+// consumers: the desktop app, this daemon, and `TREX serve`). The daemon
 // inherits the markers when the app that spawned it was itself launched from
 // inside a Claude Code session, and passes them on to every terminal PTY —
 // where a spawned `claude` then treats itself as a nested child session and
 // disables transcript saving.
-use oximux_shell_env::scrub_inherited_claude_session_markers;
+use trex_shell_env::scrub_inherited_claude_session_markers;
 
 // A sync `main` (not `#[tokio::main]`) so the environment scrub runs before
 // the runtime's worker threads exist — env mutation is only sound while the
@@ -307,7 +307,7 @@ fn main() -> Result<()> {
     tracing::info!(
         socket = %parsed.cfg.socket_path.display(),
         log_dir = ?parsed.log_dir,
-        "starting oximux-relay"
+        "starting trex-relay"
     );
     // Before the runtime exists, so the probe runs on a plain thread and its
     // line is in the log ahead of anything the server says.

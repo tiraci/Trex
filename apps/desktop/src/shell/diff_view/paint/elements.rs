@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 use crate::shell::diff_view::image_diff::{ImageDiffData, ImageSide};
 use gpui::{ObjectFit, StyledImage, img};
 
@@ -778,7 +778,7 @@ pub(super) fn line_change_strip(kind: DiffLineKind, rctx: &RenderCtx<'_>) -> Opt
 /// Does this display line start `region`? Regions are anchored by the
 /// line number of their first changed line (addition → new side, deletion
 /// → old side), which survives hunk merging from full-file context.
-pub(super) fn line_matches_anchor(l: &LinePlan, region: &oximux_core::ChangeRegion) -> bool {
+pub(super) fn line_matches_anchor(l: &LinePlan, region: &trex_core::ChangeRegion) -> bool {
     if let Some(n) = region.anchor_new {
         matches!(l.kind, DiffLineKind::Added) && l.new_line == Some(n)
     } else if let Some(o) = region.anchor_old {

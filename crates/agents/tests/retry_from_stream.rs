@@ -1,4 +1,4 @@
-//! The retry path end to end, from wire lines to a scheduled wake time.
+﻿//! The retry path end to end, from wire lines to a scheduled wake time.
 //!
 //! The unit tests either side of this seam are thorough but each mocks the
 //! other's output. This drives real `stream-json` lines through the real
@@ -7,9 +7,9 @@
 //! keeping it, fails here rather than silently disabling retries in a way every
 //! unit test still passes.
 
-use oximux_agent_core::thread::state::ChatThread;
-use oximux_agent_core::thread::stream_json::decode_line;
-use oximux_agents::retry::{MAX_ATTEMPTS, RetryClass, RetrySettings, classify_failure, schedule};
+use trex_agent_core::thread::state::ChatThread;
+use trex_agent_core::thread::stream_json::decode_line;
+use trex_agents::retry::{MAX_ATTEMPTS, RetryClass, RetrySettings, classify_failure, schedule};
 
 /// Unix ms well clear of the fixture's reset, so "past the reset" is meaningful.
 const NOW: i64 = 1_788_400_000_000;

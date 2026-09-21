@@ -1,4 +1,4 @@
-//! Integration tests for the V006 `worktree_settings` table via the
+﻿//! Integration tests for the V006 `worktree_settings` table via the
 //! public `WorktreeSettingsRepo` surface. Covers:
 //! - `get` returns `None` when no row exists (callers MUST substitute
 //!   `WorktreeSettings::default()`).
@@ -8,8 +8,8 @@
 //! - `delete` on a missing key is a no-op (matches the repo's
 //!   missing-row contract documented in `repositories/mod.rs`).
 
-use oximux_core::WorktreeSettings;
-use oximux_storage::{Db, WorktreeSettingsRepo, open_memory};
+use trex_core::WorktreeSettings;
+use trex_storage::{Db, WorktreeSettingsRepo, open_memory};
 
 /// Insert a single project + workspace so that the FK on
 /// `worktree_settings.workspace_id` resolves. Each test calls this on

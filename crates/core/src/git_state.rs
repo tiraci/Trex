@@ -1,6 +1,6 @@
-//! Git working-tree state, parsed from `git status --porcelain=v2 --branch -z`.
+﻿//! Git working-tree state, parsed from `git status --porcelain=v2 --branch -z`.
 //!
-//! Lives in `oximux-core` (not `oximux-git`) so the app crate can depend on
+//! Lives in `trex-core` (not `trex-git`) so the app crate can depend on
 //! these types without pulling in tokio + the git process layer. The git crate
 //! owns the parser; this module owns the shapes.
 
@@ -163,7 +163,7 @@ impl FileStatus {
 }
 
 /// One row in the commit graph. Parsed from a NUL-terminated `git log
-/// -z --pretty=format:<US-joined fields>` record (see `oximux_git::log`
+/// -z --pretty=format:<US-joined fields>` record (see `trex_git::log`
 /// for the exact format string).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CommitInfo {

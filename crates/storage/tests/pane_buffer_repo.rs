@@ -1,10 +1,10 @@
-//! Round-trip tests for `PaneBufferRepo` (Phase 4 step 16; F3.4 schema
+﻿//! Round-trip tests for `PaneBufferRepo` (Phase 4 step 16; F3.4 schema
 //! extends with sub_pane_ordinal; V005 adds window_id keying so two
 //! windows on the same project store independent scrollback rows).
 
-use oximux_storage::{PaneBufferRepo, ProjectRepo, open_memory};
+use trex_storage::{PaneBufferRepo, ProjectRepo, open_memory};
 
-fn seed_project(db: &oximux_storage::Db) -> String {
+fn seed_project(db: &trex_storage::Db) -> String {
     let repo = ProjectRepo::new(db.clone());
     let root = format!("/tmp/{}", uuid::Uuid::new_v4());
     repo.insert("p", &root, "main").unwrap().id

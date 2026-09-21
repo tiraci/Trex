@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 impl ProjectPanes {
     #[allow(clippy::too_many_arguments)]
@@ -258,7 +258,7 @@ impl ProjectPanes {
     /// group it lives in. The root set the ports scan walks down from.
     ///
     /// The cwd rather than a group id because that is the identity a person
-    /// recognises — they started the server "in OxiMux", not "in group 2" —
+    /// recognises — they started the server "in TREX", not "in group 2" —
     /// and because two groups on one project should share a heading.
     ///
     /// Terminals whose pid cannot be resolved are skipped, not reported as
@@ -381,7 +381,7 @@ impl ProjectPanes {
     /// rail workspace) a clicked banner belongs to.
     pub fn group_cwd_for_terminal_session(
         &self,
-        session: oximux_pty::TerminalSessionId,
+        session: trex_pty::TerminalSessionId,
         cx: &gpui::App,
     ) -> Option<std::path::PathBuf> {
         self.groups.values().find_map(|g| {
@@ -396,7 +396,7 @@ impl ProjectPanes {
     /// focus that group. Returns false when no group does (tab closed).
     pub fn activate_terminal_session(
         &mut self,
-        session: oximux_pty::TerminalSessionId,
+        session: trex_pty::TerminalSessionId,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> bool {
@@ -950,7 +950,7 @@ impl ProjectPanes {
     /// Read-only — used to locate the owning project before switching to it.
     pub fn has_agent_session(
         &self,
-        session_id: oximux_core::AgentSessionId,
+        session_id: trex_core::AgentSessionId,
         cx: &gpui::App,
     ) -> bool {
         self.groups
@@ -964,7 +964,7 @@ impl ProjectPanes {
     /// focuses that exact agent. Returns `false` if no group holds it.
     pub fn focus_agent_session(
         &mut self,
-        session_id: oximux_core::AgentSessionId,
+        session_id: trex_core::AgentSessionId,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> bool {

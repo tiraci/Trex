@@ -1,4 +1,4 @@
-//! PDF preview: a continuously scrolling document, a thumbnail rail, and a
+﻿//! PDF preview: a continuously scrolling document, a thumbnail rail, and a
 //! page/zoom toolbar — the shape every browser and OS viewer has settled on.
 //!
 //! **Why a render worker.** hayro's `RenderCache<'a>` borrows the document and
@@ -408,7 +408,7 @@ impl PdfRenderer {
             let queue = queue.clone();
             let tx = tx.clone();
             let spawned = std::thread::Builder::new()
-                .name(format!("oximux-pdf-render-{n}"))
+                .name(format!("trex-pdf-render-{n}"))
                 .spawn(move || doc.serve(&queue, &tx));
             if let Err(err) = spawned {
                 tracing::warn!(?err, "pdf: could not start a render worker");

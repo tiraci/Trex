@@ -1,4 +1,4 @@
-//! Tracks every open workspace window so the app-level quit / window-closed
+﻿//! Tracks every open workspace window so the app-level quit / window-closed
 //! observers (registered once in `main.rs`) can reach each window's
 //! [`WorkspaceRoot`] without every `open_window` closure registering its own
 //! per-window observer.
@@ -246,7 +246,7 @@ pub fn capture_session(cx: &mut App) {
         return;
     }
     let mut manifest = crate::persisted_terminals::WindowsManifest::default();
-    let mut settings_repo: Option<oximux_storage::SettingsRepo> = None;
+    let mut settings_repo: Option<trex_storage::SettingsRepo> = None;
     for (persist_id, workspace) in &windows {
         let root = workspace.read(cx);
         root.capture_all_layouts(cx);

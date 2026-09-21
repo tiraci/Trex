@@ -1,4 +1,4 @@
-# Publish the Homebrew formula to nhtera/homebrew-tap.
+﻿# Publish the Homebrew formula to tiraci/homebrew-tap.
 #
 # **Triggered on `release: published`, deliberately — not from the release
 # build.** `release.yml` creates a DRAFT release, and GitHub does not serve a
@@ -16,7 +16,7 @@
 # Required repository secret:
 #
 #   TAP_PUSH_TOKEN   a fine-grained PAT with Contents: read and write on
-#                    nhtera/homebrew-tap ONLY. Scope it to that one repository
+#                    tiraci/homebrew-tap ONLY. Scope it to that one repository
 #                    — it exists to commit a single .rb file, and anything
 #                    wider is reachable by any workflow run in this repo.
 #
@@ -42,7 +42,7 @@ permissions:
 
 jobs:
   publish-formula:
-    name: Push oximux.rb to the tap
+    name: Push trex.rb to the tap
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -79,23 +79,23 @@ jobs:
           # skip` would swallow the second as the first.
           assets="$(gh release view "$TAG" --repo "${{ github.repository }}" \
                       --json assets --jq '.assets[].name')"
-          if ! grep -qx 'oximux.rb' <<<"$assets"; then
+          if ! grep -qx 'trex.rb' <<<"$assets"; then
             echo "found=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::$TAG carries no oximux.rb — a desktop-only release. Nothing to publish."
+            echo "::notice::$TAG carries no trex.rb — a desktop-only release. Nothing to publish."
             exit 0
           fi
           gh release download "$TAG" --repo "${{ github.repository }}" \
-            --pattern oximux.rb --dir .
+            --pattern trex.rb --dir .
           echo "found=true" >> "$GITHUB_OUTPUT"
           echo "--- formula ---"
-          cat oximux.rb
+          cat trex.rb
 
       # Ruby is preinstalled on the runner. A formula that does not parse would
       # break `brew` for everyone who has the tap, and it is far cheaper to
       # catch that here than in someone's terminal.
       - name: Check the formula parses
         if: steps.fetch.outputs.found == 'true'
-        run: ruby -c oximux.rb
+        run: ruby -c trex.rb
 
       - name: Commit it to the tap
         if: steps.fetch.outputs.found == 'true'
@@ -106,26 +106,26 @@ jobs:
           set -euo pipefail
           if [[ -z "${TAP_PUSH_TOKEN}" ]]; then
             echo "::warning::TAP_PUSH_TOKEN is not set — skipping the tap push."
-            echo "Publish by hand:  gh release download $TAG --pattern oximux.rb"
-            echo "then commit oximux.rb to nhtera/homebrew-tap."
+            echo "Publish by hand:  gh release download $TAG --pattern trex.rb"
+            echo "then commit trex.rb to tiraci/homebrew-tap."
             exit 0
           fi
 
           TAP_DIR="$RUNNER_TEMP/homebrew-tap"
           git clone --depth 1 \
-            "https://x-access-token:${TAP_PUSH_TOKEN}@github.com/nhtera/homebrew-tap.git" \
+            "https://x-access-token:${TAP_PUSH_TOKEN}@github.com/tiraci/homebrew-tap.git" \
             "$TAP_DIR"
-          cp oximux.rb "$TAP_DIR/oximux.rb"
+          cp trex.rb "$TAP_DIR/trex.rb"
 
           cd "$TAP_DIR"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add oximux.rb
+          git add trex.rb
           # Re-publishing an unchanged release is a no-op, not a failure.
           if git diff --cached --quiet; then
             echo "the tap already carries this formula — nothing to do"
             exit 0
           fi
-          git commit -m "oximux ${TAG}"
+          git commit -m "TREX ${TAG}"
           git push origin HEAD:main
-          echo "pushed oximux.rb (${TAG}) to nhtera/homebrew-tap"
+          echo "pushed trex.rb (${TAG}) to tiraci/homebrew-tap"

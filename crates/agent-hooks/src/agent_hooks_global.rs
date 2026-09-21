@@ -1,4 +1,4 @@
-//! Global status-hook install/remove in every agent's own configuration.
+﻿//! Global status-hook install/remove in every agent's own configuration.
 //!
 //! What each agent wants written, and where, is data in
 //! [`crate::agent_hook_dialects::DIALECTS`]. This module is the part that is
@@ -7,33 +7,33 @@
 //! they did not ask for ([`sync_dialect`]).
 //!
 //! The per-spawn `--settings` injection ([`crate::agent_status_hooks`]) only
-//! reaches agents OxiMux launches itself. A `claude` the user types BY HAND in a
+//! reaches agents TREX launches itself. A `claude` the user types BY HAND in a
 //! plain terminal pane carries no `--settings`, so it would never report status.
 //! To track it too — the way the reference cockpit does — we install the same
 //! status hooks into the user's GLOBAL settings file, which every `claude`
-//! invocation reads. Every PTY already carries `OXIMUX_PTY_ID` (the relay sets
+//! invocation reads. Every PTY already carries `trex_PTY_ID` (the relay sets
 //! it on spawn), so a hand-typed agent self-attributes to its pane.
 //!
 //! Safety + correctness:
 //! - **Same command strings** as the `--settings` path, so Claude's
 //!   command-string hook dedup makes a picker agent (which sees the file hook
 //!   AND the `--settings` hook) fire each one exactly once.
-//! - **Only into a home the agent already made.** OxiMux writes into eight
+//! - **Only into a home the agent already made.** TREX writes into eight
 //!   different agents' configuration; creating those directories would leave a
-//!   user a dotfile for every agent OxiMux has heard of, most of which they do
+//!   user a dotfile for every agent TREX has heard of, most of which they do
 //!   not have.
 //! - **Ours are found again, one way or another.** Where the file tolerates
-//!   unknown keys our entries carry `"_oximux_managed": true`; where it does
+//!   unknown keys our entries carry `"_trex_managed": true`; where it does
 //!   not, they are recognised by the command they run. Re-installing drops the
 //!   prior ones first, which also refreshes a stale binary path after a
 //!   rebuild.
 //! - **Non-destructive merge.** We append to the per-event arrays; the user's
 //!   existing hooks are preserved. A missing file starts from `{}`; a malformed
 //!   file aborts (we never clobber an unparseable user file). A file only
-//!   OxiMux writes is the exception — there is nothing to preserve, so it is
+//!   TREX writes is the exception — there is nothing to preserve, so it is
 //!   written and deleted whole.
 //! - **Atomic + backed up.** First modification copies the file to
-//!   `settings.json.oximux-bak`; writes go through a temp file + rename.
+//!   `settings.json.trex-bak`; writes go through a temp file + rename.
 //! - **Best-effort.** Every failure is logged, never propagated — a hand-typed
 //!   agent simply won't self-report if the file can't be written.
 
@@ -44,7 +44,7 @@ use serde_json::{Value, json};
 
 use crate::agent_hook_dialects::{DIALECTS, EntryShape, HookDialect, Install, hook_specs};
 
-/// Install (`on = true`) or remove (`on = false`) OxiMux's managed status hooks
+/// Install (`on = true`) or remove (`on = false`) TREX's managed status hooks
 /// in every agent's hooks file. Best-effort per agent: one that cannot be
 /// written is logged and skipped, and the rest still get theirs.
 ///
@@ -65,7 +65,7 @@ pub fn sync_global_status_hooks(on: bool) {
     }
 }
 
-/// Install (`on`) or remove OxiMux's managed hooks in one agent's hooks file.
+/// Install (`on`) or remove TREX's managed hooks in one agent's hooks file.
 /// Best-effort throughout: a hook that cannot be written costs a row its
 /// detail, and must never cost the user an error they did not ask for.
 fn sync_dialect(on: bool, dialect: &HookDialect) {
@@ -95,29 +95,29 @@ fn sync_dialect(on: bool, dialect: &HookDialect) {
 /// What [`apply`] did to one agent's file.
 ///
 /// Reported rather than logged because the CLI has to say it out loud: someone
-/// running `oximux agent hooks on` is owed the difference between "installed",
+/// running `TREX agent hooks on` is owed the difference between "installed",
 /// "already installed" and "that agent isn't on this machine", where the app's
 /// boot-time sync only ever needed a log line.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Applied {
     /// The file was written.
     Changed,
-    /// A file OxiMux owns outright was deleted.
+    /// A file TREX owns outright was deleted.
     Removed,
     /// Already in the requested state. Re-running is a no-op by design: the
     /// agent watches this file, and a write with no change is a reload for
     /// nothing.
     Unchanged,
     /// The agent has no config directory, so there is nothing to install into.
-    /// OxiMux adds to an agent's home and never conjures one.
+    /// TREX adds to an agent's home and never conjures one.
     AgentAbsent,
-    /// `off` on a file OxiMux would otherwise delete outright, which turned out
-    /// to hold entries OxiMux did not write. Left exactly as it was.
+    /// `off` on a file TREX would otherwise delete outright, which turned out
+    /// to hold entries TREX did not write. Left exactly as it was.
     KeptForeign,
     Failed(String),
 }
 
-/// Install (`on`) or remove OxiMux's managed hooks in one agent's file, using
+/// Install (`on`) or remove TREX's managed hooks in one agent's file, using
 /// `exe` as the binary the hook calls back into.
 ///
 /// Takes the binary rather than resolving it so the CLI can install hooks that
@@ -130,13 +130,13 @@ pub fn apply(on: bool, dialect: &HookDialect, exe: &Path) -> Applied {
     };
     // Don't conjure an agent's home. Installing into one that does not exist
     // buys nothing — the agent is not there to read it — and leaves the user a
-    // dotfile for a tool they never installed, once per agent OxiMux knows of.
+    // dotfile for a tool they never installed, once per agent TREX knows of.
     // Uninstall still runs, so a file left by an agent since removed is
     // cleaned up rather than stranded.
     if on && !dialect.agent_is_installed() {
         return Applied::AgentAbsent;
     }
-    // A file nobody but OxiMux writes is removed rather than pruned: there can
+    // A file nobody but TREX writes is removed rather than pruned: there can
     // be no user content in it to preserve, and leaving an empty husk behind in
     // a directory the agent scans is litter it still has to parse.
     let ours_alone = match &dialect.install {
@@ -144,7 +144,7 @@ pub fn apply(on: bool, dialect: &HookDialect, exe: &Path) -> Applied {
         Install::Extension { .. } => true,
     };
     if !on && ours_alone {
-        // "Nobody but OxiMux writes it" is a claim about a file named after us,
+        // "Nobody but TREX writes it" is a claim about a file named after us,
         // not a guarantee. Check before deleting: the cost of being wrong is
         // someone's hand-written config, and the cost of checking is one read.
         //
@@ -172,7 +172,7 @@ pub fn apply(on: bool, dialect: &HookDialect, exe: &Path) -> Applied {
     match outcome {
         Ok(true) if on => Applied::Changed,
         // Removing the last of our entries can leave a file holding nothing at
-        // all — which is the state it was in before OxiMux created it, for
+        // all — which is the state it was in before TREX created it, for
         // every agent that had no hooks file to begin with. Leaving `{}` behind
         // is litter the agent still has to open and parse on every run, and it
         // is not a round trip: `off` should undo `on`, including the file.
@@ -208,7 +208,7 @@ fn nothing_left(path: &Path) -> bool {
     })
 }
 
-/// True when `path` parses and holds at least one hook entry OxiMux did not
+/// True when `path` parses and holds at least one hook entry TREX did not
 /// write. A file that cannot be read or parsed answers `false`: it is not
 /// evidence of user content, and the delete below has its own error path.
 fn holds_foreign_entries(path: &Path, marker: Option<&'static str>) -> bool {
@@ -243,7 +243,7 @@ fn write_if_changed(path: &Path, contents: &str) -> io::Result<bool> {
     }
     // Same temp-then-rename as the hooks files: the agent may be scanning this
     // directory while we write, and must never load half a file.
-    let tmp = path.with_extension("oximux-tmp");
+    let tmp = path.with_extension("trex-tmp");
     std::fs::write(&tmp, contents.as_bytes())?;
     std::fs::rename(&tmp, path)?;
     Ok(true)
@@ -278,7 +278,7 @@ fn rewrite_settings_at(path: &Path, mutate: impl FnOnce(&mut Value) -> bool) -> 
     }
     // One-time safety copy before our first edit.
     if path.exists() {
-        let backup = path.with_extension("json.oximux-bak");
+        let backup = path.with_extension("json.trex-bak");
         if !backup.exists() {
             let _ = std::fs::copy(path, &backup);
         }
@@ -287,17 +287,17 @@ fn rewrite_settings_at(path: &Path, mutate: impl FnOnce(&mut Value) -> bool) -> 
     // Match however the file ended before we touched it. `to_string_pretty`
     // emits no trailing newline, so without this a hand-edited file loses the
     // one every editor puts there — a one-byte diff in the user's VCS that
-    // OxiMux caused and nothing explains.
+    // TREX caused and nothing explains.
     if trailing_newline {
         pretty.push('\n');
     }
-    let tmp = path.with_extension("json.oximux-tmp");
+    let tmp = path.with_extension("json.trex-tmp");
     std::fs::write(&tmp, pretty.as_bytes())?;
     std::fs::rename(&tmp, path)?;
     Ok(true)
 }
 
-/// Replace OxiMux's managed entries with `specs`. Returns true when the file
+/// Replace TREX's managed entries with `specs`. Returns true when the file
 /// changed (a re-run with the same binary is a no-op).
 ///
 /// Takes the specs rather than the binary because every agent's file is the
@@ -409,7 +409,7 @@ fn build_entry(
     Value::Object(entry)
 }
 
-/// Remove OxiMux's managed entries and prune any event arrays they emptied.
+/// Remove TREX's managed entries and prune any event arrays they emptied.
 /// Returns true when the `hooks` object changed.
 fn remove_managed(root: &mut Value, dialect: &HookDialect) -> bool {
     let Install::HooksFile { marker, .. } = &dialect.install else {
@@ -433,7 +433,7 @@ fn remove_managed(root: &mut Value, dialect: &HookDialect) -> bool {
     Value::Object(hooks.clone()) != before
 }
 
-/// True when `entry` is one OxiMux wrote, by whichever means this file allows:
+/// True when `entry` is one TREX wrote, by whichever means this file allows:
 /// the bookkeeping marker where one can be stamped, otherwise the command it
 /// runs. The command test deliberately matches only our own CLI invocation, so
 /// a re-install replaces our entries and leaves every other hook in the file
@@ -443,7 +443,7 @@ pub(crate) fn is_managed(entry: &Value, marker: Option<&str>) -> bool {
         return true;
     }
     // The command test runs even where a marker is defined, because an entry
-    // OxiMux wrote is still OxiMux's whether or not that version stamped one.
+    // TREX wrote is still TREX's whether or not that version stamped one.
     // Measured: a real `~/.claude/settings.json` held sixteen unmarked entries
     // of ours pointing at four superseded binary paths, invisible to a
     // marker-only test and so never pruned — Claude was running five copies of
@@ -487,7 +487,7 @@ mod tests {
     use crate::agent_hook_dialects::dialect_for_slug;
 
     fn binary() -> &'static Path {
-        Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux")
+        Path::new("/Applications/trex.app/Contents/MacOS/TREX")
     }
 
     fn dialect(slug: &str) -> &'static HookDialect {
@@ -565,9 +565,9 @@ mod tests {
         // old path stops existing. Ours must be rewritten, not joined.
         for d in hooks_file_dialects() {
             let mut root = json!({});
-            install_managed(&mut root, hook_specs(d, Path::new("/old/path/oximux")), d);
+            install_managed(&mut root, hook_specs(d, Path::new("/old/path/TREX")), d);
             assert!(
-                install_managed(&mut root, hook_specs(d, Path::new("/new/path/oximux")), d),
+                install_managed(&mut root, hook_specs(d, Path::new("/new/path/TREX")), d),
                 "{} did not notice a different binary path",
                 d.slug
             );
@@ -580,7 +580,7 @@ mod tests {
             let ours: Vec<_> = arr.iter().filter(|e| is_managed(e, marker_of(d))).collect();
             assert_eq!(ours.len(), 1, "{} kept {} entries, want 1", d.slug, ours.len());
             let rendered = serde_json::to_string(&ours[0]).unwrap();
-            assert!(rendered.contains("/new/path/oximux"), "{}: {rendered}", d.slug);
+            assert!(rendered.contains("/new/path/TREX"), "{}: {rendered}", d.slug);
             assert!(!rendered.contains("/old/path"), "{}: {rendered}", d.slug);
         }
     }
@@ -588,7 +588,7 @@ mod tests {
     #[test]
     fn install_then_remove_restores_the_users_file_exactly() {
         // The Settings toggle is two-way. Turning it off must leave the file
-        // indistinguishable from one OxiMux never touched — including for the
+        // indistinguishable from one TREX never touched — including for the
         // dialects with no marker, which find their entries by command.
         for d in hooks_file_dialects() {
             let mut root = json!({
@@ -675,7 +675,7 @@ mod tests {
 
     #[test]
     fn an_unmarked_entry_of_ours_is_still_pruned() {
-        // The measured leak: entries OxiMux wrote before it stamped a marker
+        // The measured leak: entries TREX wrote before it stamped a marker
         // stayed invisible to a marker-only test, so every new binary path
         // added four more and Claude ran all of them. One real settings.json
         // had sixteen, across four superseded paths.
@@ -683,9 +683,9 @@ mod tests {
             "hooks": {
                 "Stop": [
                     { "hooks": [{ "type": "command",
-                        "command": "'/old/dist/OxiMux.app/Contents/MacOS/oximux' agent-status --state idle" }] },
+                        "command": "'/old/dist/trex.app/Contents/MacOS/TREX' agent-status --state idle" }] },
                     { "hooks": [{ "type": "command",
-                        "command": "'/older/oximux' agent-status --state idle" }] },
+                        "command": "'/older/TREX' agent-status --state idle" }] },
                     { "hooks": [{ "type": "command", "command": "the-users-own-notifier" }] }
                 ]
             }
@@ -695,7 +695,7 @@ mod tests {
         let ours: Vec<_> = stop.iter().filter(|e| is_managed(e, marker_of(dialect("claude")))).collect();
         assert_eq!(ours.len(), 1, "both unmarked entries of ours must be replaced, not joined");
         assert!(
-            serde_json::to_string(&ours[0]).unwrap().contains("/Applications/OxiMux.app"),
+            serde_json::to_string(&ours[0]).unwrap().contains("/Applications/trex.app"),
             "the survivor must be the freshly written one"
         );
         // The user's own hook is untouched.
@@ -709,7 +709,7 @@ mod tests {
     fn a_hook_that_only_resembles_ours_is_left_alone() {
         // The command test must be specific enough that an unrelated hook
         // merely mentioning one of its fragments is never adopted and deleted.
-        assert!(is_our_command("'/x/oximux' agent-status --state idle --format codex"));
+        assert!(is_our_command("'/x/TREX' agent-status --state idle --format codex"));
         assert!(!is_our_command("echo agent-status"));
         assert!(!is_our_command("my-tool --state idle"));
         assert!(!is_our_command("unrelated"));
@@ -717,13 +717,13 @@ mod tests {
 
     #[test]
     fn an_entry_written_in_the_other_shape_is_still_recognised_as_ours() {
-        // An OxiMux that wrote the nested shape into a file we now write flat
+        // An TREX that wrote the nested shape into a file we now write flat
         // (or the reverse) must have its entry REPLACED on the next sync. Not
         // recognising it would leave both firing, and the row would report the
         // same turn twice.
-        let nested = json!({ "hooks": [{ "type": "command", "command": "'/x/oximux' agent-status --state idle" }] });
-        let flat = json!({ "command": "'/x/oximux' agent-status --state idle" });
-        let bash = json!({ "type": "command", "bash": "'/x/oximux' agent-status --state idle" });
+        let nested = json!({ "hooks": [{ "type": "command", "command": "'/x/TREX' agent-status --state idle" }] });
+        let flat = json!({ "command": "'/x/TREX' agent-status --state idle" });
+        let bash = json!({ "type": "command", "bash": "'/x/TREX' agent-status --state idle" });
         for d in hooks_file_dialects().filter(|d| marker_of(d).is_none()) {
             assert!(is_managed(&nested, marker_of(d)), "{} missed a nested entry", d.slug);
             assert!(is_managed(&flat, marker_of(d)), "{} missed a flat entry", d.slug);
@@ -765,9 +765,9 @@ mod tests {
         assert_eq!(stop[0]["hooks"][0]["command"], "keep-me");
         assert!(stop.iter().any(|e| is_managed(e, marker_of(d))));
         // A backup of the original was taken.
-        assert!(path.with_extension("json.oximux-bak").exists());
+        assert!(path.with_extension("json.trex-bak").exists());
         // No temp file left behind.
-        assert!(!path.with_extension("json.oximux-tmp").exists());
+        assert!(!path.with_extension("json.trex-tmp").exists());
 
         // Re-running is a no-op (no spurious rewrite).
         assert!(
@@ -880,7 +880,7 @@ mod tests {
         assert!(checked >= 5, "only {checked} shared-file dialects were exercised");
     }
 
-    /// A file OxiMux would otherwise delete outright, holding something we did
+    /// A file TREX would otherwise delete outright, holding something we did
     /// not write. Deleting it would take a user's config with it.
     #[test]
     fn off_refuses_to_delete_an_owned_file_that_holds_a_foreign_hook() {
@@ -889,7 +889,7 @@ mod tests {
             .find(|d| matches!(&d.install, Install::HooksFile { owns_file: true, .. }))
             .expect("copilot and grok own their files");
         let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("oximux.json");
+        let path = dir.path().join("TREX.json");
         let contents = json!({
             "hooks": { "Stop": [{ "bash": "make lint", "type": "command" }] }
         })
@@ -906,7 +906,7 @@ mod tests {
     #[test]
     fn the_foreign_guard_does_not_fire_on_our_own_entries() {
         let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("oximux.json");
+        let path = dir.path().join("TREX.json");
         let mut root = json!({});
         let d = dialect("grok");
         assert!(install_managed(&mut root, hook_specs(d, binary()), d));

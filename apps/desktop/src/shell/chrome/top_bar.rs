@@ -1,4 +1,4 @@
-//! Per-column top headers — 40px strip aligned with each body column.
+﻿//! Per-column top headers — 40px strip aligned with each body column.
 //!
 //! Per-column header pattern: instead of one full-width chrome row across
 //! the entire window, each of the three body columns (left rail / center /
@@ -22,7 +22,7 @@ use gpui_component::{
     button::{Button, ButtonVariants as _},
     menu::{DropdownMenu as _, PopupMenu, PopupMenuItem},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{
     CheckForUpdates, NewWindow, OpenAbout, OpenQuickOpen, OpenSettings, ToggleLeftSidebar,
@@ -208,7 +208,7 @@ fn left_chrome_cluster(
         .text_size(px(typography.t_brand))
         .font_weight(typography.w_semibold)
         .text_color(theme.fg_base)
-        .child("OxiMux");
+        .child("TREX");
 
     let mut cluster = div()
         .flex()
@@ -277,7 +277,7 @@ fn app_menu_button() -> impl IntoElement {
                                 // as leaving the app, which is what these two
                                 // do and what About/Check for Updates do not.
                                 .item(PopupMenuItem::link(
-                                    "OxiMux Documentation",
+                                    "TREX Documentation",
                                     crate::menu::DOCS_URL,
                                 ))
                                 .item(PopupMenuItem::link(
@@ -285,7 +285,7 @@ fn app_menu_button() -> impl IntoElement {
                                     crate::menu::ISSUES_URL,
                                 ))
                                 .separator()
-                                .item(PopupMenuItem::new("About OxiMux").on_click(
+                                .item(PopupMenuItem::new("About TREX").on_click(
                                     |_, window: &mut Window, cx: &mut gpui::App| {
                                         window.dispatch_action(Box::new(OpenAbout), cx);
                                     },
@@ -297,7 +297,7 @@ fn app_menu_button() -> impl IntoElement {
                                 ))
                         })
                         .separator()
-                        .item(PopupMenuItem::new("Quit OxiMux").on_click(
+                        .item(PopupMenuItem::new("Quit TREX").on_click(
                             |_, window: &mut Window, cx: &mut gpui::App| {
                                 window.dispatch_action(Box::new(crate::menu::Quit), cx);
                             },

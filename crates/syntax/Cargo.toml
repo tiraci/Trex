@@ -1,5 +1,5 @@
-[package]
-name = "oximux-syntax"
+﻿[package]
+name = "trex-syntax"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

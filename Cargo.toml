@@ -1,4 +1,4 @@
-[workspace]
+﻿[workspace]
 resolver = "2"
 members = [
     "apps/cli",
@@ -39,88 +39,100 @@ members = [
     "crates/proc-tree",
     "crates/worktree-ops",
     "crates/agent-hooks",
+    "crates/orchestration",
+    "crates/ssh",
+    "crates/skills",
+    "crates/automations",
+    "crates/accounts",
+    "crates/diff-annotate",
     "xtask",
 ]
 
 [workspace.package]
 edition = "2024"
 version = "0.1.25"
-authors = ["nhtera"]
+authors = ["tiraci"]
 license = "Apache-2.0"
 publish = false
 rust-version = "1.92"
 
 [workspace.dependencies]
 # Internal crates
-oximux-app      = { path = "apps/desktop" }
-oximux-cli      = { path = "apps/cli" }
-oximux-ui       = { path = "crates/ui" }
-oximux-core     = { path = "crates/core" }
+trex-app      = { path = "apps/desktop" }
+trex-cli      = { path = "apps/cli" }
+trex-ui       = { path = "crates/ui" }
+trex-core     = { path = "crates/core" }
 # Owner-only access for the secrets we write to disk. Its own crate because the
 # desktop app, the relay daemon and the remote host share no other dependency.
-oximux-markdown  = { path = "crates/markdown" }
-oximux-syntax    = { path = "crates/syntax" }
-oximux-owner-only = { path = "crates/owner-only" }
+trex-markdown  = { path = "crates/markdown" }
+trex-syntax    = { path = "crates/syntax" }
+trex-owner-only = { path = "crates/owner-only" }
 # Windows tree-kill for agent CLIs and terminal PTYs. Its own crate for the same
 # reason as owner-only: the relay and the agents crate share no dependency.
-oximux-job-object = { path = "crates/job-object" }
+trex-job-object = { path = "crates/job-object" }
 # CREATE_NO_WINDOW on every spawned child, so a console-subsystem `git`/`node`/
 # `rg` doesn't pop an empty terminal window out of the GUI-subsystem app. Its
 # own crate for the usual reason: the spawn sites span crates that share no
 # other dependency.
-oximux-no-window = { path = "crates/no-window" }
+trex-no-window = { path = "crates/no-window" }
 # Which shell a terminal runs, and the locale it needs. Same sharing problem
 # again, and here the duplication was already real: both consumers carried a
 # byte-identical copy of the locale fix.
-oximux-shell-env = { path = "crates/shell-env" }
-oximux-dictation = { path = "crates/dictation" }
-oximux-pty      = { path = "crates/pty" }
-oximux-git      = { path = "crates/git" }
-oximux-agent-core = { path = "crates/agent-core" }
-oximux-agents   = { path = "crates/agents" }
-oximux-computer-use = { path = "crates/computer-use" }
-oximux-macos-trust = { path = "crates/macos-trust" }
-oximux-auto-update = { path = "crates/auto-update" }
-oximux-editor   = { path = "crates/editor" }
-oximux-storage  = { path = "crates/storage" }
+trex-shell-env = { path = "crates/shell-env" }
+trex-dictation = { path = "crates/dictation" }
+trex-pty      = { path = "crates/pty" }
+trex-git      = { path = "crates/git" }
+trex-agent-core = { path = "crates/agent-core" }
+trex-agents   = { path = "crates/agents" }
+trex-computer-use = { path = "crates/computer-use" }
+trex-macos-trust = { path = "crates/macos-trust" }
+trex-auto-update = { path = "crates/auto-update" }
+trex-editor   = { path = "crates/editor" }
+trex-storage  = { path = "crates/storage" }
 # `gpui` is opt-in rather than default so a headless consumer cannot inherit the
-# UI toolkit by omission — `oximux-worktree-ops` sits on the path from
-# `oximux-cli` to here and needs only `project_scripts`. Consumers with `Global`
+# UI toolkit by omission — `trex-worktree-ops` sits on the path from
+# `trex-cli` to here and needs only `project_scripts`. Consumers with `Global`
 # impls, theme tokens or typography ask for it with `features = ["gpui"]`.
-oximux-settings = { path = "crates/settings", default-features = false }
-oximux-relay-proto = { path = "crates/relay-proto" }
-oximux-relay    = { path = "crates/relay" }
-oximux-relay-client = { path = "crates/relay-client" }
+trex-settings = { path = "crates/settings", default-features = false }
+trex-relay-proto = { path = "crates/relay-proto" }
+trex-relay    = { path = "crates/relay" }
+trex-relay-client = { path = "crates/relay-client" }
 # Spawns/adopts the relay daemon and hands back a connected client. Its own
-# crate because BOTH hosts need it — the desktop app and `oximux serve` — and
+# crate because BOTH hosts need it — the desktop app and `TREX serve` — and
 # apps/desktop has no [lib] target for the CLI to depend on.
-oximux-relay-supervisor = { path = "crates/relay-supervisor" }
+trex-relay-supervisor = { path = "crates/relay-supervisor" }
 # remote-host's TerminalSource over the relay daemon — shared by the desktop
-# and `oximux serve` for the same reason the supervisor is.
-oximux-relay-terminals = { path = "crates/relay-terminals" }
+# and `TREX serve` for the same reason the supervisor is.
+trex-relay-terminals = { path = "crates/relay-terminals" }
 # The advisory data-dir role lock (GUI instance, schedule ticker) — its own
 # crate because both hosts contend for the same roles.
-oximux-single-instance = { path = "crates/single-instance" }
-oximux-remote-proto = { path = "crates/remote-proto" }
-oximux-remote-host = { path = "crates/remote-host" }
-oximux-worktree-ops = { path = "crates/worktree-ops" }
-oximux-agent-hooks  = { path = "crates/agent-hooks" }
-oximux-remote-session = { path = "crates/remote-session" }
+trex-single-instance = { path = "crates/single-instance" }
+trex-remote-proto = { path = "crates/remote-proto" }
+trex-remote-host = { path = "crates/remote-host" }
+trex-worktree-ops = { path = "crates/worktree-ops" }
+trex-agent-hooks  = { path = "crates/agent-hooks" }
+trex-remote-session = { path = "crates/remote-session" }
 # `host` is opt-in rather than default so the mobile core cannot inherit the
 # desktop accept loop (and, through it, the PTY stack) by omission. Desktop
 # consumers ask for it explicitly with `features = ["host"]`.
-oximux-remote-iroh = { path = "crates/remote-iroh", default-features = false }
-oximux-mobile-core = { path = "crates/mobile-core" }
-oximux-remote-local = { path = "crates/remote-local" }
-oximux-proc-cwd = { path = "crates/proc-cwd" }
+trex-remote-iroh = { path = "crates/remote-iroh", default-features = false }
+trex-mobile-core = { path = "crates/mobile-core" }
+trex-remote-local = { path = "crates/remote-local" }
+trex-proc-cwd = { path = "crates/proc-cwd" }
 # Which program a terminal is actually running, by walking its shell's
 # descendants. Its own crate for the same reason proc-cwd is: dependency-light
 # kernel introspection whose consumers share nothing else.
-oximux-proc-tree = { path = "crates/proc-tree" }
+trex-proc-tree = { path = "crates/proc-tree" }
 # Which local ports a set of processes is listening on. Scoped to a caller's
 # pid set rather than the whole machine — see the crate doc for why that is a
 # correctness decision on Linux and not just a courtesy.
-oximux-proc-ports = { path = "crates/proc-ports" }
+trex-proc-ports = { path = "crates/proc-ports" }
+trex-orchestration = { path = "crates/orchestration" }
+trex-ssh = { path = "crates/ssh" }
+trex-skills = { path = "crates/skills" }
+trex-automations = { path = "crates/automations" }
+trex-accounts = { path = "crates/accounts" }
+trex-diff-annotate = { path = "crates/diff-annotate" }
 
 # GPUI — see docs/gpui-pins.md. GPUI is no longer taken from the zed git
 # repository: upstream `gpui-kit` consumes the published `gpui-pre-*` crates,
@@ -138,20 +150,20 @@ gpui_macros = { package = "gpui-pre-macros", version = "0.3.5" }
 # php, ruby, lua, zig, scala, sql, css, html, json, markdown, yaml, toml,
 # bash, make, cmake, proto, graphql, diff, ...). Build time is a few extra
 # seconds; the runtime cost is per-file (lazy parser construction).
-# Sourced from our fork's `oximux` branch, which currently tracks upstream
+# Sourced from our fork's `TREX` branch, which currently tracks upstream
 # `longbridge/gpui-kit` 0.6.4 with no local patches — the two commits we used
 # to carry (`TextView::on_link_click`, and the soft-break reflow fix that made
 # every source line wrap render as a hard line break) have both landed
-# upstream. The branch exists so an OxiMux-only fix has somewhere to live
+# upstream. The branch exists so an trex-only fix has somewhere to live
 # without repinning; the tag `pin-ccc1e76-link-click` preserves the rev used
-# before this bump so older OxiMux commits still resolve.
+# before this bump so older TREX commits still resolve.
 #
 # Upstream renamed the project `gpui-component` -> `gpui-kit` and split it:
 # `gpui-base` (text, input core), `gpui-component` (the component library,
 # still that package name) and `gpui-kit-assets` (formerly
 # `gpui-component-assets`).
-gpui-component = { git = "https://github.com/nhtera/gpui-kit", rev = "6b8581a1e5458eace91beb842376f833beaef2ff", features = ["tree-sitter-languages"] }
-gpui-component-assets = { package = "gpui-kit-assets", git = "https://github.com/nhtera/gpui-kit", rev = "6b8581a1e5458eace91beb842376f833beaef2ff" }
+gpui-component = { git = "https://github.com/tiraci/gpui-kit", rev = "6b8581a1e5458eace91beb842376f833beaef2ff", features = ["tree-sitter-languages"] }
+gpui-component-assets = { package = "gpui-kit-assets", git = "https://github.com/tiraci/gpui-kit", rev = "6b8581a1e5458eace91beb842376f833beaef2ff" }
 
 # Async + util
 tokio = { version = "1", features = ["full"] }
@@ -177,7 +189,7 @@ merman = { version = "=0.6.2", default-features = false, features = ["render"] }
 # the standard-14 substitute fonts (~240 KB) and the predefined CMaps
 # (~250 KB); the 0.7 line needs Rust 1.92, which is why `rust-version` above
 # reads 1.92. Measured +4.3 MB on the stripped release binary — see
-# plans/260827-2313-oximux-gap-closure/phase-11-pdf-viewer.md.
+# plans/260827-2313-trex-gap-closure/phase-11-pdf-viewer.md.
 hayro = "0.7"
 # Strips the `\\?\` verbatim prefix that `Path::canonicalize` adds on Windows,
 # where it is safe to drop. Canonicalized paths get stored in settings files and
@@ -189,7 +201,7 @@ async-trait = "0.1"
 thiserror = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-# `oximux run --output-schema`: hold an agent's final answer to a JSON Schema.
+# `TREX run --output-schema`: hold an agent's final answer to a JSON Schema.
 # `default-features = false` drops the bundled HTTP resolver (and reqwest with
 # it) — a CLI validating a schema the operator handed it must never fetch a
 # remote `$ref`, which would turn a validation run into a network call against
@@ -278,10 +290,13 @@ url = "2"
 # default-features off: we only need `data_dir()` on macOS; the default
 # features pull in Windows/X11 helpers we never call.
 dirs = { version = "5", default-features = false }
+# Skills system: directory walking
+walkdir = "2"
+tempdir = "0.3"
 # CLI arg parsing — derive is the single source of truth for parse/help/
 # completions and the `agent-context` schema dump.
 clap = { version = "4", features = ["derive"] }
-# `oximux completions <shell>`. Generated from the same derive tree as `--help`
+# `TREX completions <shell>`. Generated from the same derive tree as `--help`
 # and `agent-context`, so a 29-verb surface cannot grow a command the
 # completions do not know about.
 clap_complete = "4"
@@ -290,7 +305,7 @@ clap_complete = "4"
 # renders everything else with plain prints — no TUI framework rides in here.
 crossterm = "0.28"
 # Native folder picker — wraps NSOpenPanel on macOS via objc2. We use
-# `AsyncFileDialog` from the GPUI `cx.spawn` task so the OxiMux window
+# `AsyncFileDialog` from the GPUI `cx.spawn` task so the TREX window
 # stays responsive while the panel is open. default-features off:
 # we don't need the GTK/XDG portal stacks the default features pull in
 # (Linux is not a v1 target).
@@ -382,7 +397,7 @@ similar = "2.6"
 pulldown-cmark = { version = "0.13", default-features = false }
 syntect = { version = "5.3", default-features = false, features = ["default-fancy"] }
 # The grammar collection syntect parses with, hoisted to the workspace so the
-# desktop and `oximux-syntax` cannot end up on different sets — two grammar
+# desktop and `trex-syntax` cannot end up on different sets — two grammar
 # collections in one binary would be the same duplication this work exists to
 # remove, just one level down.
 two-face = { version = "0.5.1", default-features = false, features = ["syntect-fancy"] }

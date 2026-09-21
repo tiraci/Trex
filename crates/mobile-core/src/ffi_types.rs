@@ -1,10 +1,10 @@
-//! The FFI value types crossing to Swift/Kotlin/JS, and their conversions from
+﻿//! The FFI value types crossing to Swift/Kotlin/JS, and their conversions from
 //! the wire types. Kept a thin, stable projection of `remote-proto` so the RN app
 //! never sees the postcard/JSON envelope details.
 
-use oximux_remote_proto::messages::ProjectSummaryWire as WireProject;
-use oximux_remote_proto::messages::SessionSummary as WireSummary;
-use oximux_remote_proto::proto::{Choice as WireChoice, SessionChoices as WireChoices};
+use trex_remote_proto::messages::ProjectSummaryWire as WireProject;
+use trex_remote_proto::messages::SessionSummary as WireSummary;
+use trex_remote_proto::proto::{Choice as WireChoice, SessionChoices as WireChoices};
 
 /// One selectable model or permission mode.
 ///
@@ -100,7 +100,7 @@ pub struct ChatImage {
     pub data: String,
 }
 
-impl From<ChatImage> for oximux_agent_core::thread::ChatImage {
+impl From<ChatImage> for trex_agent_core::thread::ChatImage {
     fn from(i: ChatImage) -> Self {
         Self { media_type: i.media_type, data: i.data }
     }
@@ -162,8 +162,8 @@ pub struct TerminalInfo {
     pub rows: u16,
 }
 
-impl From<oximux_remote_proto::messages::TerminalSummary> for TerminalInfo {
-    fn from(t: oximux_remote_proto::messages::TerminalSummary) -> Self {
+impl From<trex_remote_proto::messages::TerminalSummary> for TerminalInfo {
+    fn from(t: trex_remote_proto::messages::TerminalSummary) -> Self {
         Self { pty_id: t.pty_id, cwd: t.cwd, cols: t.cols, rows: t.rows }
     }
 }
@@ -207,8 +207,8 @@ pub struct ForgeItem {
     pub updated_at: String,
 }
 
-impl From<oximux_remote_proto::messages::ForgeItemWire> for ForgeItem {
-    fn from(w: oximux_remote_proto::messages::ForgeItemWire) -> Self {
+impl From<trex_remote_proto::messages::ForgeItemWire> for ForgeItem {
+    fn from(w: trex_remote_proto::messages::ForgeItemWire) -> Self {
         Self {
             number: w.number,
             title: w.title,
@@ -235,8 +235,8 @@ pub struct CheckRun {
     pub description: String,
 }
 
-impl From<oximux_remote_proto::messages::CheckRunWire> for CheckRun {
-    fn from(w: oximux_remote_proto::messages::CheckRunWire) -> Self {
+impl From<trex_remote_proto::messages::CheckRunWire> for CheckRun {
+    fn from(w: trex_remote_proto::messages::CheckRunWire) -> Self {
         Self { name: w.name, bucket: w.bucket, link: w.link, description: w.description }
     }
 }
@@ -248,8 +248,8 @@ pub struct ForgeItemDetail {
     pub author: String,
 }
 
-impl From<oximux_remote_proto::messages::ForgeItemDetailWire> for ForgeItemDetail {
-    fn from(w: oximux_remote_proto::messages::ForgeItemDetailWire) -> Self {
+impl From<trex_remote_proto::messages::ForgeItemDetailWire> for ForgeItemDetail {
+    fn from(w: trex_remote_proto::messages::ForgeItemDetailWire) -> Self {
         Self { body: w.body, author: w.author }
     }
 }
@@ -262,7 +262,7 @@ pub enum ForgeItemKind {
     Pull,
 }
 
-impl From<ForgeItemKind> for oximux_remote_proto::messages::ForgeItemKindWire {
+impl From<ForgeItemKind> for trex_remote_proto::messages::ForgeItemKindWire {
     fn from(k: ForgeItemKind) -> Self {
         match k {
             ForgeItemKind::Issue => Self::Issue,
@@ -279,7 +279,7 @@ pub enum ForgeState {
     All,
 }
 
-impl From<ForgeState> for oximux_remote_proto::messages::ForgeStateWire {
+impl From<ForgeState> for trex_remote_proto::messages::ForgeStateWire {
     fn from(s: ForgeState) -> Self {
         match s {
             ForgeState::Open => Self::Open,
@@ -302,9 +302,9 @@ pub enum Recurrence {
     WeeklyAt { weekday: u8, hour: u8, minute: u8 },
 }
 
-impl From<oximux_remote_proto::messages::RecurrenceWire> for Recurrence {
-    fn from(w: oximux_remote_proto::messages::RecurrenceWire) -> Self {
-        use oximux_remote_proto::messages::RecurrenceWire as W;
+impl From<trex_remote_proto::messages::RecurrenceWire> for Recurrence {
+    fn from(w: trex_remote_proto::messages::RecurrenceWire) -> Self {
+        use trex_remote_proto::messages::RecurrenceWire as W;
         match w {
             W::EveryMinutes { minutes } => Self::EveryMinutes { minutes },
             W::DailyAt { hour, minute } => Self::DailyAt { hour, minute },
@@ -313,7 +313,7 @@ impl From<oximux_remote_proto::messages::RecurrenceWire> for Recurrence {
     }
 }
 
-impl From<Recurrence> for oximux_remote_proto::messages::RecurrenceWire {
+impl From<Recurrence> for trex_remote_proto::messages::RecurrenceWire {
     fn from(r: Recurrence) -> Self {
         match r {
             Recurrence::EveryMinutes { minutes } => Self::EveryMinutes { minutes },
@@ -344,8 +344,8 @@ pub struct Schedule {
     pub summary: String,
 }
 
-impl From<oximux_remote_proto::messages::ScheduleWire> for Schedule {
-    fn from(w: oximux_remote_proto::messages::ScheduleWire) -> Self {
+impl From<trex_remote_proto::messages::ScheduleWire> for Schedule {
+    fn from(w: trex_remote_proto::messages::ScheduleWire) -> Self {
         Self {
             id: w.id,
             name: w.name,
@@ -367,9 +367,9 @@ pub enum RunOutcome {
     Failed,
 }
 
-impl From<oximux_remote_proto::messages::RunOutcomeWire> for RunOutcome {
-    fn from(w: oximux_remote_proto::messages::RunOutcomeWire) -> Self {
-        use oximux_remote_proto::messages::RunOutcomeWire as W;
+impl From<trex_remote_proto::messages::RunOutcomeWire> for RunOutcome {
+    fn from(w: trex_remote_proto::messages::RunOutcomeWire) -> Self {
+        use trex_remote_proto::messages::RunOutcomeWire as W;
         match w {
             W::Ok => Self::Ok,
             W::Failed => Self::Failed,
@@ -390,8 +390,8 @@ pub struct ScheduleRun {
     pub detail: Option<String>,
 }
 
-impl From<oximux_remote_proto::messages::ScheduleRunWire> for ScheduleRun {
-    fn from(w: oximux_remote_proto::messages::ScheduleRunWire) -> Self {
+impl From<trex_remote_proto::messages::ScheduleRunWire> for ScheduleRun {
+    fn from(w: trex_remote_proto::messages::ScheduleRunWire) -> Self {
         Self {
             schedule_id: w.schedule_id,
             fired_at: w.fired_at,

@@ -1,4 +1,4 @@
-//! Editor-style find-overlay layout.
+﻿//! Editor-style find-overlay layout.
 //!
 //! Pure layout function. The host (`TerminalView`) constructs a [`Params`]
 //! struct holding the data slice (`query`, `badge`, `options`) plus six
@@ -26,7 +26,7 @@ use gpui_component::{
     button::{Button, ButtonVariants},
     tooltip::Tooltip,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::terminal_search::SearchOptions;
 
@@ -169,7 +169,7 @@ pub fn build(params: Params<'_>) -> impl IntoElement + use<> {
                         .items_center()
                         .gap(px(2.0))
                         .child(toggle_text(
-                            "oximux-search-toggle-case",
+                            "trex-search-toggle-case",
                             "Aa",
                             "Match Case",
                             options.case_sensitive,
@@ -178,7 +178,7 @@ pub fn build(params: Params<'_>) -> impl IntoElement + use<> {
                             on_toggle_case,
                         ))
                         .child(toggle_text(
-                            "oximux-search-toggle-word",
+                            "trex-search-toggle-word",
                             "ab",
                             "Match Whole Word",
                             options.whole_word,
@@ -187,7 +187,7 @@ pub fn build(params: Params<'_>) -> impl IntoElement + use<> {
                             on_toggle_word,
                         ))
                         .child(toggle_text(
-                            "oximux-search-toggle-regex",
+                            "trex-search-toggle-regex",
                             ".*",
                             "Use Regular Expression",
                             options.regex,
@@ -204,7 +204,7 @@ pub fn build(params: Params<'_>) -> impl IntoElement + use<> {
                 ),
         )
         .child(
-            Button::new("oximux-search-prev")
+            Button::new("trex-search-prev")
                 .ghost()
                 .xsmall()
                 .icon(IconName::ChevronUp)
@@ -212,7 +212,7 @@ pub fn build(params: Params<'_>) -> impl IntoElement + use<> {
                 .on_click(on_prev),
         )
         .child(
-            Button::new("oximux-search-next")
+            Button::new("trex-search-next")
                 .ghost()
                 .xsmall()
                 .icon(IconName::ChevronDown)
@@ -220,7 +220,7 @@ pub fn build(params: Params<'_>) -> impl IntoElement + use<> {
                 .on_click(on_next),
         )
         .child(
-            Button::new("oximux-search-close")
+            Button::new("trex-search-close")
                 .ghost()
                 .xsmall()
                 .icon(IconName::Close)

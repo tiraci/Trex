@@ -1,4 +1,4 @@
-//! Running a project's `setup` script as part of worktree provisioning.
+﻿//! Running a project's `setup` script as part of worktree provisioning.
 //!
 //! This is the inverse of [`crate::run_cleanup_before_remove`] in the one way
 //! that matters. Cleanup must never trap the user: a teardown script that
@@ -108,7 +108,7 @@ pub async fn run_setup_bounded(
 ) -> SetupTranscript {
     let mut cmd = tokio::process::Command::new("sh");
     {
-        use oximux_no_window::NoWindow as _;
+        use trex_no_window::NoWindow as _;
         cmd.arg("-lc")
             .arg(script)
             .current_dir(worktree)

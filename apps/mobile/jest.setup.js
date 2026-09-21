@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Global test setup.
  *
  * AsyncStorage is mocked for every suite, not just the ones that store anything.
@@ -16,7 +16,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 /**
  * The dictation hook binds two native surfaces at import — `expo-audio`'s
- * recorder and, through the client, the `OximuxCore` TurboModule — neither of
+ * recorder and, through the client, the `TREXCore` TurboModule — neither of
  * which exists in the Node test environment. Any component that pulls it in (the
  * composer, transitively) would die on a missing native module far from what the
  * test is about. The real record → transcribe path runs against the desktop

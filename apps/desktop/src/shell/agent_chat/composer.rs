@@ -1,4 +1,4 @@
-//! The bottom composer row of the agent chat — a single-line input and a Send
+﻿//! The bottom composer row of the agent chat — a single-line input and a Send
 //! button — isolated into its OWN entity/view.
 //!
 //! Why a separate entity: a text input only repaints its typed characters when
@@ -34,12 +34,12 @@ use gpui_component::Disableable as _;
 use gpui_component::popover::Popover;
 use gpui_component::searchable_list::{SearchableListItem, SearchableVec};
 use gpui_component::select::{Select, SelectEvent, SelectState};
-use oximux_agents::thread::{
+use trex_agents::thread::{
     prepend_context, ChatImage, ContextChip, EffortChoice, FeatureControl, FeatureKind,
     FeatureValue, ModeChoice, ModelChoice,
 };
-use oximux_dictation::{DictationEvent, ModelPaths, Readiness};
-use oximux_settings::{DictationMode, DictationSettings};
+use trex_dictation::{DictationEvent, ModelPaths, Readiness};
+use trex_settings::{DictationMode, DictationSettings};
 
 use crate::actions::ToggleDictation;
 use super::dictation_service::{self, DictationTarget, StartDecision};
@@ -91,7 +91,7 @@ impl AgentModelCount {
 }
 
 /// The model/mode/effort options plus their "current when unset" defaults,
-/// sourced from the live [`oximux_agents::thread::AgentConnection`] and pushed
+/// sourced from the live [`trex_agents::thread::AgentConnection`] and pushed
 /// into the composer so the bottom-toolbar pickers render whatever the backend
 /// advertises — no hardcoded provider vocabulary lives in the view.
 #[derive(Clone, Default, PartialEq)]
@@ -108,7 +108,7 @@ pub struct ControlVocab {
     pub default_mode: Option<String>,
     pub default_effort: Option<String>,
 }
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::composer_history::PromptHistory;
 use super::context_meter;
@@ -345,7 +345,7 @@ pub struct WorktreeDraft {
     /// is frozen until the banner resolves it. Mirrors the parent's refusal to
     /// flip in that state rather than duplicating the rule.
     pub busy: bool,
-    /// The live `oximux/<slug>` preview, or the validation error when the slug is
+    /// The live `TREX/<slug>` preview, or the validation error when the slug is
     /// malformed. Computed by the parent (it owns `validate_slug`).
     pub hint: String,
     /// Whether `hint` is an error (drives its color).
@@ -1661,7 +1661,7 @@ impl ComposerView {
     /// user presses this button.
     ///
     /// A message with attachments never steers — pi's `steer` does carry images,
-    /// but OxiMux has never sent one and won't find out at the cost of silently
+    /// but TREX has never sent one and won't find out at the cost of silently
     /// dropping the user's. It reorders instead, keeping the images intact for
     /// the ordinary drain.
     fn send_queued_now(&mut self, idx: usize, cx: &mut Context<Self>) {
@@ -2480,7 +2480,7 @@ impl ComposerView {
                 vec![(String::new(), "System default".to_string())];
             // Enumerate devices only when the menu actually opens (a CoreAudio
             // HAL call — must never run on the per-render/per-keystroke path).
-            for d in oximux_dictation::list_input_devices() {
+            for d in trex_dictation::list_input_devices() {
                 options.push((d.clone(), d));
             }
             for (wire, label) in options {
@@ -3266,7 +3266,7 @@ impl ComposerView {
 
 impl Render for ComposerView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Flush any finished dictation transcript (insert at cursor) and pending
         // toast here — this is the first place with a `Window` after an event.
         self.apply_pending_dictation(window, cx);

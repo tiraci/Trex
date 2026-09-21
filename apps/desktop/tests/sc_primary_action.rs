@@ -1,7 +1,7 @@
-//! Priority-ladder tests for `resolve_primary_action`. One test per row of
+﻿//! Priority-ladder tests for `resolve_primary_action`. One test per row of
 //! the design-doc table — pure data in, `PrimaryAction` out, no GPUI / tokio.
 
-use oximux_app::shell::source_control::primary_action::{
+use trex_app::shell::source_control::primary_action::{
     PrimaryAction, PrimaryActionInputs, PrimaryActionKind, RemoteOpKind, UpstreamStatus,
     resolve_primary_action,
 };

@@ -1,4 +1,4 @@
-//! "Jump to message" dropdown — a compact trigger at the top of the transcript
+﻿//! "Jump to message" dropdown — a compact trigger at the top of the transcript
 //! that opens a list of the conversation's user turns (`#N` + one-line preview)
 //! with a "Jump to bottom" footer. It pairs with the left tick-rail
 //! ([`super::message_rail`]) to make up the conversation timeline: the rail is
@@ -13,7 +13,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::{div, px, AnyElement, Context, InteractiveElement, IntoElement, MouseButton,
     ParentElement, SharedString, StatefulInteractiveElement, Styled};
-use oximux_agents::thread::ThreadEntry;
+use trex_agents::thread::ThreadEntry;
 
 use super::{AgentChatView, RAIL_W};
 
@@ -119,7 +119,7 @@ fn collapse_first_line(text: &str) -> String {
 /// stripped so the row shows what the user actually said, not the plumbing.
 fn readable_text(text: &str) -> String {
     // Shared slash-command parse: the jump list shows just the command name.
-    if let Some(cmd) = oximux_agents::command_envelope::parse_slash_command(text) {
+    if let Some(cmd) = trex_agents::command_envelope::parse_slash_command(text) {
         return cmd.name;
     }
     // Drop whole noise blocks (inner content and all), then any stray tags.
@@ -338,14 +338,14 @@ impl AgentChatView {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::thread::ThreadEntry;
+    use trex_agents::thread::ThreadEntry;
 
     fn user(text: &str) -> ThreadEntry {
         ThreadEntry::User { text: text.into(), images: vec![], checkpoint: None }
     }
 
     fn assistant(text: &str) -> ThreadEntry {
-        ThreadEntry::Assistant(oximux_agents::thread::AssistantMessage {
+        ThreadEntry::Assistant(trex_agents::thread::AssistantMessage {
             text: text.into(),
             thinking: String::new(),
         })

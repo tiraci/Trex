@@ -1,4 +1,4 @@
-//! The pointer to a stash a merge left on the stack.
+﻿//! The pointer to a stash a merge left on the stack.
 //!
 //! When `merge_branch` auto-stashes a dirty project root and then either
 //! conflicts or fails to pop, the user's uncommitted work is sitting in the
@@ -28,8 +28,8 @@
 //!    and matches on the message.
 
 use chrono::Utc;
-use oximux_git::Repository;
-use oximux_storage::SettingsRepo;
+use trex_git::Repository;
+use trex_storage::SettingsRepo;
 use serde::{Deserialize, Serialize};
 
 /// Settings key holding the whole notice list as one JSON array. One key rather
@@ -184,7 +184,7 @@ pub fn for_project(notices: &[StashNotice], project_id: &str) -> Vec<StashNotice
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StashLookup {
     /// Exactly one entry carries this message. Safe to pop.
-    Found(oximux_core::StashRef),
+    Found(trex_core::StashRef),
     /// Nothing carries it any more — the user already popped or dropped it.
     Gone,
     /// Several entries carry it, so no index can be chosen without guessing.
@@ -219,7 +219,7 @@ pub async fn resolve(repo: &Repository, notice: &StashNotice) -> StashLookup {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::open_memory;
+    use trex_storage::open_memory;
 
     fn store() -> SettingsRepo {
         SettingsRepo::new(open_memory().expect("open memory"))
@@ -230,7 +230,7 @@ mod tests {
             project,
             "/repos/app",
             branch,
-            "oximux: auto-stash before merge",
+            "TREX: auto-stash before merge",
             NoticeReason::Conflicted,
         )
     }
@@ -240,7 +240,7 @@ mod tests {
     #[test]
     fn a_recorded_notice_is_still_there_on_the_next_read() {
         let repo = store();
-        let n = notice("p1", "oximux/feat");
+        let n = notice("p1", "TREX/feat");
         record(&repo, n.clone());
         assert_eq!(load(&repo), vec![n]);
     }
@@ -248,8 +248,8 @@ mod tests {
     #[test]
     fn acknowledging_removes_only_that_notice() {
         let repo = store();
-        let a = notice("p1", "oximux/a");
-        let b = notice("p1", "oximux/b");
+        let a = notice("p1", "TREX/a");
+        let b = notice("p1", "TREX/b");
         record(&repo, a.clone());
         record(&repo, b.clone());
 
@@ -262,9 +262,9 @@ mod tests {
     #[test]
     fn notices_are_scoped_to_their_project() {
         let repo = store();
-        let mine = notice("p1", "oximux/a");
+        let mine = notice("p1", "TREX/a");
         record(&repo, mine.clone());
-        record(&repo, notice("p2", "oximux/b"));
+        record(&repo, notice("p2", "TREX/b"));
 
         assert_eq!(for_project(&load(&repo), "p1"), vec![mine]);
     }
@@ -277,7 +277,7 @@ mod tests {
         repo.set(NOTICES_KEY, "{not json").expect("write garbage");
         assert!(load(&repo).is_empty());
         // ...and recording over it still works.
-        let n = notice("p1", "oximux/a");
+        let n = notice("p1", "TREX/a");
         record(&repo, n.clone());
         assert_eq!(load(&repo), vec![n]);
     }
@@ -286,11 +286,11 @@ mod tests {
     fn the_list_is_capped_dropping_the_oldest() {
         let repo = store();
         for i in 0..MAX_NOTICES + 3 {
-            record(&repo, notice("p1", &format!("oximux/b{i}")));
+            record(&repo, notice("p1", &format!("TREX/b{i}")));
         }
         let stored = load(&repo);
         assert_eq!(stored.len(), MAX_NOTICES);
-        assert_eq!(stored[0].branch, "oximux/b3", "oldest dropped first");
+        assert_eq!(stored[0].branch, "TREX/b3", "oldest dropped first");
     }
 
     /// Both reasons must produce distinct copy: a conflicted merge and a failed
@@ -298,12 +298,12 @@ mod tests {
     /// merge succeeded.
     #[test]
     fn a_failed_pop_says_the_merge_succeeded_and_a_conflict_does_not() {
-        let mut popped = notice("p1", "oximux/feat");
+        let mut popped = notice("p1", "TREX/feat");
         popped.reason = NoticeReason::PopFailed;
         let msg = popped.message();
         assert!(msg.contains("merged successfully"), "{msg}");
 
-        let conflicted = notice("p1", "oximux/feat").message();
+        let conflicted = notice("p1", "TREX/feat").message();
         assert!(conflicted.contains("conflicts"), "{conflicted}");
         assert!(
             !conflicted.contains("merged successfully"),
@@ -317,7 +317,7 @@ mod tests {
     /// do not exist.
     #[test]
     fn a_failed_merge_says_nothing_was_merged_and_the_changes_are_still_safe() {
-        let mut n = notice("p1", "oximux/feat");
+        let mut n = notice("p1", "TREX/feat");
         n.reason = NoticeReason::MergeFailed;
         let msg = n.message();
         assert!(msg.contains("Nothing was merged"), "{msg}");
@@ -336,7 +336,7 @@ mod tests {
             NoticeReason::PopFailed,
             NoticeReason::MergeFailed,
         ] {
-            let mut n = notice("p1", "oximux/feat");
+            let mut n = notice("p1", "TREX/feat");
             n.reason = reason;
             assert!(seen.insert(n.message()), "duplicate copy for {reason:?}");
         }

@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import type { SessionSummary } from 'oximux-core';
+﻿import { router } from 'expo-router';
+import type { SessionSummary } from 'trex-core';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 

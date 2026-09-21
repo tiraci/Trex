@@ -1,4 +1,4 @@
-//! Local-connection authority tests over the in-memory loopback: what a
+﻿//! Local-connection authority tests over the in-memory loopback: what a
 //! `serve_local` caller may reach at each scope, and — the property the whole
 //! `Peer` split exists for — that no remote conversation can mint local
 //! authority.
@@ -7,14 +7,14 @@ use std::sync::Arc;
 
 use futures::executor::block_on;
 use futures::future::join;
-use oximux_agent_core::thread::ThreadEvent;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::StubConnection;
-use oximux_remote_host::{AuthStore, Dispatcher, LocalScope, PairingSlot, registration_proof};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::{RegisterReq, SendPromptReq};
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_agent_core::thread::ThreadEvent;
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::StubConnection;
+use trex_remote_host::{AuthStore, Dispatcher, LocalScope, PairingSlot, registration_proof};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::{RegisterReq, SendPromptReq};
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {

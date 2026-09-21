@@ -1,7 +1,7 @@
-//! Map an OpenCode SQLite session (`~/.local/share/opencode/opencode.db`)
+﻿//! Map an OpenCode SQLite session (`~/.local/share/opencode/opencode.db`)
 //! into a chat transcript (`Vec<ThreadEntry>`), the same shape the Claude/Codex
 //! importers (`thread::session_import`, `thread::codex_session_import`) build so
-//! a session started outside OxiMux can be rendered with the same fidelity.
+//! a session started outside TREX can be rendered with the same fidelity.
 //!
 //! OpenCode's `message` rows carry the turn's role; the joined `part` rows carry
 //! the turn's content, one row per block (`{"type":"text","text":…}`,

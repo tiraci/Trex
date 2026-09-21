@@ -1,8 +1,8 @@
-//! The inline ACP authentication card + its view-owned state.
+﻿//! The inline ACP authentication card + its view-owned state.
 //!
 //! When an ACP agent needs login it fails the session open with `AuthRequired`
 //! (-32000) and advertises its methods; the worker surfaces them as a
-//! [`ThreadEvent::AuthRequired`](oximux_agents::thread::ThreadEvent). This card
+//! [`ThreadEvent::AuthRequired`](trex_agents::thread::ThreadEvent). This card
 //! turns that dead-end into an action: a pill per Agent/Terminal method (click →
 //! `authenticate`), an interactive secret form for an EnvVar method (a masked
 //! field per variable + a submit that respawns the agent with those values in its
@@ -12,8 +12,8 @@
 //! [`super::login_card`].
 
 use gpui::{AnyElement, IntoElement, ParentElement, SharedString, Styled, div, px};
-use oximux_agents::thread::AuthMethodInfo;
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::AuthMethodInfo;
+use trex_settings::{Density, Theme, Typography};
 
 /// View-owned state for a pending ACP auth prompt. Ephemeral — never persisted;
 /// a restored mid-auth tab fails closed to a fresh [`ThreadEvent::AuthRequired`].

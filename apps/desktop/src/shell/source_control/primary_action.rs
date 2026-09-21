@@ -1,4 +1,4 @@
-//! Pure state machine deriving the Source Control primary split-button label.
+﻿//! Pure state machine deriving the Source Control primary split-button label.
 //!
 //! Priority ladder for the source-control primary action button.
 //! No GPUI imports — every input/output is plain data, so the whole module is
@@ -41,7 +41,7 @@ pub struct PrimaryAction {
 }
 
 /// Snapshot of the branch's upstream tracking ref. Mirrors the relevant fields
-/// of `oximux_core::GitState` so the resolver stays a pure data function.
+/// of `trex_core::GitState` so the resolver stays a pure data function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct UpstreamStatus {
     pub has_upstream: bool,

@@ -1,4 +1,4 @@
-//! The end-to-end proof: the client [`RemoteSession`] drives the real
+﻿//! The end-to-end proof: the client [`RemoteSession`] drives the real
 //! `remote-host` `Dispatcher` over the in-memory loopback — pairing, commands, and
 //! reconnect all cross our actual wire code on both sides, with no network.
 
@@ -7,17 +7,17 @@ use std::sync::Arc;
 use futures::StreamExt;
 use futures::executor::block_on;
 use futures::future::join3;
-use oximux_agent_core::thread::{
+use trex_agent_core::thread::{
     AskQuestion, ChatThread, PermissionDecision, PermissionKind, QuestionAnswer, QuestionAnswers,
     QuestionKind, QuestionOption, ThreadEntry, ThreadEvent,
 };
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::{AgentCapabilities, StubConnection};
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot};
-use oximux_remote_proto::messages::SessionStatusWire;
-use oximux_remote_proto::{HostEvent, PairingTicket};
-use oximux_remote_proto::testing::duplex_pair;
-use oximux_remote_session::{ClientSigner, FoldOutcome, RemoteSession, SessionSubscription};
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::{AgentCapabilities, StubConnection};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot};
+use trex_remote_proto::messages::SessionStatusWire;
+use trex_remote_proto::{HostEvent, PairingTicket};
+use trex_remote_proto::testing::duplex_pair;
+use trex_remote_session::{ClientSigner, FoldOutcome, RemoteSession, SessionSubscription};
 use serde_json::json;
 
 /// All assistant-message text folded into a thread, whitespace-stripped — asserts
@@ -339,8 +339,8 @@ fn client_reconnects_via_token_fast_path_and_challenge() {
 /// unknown variant exactly as a v1/v2 dispatcher would.
 #[test]
 fn client_pairs_with_a_host_too_old_to_know_the_version_handshake() {
-    use oximux_remote_proto::Transport;
-    use oximux_remote_proto::proto::{Request, Response, RpcError};
+    use trex_remote_proto::Transport;
+    use trex_remote_proto::proto::{Request, Response, RpcError};
 
     let (client_t, server_t) = duplex_pair();
     let client = RemoteSession::new(Arc::new(client_t), ClientSigner::from_seed(&[3u8; 32]));

@@ -1,4 +1,4 @@
-//! Phase 1 step 3 smoke test.
+﻿//! Phase 1 step 3 smoke test.
 //!
 //! Verifies the alacritty wiring: bytes from the PTY flow through the ANSI
 //! parser into the grid, and `snapshot()` returns a populated `cells`
@@ -8,17 +8,17 @@
 //!   2. `fill_snapshot` reads the wrong dimensions (returns a partial grid).
 //!   3. Resize path corrupts the grid (we resize mid-test).
 
-use oximux_shell_env::test_support::{run_script, test_cwd, test_shell};
-use oximux_pty::{
+use trex_shell_env::test_support::{run_script, test_cwd, test_shell};
+use trex_pty::{
     CellColor, NamedColor16, PortablePtyBackend, SpawnConfig, TerminalBackend, TerminalEvent,
     TerminalSnapshot,
 };
 use std::time::{Duration, Instant};
 
-const MARKER: &str = "OXIMUX_GRID_OK";
-const RED_MARKER: &str = "OXIMUXRED";
-const PALETTE_MARKER: &str = "OXIMUX256";
-const TRUECOLOR_MARKER: &str = "OXIMUXRGB";
+const MARKER: &str = "TREX_GRID_OK";
+const RED_MARKER: &str = "TREXRED";
+const PALETTE_MARKER: &str = "TREX256";
+const TRUECOLOR_MARKER: &str = "TREXRGB";
 // Upper bound only — the poll loops below return as soon as the child
 // exits. Generous because ConPTY child spawn on a contended shared CI
 // runner can stall well past a few seconds when tests run in parallel.
@@ -263,7 +263,7 @@ fn snapshot_after_exit(shell: String, args: Vec<String>) -> TerminalSnapshot {
 
 /// A child spawned through the backend must not inherit `NO_COLOR`.
 ///
-/// `clear_inherited_colour_suppression` is unit-tested in `oximux-shell-env`,
+/// `clear_inherited_colour_suppression` is unit-tested in `trex-shell-env`,
 /// but a helper that is correct and never called is the failure this port keeps
 /// producing. This is the wiring check: it spawns a real child and asks *it*
 /// what it sees.
@@ -402,7 +402,7 @@ fn conpty_and_the_grid_agree_where_a_c0_byte_leaves_the_cursor() {
     // Written from the test so the fixture cannot drift from the assertion.
     // Pure ASCII: PowerShell 5.1 reads a BOM-less .ps1 as ANSI, so a literal
     // non-ASCII character would break the parse.
-    let script = std::env::temp_dir().join("oximux-conpty-si-probe.ps1");
+    let script = std::env::temp_dir().join("trex-conpty-si-probe.ps1");
     std::fs::write(
         &script,
         concat!(

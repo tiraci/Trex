@@ -1,4 +1,4 @@
-//! FileExplorer — virtualized file tree panel for the right sidebar.
+﻿//! FileExplorer — virtualized file tree panel for the right sidebar.
 //!
 //! Subscribes to the StatusPoller watch channel for git decoration; loads
 //! directories lazily via `fs_load::load_dir_cache`. Renders via
@@ -34,9 +34,9 @@ use gpui::{
     KeyDownEvent, ParentElement, Render, ScrollStrategy, Styled, Subscription, Task,
     UniformListScrollHandle, Window, div, px, uniform_list,
 };
-use oximux_core::FileStatus;
-use oximux_git::PollState;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::FileStatus;
+use trex_git::PollState;
+use trex_settings::{Density, Theme, Typography};
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
@@ -371,7 +371,7 @@ impl FileExplorer {
             .unwrap_or(0);
         if depth >= MAX_EXPAND_DEPTH {
             tracing::warn!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 path = %path.display(),
                 "refusing to expand beyond max depth {MAX_EXPAND_DEPTH}"
             );
@@ -446,7 +446,7 @@ impl FileExplorer {
     /// file as an editor tab in the active project's active pane group).
     /// When `on_open` is `None` (test wiring without a host) the click is
     /// silently dropped — must not shell out to `open(1)` because that
-    /// would launch the file outside OxiMux, breaking the cockpit-tight
+    /// would launch the file outside TREX, breaking the cockpit-tight
     /// contract: clicked files belong in the center pane.
     pub(crate) fn open_file(&self, path: PathBuf, window: &mut Window, cx: &mut App) {
         if let Some(cb) = self.on_open.as_ref() {
@@ -532,7 +532,7 @@ impl FileExplorer {
 
 impl Render for FileExplorer {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let count = self.rows.len();
         let header = render_header(self, cx);

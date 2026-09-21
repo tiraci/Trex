@@ -1,4 +1,4 @@
-//! The git RPCs: working-tree status, per-path diffs, and the staging/commit
+﻿//! The git RPCs: working-tree status, per-path diffs, and the staging/commit
 //! writes.
 //!
 //! Split from [`super::handlers`] because git is its own surface with its own
@@ -19,18 +19,18 @@
 
 use std::path::{Path, PathBuf};
 
-use oximux_remote_proto::messages::{
+use trex_remote_proto::messages::{
     DiffHunkWire, DiffLineKindWire, DiffLineWire, DiffStatusWire, FileDiffWire, GitFileWire,
     GitStatusWire, IndexStatusWire, WorktreeStatusWire,
 };
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;
 
 /// A repository resolved from a session, ready for a git call.
 struct SessionRepo {
-    repo: oximux_git::repository::Repository,
+    repo: trex_git::repository::Repository,
 }
 
 impl Dispatcher {
@@ -65,7 +65,7 @@ impl Dispatcher {
         };
         // Git error text routinely embeds absolute paths ("fatal: not a git
         // repository: /Users/…"), so it is logged host-side and never forwarded.
-        match oximux_git::repository::Repository::open(&cwd).await {
+        match trex_git::repository::Repository::open(&cwd).await {
             Ok(repo) => Ok(SessionRepo { repo }),
             Err(e) => {
                 tracing::warn!(error = %e, session = %session_id, "open repository failed");
@@ -94,7 +94,7 @@ impl SessionRepo {
     /// The rejection deliberately says nothing about what does or does not exist
     /// on disk — it must not become a probe for the host's filesystem.
     fn contain(&self, session_id: &str, path: &str) -> Result<PathBuf, Response> {
-        oximux_git::path_guard::contained_path(self.workdir(), Path::new(path)).map_err(|_| {
+        trex_git::path_guard::contained_path(self.workdir(), Path::new(path)).map_err(|_| {
             tracing::warn!(session = %session_id, "rejected out-of-repository path");
             Response::Error(RpcError::BadRequest("path is outside the repository".into()))
         })
@@ -259,8 +259,8 @@ impl Dispatcher {
 /// Map one file's diff onto the wire shape. Paths cross as repository-relative
 /// strings (never host-absolute); rename/copy origins come along so a client can
 /// render "was X".
-fn to_file_diff_wire(d: oximux_core::FileDiff, root: &std::path::Path) -> FileDiffWire {
-    use oximux_core::DiffStatus as S;
+fn to_file_diff_wire(d: trex_core::FileDiff, root: &std::path::Path) -> FileDiffWire {
+    use trex_core::DiffStatus as S;
     let status = match d.status {
         S::Added => DiffStatusWire::Added,
         S::Modified => DiffStatusWire::Modified,
@@ -294,10 +294,10 @@ fn to_file_diff_wire(d: oximux_core::FileDiff, root: &std::path::Path) -> FileDi
                     .into_iter()
                     .map(|l| DiffLineWire {
                         kind: match l.kind {
-                            oximux_core::DiffLineKind::Context => DiffLineKindWire::Context,
-                            oximux_core::DiffLineKind::Added => DiffLineKindWire::Added,
-                            oximux_core::DiffLineKind::Removed => DiffLineKindWire::Removed,
-                            oximux_core::DiffLineKind::NoNewlineHint => {
+                            trex_core::DiffLineKind::Context => DiffLineKindWire::Context,
+                            trex_core::DiffLineKind::Added => DiffLineKindWire::Added,
+                            trex_core::DiffLineKind::Removed => DiffLineKindWire::Removed,
+                            trex_core::DiffLineKind::NoNewlineHint => {
                                 DiffLineKindWire::NoNewlineHint
                             }
                         },
@@ -313,7 +313,7 @@ fn to_file_diff_wire(d: oximux_core::FileDiff, root: &std::path::Path) -> FileDi
 /// emitted as the repository-relative strings git reported; a client echoes one
 /// back on a diff request and the host contains it again there — this direction
 /// never widens what the client may ask for.
-fn to_status_wire(state: oximux_core::GitState) -> GitStatusWire {
+fn to_status_wire(state: trex_core::GitState) -> GitStatusWire {
     GitStatusWire {
         branch: state.branch,
         upstream: state.upstream,
@@ -333,8 +333,8 @@ fn to_status_wire(state: oximux_core::GitState) -> GitStatusWire {
     }
 }
 
-fn to_index_wire(status: oximux_core::IndexStatus) -> IndexStatusWire {
-    use oximux_core::IndexStatus as S;
+fn to_index_wire(status: trex_core::IndexStatus) -> IndexStatusWire {
+    use trex_core::IndexStatus as S;
     match status {
         S::Unmodified => IndexStatusWire::Unmodified,
         S::Modified => IndexStatusWire::Modified,
@@ -348,8 +348,8 @@ fn to_index_wire(status: oximux_core::IndexStatus) -> IndexStatusWire {
     }
 }
 
-fn to_worktree_wire(status: oximux_core::WorktreeStatus) -> WorktreeStatusWire {
-    use oximux_core::WorktreeStatus as S;
+fn to_worktree_wire(status: trex_core::WorktreeStatus) -> WorktreeStatusWire {
+    use trex_core::WorktreeStatus as S;
     match status {
         S::Unmodified => WorktreeStatusWire::Unmodified,
         S::Modified => WorktreeStatusWire::Modified,
@@ -365,7 +365,7 @@ fn to_worktree_wire(status: oximux_core::WorktreeStatus) -> WorktreeStatusWire {
 mod tests {
     use std::path::PathBuf;
 
-    use oximux_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
+    use trex_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
 
     use super::{IndexStatusWire, WorktreeStatusWire, to_status_wire};
 

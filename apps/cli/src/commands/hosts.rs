@@ -1,4 +1,4 @@
-//! `oximux hosts` and `oximux pair` — the client half of pairing, and the
+﻿//! `TREX hosts` and `TREX pair` — the client half of pairing, and the
 //! named-host book the resolution order reads.
 //!
 //! `pair` and `hosts add` are one operation with two ergonomics: paste a link
@@ -11,7 +11,7 @@
 
 use std::time::Duration;
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -95,7 +95,7 @@ pub async fn pair(
 
     let is_default = hosts.default.as_deref() == Some(name.as_str());
     let human = format!(
-        "paired with {name} as \"{device_name}\"{}\ntry it with `oximux --host {name} ls`",
+        "paired with {name} as \"{device_name}\"{}\ntry it with `TREX --host {name} ls`",
         if is_default { " (now the default host)" } else { "" }
     );
     Ok((host_json(hosts.get(&name).expect("just written"), is_default), human))
@@ -138,7 +138,7 @@ pub async fn ls(probe: bool, timeout_secs: u64) -> Result<(Value, String), Failu
     if hosts.entries.is_empty() {
         return Ok((
             json!([]),
-            "no paired hosts — `oximux pair <ticket>` adds one\n\
+            "no paired hosts — `TREX pair <ticket>` adds one\n\
              (with none, every verb talks to this machine's own host)"
                 .to_string(),
         ));
@@ -227,7 +227,7 @@ pub async fn rm(name: &str, timeout_secs: u64) -> Result<(Value, String), Failur
     let mut hosts = HostsFile::load(&config)?;
     let Some(entry) = hosts.get(name).cloned() else {
         return Err(Failure::new("unknown-host", exit::USAGE, format!("no host named `{name}`"))
-            .with_steps(["`oximux hosts ls` shows what is paired".into()]));
+            .with_steps(["`TREX hosts ls` shows what is paired".into()]));
     };
 
     let unpaired = match Client::connect_remote(&config, &entry, timeout_secs).await {
@@ -244,7 +244,7 @@ pub async fn rm(name: &str, timeout_secs: u64) -> Result<(Value, String), Failur
     } else {
         format!(
             "removed {name} locally — the host could not be reached, so it may still list this \
-             device\nclear it there with `oximux pair-ls` / `pair-rm` when it is back"
+             device\nclear it there with `TREX pair-ls` / `pair-rm` when it is back"
         )
     };
     Ok((json!({ "removed": name, "unpaired_host_side": unpaired }), human))
@@ -255,7 +255,7 @@ pub fn set_default(name: &str) -> Result<(Value, String), Failure> {
     let mut hosts = HostsFile::load(&config)?;
     if hosts.get(name).is_none() {
         return Err(Failure::new("unknown-host", exit::USAGE, format!("no host named `{name}`"))
-            .with_steps(["`oximux hosts ls` shows what is paired".into()]));
+            .with_steps(["`TREX hosts ls` shows what is paired".into()]));
     }
     hosts.default = Some(name.to_string());
     hosts.save(&config)?;

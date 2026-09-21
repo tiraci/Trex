@@ -1,5 +1,5 @@
-[package]
-name = "oximux-agent-core"
+﻿[package]
+name = "trex-agent-core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,12 +8,12 @@ publish.workspace = true
 rust-version.workspace = true
 
 # Dependency-minimal, mobile-portable core: the ThreadEvent wire vocabulary, the
-# stream-json decoder, and the ChatThread fold — with NO oximux-pty / rusqlite /
-# agent-client-protocol / gpui deps. Both the desktop `oximux-agents` crate and
+# stream-json decoder, and the ChatThread fold — with NO trex-pty / rusqlite /
+# agent-client-protocol / gpui deps. Both the desktop `trex-agents` crate and
 # the phone's Rust core (`mobile-core`/`remote-session`) depend on this, so the
 # fold that renders a transcript is shared verbatim across desktop and mobile.
 [features]
-# Transcript snapshot harness (`thread::snapshot`). Test-only: `oximux-agents`
+# Transcript snapshot harness (`thread::snapshot`). Test-only: `trex-agents`
 # enables it from dev-dependencies so both crates pin transcripts with one
 # harness instead of growing two. Off in every shipping build.
 test-support = []
@@ -28,7 +28,7 @@ serde_json = { workspace = true }
 # This crate's own integration test (`tests/transcript_snapshots.rs`) uses
 # `thread::snapshot`, which is behind `test-support`. Without this line the
 # feature reached it only by Cargo unifying features across a `--workspace`
-# build, borrowed from `oximux-agents`'s dev-dependency — so `cargo test -p
-# oximux-agent-core` failed to compile while CI stayed green. A crate's tests
+# build, borrowed from `trex-agents`'s dev-dependency — so `cargo test -p
+# trex-agent-core` failed to compile while CI stayed green. A crate's tests
 # must not depend on which *other* crate happens to be in the same build.
-oximux-agent-core = { path = ".", features = ["test-support"] }
+trex-agent-core = { path = ".", features = ["test-support"] }

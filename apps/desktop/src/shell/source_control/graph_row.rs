@@ -1,4 +1,4 @@
-//! Commit-graph row renderer + ref-chip cluster + hover tooltip body.
+﻿//! Commit-graph row renderer + ref-chip cluster + hover tooltip body.
 //!
 //! Lives outside `graph.rs` so the `CommitGraph` entity module stays
 //! under the 800-LOC hard cap as the v2 polish pass adds the
@@ -18,8 +18,8 @@ use gpui::{
     WeakEntity, div, prelude::FluentBuilder as _, px,
 };
 use gpui_component::tooltip::Tooltip;
-use oximux_core::{CommitInfo, RefLabel};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{CommitInfo, RefLabel};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::source_control::graph::{CommitGraph, ShowCommitRequested};
 use crate::shell::source_control::graph_gutter::graph_gutter;
@@ -227,7 +227,7 @@ fn render_ref_chips(
     refs: &[RefLabel],
     row_id: &str,
     theme: Theme,
-    density: oximux_settings::Density,
+    density: trex_settings::Density,
     typography: &Typography,
 ) -> Option<gpui::Div> {
     if refs.is_empty() {
@@ -284,7 +284,7 @@ fn render_ref_chips(
 fn ref_chip_for(
     r: &RefLabel,
     theme: Theme,
-    density: oximux_settings::Density,
+    density: trex_settings::Density,
     typography: &Typography,
 ) -> gpui::Div {
     let style = ScmStyle::new(density, typography);

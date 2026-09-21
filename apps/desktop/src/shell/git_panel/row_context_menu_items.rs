@@ -1,4 +1,4 @@
-//! Card builders + low-level menu_row primitives for the
+﻿//! Card builders + low-level menu_row primitives for the
 //! [`crate::shell::git_panel::row_context_menu::GitRowContextMenu`]
 //! entity. Split out so the menu's own module stays under the 500-LOC
 //! warn cap — entity state + render dispatch live there; this file
@@ -11,7 +11,7 @@ use gpui::{
     ClipboardItem, Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
     ParentElement, SharedString, Styled, WeakEntity, Window, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 use std::path::{Path, PathBuf};
 
 pub(super) const ROW_PADDING_X: f32 = 10.0;

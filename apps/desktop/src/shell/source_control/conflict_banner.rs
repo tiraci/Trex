@@ -1,4 +1,4 @@
-//! Amber-bordered status cards rendered above the file list when the
+﻿//! Amber-bordered status cards rendered above the file list when the
 //! worktree is in an unhappy state:
 //!
 //! - [`render_conflict_summary_card`] — "N unresolved conflicts" with
@@ -28,8 +28,8 @@ use gpui_component::{
     Disableable, Icon, Sizable as _,
     button::{Button, ButtonVariants as _},
 };
-use oximux_core::GitOperation;
-use oximux_settings::Theme;
+use trex_core::GitOperation;
+use trex_settings::Theme;
 
 use crate::shell::source_control::style::ScmStyle;
 
@@ -240,7 +240,7 @@ mod tests {
 
     #[test]
     fn operation_banner_labels_each_op_kind() {
-        // Mirrors oximux_core::GitOperation::banner_label — the UI
+        // Mirrors trex_core::GitOperation::banner_label — the UI
         // surfacing of those strings is THIS module's responsibility,
         // so locking them here catches drift between the core enum
         // and what users actually see.

@@ -1,4 +1,4 @@
-{
+﻿{
   "fill" : {
     "automatic-gradient" : "extended-srgb:0.08235,0.09020,0.10196,1.00000"
   },
@@ -6,8 +6,8 @@
     {
       "layers" : [
         {
-          "image-name" : "oximux-mark.svg",
-          "name" : "oximux-mark"
+          "image-name" : "trex-mark.svg",
+          "name" : "trex-mark"
         }
       ],
       "shadow" : {

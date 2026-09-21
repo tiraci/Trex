@@ -1,14 +1,14 @@
-use std::collections::{HashMap, VecDeque};
+﻿use std::collections::{HashMap, VecDeque};
 use std::ops::ControlFlow;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use anyhow::{Result, anyhow, bail};
-use oximux_pty::{
+use trex_pty::{
     Cell, SpawnConfig, TerminalBackend, TerminalEvent, TerminalSessionId, TerminalSnapshot,
     TerminalState, apply_color_fg_bg, background_polarity,
 };
-use oximux_relay_proto::{Notification, Request, Response};
+use trex_relay_proto::{Notification, Request, Response};
 use tokio::runtime::Handle;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::task::JoinHandle;
@@ -22,14 +22,14 @@ const SCROLLBACK_ROWS: usize = 5000;
 const STATUS_EVENT_CAPACITY: usize = 256;
 
 /// Debug-only output-arrival probe, paired with the app-side input/echo trace.
-/// Off unless `OXIMUX_INPUT_TRACE` is set; appends to the same log file so the
+/// Off unless `trex_INPUT_TRACE` is set; appends to the same log file so the
 /// `send_bytes → output_arrived` gap (the remote program's own response time)
 /// can be separated from `output_arrived → echo_render` (our drain/render).
 fn arrival_trace(bytes: usize) {
     use std::io::Write as _;
     use std::sync::OnceLock;
     static ENABLED: OnceLock<bool> = OnceLock::new();
-    if !*ENABLED.get_or_init(|| std::env::var_os("OXIMUX_INPUT_TRACE").is_some()) {
+    if !*ENABLED.get_or_init(|| std::env::var_os("TREX_INPUT_TRACE").is_some()) {
         return;
     }
     let micros = std::time::SystemTime::now()
@@ -39,7 +39,7 @@ fn arrival_trace(bytes: usize) {
     if let Ok(mut f) = std::fs::OpenOptions::new()
         .create(true)
         .append(true)
-        .open("/tmp/oximux_input_trace.log")
+        .open("/tmp/trex_input_trace.log")
     {
         let _ = writeln!(f, "{micros} output_arrived n={bytes}");
     }
@@ -91,7 +91,7 @@ pub struct RelayBackend {
     /// Per-session event-driven drain signals. The pump invokes the matching
     /// waker right after enqueuing output so the UI drains on arrival instead
     /// of polling a (throttled) timer. Shared with each pump task by Arc clone.
-    output_wakers: Arc<Mutex<HashMap<TerminalSessionId, oximux_pty::OutputWaker>>>,
+    output_wakers: Arc<Mutex<HashMap<TerminalSessionId, trex_pty::OutputWaker>>>,
     /// Session ids inherited from a predecessor backend that died with
     /// the old daemon (crash-recovery swap). Each id yields exactly one
     /// synthetic `Exit { code: None }` from `drain_events[_for]`, so
@@ -424,7 +424,7 @@ fn apply_relay_notification(
             push_event(queues, id, TerminalEvent::Exit { id, code });
             ControlFlow::Break(())
         }
-        // Explicit `oximux notify` → raise the same pane attention as a
+        // Explicit `TREX notify` → raise the same pane attention as a
         // bell. (title/body are carried on the wire for a future OS-banner
         // surface; not consumed here yet.)
         Notification::Attention { .. } => {
@@ -459,7 +459,7 @@ impl TerminalBackend for RelayBackend {
         self.attach_relay_pty(external_id)
     }
 
-    fn set_output_waker(&mut self, id: TerminalSessionId, waker: oximux_pty::OutputWaker) {
+    fn set_output_waker(&mut self, id: TerminalSessionId, waker: trex_pty::OutputWaker) {
         lock_recover(&self.output_wakers, "output wakers").insert(id, waker);
     }
 
@@ -489,7 +489,7 @@ impl TerminalBackend for RelayBackend {
         // The daemon spawns the child but has no idea what the window looks
         // like — it is a detached process with no theme of its own. So the
         // polarity has to ride the wire in the environment the app sends
-        // (see `oximux_pty::polarity`).
+        // (see `trex_pty::polarity`).
         let mut env = cfg.env;
         apply_color_fg_bg(&mut env, background_polarity());
         let resp = self.request(Request::Spawn {
@@ -625,7 +625,7 @@ impl TerminalBackend for RelayBackend {
         Ok(snap)
     }
 
-    fn input_mode(&self, id: TerminalSessionId) -> oximux_pty::InputMode {
+    fn input_mode(&self, id: TerminalSessionId) -> trex_pty::InputMode {
         let sessions = lock_recover(&self.sessions, "sessions");
         sessions
             .get(&id)
@@ -633,7 +633,7 @@ impl TerminalBackend for RelayBackend {
             .unwrap_or_default()
     }
 
-    fn mouse_mode(&self, id: TerminalSessionId) -> oximux_pty::MouseMode {
+    fn mouse_mode(&self, id: TerminalSessionId) -> trex_pty::MouseMode {
         let sessions = lock_recover(&self.sessions, "sessions");
         sessions
             .get(&id)
@@ -715,7 +715,7 @@ impl TerminalBackend for RelayBackend {
                 // matching prefill_grid can resize the receiver to the
                 // captured dimensions before replay. Without this, an
                 // 80-col capture replayed into a 200-col Term scrambles.
-                oximux_pty::serialize_term_capped_with_dims(s.term_for_test(), max_bytes)
+                trex_pty::serialize_term_capped_with_dims(s.term_for_test(), max_bytes)
             })
             .unwrap_or_default()
     }
@@ -729,7 +729,7 @@ impl TerminalBackend for RelayBackend {
             // Match the portable backend: parse the dim header if
             // present, resize the dormant Term to match, then advance
             // the body. Legacy blobs (no header) replay as before.
-            if let Some((cols, rows, payload)) = oximux_pty::parse_capture_header(bytes) {
+            if let Some((cols, rows, payload)) = trex_pty::parse_capture_header(bytes) {
                 let cols = cols.clamp(1, 1024);
                 let rows = rows.clamp(1, 512);
                 state.resize(cols, rows);
@@ -870,7 +870,7 @@ impl TerminalBackend for RelayBackend {
                 // PtyNotFound on close is benign — the relay already
                 // reaped it (e.g., from the child exiting first).
                 Ok(Response::Err {
-                    code: oximux_relay_proto::ErrCode::PtyNotFound,
+                    code: trex_relay_proto::ErrCode::PtyNotFound,
                     ..
                 }) => {}
                 Ok(other) => {
@@ -928,7 +928,7 @@ impl TerminalBackend for RelayBackend {
                 Ok(Response::Ok) => {}
                 // PtyNotFound is benign — the PTY was already reaped.
                 Ok(Response::Err {
-                    code: oximux_relay_proto::ErrCode::PtyNotFound,
+                    code: trex_relay_proto::ErrCode::PtyNotFound,
                     ..
                 }) => {}
                 Ok(other) => {
@@ -1237,7 +1237,7 @@ mod tests {
         );
     }
 
-    // An explicit `oximux notify` Attention notification raises the same
+    // An explicit `TREX notify` Attention notification raises the same
     // pane attention as a bell and keeps the pump running.
     #[test]
     fn attention_notification_emits_bell_and_continues() {

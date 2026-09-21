@@ -1,9 +1,9 @@
-//! Computer use on Windows: approving a driver that nobody signed.
+﻿//! Computer use on Windows: approving a driver that nobody signed.
 //!
 //! The macOS pane next door asks "is the driver installed and does it pass the
 //! signature gate?", and the answer arrives from Apple. Windows has no such
 //! answer to fetch — every published `cua-driver.exe` is `NotSigned` — so
-//! `oximux_computer_use::trust` moves the decision to the person who can
+//! `trex_computer_use::trust` moves the decision to the person who can
 //! actually make it, and this pane is where they make it.
 //!
 //! # What the screen has to show, and why each piece is load-bearing
@@ -37,7 +37,7 @@
 //!
 //! # Installing from here
 //!
-//! OxiMux can also fetch the driver itself (`oximux_computer_use::install`),
+//! TREX can also fetch the driver itself (`trex_computer_use::install`),
 //! and that changes nothing above. The download is checked against the
 //! checksum upstream publishes beside it, which is corruption cover and not a
 //! signature — the file still arrives unsigned, and the approval it asks for
@@ -46,7 +46,7 @@
 use std::path::PathBuf;
 
 use gpui::{AnyElement, IntoElement, ParentElement, SharedString, Styled, div, px};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 use super::controls::{info_row, value_chip};
@@ -98,7 +98,7 @@ pub(crate) enum TrustState {
 
 impl TrustState {
     pub(crate) fn resolve() -> Self {
-        Self::from_prepare(oximux_computer_use::prepare(&store()))
+        Self::from_prepare(trex_computer_use::prepare(&store()))
     }
 
     /// The mapping, split from [`TrustState::resolve`] so it can be tested
@@ -108,9 +108,9 @@ impl TrustState {
     /// to the user, and a mis-mapped one is invisible in review — the pane still
     /// renders, just with the wrong story.
     fn from_prepare(
-        outcome: Result<oximux_computer_use::VerifiedDriver, oximux_computer_use::Error>,
+        outcome: Result<trex_computer_use::VerifiedDriver, trex_computer_use::Error>,
     ) -> Self {
-        use oximux_computer_use::Error;
+        use trex_computer_use::Error;
         match outcome {
             Ok(driver) => TrustState::Approved {
                 sha256: driver.sha256,
@@ -191,7 +191,7 @@ pub(super) fn driver_entry(
 ) -> SettingEntry {
     entry(
         "Driver",
-        // No longer "a helper you install yourself" — OxiMux can fetch it now,
+        // No longer "a helper you install yourself" — TREX can fetch it now,
         // and the Install button beside this says so. What the sentence keeps is
         // the part no button conveys: you approve it.
         //
@@ -299,7 +299,7 @@ fn driver_control(
         ));
     }
 
-    // Re-check exists because the driver may also be installed outside OxiMux:
+    // Re-check exists because the driver may also be installed outside TREX:
     // a user who installs it while this pane is open would otherwise have to
     // reopen the modal to be noticed.
     row.child(value_chip(
@@ -330,7 +330,7 @@ fn install_label(state: &TrustState) -> Option<&'static str> {
 /// an install observed from another window gets progress but no inert button.
 fn install_progress(
     modal: &SettingsModal,
-    stage: &oximux_computer_use::install::InstallStage,
+    stage: &trex_computer_use::install::InstallStage,
     theme: Theme,
     density: Density,
     typography: &Typography,
@@ -560,13 +560,13 @@ pub(super) fn detail_card(
 
 /// What a staged, not-yet-placed download is asking the user to accept.
 ///
-/// Says "unsigned" rather than letting the checksum imply otherwise: OxiMux did
+/// Says "unsigned" rather than letting the checksum imply otherwise: TREX did
 /// check the download against upstream's published hash, but that file ships
 /// from the same place as the binary, so it rules out corruption and not
 /// substitution. Presenting it as verification would be the one lie this pane
 /// exists to avoid.
 fn staged_evidence(
-    version: &oximux_computer_use::Version,
+    version: &trex_computer_use::Version,
     sha256: &str,
     bytes: u64,
     theme: Theme,
@@ -603,7 +603,7 @@ fn staged_evidence(
         .child(section_title(
             "What you are approving",
             "These binaries are unsigned, so nobody vouched for them. Approving pins these \
-             exact bytes — if they ever change, OxiMux asks again.",
+             exact bytes — if they ever change, TREX asks again.",
             theme,
             typography,
         ))
@@ -625,7 +625,7 @@ fn detail_blurb(state: &TrustState) -> &'static str {
             "This file is not the one you approved. Approve it only if you updated the driver \
              yourself."
         }
-        TrustState::Approved { .. } => "OxiMux will refuse this driver if these bytes change.",
+        TrustState::Approved { .. } => "TREX will refuse this driver if these bytes change.",
         _ => "Compare this against the checksum published with the release before approving.",
     }
 }
@@ -723,7 +723,7 @@ mod tests {
 
     mod mapping {
         use super::*;
-        use oximux_computer_use::{Error, TrustBasis, VerifiedDriver, Version};
+        use trex_computer_use::{Error, TrustBasis, VerifiedDriver, Version};
         use std::time::SystemTime;
 
         #[test]

@@ -1,4 +1,4 @@
-//! Ports panel — what this machine is currently serving, and which of it is
+﻿//! Ports panel — what this machine is currently serving, and which of it is
 //! yours.
 //!
 //! **Why this is a panel and not a log line.** A dev server prints its URL
@@ -44,8 +44,8 @@ use gpui_component::{
     Disableable as _, Icon, Sizable as _,
     button::{Button, ButtonVariants as _},
 };
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::SettingsRepo;
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::SettingsRepo;
 
 use crate::app_settings::port_label_settings;
 use crate::workspace_root::WorkspaceRoot;
@@ -360,7 +360,7 @@ impl Focusable for PortsPanel {
 
 impl Render for PortsPanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(
+        trex_settings::appearance::sync(
             &mut self.theme,
             &mut self.density,
             &mut self.typography,
@@ -551,7 +551,7 @@ impl PortsPanel {
                     })
                     .xsmall()
                     // An svg paints transparent without one: see
-                    // `oximux-app-svg-icons-need-assets-registration`.
+                    // `trex-app-svg-icons-need-assets-registration`.
                     .text_color(theme.fg_subtle),
             )
             .child(

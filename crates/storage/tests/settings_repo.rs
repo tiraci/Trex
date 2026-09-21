@@ -1,6 +1,6 @@
-//! SettingsRepo integration tests — upsert + delete + missing-key semantics.
+﻿//! SettingsRepo integration tests — upsert + delete + missing-key semantics.
 
-use oximux_storage::{SettingsRepo, open_memory};
+use trex_storage::{SettingsRepo, open_memory};
 
 fn repo() -> SettingsRepo {
     SettingsRepo::new(open_memory().expect("open memory"))

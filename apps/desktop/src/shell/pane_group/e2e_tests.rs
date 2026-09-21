@@ -1,4 +1,4 @@
-//! GPUI headless E2E tests for per-pane tab strip and Cmd+W cascade.
+﻿//! GPUI headless E2E tests for per-pane tab strip and Cmd+W cascade.
 //!
 //! These live inside the crate (not in `apps/desktop/tests/`) so they can
 //! reach `pub(crate)` handlers on `PaneGroup` — specifically
@@ -31,8 +31,8 @@ use std::sync::{Arc, atomic::AtomicBool};
 use gpui::{AppContext, Context, Entity, Subscription, TestAppContext, Window};
 use tempfile::TempDir;
 
-use oximux_agents::CliRuntime;
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::CliRuntime;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{CloseTab, SplitSubPaneRight};
 use crate::keymap_registry::default_bindings as default_key_bindings;
@@ -210,7 +210,7 @@ async fn close_tab_cascade_closes_per_pane_tab_before_group_tab(cx: &mut TestApp
 fn active_lone_view(
     window: &gpui::WindowHandle<PaneGroup>,
     cx: &mut TestAppContext,
-) -> (Entity<TerminalView>, oximux_pty::TerminalSessionId) {
+) -> (Entity<TerminalView>, trex_pty::TerminalSessionId) {
     cx.read(|app| {
         let group = window.read(app).expect("PaneGroup alive");
         let tab = group.active_tab().expect("active tab");

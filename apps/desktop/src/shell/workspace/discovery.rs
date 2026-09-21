@@ -1,7 +1,7 @@
-//! External worktree discovery: the set difference between what git knows
+﻿//! External worktree discovery: the set difference between what git knows
 //! and what the database tracks.
 //!
-//! OxiMux's rail renders only rows from its own `workspaces` table. A worktree
+//! TREX's rail renders only rows from its own `workspaces` table. A worktree
 //! made by `git worktree add` in a terminal, or by another tool, is invisible
 //! even though it sits in the same repository. Git keeps the registry of every
 //! linked worktree in the main repository (`.git/worktrees/`), so one
@@ -14,7 +14,7 @@
 
 use std::path::{Path, PathBuf};
 
-use oximux_core::WorktreeInfo;
+use trex_core::WorktreeInfo;
 
 /// A worktree git lists for a project that no `workspaces` row points at.
 #[derive(Debug, Clone, PartialEq, Eq)]

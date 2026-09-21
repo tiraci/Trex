@@ -1,4 +1,4 @@
-//! Spawn the planned agent CLI and harvest its commit-message output.
+﻿//! Spawn the planned agent CLI and harvest its commit-message output.
 //!
 //! Translates [`super::plan::CommitMessagePlan`] into a `tokio::process`
 //! call: pipes the prompt over stdin (when the plan says so), drains
@@ -29,7 +29,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 use thiserror::Error;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
@@ -104,7 +104,7 @@ pub async fn run_plan(
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         // Sandboxed env hygiene — same hardening pattern as
-        // `oximux_git::process::GitCmd`. Don't let a user pager or
+        // `trex_git::process::GitCmd`. Don't let a user pager or
         // credential helper hijack the agent CLI; force ASCII C
         // locale so the model receives deterministic byte sequences.
         .env("LANG", "C")
@@ -247,7 +247,7 @@ mod tests {
     /// about binary resolution — `run_plan_returns_binary_not_found_for_missing_command`
     /// is, and it deliberately still spawns a bare name directly.
     fn shell_plan(command: &str, stdin: Option<&str>) -> CommitMessagePlan {
-        use oximux_shell_env::test_support::{run_script, test_shell};
+        use trex_shell_env::test_support::{run_script, test_shell};
         CommitMessagePlan {
             binary: test_shell(),
             args: run_script(&[command]),
@@ -276,7 +276,7 @@ mod tests {
 
     #[tokio::test]
     async fn run_plan_returns_binary_not_found_for_missing_command() {
-        let plan = plan_for("oximux-non-existent-binary-xyz", vec![], None);
+        let plan = plan_for("trex-non-existent-binary-xyz", vec![], None);
         let result = run_plan(plan, &tmp_cwd(), Arc::new(AtomicBool::new(false)), GENERATION_TIMEOUT).await;
         match result {
             Err(GenerationError::BinaryNotFound { .. }) => {}

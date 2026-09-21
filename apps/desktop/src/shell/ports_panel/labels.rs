@@ -1,4 +1,4 @@
-//! Every string a person reads about a listening port.
+﻿//! Every string a person reads about a listening port.
 //!
 //! One module because two surfaces read this data — the panel and the status
 //! bar — and two surfaces wording the same fact differently is how "3 ports"
@@ -165,7 +165,7 @@ mod tests {
         // path is one single component everywhere but Windows — asserting it
         // here on macOS would demand the wrong answer.
         #[cfg(windows)]
-        assert_eq!(project_label(&PathBuf::from("D:\\Projects\\OxiMux")), "OxiMux");
+        assert_eq!(project_label(&PathBuf::from("D:\\Projects\\TREX")), "TREX");
     }
 
     #[test]

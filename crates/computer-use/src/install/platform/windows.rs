@@ -1,7 +1,7 @@
-//! The Windows recipe: unsigned bytes, a person for a gate, a junction for a
+﻿//! The Windows recipe: unsigned bytes, a person for a gate, a junction for a
 //! swap.
 //!
-//! # Why OxiMux downloads this itself
+//! # Why TREX downloads this itself
 //!
 //! Upstream ships `install.ps1`, and it verifies nothing — no checksum, no
 //! signature — while a per-asset `checksums.txt` sits unused in the same
@@ -17,7 +17,7 @@
 //! them. That is not cosmetic parity — Windows refuses to overwrite a running
 //! `.exe`, so retargeting a junction is the only upgrade that works while the
 //! driver is live. Matching upstream's paths also means the two installers
-//! coexist: OxiMux can install over theirs, and theirs over OxiMux's.
+//! coexist: TREX can install over theirs, and theirs over TREX's.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -51,7 +51,7 @@ const THEME_REQUIRED_FROM: Version = Version::new(0, 12, 7);
 const EXTRACT_CEILING: u64 = 512 * 1024 * 1024;
 
 /// Per-version directories kept after a successful install. Upstream keeps
-/// five; two is a rollback and the one that replaced it. OxiMux is not a
+/// five; two is a rollback and the one that replaced it. TREX is not a
 /// version manager.
 const KEEP_RELEASES: usize = 2;
 

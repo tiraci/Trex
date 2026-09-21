@@ -1,4 +1,4 @@
-//! The outcome-to-UI half of `Merge into <default>`.
+﻿//! The outcome-to-UI half of `Merge into <default>`.
 //!
 //! `MergeOutcome::AutoStashed` **wraps** another variant instead of sitting
 //! beside it, so the real shape of a merge result is a cross-product —
@@ -14,14 +14,14 @@
 
 use std::path::PathBuf;
 
-use oximux_app::shell::merge_notices::{
+use trex_app::shell::merge_notices::{
     NoticeReason, StashNotice, acknowledge, for_project, load, record,
 };
-use oximux_app::shell::merge_ops::{MergeReport, MergeReportKind, report_for};
-use oximux_core::{MergeOutcome, StashRef};
-use oximux_storage::{SettingsRepo, open_memory};
+use trex_app::shell::merge_ops::{MergeReport, MergeReportKind, report_for};
+use trex_core::{MergeOutcome, StashRef};
+use trex_storage::{SettingsRepo, open_memory};
 
-const BRANCH: &str = "oximux/fix-login";
+const BRANCH: &str = "TREX/fix-login";
 const DEFAULT: &str = "main";
 
 fn report(outcome: MergeOutcome) -> MergeReport {
@@ -303,7 +303,7 @@ fn a_stranded_stash_is_readable_again_after_the_toast_is_gone() {
     let reason = r.stranded.expect("stranded");
     record(
         &repo,
-        StashNotice::new("p1", "/repos/app", BRANCH, "oximux: auto-stash before merge", reason),
+        StashNotice::new("p1", "/repos/app", BRANCH, "TREX: auto-stash before merge", reason),
     );
 
     // A new read, as a later session would do it.
@@ -313,7 +313,7 @@ fn a_stranded_stash_is_readable_again_after_the_toast_is_gone() {
     assert_eq!(pending[0].reason, NoticeReason::Conflicted);
     assert_eq!(
         pending[0].stash_message,
-        oximux_git::AUTO_STASH_MESSAGE,
+        trex_git::AUTO_STASH_MESSAGE,
         "the notice must remember the message git actually wrote, or it can \
          never be resolved"
     );
@@ -338,7 +338,7 @@ fn a_failed_merge_notice_survives_the_store_and_claims_no_merge() {
             "p1",
             "/repos/app",
             BRANCH,
-            oximux_git::AUTO_STASH_MESSAGE,
+            trex_git::AUTO_STASH_MESSAGE,
             NoticeReason::MergeFailed,
         ),
     );
@@ -367,7 +367,7 @@ fn the_notice_carries_the_host_details_and_never_an_index() {
         "p1",
         "/repos/app",
         BRANCH,
-        oximux_git::AUTO_STASH_MESSAGE,
+        trex_git::AUTO_STASH_MESSAGE,
         NoticeReason::PopFailed,
     );
     assert_eq!(n.project_root, "/repos/app");

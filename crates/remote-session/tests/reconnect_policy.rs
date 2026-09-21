@@ -1,10 +1,10 @@
-//! The reconnect policy exercised purely through its public API: the backoff
+﻿//! The reconnect policy exercised purely through its public API: the backoff
 //! schedule, the give-up rule (surfacing the last cause), reset-on-success, and the
 //! guard that a stray loss signal can't resurrect a given-up connection.
 
 use std::time::Duration;
 
-use oximux_remote_session::{ConnAction, ConnState, Reconnect};
+use trex_remote_session::{ConnAction, ConnState, Reconnect};
 
 fn secs(n: u64) -> Duration {
     Duration::from_secs(n)

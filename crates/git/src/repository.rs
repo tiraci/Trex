@@ -1,4 +1,4 @@
-//! `Repository` — handle for one git working tree.
+﻿//! `Repository` — handle for one git working tree.
 //!
 //! Validates on open via `git rev-parse --show-toplevel` and stores the canonical
 //! working-tree root. All subsequent git commands run from that root, so callers
@@ -9,7 +9,7 @@ use crate::error::{GitError, Result};
 use crate::numstat;
 use crate::process::GitCmd;
 use crate::status;
-use oximux_core::{BranchInfo, CombinedDiff, CombinedDiffScope, FileDiff, FileGroup, GitState};
+use trex_core::{BranchInfo, CombinedDiff, CombinedDiffScope, FileDiff, FileGroup, GitState};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
@@ -29,7 +29,7 @@ const DIFF_TIMEOUT: Duration = Duration::from_secs(30);
 /// `commit_files`) — NOT to `diff_unstaged`/`diff_staged`, which feed
 /// hunk-count-sensitive callers and tests with git's default 3-line
 /// context. The diff view re-derives stageable hunks from the full-context
-/// diff via `oximux_core::change_regions`, so per-hunk staging keeps its
+/// diff via `trex_core::change_regions`, so per-hunk staging keeps its
 /// `git add -p` granularity. The large-diff guard
 /// (`LARGE_DIFF_LINE_THRESHOLD`) still collapses oversized files, and the
 /// virtualized renderer keeps a fully expanded big file cheap to paint.
@@ -295,7 +295,7 @@ impl Repository {
     /// at `None` (no badge), never fails the poll.
     async fn fill_untracked_counts(&self, state: &mut GitState) {
         use futures::StreamExt;
-        use oximux_core::WorktreeStatus;
+        use trex_core::WorktreeStatus;
 
         let candidates: Vec<PathBuf> = state
             .files
@@ -394,7 +394,7 @@ impl Repository {
     pub async fn diff_for_path(&self, path: &Path, staged: bool) -> Result<Vec<FileDiff>> {
         // Full-file context so the diff view can scroll the whole document;
         // per-hunk staging granularity is recovered downstream via
-        // `oximux_core::change_regions`.
+        // `trex_core::change_regions`.
         let extra: &[&str] = if staged {
             &[FULL_FILE_CONTEXT, "--cached"]
         } else {
@@ -428,7 +428,7 @@ impl Repository {
     /// `path` may be relative-to-workdir or absolute inside the workdir;
     /// resolution mirrors `diff_for_path`.
     pub async fn diff_for_untracked(&self, path: &Path) -> Result<Vec<FileDiff>> {
-        use oximux_core::{
+        use trex_core::{
             DiffHunk, DiffLine, DiffLineKind, DiffStatus, LARGE_DIFF_LINE_THRESHOLD,
         };
 
@@ -655,7 +655,7 @@ impl Repository {
     /// single file's read failure is logged and skipped — the rest of the
     /// combined view still renders.
     async fn untracked_diffs(&self, state: &GitState) -> Vec<FileDiff> {
-        use oximux_core::{IndexStatus, WorktreeStatus};
+        use trex_core::{IndexStatus, WorktreeStatus};
         // Read + synthesize every untracked file CONCURRENTLY rather than one
         // at a time — a combined "Untracked" view over many files otherwise
         // blocks on a long sequential chain of disk reads. `join_all`

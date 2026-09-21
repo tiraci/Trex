@@ -1,11 +1,11 @@
-//! Stash operations on `Repository`: `is_dirty`, `stash_push`, `stash_list`,
+﻿//! Stash operations on `Repository`: `is_dirty`, `stash_push`, `stash_list`,
 //! `stash_apply`, `stash_pop`, `stash_drop`. Thin wrappers over `git stash` +
 //! `git status --porcelain` (for `is_dirty`). All ops are async.
 
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;
 use crate::repository::Repository;
-use oximux_core::{StashEntry, StashRef};
+use trex_core::{StashEntry, StashRef};
 
 impl Repository {
     /// Working tree or index has any tracked changes (untracked files do NOT
@@ -45,7 +45,7 @@ impl Repository {
         }
         // SAFETY (v1 single-user): `git stash push` always lands the new entry
         // at `stash@{0}`. We don't round-trip through `stash list --format=%gd`
-        // to verify because v1 is single-user (OxiMux + the user's terminal)
+        // to verify because v1 is single-user (TREX + the user's terminal)
         // and no concurrent stash op can race between push-return and the
         // caller using this ref. See `StashRef::index` doc for the broader
         // index-drift caveat that holds across all v1 stash operations.

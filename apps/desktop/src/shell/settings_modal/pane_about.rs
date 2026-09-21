@@ -1,4 +1,4 @@
-//! Appearance + About panes: design tokens, build facts, and the update
+﻿//! Appearance + About panes: design tokens, build facts, and the update
 //! controls.
 //!
 //! The About pane is where *all* update feedback lives. Checking, downloading
@@ -21,10 +21,10 @@ use gpui_component::button::Button;
 // clicks. `dropdown_caret(true)` keeps the chevron look on a single trigger.
 use gpui_component::menu::{DropdownMenu as _, PopupMenuItem};
 #[cfg(any(target_os = "macos", windows))]
-use oximux_auto_update::{CheckTrigger, UpdateStatus};
+use trex_auto_update::{CheckTrigger, UpdateStatus};
 #[cfg(any(target_os = "macos", windows))]
-use oximux_settings::AutoUpdateSettings;
-use oximux_settings::{Density, DensityPreset, Theme, ThemeChoice, Typography, UsageDetail};
+use trex_settings::AutoUpdateSettings;
+use trex_settings::{Density, DensityPreset, Theme, ThemeChoice, Typography, UsageDetail};
 
 use super::controls::info_row;
 #[cfg(any(target_os = "macos", windows))]
@@ -38,7 +38,7 @@ use crate::updater::UpdaterState;
 
 /// Where a user goes when the app cannot update itself.
 #[cfg(any(target_os = "macos", windows))]
-const RELEASES_URL: &str = "https://github.com/nhtera/OxiMux/releases/latest";
+const RELEASES_URL: &str = "https://github.com/tiraci/Trex/releases/latest";
 
 /// One face's picker: a dropdown labelled by the family in use, opening the
 /// machine's font list with the platform default at the top.
@@ -139,7 +139,7 @@ fn font_item(
 ///
 /// Density and zoom are separate rows on purpose — they are easy to mistake
 /// for one control, and the descriptions are where that distinction gets
-/// made. See `oximux_settings::appearance`.
+/// made. See `trex_settings::appearance`.
 fn appearance_controls(
     theme: Theme,
     density: Density,
@@ -217,14 +217,14 @@ fn appearance_controls(
     let ui_font = font_control(
         "appearance-ui-font",
         faces.ui.clone(),
-        oximux_settings::fonts::platform::UI,
+        trex_settings::fonts::platform::UI,
         crate::font_settings::set_ui,
         cx,
     );
     let mono_font = font_control(
         "appearance-mono-font",
         faces.mono.clone(),
-        oximux_settings::fonts::platform::MONO,
+        trex_settings::fonts::platform::MONO,
         crate::font_settings::set_mono,
         cx,
     );
@@ -282,7 +282,7 @@ fn about_pairs() -> Vec<(SharedString, SharedString)> {
         .map(|p| p.to_string_lossy().to_string())
         .unwrap_or_else(|| "(unavailable)".to_string());
     vec![
-        ("OxiMux version".into(), SharedString::from(version)),
+        ("TREX version".into(), SharedString::from(version)),
         ("App data dir".into(), SharedString::from(data_dir)),
         (
             "Settings files".into(),
@@ -455,7 +455,7 @@ fn status_colour(status: &UpdateStatus, theme: Theme) -> gpui::Hsla {
 #[cfg(any(target_os = "macos", windows))]
 fn update_control(
     theme: Theme,
-    density: oximux_settings::Density,
+    density: trex_settings::Density,
     typography: &Typography,
     cx: &mut gpui::Context<SettingsModal>,
 ) -> AnyElement {
@@ -524,7 +524,7 @@ fn update_control(
 /// read-only facts stay a plain list.
 pub(super) fn update_entries(
     theme: Theme,
-    density: oximux_settings::Density,
+    density: trex_settings::Density,
     typography: &Typography,
     cx: &mut gpui::Context<SettingsModal>,
 ) -> Vec<SettingEntry> {
@@ -550,7 +550,7 @@ pub(super) fn update_entries(
         entry(
             "Automatic updates",
             "Check for new versions in the background. Updates apply when you \
-             quit — OxiMux never restarts on its own.",
+             quit — TREX never restarts on its own.",
             super::controls::toggle_switch(
                 "auto-update-enabled",
                 enabled,
@@ -580,7 +580,7 @@ pub(super) fn update_entries(
 pub(super) fn render_about(
     query: &str,
     theme: Theme,
-    density: oximux_settings::Density,
+    density: trex_settings::Density,
     typography: &Typography,
     cx: &mut gpui::Context<SettingsModal>,
 ) -> AnyElement {

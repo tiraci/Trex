@@ -1,4 +1,4 @@
-//! Remote operations on `Repository`: push / pull / sync / publish_branch
+﻿//! Remote operations on `Repository`: push / pull / sync / publish_branch
 //! and the read-only `list_remote_branches` lookup that backs the
 //! BaseRef picker.
 //!
@@ -11,7 +11,7 @@
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;
 use crate::repository::Repository;
-use oximux_core::BranchInfo;
+use trex_core::BranchInfo;
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 

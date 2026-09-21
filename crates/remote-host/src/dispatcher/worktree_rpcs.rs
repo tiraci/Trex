@@ -1,4 +1,4 @@
-//! The worktree RPC handlers (v16): create, list, remove — each behind the
+﻿//! The worktree RPC handlers (v16): create, list, remove — each behind the
 //! dedicated full-scope worktree gates, delegating the real work to the app's
 //! [`WorktreeService`](crate::worktrees::WorktreeService).
 //!
@@ -7,9 +7,9 @@
 //! capability cannot be probed without the scope to use it. Only an authorized
 //! caller on a service-less host sees `Unsupported`.
 
-use oximux_core::WorkPhase;
-use oximux_remote_proto::messages::CreateBaseWire;
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_core::WorkPhase;
+use trex_remote_proto::messages::CreateBaseWire;
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;
@@ -53,7 +53,7 @@ impl Dispatcher {
         // Everything else this surface exposes is host-derived from a project
         // the host already knows and a slug it validates; the client never
         // names a location. A base ref is the exception — a string the host
-        // resolves and checks out — and `oximux-worktree-ops` additionally
+        // resolves and checks out — and `trex-worktree-ops` additionally
         // refuses to run an unreviewed ref's setup script. That guard covers
         // the local CLI. For a peer that is not sitting at the machine, the
         // stronger property is the one worth keeping: it cannot name a ref at
@@ -180,12 +180,12 @@ mod tests {
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     use ed25519_dalek::SigningKey;
-    use oximux_remote_proto::messages::{RegisterReq, WorktreeProgressWire, WorktreeWire};
+    use trex_remote_proto::messages::{RegisterReq, WorktreeProgressWire, WorktreeWire};
 
     use super::*;
     use crate::auth::{AuthStore, PairingSlot, registration_proof};
     use crate::dispatcher::Dispatcher;
-    use oximux_agents::session_registry::SessionRegistry;
+    use trex_agents::session_registry::SessionRegistry;
     use crate::worktrees::WorktreeService;
 
     /// Records what actually reached the service, so a refusal that never got
@@ -206,7 +206,7 @@ mod tests {
             self.creates.fetch_add(1, Ordering::SeqCst);
             let branch = match base {
                 CreateBaseWire::Existing(name) => name.clone(),
-                CreateBaseWire::Default | CreateBaseWire::From(_) => format!("oximux/{slug}"),
+                CreateBaseWire::Default | CreateBaseWire::From(_) => format!("TREX/{slug}"),
             };
             Ok(WorktreeWire {
                 id: "wt-1".into(),

@@ -1,5 +1,5 @@
-import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { RunOutcome, type ScheduleRun } from 'oximux-core';
+﻿import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { RunOutcome, type ScheduleRun } from 'trex-core';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

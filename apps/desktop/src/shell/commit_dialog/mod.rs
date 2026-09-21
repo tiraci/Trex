@@ -1,4 +1,4 @@
-//! CommitDialog — modal that gathers subject + body + conventional prefix,
+﻿//! CommitDialog — modal that gathers subject + body + conventional prefix,
 //! assembles the full commit message, and dispatches `Repository::commit()`.
 //!
 //! Composition (vertical):
@@ -32,8 +32,8 @@ use gpui_component::{
     button::{Button, ButtonVariants},
     input::{Input, InputState, Textarea, TextareaState},
 };
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
 use tokio::sync::oneshot;
 
 #[derive(Debug)]
@@ -122,7 +122,7 @@ impl CommitDialog {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::commit_dialog",
+                    target: "trex_app::commit_dialog",
                     "no tokio runtime entered; commit skipped (step 14 wires runtime)"
                 );
                 self.state = CommitDialogState::Failed {
@@ -159,7 +159,7 @@ impl Focusable for CommitDialog {
 
 impl Render for CommitDialog {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = &self.typography;

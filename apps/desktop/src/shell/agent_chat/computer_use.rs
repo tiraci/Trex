@@ -1,21 +1,21 @@
-//! Screen-control enforcement, hung off the permission round-trip.
+﻿//! Screen-control enforcement, hung off the permission round-trip.
 //!
 //! The driver runs as its own process that the agent talks to directly, so
-//! OxiMux is not in the tool-dispatch path and cannot gate a call by wrapping
+//! TREX is not in the tool-dispatch path and cannot gate a call by wrapping
 //! it. The one place we are in the path is `can_use_tool`: the agent asks
 //! before running a tool, and that ask arrives as
 //! [`ThreadEvent::PermissionRequested`]. Everything here hangs off that single
 //! interception point — a check placed anywhere else would simply never run.
 //!
-//! [`ThreadEvent::PermissionRequested`]: oximux_agents::thread::ThreadEvent::PermissionRequested
+//! [`ThreadEvent::PermissionRequested`]: trex_agents::thread::ThreadEvent::PermissionRequested
 //!
 //! ## What this does not cover
 //!
-//! Only tools from the server *OxiMux* declares. A user who wires the same
+//! Only tools from the server *TREX* declares. A user who wires the same
 //! driver into their own agent config under a different server name gets tool
 //! names this never matches, and no policy at all. That is a real gap and it
 //! belongs to the broader safety work, not here — the point of noting it is
-//! that the enforcement is scoped to what OxiMux itself hands the agent.
+//! that the enforcement is scoped to what TREX itself hands the agent.
 
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -24,15 +24,15 @@ use std::sync::{Arc, LazyLock};
 use std::time::SystemTime;
 
 use gpui::App;
-use oximux_agents::thread::{AgentConnection, ConnectSpec, ThreadEvent, Transport};
-use oximux_computer_use::grants::{GrantTable, Provenance, Verdict};
-use oximux_computer_use::mcp::Declaration;
-use oximux_computer_use::policy::{PolicyContext, decide};
-use oximux_computer_use::session::SessionId;
-use oximux_settings::ComputerUseSettings;
+use trex_agents::thread::{AgentConnection, ConnectSpec, ThreadEvent, Transport};
+use trex_computer_use::grants::{GrantTable, Provenance, Verdict};
+use trex_computer_use::mcp::Declaration;
+use trex_computer_use::policy::{PolicyContext, decide};
+use trex_computer_use::session::SessionId;
+use trex_settings::ComputerUseSettings;
 use serde_json::Value;
 
-pub use oximux_computer_use::policy::Decision;
+pub use trex_computer_use::policy::Decision;
 
 /// Where grants live for the whole app.
 ///
@@ -58,7 +58,7 @@ pub fn grants_path() -> PathBuf {
         // No data dir is a broken install; keep screen control working against
         // a temp store rather than failing the whole app to death over it.
         .unwrap_or_else(std::env::temp_dir)
-        .join(oximux_computer_use::grants::GRANTS_FILE_NAME)
+        .join(trex_computer_use::grants::GRANTS_FILE_NAME)
 }
 
 /// Where the user's driver approval is recorded, on the one platform that has
@@ -75,8 +75,8 @@ pub fn grants_path() -> PathBuf {
 /// one machine and must not follow the user to another. The grant store's use of
 /// the roaming dir is a pre-existing inconsistency, not a precedent.
 #[cfg(windows)]
-pub fn trust_store() -> oximux_computer_use::TrustStore {
-    oximux_computer_use::TrustStore::for_app_data_dir(
+pub fn trust_store() -> trex_computer_use::TrustStore {
+    trex_computer_use::TrustStore::for_app_data_dir(
         crate::app_paths::data_dir().unwrap_or_else(std::env::temp_dir),
     )
 }
@@ -88,13 +88,13 @@ pub fn trust_store() -> oximux_computer_use::TrustStore {
 /// install that pinned into a different store would end with a driver the pane
 /// calls approved and every chat refuses.
 #[cfg(windows)]
-pub fn install_anchor() -> oximux_computer_use::install::Anchor {
+pub fn install_anchor() -> trex_computer_use::install::Anchor {
     trust_store()
 }
 
 #[cfg(not(windows))]
-pub fn install_anchor() -> oximux_computer_use::install::Anchor {
-    oximux_computer_use::install::Anchor
+pub fn install_anchor() -> trex_computer_use::install::Anchor {
+    trex_computer_use::install::Anchor
 }
 
 /// Put the installed driver through every gate this platform has.
@@ -104,13 +104,13 @@ pub fn install_anchor() -> oximux_computer_use::install::Anchor {
 /// the Windows signature takes that store as an argument precisely so no caller
 /// can forget to name one.
 #[cfg(not(windows))]
-fn verified_driver() -> Result<oximux_computer_use::VerifiedDriver, oximux_computer_use::Error> {
-    oximux_computer_use::prepare()
+fn verified_driver() -> Result<trex_computer_use::VerifiedDriver, trex_computer_use::Error> {
+    trex_computer_use::prepare()
 }
 
 #[cfg(windows)]
-fn verified_driver() -> Result<oximux_computer_use::VerifiedDriver, oximux_computer_use::Error> {
-    oximux_computer_use::prepare(&trust_store())
+fn verified_driver() -> Result<trex_computer_use::VerifiedDriver, trex_computer_use::Error> {
+    trex_computer_use::prepare(&trust_store())
 }
 
 /// Drop every grant from a previous run. Called once at startup: grants are
@@ -147,7 +147,7 @@ pub struct ScreenControl {
     session: SessionId,
     /// What `session` was derived from, kept because the out-of-process gate is
     /// told the chat and derives the session itself. Handing it `session` would
-    /// give it `oximux-oximux-chat-1` and a store lookup that matches nothing —
+    /// give it `trex-trex-chat-1` and a store lookup that matches nothing —
     /// a chat that silently holds no grants rather than an error.
     label: String,
     /// The worktree this chat runs in, plus when it started — together, what
@@ -316,7 +316,7 @@ impl ScreenControl {
 /// could be an older copy, or something else entirely with the same name.
 ///
 /// Returns `None` when it is not there — which happens in a development build
-/// that was compiled without it (`cargo build -p oximux-app` alone does not
+/// that was compiled without it (`cargo build -p trex-app` alone does not
 /// produce it). The caller must then decline to declare screen control at all,
 /// because a hook command pointing at a missing file is a hook that never
 /// refuses anything.
@@ -324,7 +324,7 @@ fn gate_binary() -> Option<PathBuf> {
     let gate = std::env::current_exe()
         .ok()?
         .parent()?
-        .join(oximux_computer_use::gate_binary_file_name());
+        .join(trex_computer_use::gate_binary_file_name());
     gate.is_file().then_some(gate)
 }
 
@@ -406,7 +406,7 @@ pub fn connect_declaring(
     cx: &App,
 ) -> anyhow::Result<(Arc<dyn AgentConnection>, Receiver<ThreadEvent>)> {
     declare(&mut spec, chat, cx);
-    oximux_agents::thread::connect(spec)
+    trex_agents::thread::connect(spec)
 }
 
 /// What a chat's spawn should carry, decided from resolved inputs.
@@ -430,9 +430,9 @@ fn plan(
     if transport != Transport::StreamJson {
         return None;
     }
-    Some(oximux_computer_use::mcp::declaration(
+    Some(trex_computer_use::mcp::declaration(
         driver().as_deref(),
-        &oximux_computer_use::mcp::HookSpec {
+        &trex_computer_use::mcp::HookSpec {
             command: gate,
             chat: &chat.label,
             grants,
@@ -450,8 +450,8 @@ fn plan(
 ///
 /// Two questions, cheapest first. The settings answer covers an opted-in root
 /// and everything beneath it, which is every chat that sits inside the project.
-/// It cannot cover a worktree: OxiMux creates those *outside* the project
-/// (under the configured worktree root, `~/OxiMux/worktrees/<project>/<slug>`
+/// It cannot cover a worktree: TREX creates those *outside* the project
+/// (under the configured worktree root, `~/TREX/worktrees/<project>/<slug>`
 /// by default), so no containment rule reaches one. Resolving the worktree
 /// back to the repository that owns it is
 /// what makes "verify the build you just made" work in the isolation this
@@ -465,7 +465,7 @@ fn enabled_here(cwd: &Path, cx: &App) -> bool {
         return false;
     };
     settings.is_enabled_for(cwd)
-        || oximux_git::main_worktree_of(cwd).is_some_and(|main| settings.is_enabled_for(&main))
+        || trex_git::main_worktree_of(cwd).is_some_and(|main| settings.is_enabled_for(&main))
 }
 
 impl Drop for ScreenControl {
@@ -482,7 +482,7 @@ impl Drop for ScreenControl {
 #[cfg(test)]
 /// A process that outlives the test, to stand in for an app being driven.
 ///
-/// Platform-split for the same reason `oximux_computer_use::fixtures` is:
+/// Platform-split for the same reason `trex_computer_use::fixtures` is:
 /// none of these tests are about *which* binary is running. They are about
 /// grants, pids and cards, and `/bin/sleep` was only ever the cheapest way
 /// to get a live pid — a fact that stayed invisible while the whole module
@@ -529,10 +529,10 @@ mod view_tests {
     use std::sync::Arc;
 
     use gpui::TestAppContext;
-    use oximux_agents::thread::{StubConnection, ThreadEvent};
+    use trex_agents::thread::{StubConnection, ThreadEvent};
     use serde_json::json;
 
-    use oximux_settings::{Density, Theme, Typography};
+    use trex_settings::{Density, Theme, Typography};
 
     use super::{long_lived_name, spawn_long_lived};
     use super::super::AgentChatView;
@@ -597,7 +597,7 @@ mod view_tests {
 
     /// A screen-control call must reach the policy from the ordinary event path
     /// — this is the whole premise of the design, since the driver is a separate
-    /// process OxiMux is otherwise not between. A `type_text` with no `pid`
+    /// process TREX is otherwise not between. A `type_text` with no `pid`
     /// targets whatever window the user is in, so it comes back denied, with the
     /// reason carried to the agent rather than a bare refusal.
     #[gpui::test]
@@ -610,11 +610,11 @@ mod view_tests {
                     ThreadEvent::PermissionRequested {
                         request_id: "r1".into(),
                         tool_use_id: Some("t1".into()),
-                        tool_name: "mcp__oximux-computer-use__type_text".into(),
+                        tool_name: "mcp__trex-computer-use__type_text".into(),
                         input: json!({ "text": "rm -rf /" }),
                         description: String::new(),
                         suggestions: vec![],
-                        kind: oximux_agents::thread::PermissionKind::Tool,
+                        kind: trex_agents::thread::PermissionKind::Tool,
                     },
                     cx,
                 );
@@ -659,7 +659,7 @@ mod view_tests {
                 view.on_event(
                     ThreadEvent::ToolCallStarted {
                         id: "t1".into(),
-                        name: "mcp__oximux-computer-use__get_window_state".into(),
+                        name: "mcp__trex-computer-use__get_window_state".into(),
                         input: json!({ "pid": pid, "window_id": 1 }),
                     },
                     cx,
@@ -672,7 +672,7 @@ mod view_tests {
                 view.on_event(
                     ThreadEvent::ToolResultImages {
                         tool_use_id: "t1".into(),
-                        images: vec![oximux_agents::thread::ChatImage {
+                        images: vec![trex_agents::thread::ChatImage {
                             media_type: "image/png".into(),
                             data: "AAAA".into(),
                         }],
@@ -713,7 +713,7 @@ mod view_tests {
                 view.on_event(
                     ThreadEvent::ToolResultImages {
                         tool_use_id: "t1".into(),
-                        images: vec![oximux_agents::thread::ChatImage {
+                        images: vec![trex_agents::thread::ChatImage {
                             media_type: "image/png".into(),
                             data: "AAAA".into(),
                         }],
@@ -743,7 +743,7 @@ mod view_tests {
                     .expect("spawn a target");
                 let input = json!({ "pid": target.id() });
                 view.screen_control
-                    .approve("mcp__oximux-computer-use__click", &input)
+                    .approve("mcp__trex-computer-use__click", &input)
                     .expect("an ungranted target is approvable");
                 assert!(!driving_by(view).is_empty(), "approving starts the driving turn");
 
@@ -792,11 +792,11 @@ mod view_tests {
                     ThreadEvent::PermissionRequested {
                         request_id: "r1".into(),
                         tool_use_id: Some("t1".into()),
-                        tool_name: "mcp__oximux-computer-use__click".into(),
+                        tool_name: "mcp__trex-computer-use__click".into(),
                         input: json!({ "pid": target.id() }),
                         description: String::new(),
                         suggestions: vec![],
-                        kind: oximux_agents::thread::PermissionKind::Screen,
+                        kind: trex_agents::thread::PermissionKind::Screen,
                     },
                     cx,
                 );
@@ -843,19 +843,19 @@ mod view_tests {
                     ThreadEvent::PermissionRequested {
                         request_id: "r1".into(),
                         tool_use_id: Some("t1".into()),
-                        tool_name: "mcp__oximux-computer-use__click".into(),
+                        tool_name: "mcp__trex-computer-use__click".into(),
                         input: json!({ "pid": pid }),
                         description: String::new(),
                         suggestions: vec![],
-                        kind: oximux_agents::thread::PermissionKind::Screen,
+                        kind: trex_agents::thread::PermissionKind::Screen,
                     },
                     cx,
                 );
                 // A second call to the same process, of the kind that arrives
                 // with no permission request at all once the target is granted.
-                let later = oximux_agents::thread::ToolCall::new(
+                let later = trex_agents::thread::ToolCall::new(
                     "t2",
-                    "mcp__oximux-computer-use__type_text",
+                    "mcp__trex-computer-use__type_text",
                     json!({ "pid": pid, "text": "hello" }),
                 );
                 let ctx = view.screen_context(&later);
@@ -897,7 +897,7 @@ mod view_tests {
                         input: json!({ "command": "ls" }),
                         description: "ls".into(),
                         suggestions: vec![],
-                        kind: oximux_agents::thread::PermissionKind::Tool,
+                        kind: trex_agents::thread::PermissionKind::Tool,
                     },
                     cx,
                 );
@@ -922,7 +922,7 @@ mod tests {
 
     /// A live process standing in for "some app the agent wants to drive".
     ///
-    /// Not our own pid: OxiMux is refused outright, because an agent that can
+    /// Not our own pid: TREX is refused outright, because an agent that can
     /// drive us can approve its own consent cards. A spawned child is also
     /// closer to what these tests claim to be about.
     struct Target(std::process::Child);
@@ -981,15 +981,15 @@ mod tests {
     }
 
     fn ns(tool: &str) -> String {
-        format!("mcp__oximux-computer-use__{tool}")
+        format!("mcp__trex-computer-use__{tool}")
     }
 
     fn gate() -> &'static Path {
-        Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux-screen-gate")
+        Path::new("/Applications/trex.app/Contents/MacOS/trex-screen-gate")
     }
 
     fn host() -> &'static Path {
-        Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux")
+        Path::new("/Applications/trex.app/Contents/MacOS/TREX")
     }
 
     fn planned(transport: Transport, driver: Option<&str>) -> Option<Declaration> {
@@ -1030,7 +1030,7 @@ mod tests {
         let v: Value = serde_json::from_str(&declared.hook_settings).expect("valid json");
         let hook = &v["hooks"]["PreToolUse"][0];
         let command = hook["hooks"][0]["command"].as_str().expect("command");
-        assert!(command.contains("oximux-screen-gate"), "{command}");
+        assert!(command.contains("trex-screen-gate"), "{command}");
         // And the shell is in its matcher, which is the entire point of putting
         // it on a chat that has no screen-control tools to police.
         let matcher = hook["matcher"].as_str().expect("matcher");
@@ -1174,7 +1174,7 @@ mod tests {
         // restart at 1 every run, so a surviving `chat-1` row is addressed to
         // the id the next run's first chat mints.
         let dir = tempfile::tempdir().expect("tempdir");
-        let path = dir.path().join(oximux_computer_use::grants::GRANTS_FILE_NAME);
+        let path = dir.path().join(trex_computer_use::grants::GRANTS_FILE_NAME);
         let target = Target::spawn();
         let input = json!({ "pid": target.pid() });
 
@@ -1345,7 +1345,7 @@ mod enablement_tests {
     }
 
     /// A committed repo plus a linked worktree beside it — a worktree that is
-    /// not a child of the project, which is the shape every OxiMux-created
+    /// not a child of the project, which is the shape every trex-created
     /// worktree has.
     fn repo_with_worktree() -> (tempfile::TempDir, PathBuf, PathBuf) {
         let tmp = tempfile::tempdir().expect("tempdir");
@@ -1358,7 +1358,7 @@ mod enablement_tests {
         git(&project, &["add", "a.txt"]);
         git(&project, &["commit", "-m", "init"]);
 
-        let worktree = tmp.path().join("oximux-wt-feat-x");
+        let worktree = tmp.path().join("trex-wt-feat-x");
         git(
             &project,
             &["worktree", "add", worktree.to_str().expect("utf8"), "-b", "feat"],

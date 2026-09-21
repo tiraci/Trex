@@ -1,13 +1,13 @@
-//! How a computer-use call reads once it is over.
+﻿//! How a computer-use call reads once it is over.
 //!
 //! "Computer use" is the user-facing name throughout — the settings pane, these
 //! cards, the run summary. Internal identifiers still say `screen_*`, which is
 //! the older spelling and is left alone deliberately: renaming `ScreenControl`
 //! and friends would touch every phase's code for no reader's benefit, and the
-//! crate underneath has always been `oximux-computer-use` anyway.
+//! crate underneath has always been `trex-computer-use` anyway.
 //!
 //! By default these render through the generic MCP path:
-//! `oximux-computer-use · type_text` with a line of raw JSON under it, thirty
+//! `trex-computer-use · type_text` with a line of raw JSON under it, thirty
 //! times in a row. That is a log, not a record — and this is the one tool family
 //! where the transcript *is* the audit trail, because the actions happened in
 //! windows the user was not looking at while the agent drove them.
@@ -29,7 +29,7 @@
 //! remembered says `process 4321` rather than guessing, which is also what a
 //! restored transcript shows — the memo is deliberately not persisted.
 
-use oximux_agents::thread::{ToolCall, ToolCallStatus};
+use trex_agents::thread::{ToolCall, ToolCallStatus};
 use serde_json::Value;
 
 use super::bubble::elide;
@@ -44,9 +44,9 @@ use super::bubble::elide;
 /// redactor quietly stopped recognising it — which would look like a cosmetic
 /// regression and be an egress.
 ///
-/// [`scrub_transcript`]: oximux_computer_use::scrub_transcript
+/// [`scrub_transcript`]: trex_computer_use::scrub_transcript
 pub(super) fn is_screen_call(name: &str) -> bool {
-    oximux_computer_use::is_computer_use_tool(name)
+    trex_computer_use::is_computer_use_tool(name)
 }
 
 /// How long a typed string may run in the collapsed header before it elides.
@@ -71,13 +71,13 @@ const VERBS: &[(&str, &str)] = &[
 /// every other tool, which keeps its own label untouched.
 ///
 /// Keeps the `<server> · <tool>` shape every other MCP card uses, swapping the
-/// raw server id (`oximux-computer-use ·`) — which names OxiMux's own plumbing —
+/// raw server id (`trex-computer-use ·`) — which names TREX's own plumbing —
 /// for the term the settings pane and the wider industry both use. Deliberately
-/// not "Screen ·": OxiMux's Remote feature genuinely is controlling this screen
+/// not "Screen ·": TREX's Remote feature genuinely is controlling this screen
 /// from elsewhere, and one vocabulary for two unrelated things is how a user
 /// ends up believing their phone is driving these clicks.
 pub(super) fn display_name(tc: &ToolCall) -> Option<String> {
-    let bare = oximux_computer_use::bare_tool_name(&tc.name)?;
+    let bare = trex_computer_use::bare_tool_name(&tc.name)?;
     Some(format!("Computer use · {}", verb(bare, &tc.input)))
 }
 
@@ -157,7 +157,7 @@ fn argument(input: &Value) -> Option<String> {
 /// The pid comes from the policy's own accessor rather than a second read of the
 /// field, so the header can never name a target the policy did not decide about.
 fn addressee(input: &Value, app: Option<&str>) -> Option<String> {
-    let pid = oximux_computer_use::policy::addressed_pid(input)?;
+    let pid = trex_computer_use::policy::addressed_pid(input)?;
     Some(match app {
         Some(app) => app.to_string(),
         None => format!("process {pid}"),
@@ -218,8 +218,8 @@ pub(super) fn outcome(tc: &ToolCall) -> Option<String> {
 /// A `Rejected` with no result is the third case — the user clicked the button,
 /// and needs no explanation of their own decision.
 ///
-/// [`Refusal::reason`]: oximux_computer_use::tools::Refusal::reason
-/// [`set_tool_refusal`]: oximux_agents::thread::ChatThread::set_tool_refusal
+/// [`Refusal::reason`]: trex_computer_use::tools::Refusal::reason
+/// [`set_tool_refusal`]: trex_agents::thread::ChatThread::set_tool_refusal
 pub(super) fn refusal(tc: &ToolCall) -> Option<&str> {
     let reason = match &tc.status {
         ToolCallStatus::Failed(reason) => reason.as_str(),
@@ -235,7 +235,7 @@ mod tests {
     use serde_json::json;
 
     fn ns(tool: &str) -> String {
-        format!("mcp__oximux-computer-use__{tool}")
+        format!("mcp__trex-computer-use__{tool}")
     }
 
     fn call(tool: &str, input: Value) -> ToolCall {
@@ -249,11 +249,11 @@ mod tests {
     fn the_renderer_and_the_redactor_agree_on_what_a_screen_call_is() {
         for tool in ["click", "type_text", "get_window_state"] {
             assert!(is_screen_call(&ns(tool)), "{tool}");
-            assert!(oximux_computer_use::is_computer_use_tool(&ns(tool)), "{tool}");
+            assert!(trex_computer_use::is_computer_use_tool(&ns(tool)), "{tool}");
         }
         for other in ["Bash", "Read", "mcp__computer-use__left_click", "mcp__github__issue"] {
             assert!(!is_screen_call(other), "{other}");
-            assert!(!oximux_computer_use::is_computer_use_tool(other), "{other}");
+            assert!(!trex_computer_use::is_computer_use_tool(other), "{other}");
         }
     }
 

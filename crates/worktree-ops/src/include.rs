@@ -1,10 +1,10 @@
-//! `.oximuxinclude` — copying a project's untracked local files into a fresh
+﻿//! `.TREXinclude` — copying a project's untracked local files into a fresh
 //! worktree.
 //!
 //! A git worktree gets every *tracked* file for free and none of the untracked
 //! ones. That is correct for git and useless for the user: the `.env`, the dev
 //! certs, and the local overrides that the setup script and the app both need
-//! stay behind in the main checkout. `.oximuxinclude` is the project's
+//! stay behind in the main checkout. `.TREXinclude` is the project's
 //! declaration of which of those a worktree cannot work without.
 //!
 //! It is committed, so it names *paths*, never secrets — the files it points at
@@ -55,7 +55,7 @@ use std::path::{Component, Path, PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 
 /// File name, at the project root.
-pub const FILE_NAME: &str = ".oximuxinclude";
+pub const FILE_NAME: &str = ".TREXinclude";
 
 /// Upper bound on directory entries visited while expanding wildcard patterns.
 /// Only reachable by a pattern anchored at the repo root; see the module note.
@@ -117,13 +117,13 @@ pub struct CopyReport {
 }
 
 impl CopyReport {
-    /// True when there was no `.oximuxinclude`, or it declared nothing.
+    /// True when there was no `.TREXinclude`, or it declared nothing.
     pub fn is_empty(&self) -> bool {
         self.copied.is_empty() && self.skipped.is_empty()
     }
 }
 
-/// Copy the files `<project_root>/.oximuxinclude` declares into `worktree`.
+/// Copy the files `<project_root>/.TREXinclude` declares into `worktree`.
 ///
 /// Best-effort by contract: an absent file is a no-op, and every per-path
 /// problem lands in [`CopyReport::skipped`] rather than aborting the rest.
@@ -311,7 +311,7 @@ fn collect(
     };
     for entry in entries.flatten() {
         // Budgeted on every branch, literal included. A named directory is not
-        // inherently small — `.oximuxinclude` naming `vendor/` walks whatever
+        // inherently small — `.TREXinclude` naming `vendor/` walks whatever
         // is in it, and an unbounded walk during worktree creation is the
         // failure this cap exists to make visible.
         if *budget == 0 {

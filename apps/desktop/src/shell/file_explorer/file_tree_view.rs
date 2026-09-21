@@ -1,4 +1,4 @@
-//! FileTreeView — virtualized file-tree pane subscribed to a step-3
+﻿//! FileTreeView — virtualized file-tree pane subscribed to a step-3
 //! `Entity<FileTree>`. Lazy expand on click, fires `on_open` for files.
 //!
 //! Rendering uses `gpui::uniform_list` directly (same as `FileExplorer`)
@@ -13,8 +13,8 @@ use gpui::{
     Styled, Subscription, UniformListScrollHandle, Window, div, prelude::FluentBuilder, px,
     uniform_list,
 };
-use oximux_editor::{FileTree, FileTreeEvent, FileTreeNode, TreeNodeId};
-use oximux_settings::{Density, Theme, Typography};
+use trex_editor::{FileTree, FileTreeEvent, FileTreeNode, TreeNodeId};
+use trex_settings::{Density, Theme, Typography};
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -171,7 +171,7 @@ impl FileTreeView {
                 self.tree.update(cx, |t, cx| t.expand(id, cx));
             }
             FileTreeEvent::WatchError(msg) => {
-                tracing::warn!(target: "oximux_app::file_tree_view", "watch error: {msg}");
+                tracing::warn!(target: "trex_app::file_tree_view", "watch error: {msg}");
             }
         }
     }
@@ -356,10 +356,10 @@ impl Render for FileTreeView {
         // here or the file tree stays at 100% while everything beside it moves.
         // The palette is pulled for the same reason and must land *before*
         // the snapshot below, or this frame paints the previous theme.
-        self.theme = oximux_settings::appearance::theme(cx);
+        self.theme = trex_settings::appearance::theme(cx);
         let theme = self.theme;
-        let typography = oximux_settings::appearance::typography(cx);
-        let density = oximux_settings::appearance::density(cx);
+        let typography = trex_settings::appearance::typography(cx);
+        let density = trex_settings::appearance::density(cx);
         // Resolve the focused-editor file path once per render. Cached
         // into the uniform_list closure so every row's match check is a
         // cheap `==` instead of an Arc call per row.

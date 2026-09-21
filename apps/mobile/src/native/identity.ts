@@ -1,4 +1,4 @@
-import * as Crypto from 'expo-crypto';
+﻿import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 
 import { fromBase64, toBase64 } from './base64';
@@ -13,7 +13,7 @@ import { fromBase64, toBase64 } from './base64';
  * silently clone an authorized device — the desktop authorizes *keys*, and has no
  * way to tell two holders of the same key apart.
  */
-const SEED_KEY = 'oximux.identity.seed.v1';
+const SEED_KEY = 'TREX.identity.seed.v1';
 
 const SEED_BYTES = 32;
 

@@ -1,13 +1,13 @@
-//! Agent glue — the host-side wiring that keeps live agents coherent.
+﻿//! Agent glue — the host-side wiring that keeps live agents coherent.
 //!
 //! What is still *here* is what needs the app: `agent_awake` (sleep-assertion
 //! and App-Nap suppression while agents run) and `screen_control_watch`.
 //!
-//! The status-hook half moved to the `oximux-agent-hooks` crate, because the
+//! The status-hook half moved to the `trex-agent-hooks` crate, because the
 //! CLI has to install and inspect the same hooks the app does and a verb that
 //! only worked while the GUI was up would be useless exactly when it is
 //! reached for. It is re-exported below under its historical names, so every
-//! `crate::agent_hook_dialects::…` / `oximux_app::agent_status_hooks::…` call
+//! `crate::agent_hook_dialects::…` / `trex_app::agent_status_hooks::…` call
 //! site resolves unchanged.
 
 pub mod agent_awake;
@@ -16,7 +16,7 @@ pub mod agent_awake;
 pub mod screen_control_watch;
 
 #[doc(inline)]
-pub use oximux_agent_hooks::{
+pub use trex_agent_hooks::{
     agent_hook_dialects, agent_hooks_global, agent_status_hooks, pi_status_extension,
 };
 

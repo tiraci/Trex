@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
-# Drive the REAL `oximux serve` and `oximux worktree` against a REAL git repo.
+﻿#!/usr/bin/env bash
+# Drive the REAL `TREX serve` and `TREX worktree` against a REAL git repo.
 #
-#   scripts/live-verify-worktree.sh                        # target/debug/oximux-cli
-#   scripts/live-verify-worktree.sh path/to/oximux         # or a binary you name
+#   scripts/live-verify-worktree.sh                        # target/debug/trex-cli
+#   scripts/live-verify-worktree.sh path/to/TREX         # or a binary you name
 #
 # Exits 0 when every check passes, 1 otherwise, and prints one PASS/FAIL line
 # per check so a failure names the property that broke.
@@ -31,8 +31,8 @@
 # design (usage errors), and pipefail would turn a matching grep into a failure.
 set -u
 
-CLI="${1:-target/debug/oximux-cli}"
-[ -x "$CLI" ] || { echo "no CLI at $CLI — build it first: cargo build -p oximux-cli" >&2; exit 2; }
+CLI="${1:-target/debug/trex-cli}"
+[ -x "$CLI" ] || { echo "no CLI at $CLI — build it first: cargo build -p trex-cli" >&2; exit 2; }
 CLI=$(cd "$(dirname "$CLI")" && pwd)/$(basename "$CLI")
 # `/usr/bin/sqlite3` explicitly: PATH may resolve to an Android SDK build whose
 # behaviour is not the system one's.
@@ -88,7 +88,7 @@ echo "HEAD: $(git branch --show-current)  (deliberately NOT the default branch)"
 # ---------------------------------------------------------------------------
 # The real host.
 # ---------------------------------------------------------------------------
-say "booting oximux serve"
+say "booting TREX serve"
 "$CLI" serve --data-dir "$ROOT/data" > "$ROOT/serve.out" 2> "$ROOT/serve.err" &
 SERVE_PID=$!
 for _ in $(seq 1 60); do [ -s "$ROOT/serve.out" ] && break; sleep 0.5; done
@@ -98,7 +98,7 @@ echo "host up, dataDir=$DIR"
 
 # The CLI has no `projects add`, so register the project the way the desktop
 # would — straight into the host's own database.
-"$SQLITE" "$ROOT/data/oximux.db" \
+"$SQLITE" "$ROOT/data/trex.db" \
   "INSERT INTO projects (id,name,root_path,default_branch,created_at) \
    VALUES ('p1','Live','$ROOT/repo','main','2026-01-01T00:00:00Z');" \
   || { echo "could not seed the project row" >&2; exit 1; }
@@ -112,28 +112,28 @@ id_of()     { python3 -c "import json,sys;print(json.load(sys.stdin)['data']['id
 say "1. plain create — the default branch lives only on the remote"
 OUT=$(wt create feat --project "$ROOT/repo" 2>&1)
 B=$(echo "$OUT" | branch_of 2>/dev/null)
-[ "$B" = "oximux/feat" ] && ok "branch is $B (git's DWIM did not hijack it onto 'main')" \
-                         || bad "branch is '$B', expected oximux/feat -- $OUT"
+[ "$B" = "TREX/feat" ] && ok "branch is $B (git's DWIM did not hijack it onto 'main')" \
+                         || bad "branch is '$B', expected TREX/feat -- $OUT"
 git rev-parse --verify --quiet main >/dev/null && bad "a local 'main' was created behind our back" \
                                                 || ok "no stray local 'main'"
-git rev-parse --verify --quiet oximux/feat >/dev/null && ok "oximux/feat exists (the row does not name a phantom)" \
-                                                      || bad "oximux/feat missing — the row names a branch that was never made"
-[ "$(git rev-parse oximux/feat)" = "$(git rev-parse origin/main)" ] \
+git rev-parse --verify --quiet TREX/feat >/dev/null && ok "TREX/feat exists (the row does not name a phantom)" \
+                                                      || bad "TREX/feat missing — the row names a branch that was never made"
+[ "$(git rev-parse TREX/feat)" = "$(git rev-parse origin/main)" ] \
   && ok "based on origin/main, not on the wip HEAD" \
-  || bad "based on $(git rev-parse --short oximux/feat), wanted origin/main $(git rev-parse --short origin/main)"
+  || bad "based on $(git rev-parse --short TREX/feat), wanted origin/main $(git rev-parse --short origin/main)"
 [ -f "$(echo "$OUT" | path_of)/c.txt" ] && bad "wip work leaked into the worktree" || ok "no wip files in the worktree"
 
 say "2. create --from <ref>"
 OUT=$(wt create fromside --project "$ROOT/repo" --from side 2>&1)
 B=$(echo "$OUT" | branch_of 2>/dev/null)
-[ "$B" = "oximux/fromside" ] && ok "branch is $B" || bad "branch is '$B' -- $OUT"
-[ "$(git rev-parse oximux/fromside)" = "$(git rev-parse side)" ] && ok "cut from 'side' exactly" || bad "not based on side"
+[ "$B" = "TREX/fromside" ] && ok "branch is $B" || bad "branch is '$B' -- $OUT"
+[ "$(git rev-parse TREX/fromside)" = "$(git rev-parse side)" ] && ok "cut from 'side' exactly" || bad "not based on side"
 
 say "3. create --branch <name> (adopt)"
 OUT=$(wt create --project "$ROOT/repo" --branch side 2>&1)
 B=$(echo "$OUT" | branch_of 2>/dev/null); ADOPTED_ID=$(echo "$OUT" | id_of 2>/dev/null)
 [ "$B" = "side" ] && ok "adopted 'side' under its own name" || bad "branch is '$B', expected side -- $OUT"
-git branch --format='%(refname:short)' | grep -q '^oximux/side$' \
+git branch --format='%(refname:short)' | grep -q '^TREX/side$' \
   && bad "a prefixed branch was minted anyway" || ok "no prefixed branch minted"
 
 # Adopt means adopt. A remote-tracking name would make git MINT a local branch,
@@ -177,9 +177,9 @@ fi
 say "7. deleting a MINTED worktree must still clean its branch up"
 MINTED_ID=$(wt ls 2>/dev/null | python3 -c "
 import json,sys
-print(next(r['id'] for r in json.load(sys.stdin)['data'] if r['branch']=='oximux/fromside'))" 2>/dev/null)
+print(next(r['id'] for r in json.load(sys.stdin)['data'] if r['branch']=='TREX/fromside'))" 2>/dev/null)
 "$CLI" --dir "$DIR" worktree rm "$MINTED_ID" >/dev/null 2>&1
-git rev-parse --verify --quiet oximux/fromside >/dev/null \
+git rev-parse --verify --quiet TREX/fromside >/dev/null \
   && bad "a minted branch leaked — cleanup regressed" || ok "minted branch cleaned up"
 
 say "RESULT"

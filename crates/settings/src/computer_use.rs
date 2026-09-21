@@ -1,4 +1,4 @@
-//! Screen-control settings, loaded from `computer_use.toml` in the app data dir
+﻿//! Screen-control settings, loaded from `computer_use.toml` in the app data dir
 //! and held as a GPUI [`Global`] so the settings pane and the agent spawn path
 //! read one source of truth.
 //!
@@ -16,22 +16,22 @@
 //! # What the project list does not do
 //!
 //! It scopes the *tools*, not the *permission*. Turning screen control on
-//! anywhere requires OxiMux to hold macOS Accessibility, because the Escape kill
+//! anywhere requires TREX to hold macOS Accessibility, because the Escape kill
 //! switch is an event tap and a tap does not exist without it. macOS attributes
-//! that grant to OxiMux as the responsible process, and every descendant
+//! that grant to TREX as the responsible process, and every descendant
 //! inherits it — measured, not assumed: a binary spawned from an agent's shell
 //! tool reports `AXIsProcessTrusted() == true`, through an intervening helper
 //! whose whole job is to disclaim responsibility.
 //!
 //! So an agent's shell can reach GUI automation in a project that never appears
-//! in this list. `oximux_computer_use::gui_scripting` refuses the obvious
+//! in this list. `trex_computer_use::gui_scripting` refuses the obvious
 //! commands that do, and the settings pane says so plainly rather than implying
 //! a fence that is not there.
 //!
-//! # Why this is not a `.oximux/` file
+//! # Why this is not a `.trex/` file
 //!
 //! Every other per-project setting in this crate lives in a git-committable
-//! `.oximux/*.toml` so a team can share it. That precedent is exactly wrong
+//! `.trex/*.toml` so a team can share it. That precedent is exactly wrong
 //! here: a repository could then ship `enabled = true` and cloning it would
 //! grant screen control before the user had seen a single line of its code.
 //! The opt-in is keyed by path but stored in the *user's* data dir, where a
@@ -154,7 +154,7 @@ impl ComputerUseSettings {
     /// would leave the pane listing a project whose chats silently get nothing.
     ///
     /// Containment is not the whole answer: a linked worktree lives *outside*
-    /// its project (under the configured worktree root, `~/OxiMux/worktrees`
+    /// its project (under the configured worktree root, `~/TREX/worktrees`
     /// by default), so no amount of prefix matching reaches it. Resolving a
     /// worktree back to its main repository needs git and belongs to the
     /// caller; this stays pure so it can be tested without one.

@@ -1,11 +1,11 @@
-import {
+﻿import {
   attachPromptText,
   checkStatus,
   checksSettled,
   checksSummary,
   relativeAge,
 } from '@/native/forge';
-import type { CheckRun, ForgeItem } from 'oximux-core';
+import type { CheckRun, ForgeItem } from 'trex-core';
 
 function check(bucket: string): CheckRun {
   return { name: 'build', bucket, link: '', description: '' };

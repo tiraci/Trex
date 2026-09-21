@@ -1,4 +1,4 @@
-//! Render for `ProjectPanes`: recursively walks the group tree and
+﻿//! Render for `ProjectPanes`: recursively walks the group tree and
 //! emits a flex layout where Split nodes become divider-separated rows
 //! / columns and Leaf nodes become `PaneGroup` entities.
 //!
@@ -173,7 +173,7 @@ impl ProjectPanes {
 
 impl Render for ProjectPanes {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Drop any group whose tabs got closed down to zero. Refusing
         // the last group keeps the workspace anchored.
         self.purge_empty_groups(window, cx);
@@ -249,7 +249,7 @@ fn render_tree(
     rim_flash: Option<u64>,
     hovered: Option<TabDragHoveredTarget>,
     project_panes_entity: Entity<ProjectPanes>,
-    theme: oximux_settings::Theme,
+    theme: trex_settings::Theme,
     hoisted: &HashSet<PaneGroupId>,
     path: &[usize],
     cx: &App,
@@ -410,7 +410,7 @@ fn advance_rim_flash(
 /// the tab strip's bottom border. `token` keys the animation id so every fresh
 /// focus replays it; a stable token lets a continuously-focused leaf settle at
 /// transparent rather than re-flashing each frame.
-fn rim_flash_overlay(id: PaneGroupId, token: u64, theme: oximux_settings::Theme) -> AnyElement {
+fn rim_flash_overlay(id: PaneGroupId, token: u64, theme: trex_settings::Theme) -> AnyElement {
     let ring = theme.focus_ring;
     div()
         .absolute()
@@ -468,7 +468,7 @@ fn interactive_divider(
     divider_idx: usize,
     axis: Axis,
     weights: Vec<f32>,
-    theme: oximux_settings::Theme,
+    theme: trex_settings::Theme,
     panes: Entity<ProjectPanes>,
     bounds_cache: DividerBoundsCache,
 ) -> AnyElement {
@@ -595,7 +595,7 @@ fn leaf_body(
     group: Entity<crate::shell::pane_group::PaneGroup>,
     active_zone: Option<Zone>,
     project_panes: Entity<ProjectPanes>,
-    theme: oximux_settings::Theme,
+    theme: trex_settings::Theme,
     is_focused: bool,
 ) -> AnyElement {
     let body_id = SharedString::from(format!("pane-group-body-{}", group.entity_id()));
@@ -801,7 +801,7 @@ fn zone_slug(zone: Zone) -> &'static str {
 /// Cross-fades in (~80ms) on each zone change instead of hard-snapping;
 /// the animation id is keyed on (group, zone) so it restarts only when the
 /// zone actually changes and otherwise settles at full opacity.
-fn zone_overlay(group_id: PaneGroupId, zone: Zone, theme: oximux_settings::Theme) -> AnyElement {
+fn zone_overlay(group_id: PaneGroupId, zone: Zone, theme: trex_settings::Theme) -> AnyElement {
     let base = div()
         .absolute()
         .bg(theme.focus_ring)

@@ -1,8 +1,8 @@
-//! oximux-agents
+﻿//! trex-agents
 //!
 //! `AgentRuntime` trait + CLI adapter trait + regex-based status machine.
 //! Concrete adapters (Claude Code, Codex, Pi, custom) land in later
-//! Phase 3 slices. The runtime owns one PTY per session via `oximux-pty`
+//! Phase 3 slices. The runtime owns one PTY per session via `trex-pty`
 //! and emits lifecycle events the UI badge + dashboard consume.
 
 pub mod agent_process;

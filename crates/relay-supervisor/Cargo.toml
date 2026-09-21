@@ -1,5 +1,5 @@
-[package]
-name = "oximux-relay-supervisor"
+﻿[package]
+name = "trex-relay-supervisor"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -7,18 +7,18 @@ license.workspace = true
 publish.workspace = true
 rust-version.workspace = true
 
-# Ensures an `oximux-relay` daemon is alive and hands back a connected
+# Ensures an `trex-relay` daemon is alive and hands back a connected
 # `RelayClient` — extracted from the desktop app (where it lived with zero
-# gpui imports) so `oximux serve` can supervise the same daemon with the same
+# gpui imports) so `TREX serve` can supervise the same daemon with the same
 # detach recipes, version-mismatch handling, and poll-connect retry. The
 # desktop consumes this crate through its old module path, so both hosts run
 # one supervisor, not two forks.
 
 [dependencies]
-oximux-relay-client = { workspace = true }
-oximux-relay-proto = { workspace = true }
-oximux-owner-only = { workspace = true }
-oximux-no-window = { workspace = true }
+trex-relay-client = { workspace = true }
+trex-relay-proto = { workspace = true }
+trex-owner-only = { workspace = true }
+trex-no-window = { workspace = true }
 anyhow = { workspace = true }
 tracing = { workspace = true }
 tokio = { workspace = true }

@@ -1,4 +1,4 @@
-//! What OxiMux needs from the machine, and how to get it.
+﻿//! What TREX needs from the machine, and how to get it.
 //!
 //! Pure data and pure wording — no probing, no spawning. The catalog is
 //! separate from [`super::probe`] so the two questions stay separate: *what
@@ -11,7 +11,7 @@
 //! integration" does not answer that. "Pull requests, CI checks, and GitHub
 //! issues in Tasks" does.
 
-/// An external command-line tool OxiMux calls out to.
+/// An external command-line tool TREX calls out to.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub(crate) enum Tool {
     Git,
@@ -120,7 +120,7 @@ impl Tool {
         }
     }
 
-    /// Whether OxiMux is meaningfully broken without it, as opposed to
+    /// Whether TREX is meaningfully broken without it, as opposed to
     /// missing one surface. Drives whether "Not installed" reads as a warning
     /// or as an error.
     pub(crate) fn is_required(self) -> bool {

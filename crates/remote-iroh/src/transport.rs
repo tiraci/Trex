@@ -1,4 +1,4 @@
-//! A [`Transport`] over a single iroh QUIC bi-directional stream.
+﻿//! A [`Transport`] over a single iroh QUIC bi-directional stream.
 //!
 //! iroh hands us a raw ordered byte pipe; the `Transport` contract is
 //! frame-oriented (one postcard message per `send`/`recv`), so this impl owns the
@@ -15,7 +15,7 @@
 use async_trait::async_trait;
 use futures::lock::Mutex;
 use iroh::endpoint::{Connection, RecvStream, SendStream};
-use oximux_remote_proto::transport::{Transport, TransportError};
+use trex_remote_proto::transport::{Transport, TransportError};
 
 /// A hard cap on a single frame so a hostile or corrupt length prefix can't drive
 /// an unbounded allocation. Comfortably above any real RPC/event payload.

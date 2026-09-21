@@ -1,4 +1,4 @@
-//! Pure plan helpers for one persisted Workspace's rail row.
+﻿//! Pure plan helpers for one persisted Workspace's rail row.
 //!
 //! `build_workspace_row_plan`, `build_workspace_card_plan` and
 //! `status_dot_color` are pure functions — no GPUI runtime, no IO — unit-tested
@@ -7,9 +7,9 @@
 //! here had no caller left and was retired.
 
 use gpui::{Hsla, SharedString};
-use oximux_core::{AgentStatus, WorkPhase, Workspace};
-use oximux_git::AheadBehind;
-use oximux_settings::Theme;
+use trex_core::{AgentStatus, WorkPhase, Workspace};
+use trex_git::AheadBehind;
+use trex_settings::Theme;
 
 use crate::shell::agent_presentation::{AgentVerb, agent_verb};
 use crate::shell::left_rail::worktree_stats::WorktreeStats;
@@ -304,12 +304,12 @@ mod tests {
         Workspace {
             id: format!("id-{slug}"),
             project_id: "proj".to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: name.to_string(),
             slug: slug.to_string(),
-            branch: format!("oximux/{slug}"),
+            branch: format!("TREX/{slug}"),
             worktree_path: format!("/tmp/{slug}"),
             status: "active".to_string(),
             created_at: "2026-05-21T00:00:00Z".to_string(),
@@ -504,7 +504,7 @@ mod tests {
         Workspace {
             id: format!("id-{slug}"),
             project_id: "proj".to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: name.to_string(),
@@ -526,9 +526,9 @@ mod tests {
     #[test]
     fn card_plan_carries_branch_when_present() {
         let t = Theme::charcoal();
-        let w = ws_with_branch("Feat", "feat", "oximux/feat");
+        let w = ws_with_branch("Feat", "feat", "TREX/feat");
         let plan = build_workspace_card_plan(&w, false, false, false, false, None, None, None, None, t);
-        assert_eq!(plan.branch, Some("oximux/feat".to_string()));
+        assert_eq!(plan.branch, Some("TREX/feat".to_string()));
     }
 
     #[test]
@@ -554,7 +554,7 @@ mod tests {
     #[test]
     fn card_plan_branch_follows_live_head_over_the_stored_name() {
         let t = Theme::charcoal();
-        let w = ws_with_branch("Feat", "feat", "oximux/feat");
+        let w = ws_with_branch("Feat", "feat", "TREX/feat");
         let plan = build_workspace_card_plan(
             &w, false, false, false, false, None, None, None, Some(&stats_on("main")), t,
         );
@@ -568,12 +568,12 @@ mod tests {
     #[test]
     fn card_plan_branch_keeps_stored_name_when_head_is_detached() {
         let t = Theme::charcoal();
-        let w = ws_with_branch("Feat", "feat", "oximux/feat");
+        let w = ws_with_branch("Feat", "feat", "TREX/feat");
         let measured_detached = stats(0, 0, 0, None);
         let plan = build_workspace_card_plan(
             &w, false, false, false, false, None, None, None, Some(&measured_detached), t,
         );
-        assert_eq!(plan.branch, Some("oximux/feat".to_string()));
+        assert_eq!(plan.branch, Some("TREX/feat".to_string()));
     }
 
     /// The synthesized primary row's title has no source but its branch, so it
@@ -595,7 +595,7 @@ mod tests {
     #[test]
     fn real_row_title_survives_a_branch_switch() {
         let t = Theme::charcoal();
-        let w = ws_with_branch("Auth rework", "auth", "oximux/auth");
+        let w = ws_with_branch("Auth rework", "auth", "TREX/auth");
         let plan = build_workspace_card_plan(
             &w, false, false, false, false, None, None, None, Some(&stats_on("main")), t,
         );
@@ -866,7 +866,7 @@ mod tests {
     // ── progress: comment + phase ────────────────────────────────────────────
 
     fn ws_with_progress(comment: &str, phase: &str) -> Workspace {
-        let mut w = ws_with_branch("W", "w", "oximux/w");
+        let mut w = ws_with_branch("W", "w", "TREX/w");
         w.comment = comment.to_string();
         w.phase = phase.to_string();
         w

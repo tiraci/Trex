@@ -1,4 +1,4 @@
-//! The collapsed `Untracked (N)` disclosure: worktrees git lists for a
+﻿//! The collapsed `Untracked (N)` disclosure: worktrees git lists for a
 //! project that no `workspaces` row points at.
 //!
 //! Shaped like the `Archived (N)` section beside it — one per project in
@@ -13,7 +13,7 @@ use gpui::{
     Entity, InteractiveElement, IntoElement, ParentElement, SharedString,
     StatefulInteractiveElement, Styled, WeakEntity, div, prelude::FluentBuilder as _, px, svg,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::left_rail::LeftRail;
 use crate::shell::workspace::discovery::UntrackedWorktree;

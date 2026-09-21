@@ -1,4 +1,4 @@
-//! Pure data plan for the DiffView. Splitting the plan-building from the
+﻿//! Pure data plan for the DiffView. Splitting the plan-building from the
 //! `IntoElement` construction (see sibling `paint.rs`) lets tests assert
 //! on the plan without spinning up GPUI and keeps each side under the
 //! file-size soft cap.
@@ -11,8 +11,8 @@
 
 use crate::shell::diff_view::syntax::{HiToken, Language, detect_language, highlight_line};
 use crate::shell::diff_view::word_diff::{TokenSpan, diff_words, pair_runs};
-use oximux_core::{DiffLine, DiffLineKind, DiffStatus, FileDiff};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{DiffLine, DiffLineKind, DiffStatus, FileDiff};
+use trex_settings::{Density, Theme, Typography};
 
 /// Bundle of styling threaded through the render layer. Same trick as
 /// `git_panel::changed_files::RenderCtx` — keeps argument counts under the

@@ -1,4 +1,4 @@
-//! Bottom toolbar of the left rail — "Add Project" button, locate-active
+﻿//! Bottom toolbar of the left rail — "Add Project" button, locate-active
 //! affordance, and settings icon.
 //!
 //! The settings cog dispatches `OpenSettings`, opening the settings modal.
@@ -9,7 +9,7 @@ use gpui::{
     StatefulInteractiveElement, Styled, WeakEntity, div, px, svg,
 };
 use gpui_component::tooltip::Tooltip;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{OpenAddProjectDialog, OpenSettings};
 use crate::shell::left_rail::LeftRail;

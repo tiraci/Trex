@@ -1,4 +1,4 @@
-//! Restricting a file to the account that created it.
+﻿//! Restricting a file to the account that created it.
 //!
 //! The app writes several things to disk that are only meaningful as secrets:
 //! the relay's auth token, the Remote Control private signing key. On unix each
@@ -394,13 +394,13 @@ mod tests {
             fs::set_permissions(&dir, fs::Permissions::from_mode(0o755)).expect("widen");
             assert!(!is_dir_restricted_to_owner(&dir).expect("read back"));
         }
-        fs::write(dir.join("oximux.db"), b"transcripts").expect("seed file");
+        fs::write(dir.join("trex.db"), b"transcripts").expect("seed file");
 
         prepare_owner_only_dir(&dir).expect("prepare");
 
         assert!(is_dir_restricted_to_owner(&dir).expect("read back"));
         assert_eq!(
-            fs::read(dir.join("oximux.db")).expect("contents survive"),
+            fs::read(dir.join("trex.db")).expect("contents survive"),
             b"transcripts".to_vec(),
             "hardening must not disturb what is already in the directory"
         );

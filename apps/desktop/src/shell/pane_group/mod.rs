@@ -1,4 +1,4 @@
-//! `PaneGroup` — one tab-strip leaf in the workspace's group layout tree.
+﻿//! `PaneGroup` — one tab-strip leaf in the workspace's group layout tree.
 //!
 //! Each `PaneGroup` is a single tab strip with one active tab + its
 //! content. The workspace owns a tree of these via `PaneGroupManager`;
@@ -31,16 +31,16 @@ use gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, Point, ScrollHandle, SharedString,
     Subscription, Task, WeakEntity, Window, px,
 };
-use oximux_agents::{
+use trex_agents::{
     AgentRuntime, AgentStatusStream, CliRuntime, SharedBackend, agent_label_from_title,
     classify_agent_title,
 };
-use oximux_core::{AgentAdapter, AgentSessionId};
+use trex_core::{AgentAdapter, AgentSessionId};
 use std::rc::Rc;
 
 use crate::shell::agent_presentation::AmbientAgent;
-use oximux_pty::TerminalSessionId;
-use oximux_settings::{Density, Theme, Typography};
+use trex_pty::TerminalSessionId;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{
     CloseTab, FocusNextSubPane, FocusPrevSubPane, NewAgent, NewBrowserTab, NewTab, NextTab,

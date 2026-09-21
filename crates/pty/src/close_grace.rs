@@ -1,4 +1,4 @@
-//! SIGTERM → grace window → SIGKILL dance for `PortablePtyBackend::close`.
+﻿//! SIGTERM → grace window → SIGKILL dance for `PortablePtyBackend::close`.
 //!
 //! Extracted from `portable_pty_backend.rs` for two reasons:
 //! 1. The grace logic is conceptually independent of the backend; the
@@ -62,7 +62,7 @@ pub(crate) fn term_step(pid: Option<u32>) -> TermResult {
         let pid_i32: i32 = match i32::try_from(pid) {
             Ok(v) => v,
             Err(_) => {
-                eprintln!("[oximux-pty] refusing SIGTERM: pid {pid} exceeds i32::MAX");
+                eprintln!("[trex-pty] refusing SIGTERM: pid {pid} exceeds i32::MAX");
                 return TermResult::Failed;
             }
         };
@@ -73,7 +73,7 @@ pub(crate) fn term_step(pid: Option<u32>) -> TermResult {
             Ok(()) => TermResult::Sent,
             Err(Errno::ESRCH) => TermResult::AlreadyGone,
             Err(err) => {
-                eprintln!("[oximux-pty] SIGTERM to pgid {pid} failed: {err}");
+                eprintln!("[trex-pty] SIGTERM to pgid {pid} failed: {err}");
                 TermResult::Failed
             }
         }

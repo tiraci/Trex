@@ -1,4 +1,4 @@
-//! Syntect-driven syntax highlighting for the diff body.
+﻿//! Syntect-driven syntax highlighting for the diff body.
 //!
 //! Per-line tokenizer. Each call to [`highlight_line`] returns a list of
 //! [`HiToken`]s — each carries its byte range inside the line plus the
@@ -51,7 +51,7 @@ static SYNTAX_SET: LazyLock<SyntaxSet> = LazyLock::new(two_face::syntax::extra_n
 /// The diff syntax theme for the charcoal palette — a conventional
 /// dark-editor token set (keyword-blue / string-orange / comment-green)
 /// bundled as a TextMate theme and embedded at compile time. Only token
-/// foregrounds are consumed; the theme's background is inert (OxiMux paints
+/// foregrounds are consumed; the theme's background is inert (TREX paints
 /// its own surface).
 static SYNTAX_DARK: LazyLock<Theme> = LazyLock::new(|| {
     let bytes = include_bytes!("../../../assets/themes/syntax-dark.tmTheme");

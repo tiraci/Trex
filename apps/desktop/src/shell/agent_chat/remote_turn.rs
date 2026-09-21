@@ -1,4 +1,4 @@
-//! Turns that were started from a paired phone rather than from this desk.
+﻿//! Turns that were started from a paired phone rather than from this desk.
 //!
 //! Two things happen when a prompt arrives over the remote RPC. The obvious one
 //! is cosmetic: the desktop shows the user's own bubble, because no backend
@@ -10,7 +10,7 @@
 //! desktop; from a phone they can do neither, and a remote prompt is opaque text
 //! — "click Delete and confirm" is indistinguishable from any other instruction,
 //! so the device's write tier cannot tell them apart. The turn is therefore
-//! marked, and `oximux_computer_use::policy` refuses every screen-control call
+//! marked, and `trex_computer_use::policy` refuses every screen-control call
 //! reached from it.
 //!
 //! The mark lives here rather than in the session registry for a plain reason:
@@ -19,8 +19,8 @@
 
 use futures::StreamExt;
 use gpui::{Context, Task, WeakEntity};
-use oximux_agents::session_registry::RemotePrompt;
-use oximux_agents::thread::ThreadEvent;
+use trex_agents::session_registry::RemotePrompt;
+use trex_agents::thread::ThreadEvent;
 
 use super::{AgentChatView, FOLLOW_FRAMES};
 

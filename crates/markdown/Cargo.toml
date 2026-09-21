@@ -1,5 +1,5 @@
-[package]
-name = "oximux-markdown"
+﻿[package]
+name = "trex-markdown"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

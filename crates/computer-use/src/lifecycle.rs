@@ -1,8 +1,8 @@
-//! Starting and ending an agent's driver session.
+﻿//! Starting and ending an agent's driver session.
 //!
 //! A session is where the driver's own capture policy lives, and the policy is
 //! chosen once: `capture_scope` is documented **"Immutable for the live
-//! session."** OxiMux pins `window`, which has no escalation path at all —
+//! session."** TREX pins `window`, which has no escalation path at all —
 //! `escalate_session` only unlocks a session that started as `auto`. So a
 //! window-pinned session cannot reach desktop-scope tools even if every check
 //! in [`crate::policy`] were removed.
@@ -11,7 +11,7 @@
 //!
 //! `cua-driver call` requires a daemon that is **already running**, and refuses
 //! rather than starting one. The daemon comes up when the agent's own MCP proxy
-//! launches it, which is after OxiMux has spawned the agent — so a session
+//! launches it, which is after TREX has spawned the agent — so a session
 //! cannot be created at spawn time, only once the agent has reached the driver.
 //!
 //! And the driver's `mcp` mode takes no `--session` flag in 0.12.6, so there is
@@ -32,7 +32,7 @@ use crate::Error;
 /// the caller may be on a thread the user is waiting on.
 pub const SESSION_TIMEOUT: Duration = Duration::from_secs(5);
 
-/// The capture policy OxiMux gives every agent.
+/// The capture policy TREX gives every agent.
 ///
 /// `window` rather than the driver's `auto` default: `auto` starts window-only
 /// but *can* be escalated to the whole desktop, and `window` cannot. The
@@ -121,7 +121,7 @@ mod tests {
         // mistyped field silently gets the weaker policy.
         let payload = start_payload(&SessionId::for_agent("chat-a"));
         assert_eq!(payload["capture_scope"], "window");
-        assert_eq!(payload["session"], "oximux-chat-a");
+        assert_eq!(payload["session"], "trex-chat-a");
     }
 
     #[test]

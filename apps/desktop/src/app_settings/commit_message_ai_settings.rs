@@ -1,16 +1,16 @@
-//! App-side loader + live-reload watcher for [`CommitMessageAiSettings`].
+﻿//! App-side loader + live-reload watcher for [`CommitMessageAiSettings`].
 //!
 //! On startup we read `commit_message_ai.toml` from the app data dir
 //! (seeding a commented default if absent), install it as a GPUI
 //! global, and reload on edit via the same debounced FSEvents pattern
 //! the terminal settings use. The commit composer reads
 //! [`CommitMessageAiSettings`] at sparkles-click time, so a mid-session
-//! edit takes effect on the next click without restarting OxiMux.
+//! edit takes effect on the next click without restarting TREX.
 //!
 //! The watch is on the DIRECTORY (atomic save = write-temp + rename
 //! replaces the inode, which a file-level watch would miss) but
 //! filtered to the `commit_message_ai.toml` filename so churn from
-//! sibling files (terminal.toml, oximux.db, sqlite WAL) is ignored.
+//! sibling files (terminal.toml, trex.db, sqlite WAL) is ignored.
 
 use std::path::PathBuf;
 
@@ -19,7 +19,7 @@ use notify_debouncer_full::{
     DebounceEventResult, Debouncer, FileIdMap, new_debouncer,
     notify::{RecommendedWatcher, RecursiveMode},
 };
-use oximux_settings::CommitMessageAiSettings;
+use trex_settings::CommitMessageAiSettings;
 use tokio::sync::mpsc;
 
 

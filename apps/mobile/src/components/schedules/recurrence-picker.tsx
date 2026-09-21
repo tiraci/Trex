@@ -1,4 +1,4 @@
-import { Recurrence, Recurrence_Tags } from 'oximux-core';
+﻿import { Recurrence, Recurrence_Tags } from 'trex-core';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';

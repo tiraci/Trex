@@ -1,4 +1,4 @@
-//! The desktop's remote-control state: a process-wide [`SessionRegistry`] that the
+﻿//! The desktop's remote-control state: a process-wide [`SessionRegistry`] that the
 //! in-app iroh host serves, plus an `enabled` flag that gates whether live agent
 //! sessions are fanned into it at all, and the running [`HostHandle`] itself.
 //!
@@ -37,7 +37,7 @@ pub const ENABLED_SETTING: &str = "remote.enabled";
 pub const KEEP_AWAKE_SETTING: &str = "remote.keep_awake";
 
 /// Settings key for local CLI access — the owner-only control socket the
-/// `oximux` CLI dials. Its own switch, independent of remote in both
+/// `TREX` CLI dials. Its own switch, independent of remote in both
 /// directions: pairing a phone must not open a local control surface, and
 /// turning local access off must not cut a paired phone.
 ///
@@ -56,7 +56,7 @@ pub const LOCAL_ENABLED_SETTING: &str = "local.enabled";
 /// only have by reading that file. But any program running as this user can read
 /// it — including the agents this desktop spawns — so on-by-default means an
 /// agent that goes looking can drive every session and terminal. The per-session
-/// credential in `oximux-remote-local` exists to close exactly that and is not
+/// credential in `trex-remote-local` exists to close exactly that and is not
 /// yet wired at spawn; until it is, the toggle's own copy is what tells the user.
 pub fn local_access_enabled(stored: Option<&str>) -> bool {
     stored.is_none_or(|v| v == "true")
@@ -76,21 +76,21 @@ fn now_secs() -> u64 {
         .unwrap_or(0)
 }
 use futures::channel::mpsc;
-use oximux_agents::session_registry::{
+use trex_agents::session_registry::{
     RemoteChoice, RemotePrompt, SessionHandle, SessionMeta, SessionRegistry,
 };
-use oximux_agents::thread::AgentConnection;
-use oximux_remote_host::AudioTranscriber;
-use oximux_remote_host::ProjectProvider;
-use oximux_remote_host::TerminalSource;
-use oximux_remote_host::RewindService;
-use oximux_remote_host::{SessionLauncher, 
+use trex_agents::thread::AgentConnection;
+use trex_remote_host::AudioTranscriber;
+use trex_remote_host::ProjectProvider;
+use trex_remote_host::TerminalSource;
+use trex_remote_host::RewindService;
+use trex_remote_host::{SessionLauncher, 
     AppPubkey, AuthStore, DeviceInfo, DeviceStore, Dispatcher, PairingEvent, PairingSlot,
     mint_pairing_secret,
 };
 use tokio::sync::broadcast;
-use oximux_remote_iroh::HostHandle;
-use oximux_remote_proto::PairingTicket;
+use trex_remote_iroh::HostHandle;
+use trex_remote_proto::PairingTicket;
 
 /// Monotonic source of *placeholder* remote session ids, for a chat that has not
 /// yet been given an agent session id of its own.
@@ -138,7 +138,7 @@ pub struct RemoteBinding {
 
 impl RemoteBinding {
     /// Fan one backend event into the bound session (assign seq, store, broadcast).
-    pub fn ingest(&self, event: oximux_agents::thread::ThreadEvent) {
+    pub fn ingest(&self, event: trex_agents::thread::ThreadEvent) {
         self.handle.ingest(event);
     }
 
@@ -167,7 +167,7 @@ impl RemoteBinding {
     /// approval) into the view's fold — the decision's edit is on no backend
     /// stream, and without this the desktop transcript would keep showing only
     /// what the agent asked for.
-    pub fn set_event_sink(&self, tx: mpsc::UnboundedSender<oximux_agents::thread::ThreadEvent>) {
+    pub fn set_event_sink(&self, tx: mpsc::UnboundedSender<trex_agents::thread::ThreadEvent>) {
         self.handle.set_remote_event_sink(tx);
     }
 
@@ -223,12 +223,12 @@ pub struct RemoteControl {
     /// to establish. Shares the app's one SQLite connection, so a schedule the
     /// phone creates is the same row the desktop's ticker fires and its Settings
     /// pane lists.
-    schedules: Option<Arc<oximux_agents::schedule::ScheduleStore>>,
+    schedules: Option<Arc<trex_agents::schedule::ScheduleStore>>,
     /// The host's team runs and coordination blackboard, when installed. Both
     /// are plain SQLite stores (gpui-free, no process spawn), so they need no
     /// view-layer seam — the same reasoning as `schedules`.
-    teams: Option<Arc<oximux_agents::team::TeamStore>>,
-    coord: Option<Arc<oximux_agents::coord::CoordStore>>,
+    teams: Option<Arc<trex_agents::team::TeamStore>>,
+    coord: Option<Arc<trex_agents::coord::CoordStore>>,
     /// The desktop's speech-to-text engine, when one is installed. `None` answers
     /// `TranscribeAudio` with `Unauthorized`, as `launcher` does. Shares the
     /// composer's own model manager, so a model downloaded in Settings › Voice is
@@ -242,19 +242,19 @@ pub struct RemoteControl {
     /// The desktop's worktree management, when it is installed. `None` answers
     /// the worktree RPCs with `Unsupported` for an authorized full-scope caller
     /// (the dispatcher still answers `Unauthorized` first for anyone else).
-    worktrees: Option<Arc<dyn oximux_remote_host::WorktreeService>>,
+    worktrees: Option<Arc<dyn trex_remote_host::WorktreeService>>,
     /// The manual-fire path, installed only when this desktop won the ticker
     /// lock. `None` answers `RunScheduleNow` with `Unsupported` for an
     /// authorized caller — the schedules still fire, just from the process
     /// that owns them.
-    schedule_runner: Option<Arc<dyn oximux_remote_host::ScheduleRunner>>,
+    schedule_runner: Option<Arc<dyn trex_remote_host::ScheduleRunner>>,
     /// Recorded schedule runs, fanned out to session-list subscribers. The
     /// sender is shared with the ticker's recorded-run hook.
     schedule_events:
-        Option<tokio::sync::broadcast::Sender<oximux_remote_proto::messages::ScheduleRunWire>>,
+        Option<tokio::sync::broadcast::Sender<trex_remote_proto::messages::ScheduleRunWire>>,
     /// The index of persisted-but-unbuilt sessions, so a client is not limited to
     /// the projects the desktop has happened to show this run.
-    catalog: Option<Arc<dyn oximux_remote_host::catalog::SessionCatalog>>,
+    catalog: Option<Arc<dyn trex_remote_host::catalog::SessionCatalog>>,
     /// The live host's auth store while one is bound, so the paired-devices UI can
     /// revoke against the *running* host (the dispatcher rechecks authorization on
     /// every RPC, so a revoke lands mid-session). Cleared on stop — with no host, the
@@ -280,11 +280,11 @@ pub struct RemoteControl {
     /// dropping the iroh `HostHandle`.
     local: Mutex<Option<local_listener::LocalHandle>>,
     /// Proof that this process, and no other, is the host for the data
-    /// directory — the same advisory lock `oximux serve` takes.
+    /// directory — the same advisory lock `TREX serve` takes.
     ///
     /// Both hosts bind the same socket and write the same token file, and the
     /// desktop's data dir *is* serve's default, so an app with local access on
-    /// plus a bare `oximux serve` is two hosts over one database: on unix the
+    /// plus a bare `TREX serve` is two hosts over one database: on unix the
     /// newcomer replaced the live socket node, and on both platforms it swapped
     /// the credential the incumbent's listener authenticates against, leaving
     /// every client of the first host denied.
@@ -294,7 +294,7 @@ pub struct RemoteControl {
     /// on the same file from this one would be refused too — and Settings →
     /// Remote legitimately rebinds over our own live listener. Taking it only
     /// when it is not already held keeps that path working.
-    host_lock: Mutex<Option<oximux_single_instance::SingleInstanceGuard>>,
+    host_lock: Mutex<Option<trex_single_instance::SingleInstanceGuard>>,
 }
 
 impl Global for RemoteControl {}
@@ -363,17 +363,17 @@ impl RemoteControl {
     /// Install the schedule store the host serves. Called once at boot with the
     /// same store the desktop's scheduler ticks, so both surfaces read and write
     /// the same rows.
-    pub fn set_schedule_store(&mut self, schedules: Arc<oximux_agents::schedule::ScheduleStore>) {
+    pub fn set_schedule_store(&mut self, schedules: Arc<trex_agents::schedule::ScheduleStore>) {
         self.schedules = Some(schedules);
     }
 
     /// Install the team-run and coordination stores the host serves. Called
-    /// once at boot against the same database `oximux serve` would use, so a
+    /// once at boot against the same database `TREX serve` would use, so a
     /// run opened from one host is visible from the other.
     pub fn set_automation_stores(
         &mut self,
-        teams: Arc<oximux_agents::team::TeamStore>,
-        coord: Arc<oximux_agents::coord::CoordStore>,
+        teams: Arc<trex_agents::team::TeamStore>,
+        coord: Arc<trex_agents::coord::CoordStore>,
     ) {
         self.teams = Some(teams);
         self.coord = Some(coord);
@@ -402,26 +402,26 @@ impl RemoteControl {
     /// desktop's own New-Worktree flow uses.
     pub fn set_worktree_service(
         &mut self,
-        worktrees: Arc<dyn oximux_remote_host::WorktreeService>,
+        worktrees: Arc<dyn trex_remote_host::WorktreeService>,
     ) {
         self.worktrees = Some(worktrees);
     }
 
     /// Serve `RunScheduleNow` — installed only by the ticker-lock winner.
-    pub fn set_schedule_runner(&mut self, runner: Arc<dyn oximux_remote_host::ScheduleRunner>) {
+    pub fn set_schedule_runner(&mut self, runner: Arc<dyn trex_remote_host::ScheduleRunner>) {
         self.schedule_runner = Some(runner);
     }
 
     /// Fan recorded schedule runs out to session-list subscribers.
     pub fn set_schedule_events(
         &mut self,
-        events: tokio::sync::broadcast::Sender<oximux_remote_proto::messages::ScheduleRunWire>,
+        events: tokio::sync::broadcast::Sender<trex_remote_proto::messages::ScheduleRunWire>,
     ) {
         self.schedule_events = Some(events);
     }
 
     /// Let the host see and open sessions whose views have not been built.
-    pub fn set_session_catalog(&mut self, catalog: Arc<dyn oximux_remote_host::catalog::SessionCatalog>) {
+    pub fn set_session_catalog(&mut self, catalog: Arc<dyn trex_remote_host::catalog::SessionCatalog>) {
         self.catalog = Some(catalog);
     }
 
@@ -701,7 +701,7 @@ impl RemoteControl {
         };
         let (tx, rx) = tokio::sync::oneshot::channel();
         rt.spawn(async move {
-            let _ = tx.send(oximux_remote_iroh::start_host(dispatcher, secret, endpoint_secret).await);
+            let _ = tx.send(trex_remote_iroh::start_host(dispatcher, secret, endpoint_secret).await);
         });
         cx.spawn(async move |cx| {
             match rx.await {
@@ -795,17 +795,17 @@ impl RemoteControl {
         if held.is_some() {
             return true;
         }
-        let path = dir.join(oximux_remote_local::HOST_LOCK_FILENAME);
-        match oximux_single_instance::try_acquire(&path) {
-            Ok(oximux_single_instance::AcquireOutcome::Acquired(guard)) => {
+        let path = dir.join(trex_remote_local::HOST_LOCK_FILENAME);
+        match trex_single_instance::try_acquire(&path) {
+            Ok(trex_single_instance::AcquireOutcome::Acquired(guard)) => {
                 *held = Some(guard);
                 true
             }
-            Ok(oximux_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
+            Ok(trex_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
                 tracing::warn!(
                     holder_pid = ?holder_pid,
                     dir = %dir.display(),
-                    "another OxiMux host is already serving this data directory; \
+                    "another TREX host is already serving this data directory; \
                      local CLI access not bound",
                 );
                 false
@@ -828,7 +828,7 @@ impl RemoteControl {
     /// receives no credential simply cannot reach the control socket.
     ///
     /// **Nothing calls this yet, and the confinement is therefore not in force:**
-    /// an agent that runs `oximux` reads the operator token file (it is the same
+    /// an agent that runs `TREX` reads the operator token file (it is the same
     /// OS user) and is served full scope. Wiring it is not a matter of finding
     /// the spawn site. A chat's `remote_session_id` starts as a placeholder and
     /// is REKEYED once the agent reports its own id
@@ -867,8 +867,8 @@ impl RemoteControl {
 mod tests {
     use std::sync::atomic::AtomicUsize;
 
-    use oximux_agents::thread::{StubConnection, ThreadEvent};
-    use oximux_remote_host::{AppPubkey, StoredDevice};
+    use trex_agents::thread::{StubConnection, ThreadEvent};
+    use trex_remote_host::{AppPubkey, StoredDevice};
 
     use super::*;
 
@@ -1137,7 +1137,7 @@ mod tests {
         );
 
         // A second host over the same directory is refused while the first holds
-        // it. Standing in for `oximux serve`, which takes this identical lock.
+        // it. Standing in for `TREX serve`, which takes this identical lock.
         let other = RemoteControl::new();
         assert!(
             !other.claim_host_role(dir.path()),

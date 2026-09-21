@@ -1,4 +1,4 @@
-//! Two-key pairing/auth + a two-level ACL.
+﻿//! Two-key pairing/auth + a two-level ACL.
 //!
 //! - **Pairing** ([`pairing`]) proves a client scanned this host's QR: `Register`
 //!   carries an `HMAC-SHA256(handshake_secret, app_pubkey || timestamp)` proof,
@@ -33,7 +33,7 @@ pub use peer::{LocalScope, Peer};
 pub use persistence::{DeviceStore, StorageDeviceStore, StoredDevice};
 // The registration proof is a wire invariant shared with the client, so it lives
 // in `remote-proto`; re-exported here for the host's callers + tests.
-pub use oximux_remote_proto::registration_proof;
+pub use trex_remote_proto::registration_proof;
 
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};

@@ -1,4 +1,4 @@
-//! Codex app-server (v2) notification → [`ThreadEvent`] mapping.
+﻿//! Codex app-server (v2) notification → [`ThreadEvent`] mapping.
 //!
 //! codex 0.144.1's v2 protocol has a **single** event channel (item lifecycle +
 //! turn/thread events) — the legacy `codex/event/<snake>` mirror that older
@@ -1915,7 +1915,7 @@ mod tests {
     /// so all five agents are measured the same way.
     ///
     /// Regenerate a deliberate change with
-    /// `UPDATE_TRANSCRIPT_SNAPSHOTS=1 cargo test -p oximux-agents`, then read
+    /// `UPDATE_TRANSCRIPT_SNAPSHOTS=1 cargo test -p trex-agents`, then read
     /// the diff — the point of the pin is that a render change has to be
     /// noticed and named, not accepted silently.
     #[test]
@@ -1927,7 +1927,7 @@ mod tests {
             let (events, _) = replay(&format!("{fixture}.jsonl"));
             assert!(!events.is_empty(), "{fixture} decoded to nothing");
             let thread = render(&events);
-            oximux_agent_core::thread::snapshot::assert_thread_snapshot(
+            trex_agent_core::thread::snapshot::assert_thread_snapshot(
                 format!(
                     "{}/tests/snapshots/{fixture}.transcript.json",
                     env!("CARGO_MANIFEST_DIR")
@@ -1957,7 +1957,7 @@ mod tests {
                 .iter()
                 .any(|e| matches!(e, ThreadEvent::TurnEnded { .. }));
             let thread = render(&events);
-            oximux_agent_core::thread::invariants::assert_holds(fixture, &thread, settled);
+            trex_agent_core::thread::invariants::assert_holds(fixture, &thread, settled);
         }
     }
 

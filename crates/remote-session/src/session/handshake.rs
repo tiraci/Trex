@@ -1,14 +1,14 @@
-//! The client half of the auth handshake: `Register` (first-time pairing) and
+﻿//! The client half of the auth handshake: `Register` (first-time pairing) and
 //! `Connect`→(`Challenge`→`AuthProve`) reconnect. Each caches the reconnect token
 //! the host issues. The transport plumbing (`call`) + token cache live on
 //! [`RemoteSession`] in the parent module.
 
-use oximux_remote_proto::messages::{ConnectReq, HelloReq, RegisterReq};
-use oximux_remote_proto::pairing::PairingTicket;
-use oximux_remote_proto::proto::{
+use trex_remote_proto::messages::{ConnectReq, HelloReq, RegisterReq};
+use trex_remote_proto::pairing::PairingTicket;
+use trex_remote_proto::proto::{
     ASSUMED_VERSION_WHEN_SILENT, PROTOCOL_VERSION, Request, Response, RpcError, is_compatible,
 };
-use oximux_remote_proto::{AuthProveReq, registration_proof};
+use trex_remote_proto::{AuthProveReq, registration_proof};
 
 use super::{RemoteSession, Result};
 use crate::error::SessionError;

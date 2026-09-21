@@ -1,4 +1,4 @@
-//! The inbound rewind path: a rewind request crossing from the dispatcher's
+﻿//! The inbound rewind path: a rewind request crossing from the dispatcher's
 //! tokio task onto the GPUI thread, and its answer coming back.
 //!
 //! Second user of the bridge shape [`launch_bridge`](super::launch_bridge)
@@ -12,7 +12,7 @@
 //! across every window, every project (including ones the user has switched
 //! away from), and every tab.
 
-use oximux_remote_host::{RewindError, RewindService};
+use trex_remote_host::{RewindError, RewindService};
 use tokio::sync::{mpsc, oneshot};
 
 /// One request to rewind a session, plus where to send the answer.

@@ -1,4 +1,4 @@
-//! App-side loader + live-reload watcher for [`ComputerUseSettings`].
+﻿//! App-side loader + live-reload watcher for [`ComputerUseSettings`].
 //!
 //! Reads `computer_use.toml` from the app data dir on boot (default if absent),
 //! installs it as a GPUI global, and reloads on edit via the same debounced
@@ -21,7 +21,7 @@ use notify_debouncer_full::{
     DebounceEventResult, Debouncer, FileIdMap, new_debouncer,
     notify::{RecommendedWatcher, RecursiveMode},
 };
-use oximux_settings::ComputerUseSettings;
+use trex_settings::ComputerUseSettings;
 use tokio::sync::mpsc;
 
 const DEBOUNCE_MS: u64 = 250;

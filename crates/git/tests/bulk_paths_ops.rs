@@ -1,4 +1,4 @@
-//! Integration tests for vectorised path ops invoked with N > 1 paths
+﻿//! Integration tests for vectorised path ops invoked with N > 1 paths
 //! in one call — the shape `GitPanel::bulk_stage_selected` /
 //! `bulk_unstage_selected` use after Phase 03 Slice B.
 //!
@@ -11,8 +11,8 @@
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_core::{IndexStatus, WorktreeStatus};
-use oximux_git::Repository;
+use trex_core::{IndexStatus, WorktreeStatus};
+use trex_git::Repository;
 use std::path::Path;
 
 /// Vectorised stage on three modified files: all three flip to

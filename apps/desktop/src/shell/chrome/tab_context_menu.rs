@@ -1,4 +1,4 @@
-//! Tab right-click context menu — Close / Close Others / Close to Right
+﻿//! Tab right-click context menu — Close / Close Others / Close to Right
 //! / Close All in Group.
 //!
 //! Mirrors `PaneActionsMenu`: one shared entity owned by `WorkspaceRoot`,
@@ -13,7 +13,7 @@ use gpui::{
     ClipboardItem, Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
     ParentElement, Render, Styled, WeakEntity, Window, div, px, svg,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -270,7 +270,7 @@ impl TabContextMenu {
 
 impl Render for TabContextMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

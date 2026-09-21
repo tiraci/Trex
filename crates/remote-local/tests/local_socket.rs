@@ -1,4 +1,4 @@
-//! End-to-end over a real socket: bind owner-only, dial with the token,
+﻿//! End-to-end over a real socket: bind owner-only, dial with the token,
 //! carry frames both ways — and the two-factor refusals (no token file,
 //! wrong token) that back the CLI's exit-code contract.
 
@@ -6,11 +6,11 @@
 use interprocess::local_socket::ToFsName as _;
 #[cfg(unix)]
 use interprocess::local_socket::traits::tokio::Stream as _;
-use oximux_remote_local::{
+use trex_remote_local::{
     DialError, LocalClaim, LocalControlListener, dial, generate_token, token_path,
     write_token_file,
 };
-use oximux_remote_proto::Transport;
+use trex_remote_proto::Transport;
 
 /// Happy path: handshake grants, the claim arrives, frames cross both ways,
 /// and every on-disk artifact is owner-only by readback.
@@ -22,13 +22,13 @@ async fn dial_handshake_and_frames_over_a_real_socket() {
     let listener = LocalControlListener::bind(&runtime_dir, &token).unwrap();
 
     // The two trust factors, asserted from the outside.
-    assert!(oximux_owner_only::is_restricted_to_owner(&token_path(&runtime_dir)).unwrap());
+    assert!(trex_owner_only::is_restricted_to_owner(&token_path(&runtime_dir)).unwrap());
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt as _;
         let dir_mode = std::fs::metadata(&runtime_dir).unwrap().permissions().mode();
         assert_eq!(dir_mode & 0o777, 0o700, "runtime dir is owner-only");
-        let sock_mode = std::fs::metadata(oximux_remote_local::socket_path(&runtime_dir))
+        let sock_mode = std::fs::metadata(trex_remote_local::socket_path(&runtime_dir))
             .unwrap()
             .permissions()
             .mode();
@@ -70,9 +70,9 @@ async fn a_session_credential_earns_only_its_session() {
         assert_eq!(claim, LocalClaim::Session("sess-7".into()));
     };
     let client = async {
-        oximux_remote_local::dial_as(
+        trex_remote_local::dial_as(
             &runtime_dir,
-            oximux_remote_local::LocalIdentity::Session("sess-7".into()),
+            trex_remote_local::LocalIdentity::Session("sess-7".into()),
             &secret,
         )
         .await
@@ -101,9 +101,9 @@ async fn a_rebound_credential_earns_the_session_it_was_bound_to() {
         assert_eq!(claim, LocalClaim::Session("sess-real".into()));
     };
     let client = async {
-        oximux_remote_local::dial_as(
+        trex_remote_local::dial_as(
             &runtime_dir,
-            oximux_remote_local::LocalIdentity::Session("launch-abc".into()),
+            trex_remote_local::LocalIdentity::Session("launch-abc".into()),
             &secret,
         )
         .await
@@ -128,9 +128,9 @@ async fn a_revoked_handle_stops_working_and_binding_it_back_does_nothing() {
         assert!(listener.accept().await.is_err(), "a revoked handle grants nothing");
     };
     let client = async {
-        let denied = oximux_remote_local::dial_as(
+        let denied = trex_remote_local::dial_as(
             &runtime_dir,
-            oximux_remote_local::LocalIdentity::Session("launch-abc".into()),
+            trex_remote_local::LocalIdentity::Session("launch-abc".into()),
             &secret,
         )
         .await;
@@ -155,9 +155,9 @@ async fn a_session_holder_cannot_escalate_to_operator() {
     let client = async {
         // The agent's own secret, presented while naming OPERATOR — the exact
         // move a prompt-injected agent would try.
-        let err = oximux_remote_local::dial_as(
+        let err = trex_remote_local::dial_as(
             &runtime_dir,
-            oximux_remote_local::LocalIdentity::Operator,
+            trex_remote_local::LocalIdentity::Operator,
             &session_secret,
         )
         .await
@@ -210,7 +210,7 @@ async fn rebind_over_a_stale_socket_node() {
     // Simulate a crash: forget the listener without its Drop unlinking the
     // node (std::mem::forget leaks the fd, which is fine for one test).
     std::mem::forget(first);
-    assert!(oximux_remote_local::socket_path(&runtime_dir).exists());
+    assert!(trex_remote_local::socket_path(&runtime_dir).exists());
     let _second = LocalControlListener::bind(&runtime_dir, &token)
         .expect("rebind over the stale node");
 }
@@ -230,7 +230,7 @@ async fn a_late_drop_does_not_unlink_a_successors_socket() {
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("runtime");
     let token = generate_token();
-    let socket = oximux_remote_local::socket_path(&runtime_dir);
+    let socket = trex_remote_local::socket_path(&runtime_dir);
 
     let first = LocalControlListener::bind(&runtime_dir, &token).unwrap();
     // The successor unlinks the stale node and creates its own in its place.
@@ -291,7 +291,7 @@ async fn a_silent_peer_does_not_block_the_accept_path() {
     let clients = async {
         // Connects and sends nothing, staying alive for the duration.
         let _silent = interprocess::local_socket::tokio::Stream::connect(
-            oximux_remote_local::socket_path(&runtime_dir)
+            trex_remote_local::socket_path(&runtime_dir)
                 .to_fs_name::<interprocess::local_socket::GenericFilePath>()
                 .unwrap(),
         )

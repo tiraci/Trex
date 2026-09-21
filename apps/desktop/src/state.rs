@@ -1,5 +1,5 @@
-//! `AppState` — boot-time hydration of recent projects, workspaces, and
-//! Interrupted sessions out of `oximux-storage`.
+﻿//! `AppState` — boot-time hydration of recent projects, workspaces, and
+//! Interrupted sessions out of `trex-storage`.
 //!
 //! Phase 4 step 4 plumbing only: the data is loaded into memory but no UI
 //! consumes it yet (steps 5–7 will render it). Held as a field on
@@ -12,8 +12,8 @@
 
 use std::collections::HashMap;
 
-use oximux_core::{AgentSession, AgentStatus, Project, Workspace};
-use oximux_storage::{
+use trex_core::{AgentSession, AgentStatus, Project, Workspace};
+use trex_storage::{
     AgentSessionRepo, Db, DiffReviewNoteRepo, PaneBufferRepo, PaneRelayIdRepo, PaneSessionRepo,
     ProjectRepo, RemoteDeviceRepo, SettingsRepo, StorageError, WorkspaceRepo, WorktreeSettingsRepo,
 };
@@ -96,20 +96,20 @@ impl AppState {
     /// Shares the app's `Db` rather than opening its own connection — SQLite
     /// serializes writers, so a second connection would turn lock contention
     /// between the scheduler and the rest of the app into `SQLITE_BUSY`.
-    pub fn schedule_store(&self) -> oximux_agents::schedule::ScheduleStore {
-        oximux_agents::schedule::ScheduleStore::new(self.db.conn())
+    pub fn schedule_store(&self) -> trex_agents::schedule::ScheduleStore {
+        trex_agents::schedule::ScheduleStore::new(self.db.conn())
     }
 
     /// The team-run store, shared with remote control so a run opened from the
     /// CLI is the same run the desktop's host reports on.
-    pub fn team_store(&self) -> oximux_agents::team::TeamStore {
-        oximux_agents::team::TeamStore::new(self.db.conn())
+    pub fn team_store(&self) -> trex_agents::team::TeamStore {
+        trex_agents::team::TeamStore::new(self.db.conn())
     }
 
     /// The coordination blackboard, shared for the same reason — the board only
     /// coordinates if every host reads one set of keys.
-    pub fn coord_store(&self) -> oximux_agents::coord::CoordStore {
-        oximux_agents::coord::CoordStore::new(self.db.conn())
+    pub fn coord_store(&self) -> trex_agents::coord::CoordStore {
+        trex_agents::coord::CoordStore::new(self.db.conn())
     }
 
     /// The project repository, shared for the remote-control project provider so a
@@ -191,7 +191,7 @@ pub fn hydrate(db: Db) -> Result<AppState, StorageError> {
             s.ended_at = Some(ts);
             Ok(s)
         })
-        .collect::<Result<Vec<_>, oximux_storage::StorageError>>()?;
+        .collect::<Result<Vec<_>, trex_storage::StorageError>>()?;
 
     let workspace_total: usize = workspaces.values().map(Vec::len).sum();
     tracing::info!(
@@ -222,7 +222,7 @@ mod tests {
     use super::*;
 
     fn fresh_db() -> Db {
-        oximux_storage::open_memory().expect("open_memory")
+        trex_storage::open_memory().expect("open_memory")
     }
 
     #[test]
@@ -243,7 +243,7 @@ mod tests {
 
         let project = project_repo.insert("p", "/p", "main").expect("project");
         let workspace = workspace_repo
-            .insert(&project.id, "ws", "ws", "oximux/ws", "/p/ws", true)
+            .insert(&project.id, "ws", "ws", "TREX/ws", "/p/ws", true)
             .expect("workspace");
         let alive_1 = agent_repo
             .insert(&workspace.id, "claude", None, None)
@@ -334,13 +334,13 @@ mod tests {
         let a = project_repo.insert("a", "/a", "main").expect("a");
         let b = project_repo.insert("b", "/b", "main").expect("b");
         workspace_repo
-            .insert(&a.id, "wa", "wa", "oximux/wa", "/a/wa", true)
+            .insert(&a.id, "wa", "wa", "TREX/wa", "/a/wa", true)
             .expect("wa");
         workspace_repo
-            .insert(&b.id, "wb1", "wb1", "oximux/wb1", "/b/wb1", true)
+            .insert(&b.id, "wb1", "wb1", "TREX/wb1", "/b/wb1", true)
             .expect("wb1");
         workspace_repo
-            .insert(&b.id, "wb2", "wb2", "oximux/wb2", "/b/wb2", true)
+            .insert(&b.id, "wb2", "wb2", "TREX/wb2", "/b/wb2", true)
             .expect("wb2");
 
         let state = hydrate(db).expect("hydrate");
@@ -357,7 +357,7 @@ mod tests {
         let agent_repo = AgentSessionRepo::new(db.clone());
         let project = project_repo.insert("p", "/p", "main").expect("project");
         let workspace = workspace_repo
-            .insert(&project.id, "ws", "ws", "oximux/ws", "/p/ws", true)
+            .insert(&project.id, "ws", "ws", "TREX/ws", "/p/ws", true)
             .expect("workspace");
         let session = agent_repo
             .insert(&workspace.id, "claude", None, None)

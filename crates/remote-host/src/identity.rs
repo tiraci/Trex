@@ -1,7 +1,7 @@
-//! The host's persistent Ed25519 identity.
+﻿//! The host's persistent Ed25519 identity.
 //!
 //! One key per workspace, its filename keyed on **SHA-256(workdir)** — never
-//! `DefaultHasher`, whose output isn't stable across Rust versions (OxiMux has
+//! `DefaultHasher`, whose output isn't stable across Rust versions (TREX has
 //! already been bitten by that in the sidebar dot-colour hashing). The private
 //! key file is written `0600`. This is the host's stable node identity; the iroh
 //! transport key (added with the endpoint) is derived from or seeded by it later.
@@ -18,7 +18,7 @@ use sha2::{Digest, Sha256};
 /// Domain-separation label for the derived iroh transport key. Bump the version
 /// suffix only with intent: it changes the host's endpoint id, which invalidates
 /// every previously scanned pairing code.
-const TRANSPORT_KEY_DOMAIN: &[u8] = b"oximux/remote/iroh-transport/v1";
+const TRANSPORT_KEY_DOMAIN: &[u8] = b"TREX/remote/iroh-transport/v1";
 
 /// A loaded host identity.
 pub struct HostIdentity {
@@ -113,7 +113,7 @@ fn persist(path: &Path, bytes: [u8; 32]) -> io::Result<()> {
     // there is no create-time equivalent of `mode`, so a failure here has to
     // propagate: a private signing key readable by other accounts is worse than
     // no Remote Control at all.
-    oximux_owner_only::restrict_file(path)?;
+    trex_owner_only::restrict_file(path)?;
     Ok(())
 }
 
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn identity_persists_and_reloads_the_same_key() {
-        let dir = std::env::temp_dir().join(format!("oximux-host-id-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trex-host-id-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
 
         let first = HostIdentity::load_or_generate(&dir, "/repo/a").expect("generate");
@@ -136,7 +136,7 @@ mod tests {
 
         let path = identity_path(&dir, "/repo/a");
         assert!(
-            oximux_owner_only::is_restricted_to_owner(&path).unwrap(),
+            trex_owner_only::is_restricted_to_owner(&path).unwrap(),
             "private signing key must not be readable by other accounts"
         );
 
@@ -148,7 +148,7 @@ mod tests {
     /// address — and must not simply be the signing key.
     #[test]
     fn transport_secret_is_stable_and_distinct_from_the_signing_key() {
-        let dir = std::env::temp_dir().join(format!("oximux-host-tk-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trex-host-tk-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
 
         let first = HostIdentity::load_or_generate(&dir, "scope").expect("generate");

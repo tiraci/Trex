@@ -1,4 +1,4 @@
-//! Drag plumbing for sidebar reorder — payload types, the floating preview
+﻿//! Drag plumbing for sidebar reorder — payload types, the floating preview
 //! chip, and the pure insertion-side helper.
 //!
 //! The left rail reorders project groups and workspace rows with GPUI's
@@ -128,9 +128,9 @@ impl Render for SidebarDragPreview {
         // Every token resolved per render rather than carried in. A ghost that
         // held a palette would be one more place for a stale one to hide, and
         // it has no state worth keeping — it exists for one drag.
-        let theme = oximux_settings::appearance::theme(cx);
-        let density = oximux_settings::appearance::density(cx);
-        let typography = oximux_settings::appearance::typography(cx);
+        let theme = trex_settings::appearance::theme(cx);
+        let density = trex_settings::appearance::density(cx);
+        let typography = trex_settings::appearance::typography(cx);
         div()
             .flex()
             .items_center()

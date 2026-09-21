@@ -1,11 +1,11 @@
-//! Smoke tests: construct `RightSidebar` with a static watch channel (no tokio
+﻿//! Smoke tests: construct `RightSidebar` with a static watch channel (no tokio
 //! thread-pool tasks), verify default state, tab switching, toggle, and
 //! the no-repo fallback that guards against SourceControl tab when hidden.
 
 use gpui::TestAppContext;
-use oximux_app::shell::right_sidebar::{RightSidebar, SidebarTestConfig, tab::RightTab};
-use oximux_git::{PollState, Repository};
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::right_sidebar::{RightSidebar, SidebarTestConfig, tab::RightTab};
+use trex_git::{PollState, Repository};
+use trex_settings::{Density, Theme, Typography};
 use std::process::Command;
 use tokio::sync::watch;
 

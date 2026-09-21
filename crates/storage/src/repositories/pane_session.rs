@@ -1,8 +1,8 @@
-//! `PaneSessionRepo` — typed CRUD over the `pane_sessions` table.
+﻿//! `PaneSessionRepo` — typed CRUD over the `pane_sessions` table.
 //! `grid_position` is an opaque caller-controlled string; format is set
 //! by the UI layer (step 8).
 
-use oximux_core::PaneSession;
+use trex_core::PaneSession;
 use rusqlite::{OptionalExtension, params};
 
 use super::{new_id, now};

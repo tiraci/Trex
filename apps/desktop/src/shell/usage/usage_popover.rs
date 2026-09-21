@@ -1,4 +1,4 @@
-//! Floating usage popover — a borderless panel **window** hosting the usage
+﻿//! Floating usage popover — a borderless panel **window** hosting the usage
 //! card above the inline browser.
 //!
 //! Why a separate window: the inline browser's webview is a native view
@@ -18,9 +18,9 @@ use gpui::{
     KeyDownEvent, ParentElement, Render, Styled, Subscription, WeakEntity, Window,
     WindowBackgroundAppearance, WindowBounds, WindowKind, WindowOptions, div, point, px, size,
 };
-use oximux_agents::session_log::now_unix_ms;
-use oximux_agents::session_log::usage::ProviderUsage;
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::session_log::now_unix_ms;
+use trex_agents::session_log::usage::ProviderUsage;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::usage_meter;
 use crate::workspace_root::WorkspaceRoot;
@@ -110,7 +110,7 @@ impl Focusable for UsagePopover {
 
 impl Render for UsagePopover {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         div()
             .size_full()
             .track_focus(&self.focus_handle)

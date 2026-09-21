@@ -1,5 +1,5 @@
-//! `remote-host`'s [`TerminalSource`] seam implemented over the relay daemon —
-//! shared by both hosts (the desktop app and `oximux serve`), extracted from
+﻿//! `remote-host`'s [`TerminalSource`] seam implemented over the relay daemon —
+//! shared by both hosts (the desktop app and `TREX serve`), extracted from
 //! the desktop for the same reason the relay supervisor was.
 //!
 //! This is the only place the remote protocol and the PTY daemon meet.
@@ -10,12 +10,12 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use oximux_relay_client::RelayClient;
-use oximux_relay_proto::{Notification, Request, Response};
-use oximux_remote_host::{
+use trex_relay_client::RelayClient;
+use trex_relay_proto::{Notification, Request, Response};
+use trex_remote_host::{
     AttachmentId, TerminalAttach, TerminalError, TerminalFrame, TerminalSource,
 };
-use oximux_remote_proto::messages::TerminalSummary;
+use trex_remote_proto::messages::TerminalSummary;
 use tokio::sync::{mpsc, oneshot};
 
 /// How many terminal frames to buffer per remote attachment.
@@ -100,7 +100,7 @@ impl TerminalSource for RelayTerminals {
                 self.client.bind_attachment(pty_id, sub_id, attachment_id);
                 TerminalAttach { replay, cols, rows, attachment: AttachmentId(attachment_id) }
             }
-            Ok(Response::Err { code: oximux_relay_proto::ErrCode::PtyNotFound, .. }) => {
+            Ok(Response::Err { code: trex_relay_proto::ErrCode::PtyNotFound, .. }) => {
                 self.client.unsubscribe_pty(pty_id, sub_id);
                 return Err(TerminalError::NotFound);
             }
@@ -215,7 +215,7 @@ impl TerminalSource for RelayTerminals {
             .await?
         {
             Response::Ok => Ok(()),
-            Response::Err { code: oximux_relay_proto::ErrCode::PtyNotFound, .. } => {
+            Response::Err { code: trex_relay_proto::ErrCode::PtyNotFound, .. } => {
                 Err(TerminalError::NotFound)
             }
             other => {
@@ -242,7 +242,7 @@ impl TerminalSource for RelayTerminals {
             .await?
         {
             Response::Ok => Ok(()),
-            Response::Err { code: oximux_relay_proto::ErrCode::PtyNotFound, .. } => {
+            Response::Err { code: trex_relay_proto::ErrCode::PtyNotFound, .. } => {
                 Err(TerminalError::NotFound)
             }
             other => {

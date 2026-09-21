@@ -1,4 +1,4 @@
-//! ACP authentication methods ↔ OxiMux's auth card + the worker's authenticate
+﻿//! ACP authentication methods ↔ TREX's auth card + the worker's authenticate
 //! flow.
 //!
 //! When an ACP agent needs login it fails `session/new`/`session/load` with the

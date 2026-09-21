@@ -1,4 +1,4 @@
-//! Left navigation for the settings modal: the pane enum + nav list.
+﻿//! Left navigation for the settings modal: the pane enum + nav list.
 
 use gpui::{
     AnyElement, Entity, InteractiveElement, IntoElement, MouseButton, ParentElement, SharedString,
@@ -8,7 +8,7 @@ use gpui_component::{
     Icon, Sizable as _,
     input::{Input, InputState},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 
@@ -59,7 +59,7 @@ pub enum SettingsPane {
     Notifications,
     Schedules,
     Remote,
-    /// External CLIs OxiMux shells out to — presence, sign-in, and the button
+    /// External CLIs TREX shells out to — presence, sign-in, and the button
     /// that fixes whichever is missing.
     Integrations,
     Keybindings,
@@ -146,7 +146,7 @@ impl SettingsPane {
             SettingsPane::Voice => "Voice",
             // "Computer use" rather than anything about screens: it is the term
             // users arrive already knowing, the code has always spelled it that
-            // way (`oximux-computer-use`, `computer_use.toml`), and the sidebar
+            // way (`trex-computer-use`, `computer_use.toml`), and the sidebar
             // entry directly below this one is Remote — which genuinely *is*
             // controlling this screen from elsewhere. Two adjacent rows both
             // named for screens would be read as two halves of one feature.

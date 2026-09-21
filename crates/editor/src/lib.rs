@@ -1,4 +1,4 @@
-//! oximux-editor
+﻿//! trex-editor
 //!
 //! Thin wrapper around `gpui-component`'s `Input` widget configured as a
 //! code editor (tree-sitter highlight built in), plus a hand-rolled LSP

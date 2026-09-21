@@ -1,5 +1,5 @@
-[package]
-name = "oximux-pty"
+﻿[package]
+name = "trex-pty"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,8 +8,8 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-oximux-core = { workspace = true }
-oximux-shell-env = { workspace = true }
+trex-core = { workspace = true }
+trex-shell-env = { workspace = true }
 anyhow = { workspace = true }
 portable-pty = { workspace = true }
 alacritty_terminal = { workspace = true }
@@ -22,4 +22,4 @@ alacritty_terminal = { workspace = true }
 nix = { version = "0.25", features = ["signal"] }
 
 [dev-dependencies]
-oximux-shell-env = { workspace = true, features = ["test-support"] }
+trex-shell-env = { workspace = true, features = ["test-support"] }

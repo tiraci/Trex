@@ -1,4 +1,4 @@
-//! Integration test for the Phase 01 discard flow.
+﻿//! Integration test for the Phase 01 discard flow.
 //!
 //! Covers the seams that matter for safety:
 //! - `GitPanel::discard_path` populates `pending_discard` with the
@@ -17,11 +17,11 @@
 //! flushes the cx.spawn result handler after the tokio side resolves.
 
 use gpui::TestAppContext;
-use oximux_app::shell::git_panel::GitPanel;
-use oximux_app::shell::git_panel::discard_confirm::DiscardKind;
-use oximux_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
-use oximux_git::{PollState, Repository};
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::git_panel::GitPanel;
+use trex_app::shell::git_panel::discard_confirm::DiscardKind;
+use trex_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
+use trex_git::{PollState, Repository};
+use trex_settings::{Density, Theme, Typography};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use tokio::sync::watch;
@@ -38,7 +38,7 @@ fn seed_dirty_repo(p: &Path, name: &str, body: &str, dirty_body: &str) {
             .expect("git on PATH");
     };
     st(&["init", "-b", "main"]);
-    st(&["config", "user.email", "test@oximux.dev"]);
+    st(&["config", "user.email", "test@TREX.dev"]);
     st(&["config", "user.name", "Test"]);
     std::fs::write(p.join(name), body).expect("write seed");
     st(&["add", name]);
@@ -106,7 +106,7 @@ async fn discard_path_sets_pending_with_modified_copy(cx: &mut TestAppContext) {
         // non-empty), `kind` → embedded in `scope: DiscardScope`.
         assert_eq!(req.paths, vec![PathBuf::from("src.rs")]);
         let kind = match req.scope {
-            oximux_app::shell::git_panel::DiscardScope::Single { kind } => kind,
+            trex_app::shell::git_panel::DiscardScope::Single { kind } => kind,
             other => panic!("expected DiscardScope::Single, got {other:?}"),
         };
         assert_eq!(kind, DiscardKind::Discard);

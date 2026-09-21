@@ -1,5 +1,5 @@
-[package]
-name = "oximux-relay-proto"
+﻿[package]
+name = "trex-relay-proto"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

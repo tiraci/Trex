@@ -1,7 +1,7 @@
-//! Keep every data path resolving through `app_paths`.
+﻿//! Keep every data path resolving through `app_paths`.
 //!
 //! `app_paths` exists because ten modules each spelled
-//! `dirs::data_dir().map(|d| d.join("dev.nhtera.oximux"))` themselves. The
+//! `dirs::data_dir().map(|d| d.join("dev.tiraci.trex"))` themselves. The
 //! migration that introduced it converted most of them and missed seven, and
 //! nothing noticed for a simple reason: on macOS `dirs::data_dir()` and
 //! `dirs::data_local_dir()` are the same directory, so the two spellings are
@@ -24,12 +24,12 @@
 //!
 //! `home_dir` is deliberately not covered. Reading `~/.claude` or `~/.codex`
 //! is reaching into *another* tool's files, which is a different thing from
-//! deciding where OxiMux keeps its own.
+//! deciding where TREX keeps its own.
 
 use std::error::Error;
 use std::path::{Path, PathBuf};
 
-/// The `dirs` roots that pick a location for OxiMux's own files. Every one of
+/// The `dirs` roots that pick a location for TREX's own files. Every one of
 /// these has an `app_paths` wrapper that encodes the platform reasoning once.
 const RESERVED: &[(&str, &str)] = &[
     ("dirs::data_dir()", "app_paths::data_dir()"),
@@ -45,7 +45,7 @@ const OWNER: &str = "apps/desktop/src/app_paths.rs";
 /// this particular file gets to decide a location for itself.
 // The one exception, and why it is not the thing this lint exists to stop: the
 // control socket's location has to be known by BOTH the desktop that binds it
-// and the `oximux` CLI that dials it, and the CLI cannot depend on
+// and the `TREX` CLI that dials it, and the CLI cannot depend on
 // apps/desktop. `remote-local` is the naming contract those two share, so it is
 // the only place the path can be stated for both. It is not a module choosing a
 // location for itself — it is the second half of `app_paths`' choice, and
@@ -94,7 +94,7 @@ pub fn run(sources: &[PathBuf], root: &Path) -> Result<(), Box<dyn Error>> {
     hits.sort();
     Err(format!(
         "{} data-path call site(s) bypass app_paths:\n{}\n\n\
-         These decide where OxiMux keeps its files, and the decision belongs in\n\
+         These decide where TREX keeps its files, and the decision belongs in\n\
          {OWNER} so it is made once per platform rather than once per module.\n\
          On macOS data_dir and data_local_dir are the same directory, so a\n\
          bypass here is invisible until it reaches Windows, where data_dir is\n\
@@ -112,7 +112,7 @@ mod tests {
     /// Write `files` under a fresh temp root and run the lint over them.
     fn lint(files: &[(&str, &str)]) -> Result<(), Box<dyn Error>> {
         let root = std::env::temp_dir().join(format!(
-            "oximux-data-dir-lint-{}-{:?}",
+            "trex-data-dir-lint-{}-{:?}",
             std::process::id(),
             std::thread::current().id()
         ));
@@ -183,7 +183,7 @@ mod tests {
     #[test]
     fn home_dir_is_left_alone() {
         // Reading another tool's config out of the home directory is not a
-        // decision about where OxiMux keeps its own files.
+        // decision about where TREX keeps its own files.
         lint(&[(
             "apps/desktop/src/hooks.rs",
             "fn s() { dirs::home_dir().map(|h| h.join(\".claude\")) }\n",

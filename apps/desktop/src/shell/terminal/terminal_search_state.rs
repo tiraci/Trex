@@ -1,4 +1,4 @@
-//! Search-overlay state for `TerminalView`.
+﻿//! Search-overlay state for `TerminalView`.
 //!
 //! Owns the four state fields (active/query/matches/history_len) and the
 //! search-mode key dispatcher. The host (`TerminalView`) owns I/O: it
@@ -12,7 +12,7 @@
 //! pure math vs view-coupled state machine.
 
 use gpui::KeyDownEvent;
-use oximux_pty::Cell;
+use trex_pty::Cell;
 
 use crate::shell::terminal_search::{
     MatchRange, SearchOptions, compile_search_regex, find_matches_precompiled,

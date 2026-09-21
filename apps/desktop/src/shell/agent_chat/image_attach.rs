@@ -1,4 +1,4 @@
-//! Image-attachment helpers for the agent chat.
+﻿//! Image-attachment helpers for the agent chat.
 //!
 //! Turns a picked / pasted / dropped image into a wire-ready [`ChatImage`]
 //! (standard-base64 data + a Claude-supported media type) paired with a decoded
@@ -15,7 +15,7 @@ use std::sync::Arc;
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD;
 use gpui::{Image, ImageFormat};
-use oximux_agents::thread::ChatImage;
+use trex_agents::thread::ChatImage;
 
 /// The image media types Claude accepts as base64 blocks.
 fn is_supported(f: ImageFormat) -> bool {

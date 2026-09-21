@@ -1,8 +1,8 @@
-//! Unit tests for `tree_state` — `should_include` and `flatten`.
+﻿//! Unit tests for `tree_state` — `should_include` and `flatten`.
 //! These duplicate the in-module tests from tree_state.rs to satisfy the
 //! "tests under apps/desktop/tests/" requirement and add additional cases.
 
-use oximux_app::shell::file_explorer::tree_state::{DirCache, TreeNode, flatten, should_include};
+use trex_app::shell::file_explorer::tree_state::{DirCache, TreeNode, flatten, should_include};
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 

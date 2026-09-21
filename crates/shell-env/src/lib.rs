@@ -1,6 +1,6 @@
-//! What a spawned terminal shell should be, and what its environment needs.
+﻿//! What a spawned terminal shell should be, and what its environment needs.
 //!
-//! Two rules, both of which used to live twice — once in `oximux-pty`'s
+//! Two rules, both of which used to live twice — once in `trex-pty`'s
 //! in-process backend and once in the relay daemon's registry. They are the
 //! same rule in both places, and the daemon is the one that has to be right:
 //! a phone paired to a desktop asks for "a terminal", and only the host knows
@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 /// Which shell family a new terminal pane runs on Windows.
 ///
-/// Stored in `terminal.toml` (via `oximux-settings`) and surfaced as a
+/// Stored in `terminal.toml` (via `trex-settings`) and surfaced as a
 /// segmented control in the settings UI. Ignored off Windows, where the shell
 /// is the inherited `$SHELL` or the POSIX fallback chain (see [`default_shell`]).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -26,7 +26,7 @@ pub enum WindowsShell {
     #[serde(rename = "cmd")]
     CommandPrompt,
     /// Git for Windows' `bash.exe`, resolved from the standard install
-    /// locations (or `OXIMUX_GIT_BASH_PATH`). Falls back to PowerShell when
+    /// locations (or `trex_GIT_BASH_PATH`). Falls back to PowerShell when
     /// Git for Windows is not installed.
     #[serde(rename = "git-bash")]
     GitBash,
@@ -178,7 +178,7 @@ fn git_bash_shell() -> Option<ResolvedShell> {
 
 /// Locate Git for Windows' `bash.exe`.
 ///
-/// Order: `OXIMUX_GIT_BASH_PATH` override, then the standard per-machine and
+/// Order: `trex_GIT_BASH_PATH` override, then the standard per-machine and
 /// per-user install roots, then the install `git` on `PATH` resolves to. Only
 /// a real Git-for-Windows layout counts, so a WSL/Cygwin `bash.exe` on `PATH`
 /// is never mistaken for it.
@@ -188,7 +188,7 @@ fn git_bash_path() -> Option<String> {
 
     // 1. Operator override for a non-standard install (mirrors Claude Code's
     //    CLAUDE_CODE_GIT_BASH_PATH).
-    if let Ok(custom) = std::env::var("OXIMUX_GIT_BASH_PATH")
+    if let Ok(custom) = std::env::var("TREX_GIT_BASH_PATH")
         && Path::new(&custom).is_file()
     {
         return Some(custom);
@@ -365,12 +365,12 @@ pub fn seed_utf8_locale(command: &mut CommandBuilder) {
 ///
 /// `NO_COLOR` (any non-empty value) and `FORCE_COLOR=0` are both honoured by
 /// essentially every modern CLI — chalk, supports-color, clap, ripgrep, and the
-/// agent CLIs OxiMux exists to host.
+/// agent CLIs TREX exists to host.
 const COLOUR_SUPPRESSORS: &[&str] = &["NO_COLOR", "FORCE_COLOR"];
 
 /// Drop inherited "no colour" flags from a PTY child's environment.
 ///
-/// OxiMux forces `TERM=xterm-256color` and `COLORTERM=truecolor` on every PTY
+/// TREX forces `TERM=xterm-256color` and `COLORTERM=truecolor` on every PTY
 /// child, because a GUI-launched app (and a detached relay daemon even more so)
 /// inherits no terminal identity of its own. Passing an inherited `NO_COLOR`
 /// through alongside those is self-contradictory: the same environment would
@@ -378,14 +378,14 @@ const COLOUR_SUPPRESSORS: &[&str] = &["NO_COLOR", "FORCE_COLOR"];
 /// not use any.
 ///
 /// The variable is almost never the user's: it is injected by whatever launched
-/// OxiMux. Coding agents set `NO_COLOR=1` on their child processes so tool
+/// TREX. Coding agents set `NO_COLOR=1` on their child processes so tool
 /// output arrives as clean text — which is correct for the tools they run, and
 /// wrong for a terminal emulator started from one, whose panes then render
 /// every agent, pager and build tool in flat monochrome. Nothing reports it;
 /// the terminal simply looks wrong.
 ///
 /// The cost is real and worth naming: a user who sets `NO_COLOR` globally
-/// loses it *for OxiMux panes only*. The escape hatch is that this runs before
+/// loses it *for TREX panes only*. The escape hatch is that this runs before
 /// the caller-supplied environment is applied, so an explicit
 /// `SpawnConfig`/`SpawnArgs` entry still wins, as does anything the user's own
 /// shell profile exports once the pane is live.
@@ -689,7 +689,7 @@ pub mod test_support {
 /// dropping them cannot lose a setting the user chose.
 ///
 /// One list, three consumers (the desktop app, the relay daemon, and
-/// `oximux serve`): each is a process that spawns agent CLIs and terminals,
+/// `TREX serve`): each is a process that spawns agent CLIs and terminals,
 /// and an inherited `CLAUDE_CODE_CHILD_SESSION` makes a spawned `claude`
 /// treat itself as a nested child and switch transcript saving off — the
 /// exact history the hosts exist to keep.

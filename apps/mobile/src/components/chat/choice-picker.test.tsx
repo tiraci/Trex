@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import type { Choice } from 'oximux-core';
+﻿import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { Choice } from 'trex-core';
 
 import { ChoicePicker } from '@/components/chat/choice-picker';
 

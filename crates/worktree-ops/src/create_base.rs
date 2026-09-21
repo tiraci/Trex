@@ -1,4 +1,4 @@
-//! What a new worktree is cut from — and what that choice implies for
+﻿//! What a new worktree is cut from — and what that choice implies for
 //! provisioning.
 //!
 //! Before this existed, `git worktree add -b <branch> <path>` ran with no
@@ -11,8 +11,8 @@
 //! fourth state — "adopt an existing branch, and also cut it from somewhere" —
 //! is not a thing, and a pair of `Option`s would let a caller build it.
 
-use oximux_git::Repository;
-use oximux_settings::SetupDecision;
+use trex_git::Repository;
+use trex_settings::SetupDecision;
 
 /// The base a new worktree is cut from.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -98,7 +98,7 @@ impl CreateBase {
 
 /// Whether the setup script may run for a worktree cut from this base.
 ///
-/// Provisioning runs the *worktree's own committed* `.oximux/scripts.toml` —
+/// Provisioning runs the *worktree's own committed* `.trex/scripts.toml` —
 /// "the branch's own copy is the one that will actually run". That is safe only
 /// while every worktree branches off the user's own HEAD, which is precisely
 /// the invariant [`CreateBase`] removes. Basing a worktree on a fetched
@@ -155,7 +155,7 @@ pub async fn setup_decision(
     // A malformed ref never reaches `git merge-base`. This runs upstream of
     // `add_worktree_from`'s own validation, so without this the first `git`
     // invocation to see an unvalidated ref would be the ancestry check.
-    if oximux_git::worktree::validate_ref_name(named).is_err() {
+    if trex_git::worktree::validate_ref_name(named).is_err() {
         return (
             SetupDecision::Skip,
             Some(format!("Setup skipped: `{named}` is not a usable ref name.")),
@@ -250,18 +250,18 @@ mod tests {
 
     #[test]
     fn the_row_names_the_branch_in_both_modes() {
-        assert_eq!(CreateBase::new_branch("oximux/x").branch(), "oximux/x");
+        assert_eq!(CreateBase::new_branch("TREX/x").branch(), "TREX/x");
         assert_eq!(
-            CreateBase::new_branch_from("oximux/x", "main").branch(),
-            "oximux/x"
+            CreateBase::new_branch_from("TREX/x", "main").branch(),
+            "TREX/x"
         );
         assert_eq!(CreateBase::existing("side").branch(), "side");
     }
 
     #[test]
     fn only_a_minted_branch_may_be_rolled_back() {
-        assert!(CreateBase::new_branch("oximux/x").creates_branch());
-        assert!(CreateBase::new_branch_from("oximux/x", "main").creates_branch());
+        assert!(CreateBase::new_branch("TREX/x").creates_branch());
+        assert!(CreateBase::new_branch_from("TREX/x", "main").creates_branch());
         assert!(
             !CreateBase::existing("side").creates_branch(),
             "rollback would force-delete the user's own branch"
@@ -270,9 +270,9 @@ mod tests {
 
     #[test]
     fn only_a_chosen_base_is_a_named_one() {
-        assert_eq!(CreateBase::new_branch("oximux/x").named_base(), None);
+        assert_eq!(CreateBase::new_branch("TREX/x").named_base(), None);
         assert_eq!(
-            CreateBase::new_branch_from("oximux/x", "origin/pr").named_base(),
+            CreateBase::new_branch_from("TREX/x", "origin/pr").named_base(),
             Some("origin/pr")
         );
         assert_eq!(CreateBase::existing("side").named_base(), Some("side"));

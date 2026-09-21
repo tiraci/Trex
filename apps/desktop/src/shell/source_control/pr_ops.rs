@@ -1,4 +1,4 @@
-//! Create-Pull-Request execution path for the Source Control panel.
+﻿//! Create-Pull-Request execution path for the Source Control panel.
 //!
 //! Mirrors the two-runtime bridge in [`super::commit_ops`]: the `gh pr create`
 //! shellout runs on the live tokio runtime via `Handle::try_current().spawn`,
@@ -69,7 +69,7 @@ pub fn run_create_pr(area: &mut CommitArea, opts: CreatePrOptions, cx: &mut Cont
                         crate::shell::toast::ToastKind::Success,
                         "Pull request opened",
                     );
-                    tracing::info!(target: "oximux_app::source_control", url = %url, "pull request created");
+                    tracing::info!(target: "trex_app::source_control", url = %url, "pull request created");
                 }
                 Err(err) => {
                     crate::shell::toast::toast(
@@ -129,7 +129,7 @@ pub fn run_merge_pr(area: &mut CommitArea, method: MergeMethod, cx: &mut Context
                     // Force the next observer tick to re-check PR status so the
                     // merged PR's surface (checks, merge rows) clears promptly.
                     area.pr_status_dirty = true;
-                    tracing::info!(target: "oximux_app::source_control", "pull request merged");
+                    tracing::info!(target: "trex_app::source_control", "pull request merged");
                 }
                 Err(err) => {
                     area.status = CommitStatus::Failed("merge PR".to_string(), err);

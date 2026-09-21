@@ -1,6 +1,6 @@
-//! Validate `config/reliability-gates.toml` — the reliability claims ledger.
+﻿//! Validate `config/reliability-gates.toml` — the reliability claims ledger.
 //!
-//! Why this exists at all: OxiMux plan docs have twice carried a "VERIFIED" row
+//! Why this exists at all: TREX plan docs have twice carried a "VERIFIED" row
 //! that was false. Once the evidence was a truncated `ls` that showed the first
 //! screenful and was read as the whole set; once it was an API that genuinely
 //! existed, just not on the host that mattered. Neither was a lie and neither

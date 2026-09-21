@@ -1,6 +1,6 @@
-# Automatic retry after a rate limit
+﻿# Automatic retry after a rate limit
 
-When a turn fails because the provider is out of capacity, OxiMux can hold the
+When a turn fails because the provider is out of capacity, TREX can hold the
 turn and send it again by itself, instead of leaving a failed turn for you to
 find and re-send by hand.
 
@@ -94,10 +94,10 @@ The limit kinds above are not guessed from error messages, and not matched
 against error prose — a provider is free to reword a message at any time. They
 are read from the `rate_limit_event` line that the Claude CLI already emits on
 its own stream, whose `status` and `rateLimitType` values are a closed set
-defined by the CLI's own schema. OxiMux previously discarded that line.
+defined by the CLI's own schema. TREX previously discarded that line.
 
 One detail worth recording: the wire reports `resetsAt` in unix **seconds**,
-while every reset time inside OxiMux is milliseconds. The conversion happens
+while every reset time inside TREX is milliseconds. The conversion happens
 once, in the decoder, and is asserted against a literal — get it wrong and a
 retry fires either instantly or tens of thousands of years out, neither of which
 looks like a units bug from the UI.
@@ -112,7 +112,7 @@ turn rather than restarting at every launch.
 Three things stop the rebuild, and each is a case where firing would be wrong
 rather than merely late:
 
-- **The reset passed while OxiMux was closed.** More than five minutes past and
+- **The reset passed while TREX was closed.** More than five minutes past and
   the retry is dropped. A lid closed over the reset still fires; a night away
   does not. Nothing sends unattended for a limit that expired without you — the
   turn is still there, and the Retry button still works.
@@ -126,16 +126,16 @@ fire, why, and how many attempts the turn has cost.
 
 ## Not covered yet
 
-`oximux agent retry status|now|cancel` is not implemented, and it is blocked by
+`TREX agent retry status|now|cancel` is not implemented, and it is blocked by
 more than the work of adding three verbs. Retry lives in the **desktop app
-only** — `oximux serve`, the host the CLI actually talks to, has no retry at
+only** — `TREX serve`, the host the CLI actually talks to, has no retry at
 all. Verbs added today would answer "nothing armed" for every `serve` session
 while the desktop quietly retried its own, which is a worse surface than no
 verbs. Making the CLI's answer true means moving retry into the host layer
 first; the wire change (a new verb plus a protocol version bump) is the smaller
 half of that job.
 
-What is *not* missing is the policy. `oximux_agents::retry::schedule()` and
+What is *not* missing is the policy. `TREX_agents::retry::schedule()` and
 `classify_failure` are already pure and host-agnostic — no clock, no randomness,
 no view — so what has to move is the driver that arms a timer and re-sends, not
 the rules about when a retry is allowed. Two shipped things give that driver its

@@ -1,4 +1,4 @@
-//! Deciding whether an open diff is showing something that can still change.
+﻿//! Deciding whether an open diff is showing something that can still change.
 //!
 //! A diff tab was a snapshot: it fetched once and then held whatever it got.
 //! Everything that edits the files underneath it — the user in another editor,
@@ -18,7 +18,7 @@
 
 use std::path::PathBuf;
 
-use oximux_core::{CombinedDiff, CombinedDiffScope, FileDiff};
+use trex_core::{CombinedDiff, CombinedDiffScope, FileDiff};
 
 use super::DiffViewState;
 

@@ -1,4 +1,4 @@
-//! Right-click context menu for commit-graph rows.
+﻿//! Right-click context menu for commit-graph rows.
 //!
 //! Four items in a single card: Cherry-pick / Revert / Copy SHA / Copy
 //! short SHA. The first two dispatch through `CommitArea::cherry_pick` /
@@ -17,7 +17,7 @@ use gpui::{
     ClipboardItem, Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
     ParentElement, Render, Styled, WeakEntity, Window, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -95,7 +95,7 @@ impl CommitContextMenu {
 
 impl Render for CommitContextMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

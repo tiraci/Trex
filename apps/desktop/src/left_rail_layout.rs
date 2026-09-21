@@ -1,4 +1,4 @@
-//! Persistence + clamp for the left-rail (projects) width.
+﻿//! Persistence + clamp for the left-rail (projects) width.
 //!
 //! The width is a user layout preference, stored as a decimal-string
 //! `f32` in the global `SettingsRepo` key/value store (same shape as
@@ -8,7 +8,7 @@
 //! default; out-of-range values are clamped on both load and save so a
 //! corrupt write can't leak past either direction.
 
-use oximux_storage::SettingsRepo;
+use trex_storage::SettingsRepo;
 
 use crate::shell::left_rail::workspace_list_render::{WorkspaceGroupMode, WorkspaceSortMode};
 
@@ -52,7 +52,7 @@ pub fn save_left_rail_width(repo: &SettingsRepo, value: f32) {
     let encoded = format!("{}", clamp_left_rail_width(value));
     if let Err(err) = repo.set(KEY_LEFT_RAIL_WIDTH, &encoded) {
         tracing::warn!(
-            target: "oximux_app::left_rail_layout",
+            target: "trex_app::left_rail_layout",
             "failed to persist left_rail_width: {err}"
         );
     }
@@ -82,7 +82,7 @@ pub fn save_collapsed_projects(repo: &SettingsRepo, ids: &[String]) {
     let encoded = ids.join(",");
     if let Err(err) = repo.set(KEY_LEFT_RAIL_COLLAPSED, &encoded) {
         tracing::warn!(
-            target: "oximux_app::left_rail_layout",
+            target: "trex_app::left_rail_layout",
             "failed to persist left_rail_collapsed_projects: {err}"
         );
     }
@@ -105,7 +105,7 @@ pub fn load_sort_mode(repo: &SettingsRepo) -> WorkspaceSortMode {
 pub fn save_sort_mode(repo: &SettingsRepo, mode: WorkspaceSortMode) {
     if let Err(err) = repo.set(KEY_LEFT_RAIL_SORT_MODE, mode.as_key()) {
         tracing::warn!(
-            target: "oximux_app::left_rail_layout",
+            target: "trex_app::left_rail_layout",
             "failed to persist left_rail_sort_mode: {err}"
         );
     }
@@ -126,7 +126,7 @@ pub fn save_compact_cards(repo: &SettingsRepo, compact: bool) {
     let encoded = if compact { "true" } else { "false" };
     if let Err(err) = repo.set(KEY_LEFT_RAIL_COMPACT_CARDS, encoded) {
         tracing::warn!(
-            target: "oximux_app::left_rail_layout",
+            target: "trex_app::left_rail_layout",
             "failed to persist left_rail_compact_cards: {err}"
         );
     }
@@ -149,7 +149,7 @@ pub fn load_group_mode(repo: &SettingsRepo) -> WorkspaceGroupMode {
 pub fn save_group_mode(repo: &SettingsRepo, mode: WorkspaceGroupMode) {
     if let Err(err) = repo.set(KEY_LEFT_RAIL_GROUP_MODE, mode.as_key()) {
         tracing::warn!(
-            target: "oximux_app::left_rail_layout",
+            target: "trex_app::left_rail_layout",
             "failed to persist left_rail_group_mode: {err}"
         );
     }

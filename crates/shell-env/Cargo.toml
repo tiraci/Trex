@@ -1,5 +1,5 @@
-[package]
-name = "oximux-shell-env"
+﻿[package]
+name = "trex-shell-env"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -17,7 +17,7 @@ test-support = []
 # depend on portable-pty, so this adds nothing to either dependency graph.
 portable-pty = { workspace = true }
 
-# Derive on the Windows-shell choice enums so `oximux-settings` can persist
+# Derive on the Windows-shell choice enums so `trex-settings` can persist
 # them in `terminal.toml` without a parallel copy of the same variants.
 serde = { workspace = true }
 

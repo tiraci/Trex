@@ -1,7 +1,7 @@
-//! Status-bar usage meter — one compact segment per configured account, and
+﻿//! Status-bar usage meter — one compact segment per configured account, and
 //! the click popover that spells all of them out.
 //!
-//! Data comes from `oximux_agents::session_log::usage_probe` on a 60 s
+//! Data comes from `trex_agents::session_log::usage_probe` on a 60 s
 //! background tick owned by `WorkspaceRoot`. Everything here is rendering plus
 //! pure formatting.
 //!
@@ -20,10 +20,10 @@
 
 use gpui::{Div, Hsla, ParentElement, Styled, div, px, relative};
 use gpui_component::Icon;
-use oximux_agents::session_log::usage::{
+use trex_agents::session_log::usage::{
     ProviderUsage, UsageProvider, UsageSnapshot, UsageState, UsageWindow,
 };
-use oximux_settings::{Density, Theme, Typography, UsageDetail};
+use trex_settings::{Density, Theme, Typography, UsageDetail};
 
 /// Status-bar label for a configured account that could not be read. The
 /// reason itself lives in the popover, as it always has.
@@ -490,7 +490,7 @@ pub fn popover_height(rows: &[ProviderUsage], density: Density, typography: &Typ
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::session_log::usage::{FIVE_HOUR_MINUTES, WEEK_MINUTES};
+    use trex_agents::session_log::usage::{FIVE_HOUR_MINUTES, WEEK_MINUTES};
 
     fn snapshot(five_pct: f64, weekly_pct: f64) -> UsageSnapshot {
         UsageSnapshot {
@@ -760,9 +760,9 @@ mod tests {
         let roomy = popover_height(&rows, Density::comfortable(), &Typography::cockpit());
         assert!(roomy > tight, "more air around the same text needs more card");
 
-        let zoomed_tokens = Typography::for_appearance(oximux_settings::Appearance {
-            scale: oximux_settings::UiScale::from_percent(150),
-            ..oximux_settings::Appearance::default()
+        let zoomed_tokens = Typography::for_appearance(trex_settings::Appearance {
+            scale: trex_settings::UiScale::from_percent(150),
+            ..trex_settings::Appearance::default()
         });
         let zoomed = popover_height(&rows, Density::cockpit(), &zoomed_tokens);
         assert!(zoomed > tight, "bigger text needs more card");

@@ -1,4 +1,4 @@
-//! Quiet transient toasts — a thin bottom-right stack for cross-surface events
+﻿//! Quiet transient toasts — a thin bottom-right stack for cross-surface events
 //! that have no permanent home (agent finished, commit failed, PR opened,
 //! clipboard ops). The status bar carries persistent repo/agent state; toasts
 //! carry the fleeting "this just happened" beat that would otherwise be silent.
@@ -18,7 +18,7 @@ use gpui::{
 };
 use gpui::prelude::FluentBuilder;
 use gpui_component::button::{Button, ButtonVariants};
-use oximux_settings::{Density, Motion, Theme, Typography};
+use trex_settings::{Density, Motion, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -284,7 +284,7 @@ impl ToastLayer {
         let anim = if exiting {
             Animation::new(dur).with_easing(ease_out_quint())
         } else {
-            Animation::new(dur).with_easing(oximux_settings::ease_out_spring())
+            Animation::new(dur).with_easing(trex_settings::ease_out_spring())
         };
         card.with_animation(
             ElementId::Name(anim_id.into()),
@@ -303,7 +303,7 @@ impl ToastLayer {
 
 impl Render for ToastLayer {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Nothing queued → render an inert empty node (no overlay, no hit area).
         if self.toasts.is_empty() {
             return div();

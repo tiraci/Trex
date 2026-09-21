@@ -1,4 +1,4 @@
-//! The v18 automation surface: heartbeats, team runs, and the coordination
+﻿//! The v18 automation surface: heartbeats, team runs, and the coordination
 //! blackboard — gates first, behaviour second.
 //!
 //! The gate matrix these pin, per the phase's ACL requirement:
@@ -15,17 +15,17 @@ use std::sync::Arc;
 
 use futures::executor::block_on;
 use futures::future::join;
-use oximux_agents::coord::CoordStore;
-use oximux_agents::schedule::{NewSchedule, Recurrence, ScheduleStore};
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::team::{NewTeamRole, TeamRoleStatus, TeamStore};
-use oximux_remote_host::{AuthStore, Dispatcher, LocalScope};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::{
+use trex_agents::coord::CoordStore;
+use trex_agents::schedule::{NewSchedule, Recurrence, ScheduleStore};
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::team::{NewTeamRole, TeamRoleStatus, TeamStore};
+use trex_remote_host::{AuthStore, Dispatcher, LocalScope};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::{
     CreateHeartbeatReq, HelloReq, RecurrenceWire, StateSetReq, TeamReportReq, TeamRoleStatusWire,
 };
-use oximux_remote_proto::proto::{PROTOCOL_VERSION, Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_remote_proto::proto::{PROTOCOL_VERSION, Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 async fn call(client: &dyn Transport, req: Request) -> Response {
     client.send(req.to_bytes().unwrap()).await.unwrap();
@@ -35,17 +35,17 @@ async fn call(client: &dyn Transport, req: Request) -> Response {
 
 /// One in-memory database shared by every store a host attaches, exactly as a
 /// real host shares one file.
-fn db() -> oximux_storage::Db {
-    oximux_storage::db::open_memory().expect("open in-memory db")
+fn db() -> trex_storage::Db {
+    trex_storage::db::open_memory().expect("open in-memory db")
 }
 
 /// A host with the automation stores attached and `sess-1`/`sess-2` live.
-fn host(db: &oximux_storage::Db) -> (Arc<Dispatcher>, ScheduleStore, TeamStore) {
+fn host(db: &trex_storage::Db) -> (Arc<Dispatcher>, ScheduleStore, TeamStore) {
     let registry = Arc::new(SessionRegistry::new());
     for id in ["sess-1", "sess-2"] {
         registry.register(
             id.into(),
-            Arc::new(oximux_agents::thread::StubConnection::default()),
+            Arc::new(trex_agents::thread::StubConnection::default()),
         );
     }
     let schedules = ScheduleStore::new(db.conn());
@@ -62,7 +62,7 @@ fn host(db: &oximux_storage::Db) -> (Arc<Dispatcher>, ScheduleStore, TeamStore) 
 /// Run one scripted exchange against a local connection at `scope`.
 fn talk<F, Fut>(dispatcher: &Arc<Dispatcher>, scope: LocalScope, script: F)
 where
-    F: FnOnce(oximux_remote_proto::testing::DuplexTransport) -> Fut,
+    F: FnOnce(trex_remote_proto::testing::DuplexTransport) -> Fut,
     Fut: std::future::Future<Output = ()>,
 {
     let (server, client) = duplex_pair();
@@ -220,12 +220,12 @@ fn a_confined_agent_cannot_open_a_team_run() {
     talk(&dispatcher, LocalScope::Session("sess-1".into()), |client| async move {
         let reply = call(
             &client,
-            Request::TeamRunCreate(oximux_remote_proto::messages::TeamRunCreateReq {
+            Request::TeamRunCreate(trex_remote_proto::messages::TeamRunCreateReq {
                 name: "ship".into(),
                 cwd: "/work".into(),
                 agent_id: None,
                 worktree_each: false,
-                roles: vec![oximux_remote_proto::messages::TeamRoleSpecWire {
+                roles: vec![trex_remote_proto::messages::TeamRoleSpecWire {
                     name: "backend".into(),
                     prompt: "go".into(),
                 }],
@@ -525,8 +525,8 @@ fn a_watcher_gets_the_baseline_then_prefixed_changes() {
 /// to steer them without ever sending a prompt.
 #[test]
 fn a_read_only_device_is_refused_every_v18_write() {
-    use oximux_remote_host::{PairingSlot, registration_proof};
-    use oximux_remote_proto::messages::{RegisterReq, TeamRoleSpecWire, TeamRunCreateReq};
+    use trex_remote_host::{PairingSlot, registration_proof};
+    use trex_remote_proto::messages::{RegisterReq, TeamRoleSpecWire, TeamRunCreateReq};
 
     const NOW: u64 = 1_754_000_000;
     const SECRET: [u8; 16] = [0x22; 16];
@@ -538,7 +538,7 @@ fn a_read_only_device_is_refused_every_v18_write() {
     let registry = Arc::new(SessionRegistry::new());
     registry.register(
         "sess-1".into(),
-        Arc::new(oximux_agents::thread::StubConnection::default()),
+        Arc::new(trex_agents::thread::StubConnection::default()),
     );
     let auth = Arc::new(AuthStore::new());
     auth.set_pairing(PairingSlot::new(SECRET, None, false));
@@ -673,7 +673,7 @@ fn a_cursor_aware_watcher_replays_a_covered_gap_and_resyncs_an_uncovered_one() {
         async fn watch_from(
             client: &dyn Transport,
             since_seq: Option<u64>,
-        ) -> oximux_remote_proto::messages::StateWatchStartedWire {
+        ) -> trex_remote_proto::messages::StateWatchStartedWire {
             client
                 .send(
                     Request::StateWatchFrom { prefix: Some("team/".into()), since_seq }

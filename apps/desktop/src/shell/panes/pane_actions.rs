@@ -1,4 +1,4 @@
-//! Pane Actions dropdown — split direction picker.
+﻿//! Pane Actions dropdown — split direction picker.
 //!
 //! A small popup anchored near the workspace's trailing "..." button.
 //! Each item dispatches a Split* action up the focus chain so the
@@ -13,7 +13,7 @@ use gpui::{
     Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement, Render,
     Styled, Window, div, px, svg,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -84,7 +84,7 @@ impl PaneActionsMenu {
 
 impl Render for PaneActionsMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

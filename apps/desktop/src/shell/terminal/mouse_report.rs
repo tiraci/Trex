@@ -1,4 +1,4 @@
-//! Mouse-event → PTY-bytes encoding for apps that enable mouse reporting
+﻿//! Mouse-event → PTY-bytes encoding for apps that enable mouse reporting
 //! (vim, lazygit, htop, tmux). Pure functions over primitives so the SGR
 //! (1006) and legacy X10/1000 byte formats are unit-testable without GPUI
 //! event plumbing.
@@ -7,7 +7,7 @@
 //! is 1-based, so every encoder adds 1. The X10 form additionally offsets by
 //! 32 and cannot represent coordinates past column/row 223.
 
-use oximux_pty::MouseMode;
+use trex_pty::MouseMode;
 
 /// What happened to the pointer. `Drag` is motion with a button held.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

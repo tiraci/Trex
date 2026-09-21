@@ -1,4 +1,4 @@
-//! The coordination-state RPC handlers — the shared blackboard.
+﻿//! The coordination-state RPC handlers — the shared blackboard.
 //!
 //! Reads and writes are gated on the caller's *tier*, not on any session: the
 //! board is host-wide by construction, because one narrowed to a single session
@@ -10,11 +10,11 @@
 //! entry the caller lost to, so a losing writer can merge and retry without a
 //! second round trip. The CLI turns that into its own exit code.
 
-use oximux_agents::coord::CoordEntry;
-use oximux_remote_proto::messages::{
+use trex_agents::coord::CoordEntry;
+use trex_remote_proto::messages::{
     StateChangeWire, StateEntryWire, StateSetReq, StateWatchStartedWire,
 };
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;

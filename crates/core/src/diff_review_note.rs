@@ -1,6 +1,6 @@
-//! Diff review notes — a reviewer's per-line comment on a diff.
+﻿//! Diff review notes — a reviewer's per-line comment on a diff.
 //!
-//! Lives in `oximux-core` so the diff view (compose / render) and storage
+//! Lives in `trex-core` so the diff view (compose / render) and storage
 //! (`DiffReviewNoteRepo` row mapping) share one source of truth. Notes are
 //! anchored to a stable `(repo, diff_ref, path, side, line)` coordinate
 //! rather than a render-row index, so they re-attach to the right line when

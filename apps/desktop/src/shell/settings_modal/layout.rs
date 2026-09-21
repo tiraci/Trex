@@ -1,4 +1,4 @@
-//! Body layout primitives for the settings panes: a bordered "section card"
+﻿//! Body layout primitives for the settings panes: a bordered "section card"
 //! that groups rows with hairline dividers, and a described setting row
 //! (label + helper text on the left, the control pinned right). These give
 //! the panes the grouped, descriptive look of a native preferences window
@@ -8,7 +8,7 @@ use gpui::{
     AnyElement, InteractiveElement as _, IntoElement, ParentElement, SharedString, Styled, div,
     prelude::FluentBuilder, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Stack `rows` full-width, separating each from the next with a hairline
 /// divider (the last row gets none). No surrounding border or fill — the airy,
@@ -623,7 +623,7 @@ mod tests {
         Bounds, Context, IntoElement, ParentElement as _, Pixels, Render, Styled as _,
         TestAppContext, Window, canvas, div, prelude::FluentBuilder as _, px, size,
     };
-    use oximux_settings::{Density, Theme, Typography};
+    use trex_settings::{Density, Theme, Typography};
     use std::cell::Cell;
     use std::rc::Rc;
 
@@ -782,7 +782,7 @@ mod tests {
     /// résumé of ordinary words cannot reproduce the fault however long it is.
     /// Real flags carry paths, and a path is one word.
     const LONG_RESUME: &str = "flags --dangerously-skip-permissions \
-         --settings=/Users/me/.config/oximux/agents/claude-code/proxy-settings.json \
+         --settings=/Users/me/.config/TREX/agents/claude-code/proxy-settings.json \
          · model opus · 4 variables";
 
     /// Stands a bounds-recording canvas in for a list row's action cluster, so

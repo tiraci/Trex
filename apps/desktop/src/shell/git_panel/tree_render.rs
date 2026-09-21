@@ -1,4 +1,4 @@
-//! Tree-view body rendering for the SCM panel.
+﻿//! Tree-view body rendering for the SCM panel.
 //!
 //! Consumed by `changed_files::section` when `rctx.view_mode == Tree`.
 //! Owns the folder-row visual (chevron + folder icon + name + child-count +
@@ -26,7 +26,7 @@ use gpui_component::{
     Disableable as _, Icon, IconName, Sizable as _,
     button::{Button, ButtonVariants as _},
 };
-use oximux_core::FileStatus;
+use trex_core::FileStatus;
 
 /// Horizontal indent per tree depth level. 12 px / level, depth cap 8
 /// (deeper paths still render — the cap just stops indenting further so
@@ -273,7 +273,7 @@ fn folder_hover_cluster(
     kind: RowKind,
     paths: Vec<std::path::PathBuf>,
     folder_row_id: SharedString,
-    theme: oximux_settings::Theme,
+    theme: trex_settings::Theme,
     discard_pending: bool,
     cx: &mut Context<GitPanel>,
 ) -> AnyElement {
@@ -361,7 +361,7 @@ fn area_for(kind: RowKind) -> DiscardAllArea {
 /// as a single visual family.
 const FOLDER_BTN_PX: f32 = 14.0;
 
-fn rollup_badge(status: Option<NodeStatus>, theme: oximux_settings::Theme) -> Option<AnyElement> {
+fn rollup_badge(status: Option<NodeStatus>, theme: trex_settings::Theme) -> Option<AnyElement> {
     let s = status?;
     let (text, colour) = match s {
         NodeStatus::Modified => ("M", theme.status_warning),

@@ -1,4 +1,4 @@
-//! Unpacking a release archive.
+﻿//! Unpacking a release archive.
 //!
 //! Release archives are **flat** `.tar.gz` on every platform, Windows
 //! included: one archive format means one extraction path, and Windows has
@@ -124,7 +124,7 @@ mod tests {
         assert!(err.to_string().contains(&relay_name()), "{err}");
     }
 
-    /// The traversal case. `../../../etc/oximux` is not one of the two names
+    /// The traversal case. `../../../etc/TREX` is not one of the two names
     /// we compare against, so it is skipped — and because the destination is
     /// always `into.join(<our own constant>)`, even a name that *did* match
     /// could not land outside the staging directory.
@@ -134,7 +134,7 @@ mod tests {
         let escape = format!("../{}", cli_name());
         let archive = tar_gz(&[
             (escape.as_str(), b"evil"),
-            ("/tmp/oximux-absolute", b"evil"),
+            ("/tmp/trex-absolute", b"evil"),
             ("payload.sh", b"evil"),
             (&cli_name(), b"new cli"),
             (&relay_name(), b"new relay"),

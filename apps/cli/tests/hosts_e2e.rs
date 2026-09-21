@@ -1,7 +1,7 @@
-//! The fleet surface against the compiled binary: the hosts book, the
+﻿//! The fleet surface against the compiled binary: the hosts book, the
 //! resolution order, and the fan-out's partial-failure contract.
 //!
-//! Every invocation points `OXIMUX_CONFIG_DIR` at a temp directory. Without
+//! Every invocation points `trex_CONFIG_DIR` at a temp directory. Without
 //! that the suite would read — and `pair`/`hosts rm` would *write* — the
 //! developer's real hosts file.
 
@@ -9,29 +9,29 @@ use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::StubConnection;
-use oximux_remote_host::{AuthStore, Dispatcher, LocalScope};
-use oximux_remote_local::{LocalClaim, LocalControlListener, generate_token};
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::StubConnection;
+use trex_remote_host::{AuthStore, Dispatcher, LocalScope};
+use trex_remote_local::{LocalClaim, LocalControlListener, generate_token};
 
 /// The binary, with its config isolated and a short timeout so an unreachable
 /// host fails in seconds rather than at the dial ceiling.
 fn bin(config: &Path, runtime_dir: &Path) -> Command {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_oximux-cli"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_trex-cli"));
     cmd.args(["--dir", runtime_dir.to_str().unwrap(), "--timeout", "2"]);
-    cmd.env(oximux_cli_config_var(), config);
+    cmd.env(trex_cli_config_var(), config);
     // The runner's own environment must not select a host or a credential.
-    cmd.env_remove("OXIMUX_HOST");
-    cmd.env_remove(oximux_remote_local::SESSION_ENV_VAR);
-    cmd.env_remove(oximux_remote_local::SESSION_TOKEN_ENV_VAR);
+    cmd.env_remove("TREX_HOST");
+    cmd.env_remove(trex_remote_local::SESSION_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_TOKEN_ENV_VAR);
     cmd
 }
 
 /// Spelled out rather than imported: the binary crate is not a library, so the
 /// constant it defines is not reachable from an integration test. The name is
 /// pinned by `a_config_override_is_honoured` below.
-fn oximux_cli_config_var() -> &'static str {
-    "OXIMUX_CONFIG_DIR"
+fn trex_cli_config_var() -> &'static str {
+    "TREX_CONFIG_DIR"
 }
 
 fn json_stdout(out: &std::process::Output) -> serde_json::Value {
@@ -110,7 +110,7 @@ fn hosts_ls_on_a_fresh_machine_says_how_to_add_one() {
         .expect("run");
     assert!(out.status.success());
     let text = String::from_utf8_lossy(&out.stdout);
-    assert!(text.contains("oximux pair"), "points at the next step: {text}");
+    assert!(text.contains("TREX pair"), "points at the next step: {text}");
 }
 
 /// A typo'd `--host` must be an error. Silently driving the machine the user is
@@ -132,13 +132,13 @@ fn an_unknown_host_is_a_usage_error_not_a_fallback_to_local() {
     assert!(err["error"]["message"].as_str().unwrap().contains("prod"));
 }
 
-/// `OXIMUX_HOST` selects a host too, and is subject to the same rule.
+/// `trex_HOST` selects a host too, and is subject to the same rule.
 #[test]
 fn the_environment_can_select_a_host_and_a_bad_one_still_errors() {
     let dir = tempfile::tempdir().unwrap();
     let config = dir.path().join("config");
     let out = bin(&config, dir.path())
-        .env("OXIMUX_HOST", "ghost")
+        .env("TREX_HOST", "ghost")
         .args(["--json", "ls"])
         .output()
         .expect("run");
@@ -253,7 +253,7 @@ fn removing_an_unreachable_host_still_clears_it_locally_and_says_so() {
 
 /// The config directory and the hosts file are owner-only after a write.
 ///
-/// Same reason `oximux serve` hardens its data dir, and the same deployment:
+/// Same reason `TREX serve` hardens its data dir, and the same deployment:
 /// a shared server is exactly where other accounts exist. The signing keys
 /// beside this file were already 0600 and readback-verified, so what an open
 /// directory leaked was not the credential but the fleet — which hosts this

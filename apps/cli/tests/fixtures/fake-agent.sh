@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 # A stand-in for a real agent CLI, speaking just enough stream-json for the
 # headless launcher to adopt it as a session.
 #
@@ -9,25 +9,25 @@
 # The host inherits its environment into us, so the test hands over what we
 # need through it:
 #
-#   OXIMUX_FAKE_AGENT_SESSION  the session id to announce, when the host names none
-#   OXIMUX_FAKE_AGENT_REPORT   file to append findings to
-#   OXIMUX_FAKE_AGENT_CLI      path to the oximux binary, for the confinement probe
-#   OXIMUX_FAKE_AGENT_DIR      the host's runtime dir, for --dir
-#   OXIMUX_FAKE_AGENT_STALL    if set, take the prompt and never answer it —
+#   TREX_FAKE_AGENT_SESSION  the session id to announce, when the host names none
+#   TREX_FAKE_AGENT_REPORT   file to append findings to
+#   TREX_FAKE_AGENT_CLI      path to the TREX binary, for the confinement probe
+#   TREX_FAKE_AGENT_DIR      the host's runtime dir, for --dir
+#   TREX_FAKE_AGENT_STALL    if set, take the prompt and never answer it —
 #                              the turn stays in flight, which is what the
 #                              recovery suite needs to catch the host mid-turn
 #
-# and the *host* hands over OXIMUX_SESSION_ID / OXIMUX_SESSION_TOKEN, which is
+# and the *host* hands over TREX_SESSION_ID / TREX_SESSION_TOKEN, which is
 # the thing under test. We never write the token anywhere — it is a live
 # credential, and a fixture that leaked one into a file a test reads would be
 # teaching exactly the wrong habit. Presence is all the test needs.
 
 set -u
 
-report="${OXIMUX_FAKE_AGENT_REPORT:-}"
-cli="${OXIMUX_FAKE_AGENT_CLI:-}"
-dir="${OXIMUX_FAKE_AGENT_DIR:-}"
-sid="${OXIMUX_FAKE_AGENT_SESSION:-fake-session-1}"
+report="${TREX_FAKE_AGENT_REPORT:-}"
+cli="${TREX_FAKE_AGENT_CLI:-}"
+dir="${TREX_FAKE_AGENT_DIR:-}"
+sid="${TREX_FAKE_AGENT_SESSION:-fake-session-1}"
 # The `--model` we were spawned with, or empty. Recorded because it is the only
 # place a test can see that a model reached the *process*: Claude and Codex take
 # it here and refuse to change it afterwards, so a host that applies a model as
@@ -77,12 +77,12 @@ note() {
 }
 
 # 1. What the host handed us, before anything else can disturb it.
-if [ -n "${OXIMUX_SESSION_ID:-}" ]; then
+if [ -n "${TREX_SESSION_ID:-}" ]; then
     note "session_id=present"
 else
     note "session_id=absent"
 fi
-if [ -n "${OXIMUX_SESSION_TOKEN:-}" ]; then
+if [ -n "${TREX_SESSION_TOKEN:-}" ]; then
     note "session_token=present"
 else
     note "session_token=absent"
@@ -131,7 +131,7 @@ done
 #    disk for the next boot to disagree about. A pending permission does persist,
 #    and settling it is exactly what the drain promises: the tool call is marked
 #    rejected rather than left waiting for an answer no living process will give.
-if [ -n "${OXIMUX_FAKE_AGENT_STALL:-}" ]; then
+if [ -n "${TREX_FAKE_AGENT_STALL:-}" ]; then
     printf '{"type":"control_request","request_id":"rid-stall","request":{"subtype":"can_use_tool","tool_name":"Edit","display_name":"Edit","input":{"file_path":"notes.txt","old_string":"a","new_string":"b","replace_all":false},"description":"notes.txt","tool_use_id":"toolu_stall"}}\n'
     note "stalling=1"
     while IFS= read -r _; do :; done

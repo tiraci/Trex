@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 
 /**
@@ -8,8 +8,8 @@ import { create } from 'zustand';
  */
 export type ToolDetail = 'overview' | 'detailed';
 
-const DETAIL_KEY = '@oximux:tool-detail';
-const THINKING_KEY = '@oximux:auto-expand-thinking';
+const DETAIL_KEY = '@TREX:tool-detail';
+const THINKING_KEY = '@TREX:auto-expand-thinking';
 
 type State = {
   toolDetail: ToolDetail;

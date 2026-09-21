@@ -1,4 +1,4 @@
-//! Per-worktree git numbers the rail shows on a row, and the pure label
+﻿//! Per-worktree git numbers the rail shows on a row, and the pure label
 //! helpers that turn them into chips.
 //!
 //! One value per worktree path, produced by the single batched refresher
@@ -8,7 +8,7 @@
 //! "unknown" here is an `Option` and never a zero — `↑0 ↓0` on a row whose
 //! base could not even be resolved would be a confident lie.
 
-use oximux_git::AheadBehind;
+use trex_git::AheadBehind;
 
 use super::workspace_row::DiffCounts;
 
@@ -22,7 +22,7 @@ pub struct WorktreeStats {
     /// Untracked files are not in it: numstat against HEAD does not see them.
     pub dirty_files: u32,
     /// HEAD against the worktree's base, or `None` when no base resolved.
-    /// See `oximux_git::ahead_behind` for the resolution order.
+    /// See `trex_git::ahead_behind` for the resolution order.
     pub ahead_behind: Option<AheadBehind>,
     /// The branch this checkout is on *right now*, or `None` for a detached
     /// HEAD. Measured here rather than read from `workspaces.branch` because

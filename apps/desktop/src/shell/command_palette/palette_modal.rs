@@ -1,4 +1,4 @@
-//! Layout composition for the palette modal — backdrop, card, header,
+﻿//! Layout composition for the palette modal — backdrop, card, header,
 //! scrollable result list, and footer. Pure: the owning entity
 //! (`mod.rs::PaletteModal`) feeds resolved state and the activate/dismiss
 //! callbacks. Per-row rendering lives in `row_render.rs`.
@@ -11,7 +11,7 @@ use gpui::{
     px,
 };
 use gpui_component::{Icon, IconName};
-use oximux_settings::{Density, Motion, Theme, Typography};
+use trex_settings::{Density, Motion, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -110,7 +110,7 @@ pub fn build_modal_layout(input: ModalRenderInput<'_>) -> gpui::Div {
         // motion collapses `m_overlay` to ~instant, so the card simply appears.
         .child(card.with_animation(
             "palette-enter",
-            Animation::new(motion.m_overlay).with_easing(oximux_settings::ease_out_spring()),
+            Animation::new(motion.m_overlay).with_easing(trex_settings::ease_out_spring()),
             |el, delta| el.opacity(delta).mt(px(6.0 * (1.0 - delta))),
         ))
 }

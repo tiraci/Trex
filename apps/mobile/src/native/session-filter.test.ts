@@ -1,4 +1,4 @@
-import type { SessionSummary } from 'oximux-core';
+﻿import type { SessionSummary } from 'trex-core';
 
 import { filterSessions } from '@/native/session-filter';
 

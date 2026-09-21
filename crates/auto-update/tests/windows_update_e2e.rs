@@ -1,4 +1,4 @@
-//! The Windows updater end to end: a signed release goes in, an install
+﻿//! The Windows updater end to end: a signed release goes in, an install
 //! directory comes out replaced — and every refusal along the way leaves the
 //! installed files exactly as they were.
 //!
@@ -21,11 +21,11 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use oximux_auto_update::release::download::{self, Fetcher};
-use oximux_auto_update::release::testkit::MinisignKeypair;
-use oximux_auto_update::release::{ReleaseError, verify};
-use oximux_auto_update::windows::{install::InstalledApp, pipeline, staging};
-use oximux_auto_update::{CheckTrigger, UpdateStatus, UpdaterConfig, Version};
+use trex_auto_update::release::download::{self, Fetcher};
+use trex_auto_update::release::testkit::MinisignKeypair;
+use trex_auto_update::release::{ReleaseError, verify};
+use trex_auto_update::windows::{install::InstalledApp, pipeline, staging};
+use trex_auto_update::{CheckTrigger, UpdateStatus, UpdaterConfig, Version};
 
 const TARGET: &str = "x86_64-pc-windows-msvc";
 const RUNNING: &str = "0.1.15";
@@ -55,7 +55,7 @@ impl Fetcher for MapFetcher {
 }
 
 /// The app payload as `scripts/bundle-windows.ps1` builds it: the whole
-/// `OxiMux\` directory, not its contents.
+/// `TREX\` directory, not its contents.
 fn payload_zip(version: &str) -> Vec<u8> {
     let mut buffer = Vec::new();
     {
@@ -63,9 +63,9 @@ fn payload_zip(version: &str) -> Vec<u8> {
         let options: zip::write::FileOptions<'_, ()> =
             zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
         for (name, contents) in [
-            ("OxiMux/oximux.exe", format!("app {version}")),
-            ("OxiMux/oximux-relay.exe", format!("relay {version}")),
-            ("OxiMux/onnxruntime.dll", format!("native {version}")),
+            ("TREX/TREX.exe", format!("app {version}")),
+            ("TREX/trex-relay.exe", format!("relay {version}")),
+            ("TREX/onnxruntime.dll", format!("native {version}")),
         ] {
             writer.start_file(name, options).expect("start entry");
             writer.write_all(contents.as_bytes()).expect("write entry");
@@ -88,7 +88,7 @@ impl Release {
         let honest_digest = verify::sha256_hex(&payload);
         let served = if corrupt_payload { b"tampered bytes".to_vec() } else { payload };
 
-        let name = format!("OxiMux-{version}-windows-x64.zip");
+        let name = format!("trex-{version}-windows-x64.zip");
         let raw = format!(
             r#"{{"schemaVersion":1,"version":"{version}","channel":"stable","targets":{{}},"apps":{{"{TARGET}":{{"archive":"{name}","size":{},"sha256":"{honest_digest}"}}}}}}"#,
             served.len().max(1)
@@ -120,9 +120,9 @@ struct Fixture {
 
 fn fixture() -> Fixture {
     let root = tempfile::tempdir().expect("tempdir");
-    let install = root.path().join("OxiMux");
+    let install = root.path().join("TREX");
     std::fs::create_dir(&install).expect("install dir");
-    for name in ["oximux.exe", "oximux-relay.exe", "onnxruntime.dll"] {
+    for name in ["TREX.exe", "trex-relay.exe", "onnxruntime.dll"] {
         std::fs::write(install.join(name), format!("{name} {RUNNING}")).expect("installed file");
     }
     let config = UpdaterConfig {
@@ -134,7 +134,7 @@ fn fixture() -> Fixture {
     Fixture { _root: root, install, config }
 }
 
-fn check(fx: &Fixture, release: &Release) -> Result<UpdateStatus, oximux_auto_update::UpdateError> {
+fn check(fx: &Fixture, release: &Release) -> Result<UpdateStatus, trex_auto_update::UpdateError> {
     pipeline::run_with(
         &release.fetcher,
         Some(&release.public_key),
@@ -150,7 +150,7 @@ fn read(path: &Path) -> String {
 }
 
 fn install_is_untouched(fx: &Fixture) {
-    for name in ["oximux.exe", "oximux-relay.exe", "onnxruntime.dll"] {
+    for name in ["TREX.exe", "trex-relay.exe", "onnxruntime.dll"] {
         assert_eq!(
             read(&fx.install.join(name)),
             format!("{name} {RUNNING}"),
@@ -174,10 +174,10 @@ fn a_signed_release_stages_then_replaces_the_whole_install() {
     // every one of these files.
     install_is_untouched(&fx);
 
-    let outcome = oximux_auto_update::apply_pending_update(&fx.config, None);
+    let outcome = trex_auto_update::apply_pending_update(&fx.config, None);
     assert_eq!(outcome, staging::SwapOutcome::Applied);
-    assert_eq!(read(&fx.install.join("oximux.exe")), "app 0.2.0");
-    assert_eq!(read(&fx.install.join("oximux-relay.exe")), "relay 0.2.0");
+    assert_eq!(read(&fx.install.join("TREX.exe")), "app 0.2.0");
+    assert_eq!(read(&fx.install.join("trex-relay.exe")), "relay 0.2.0");
     assert_eq!(read(&fx.install.join("onnxruntime.dll")), "native 0.2.0");
 }
 
@@ -287,8 +287,8 @@ fn a_newer_release_replaces_a_staged_one_rather_than_stacking_beside_it() {
     );
     assert_eq!(staged_dirs(&fx).len(), 1, "exactly one staging directory at a time");
 
-    oximux_auto_update::apply_pending_update(&fx.config, None);
-    assert_eq!(read(&fx.install.join("oximux.exe")), "app 0.3.0");
+    trex_auto_update::apply_pending_update(&fx.config, None);
+    assert_eq!(read(&fx.install.join("TREX.exe")), "app 0.3.0");
 }
 
 /// The swap leaves backups it cannot delete, because this process is running
@@ -299,14 +299,14 @@ fn a_newer_release_replaces_a_staged_one_rather_than_stacking_beside_it() {
 fn the_next_launch_clears_the_backups_the_swap_could_not_delete() {
     let fx = fixture();
     check(&fx, &Release::signed("0.2.0")).expect("stages");
-    oximux_auto_update::apply_pending_update(&fx.config, None);
+    trex_auto_update::apply_pending_update(&fx.config, None);
 
     // Simulate what Windows does to a mapped image: put a backup back and
     // prove the boot sweep, not the swap, is what finally removes it.
     let backup = fx.install.join("onnxruntime.dll.old-deadbeef");
     std::fs::write(&backup, "old native").expect("write backup");
 
-    oximux_auto_update::boot_housekeeping(&fx.config, None);
+    trex_auto_update::boot_housekeeping(&fx.config, None);
 
     assert!(!backup.exists(), "the backup is swept at the next launch");
     assert_eq!(read(&fx.install.join("onnxruntime.dll")), "native 0.2.0");
@@ -326,7 +326,7 @@ fn staged_dirs(fx: &Fixture) -> Vec<PathBuf> {
             p.is_dir()
                 && p.file_name()
                     .and_then(|n| n.to_str())
-                    .is_some_and(|n| n.starts_with(".OxiMux.update-"))
+                    .is_some_and(|n| n.starts_with(".TREX.update-"))
         })
         .collect()
 }

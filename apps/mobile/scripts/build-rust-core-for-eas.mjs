@@ -1,12 +1,12 @@
-// Builds the `oximux-core` turbo module's native half on an EAS worker.
+﻿// Builds the `trex-core` turbo module's native half on an EAS worker.
 //
 // Why this exists: everything the CocoaPods spec vendors — the xcframework, the
 // generated C++/TS/ObjC bindings — is produced from `crates/mobile-core` and is
-// deliberately untracked (see modules/oximux-core/.gitignore), so a fresh clone
+// deliberately untracked (see modules/trex-core/.gitignore), so a fresh clone
 // has the Rust source but none of the compiled artifacts. Locally that is what
 // `npm run bindings` does; on EAS nobody runs it.
 //
-// Why it runs at PRE-install rather than post: `oximux-core` is a `file:`
+// Why it runs at PRE-install rather than post: `trex-core` is a `file:`
 // dependency whose own `prepare` script is `bob build`, and npm runs that during
 // the app's install. With no generated `src/index.tsx` yet, bob compiles zero
 // files, writes no `lib/module/index.js`, and npm fails the whole install phase
@@ -29,7 +29,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const mobileRoot = join(fileURLToPath(new URL('.', import.meta.url)), '..');
-const coreModule = join(mobileRoot, 'modules', 'oximux-core');
+const coreModule = join(mobileRoot, 'modules', 'trex-core');
 const repoRoot = join(mobileRoot, '..', '..');
 
 // rustup drops its shims here; a freshly installed toolchain is not on PATH for
@@ -105,4 +105,4 @@ run('npx', ['bob', 'build'], coreModule);
 // this module during that install still resolves.
 rmSync(join(coreModule, 'node_modules'), { recursive: true, force: true });
 
-console.log('\n✓ native core ready — the app install can now resolve oximux-core');
+console.log('\n✓ native core ready — the app install can now resolve trex-core');

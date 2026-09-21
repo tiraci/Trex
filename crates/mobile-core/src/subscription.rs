@@ -1,4 +1,4 @@
-//! Live subscription: fold a session's `HostEvent` stream and push the folded
+﻿//! Live subscription: fold a session's `HostEvent` stream and push the folded
 //! transcript to the foreign [`ThreadSink`]. The demux pump feeds one
 //! connection-wide event stream; [`run_dispatcher`] routes each frame to the
 //! matching registered session and heals seq gaps via `events_since`.
@@ -26,8 +26,8 @@ use std::sync::{Arc, Mutex as StdMutex};
 
 use futures::StreamExt;
 use futures::channel::oneshot;
-use oximux_agent_core::thread::ThreadEntry;
-use oximux_remote_session::{EventStream, FoldOutcome, RemoteSession, SessionSubscription};
+use trex_agent_core::thread::ThreadEntry;
+use trex_remote_session::{EventStream, FoldOutcome, RemoteSession, SessionSubscription};
 
 use crate::callbacks::ThreadSink;
 use crate::client::{MobileClient, Shared};
@@ -299,9 +299,9 @@ mod tests {
     use std::collections::HashMap;
     use std::sync::atomic::AtomicU64;
 
-    use oximux_remote_proto::testing::duplex_pair;
-    use oximux_remote_proto::transport::Transport;
-    use oximux_remote_session::ClientSigner;
+    use trex_remote_proto::testing::duplex_pair;
+    use trex_remote_proto::transport::Transport;
+    use trex_remote_session::ClientSigner;
     use tokio::sync::Mutex as TokioMutex;
 
     use super::*;

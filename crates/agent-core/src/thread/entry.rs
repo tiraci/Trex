@@ -1,7 +1,7 @@
-//! Transcript entries for the Agent Chat UI thread.
+﻿//! Transcript entries for the Agent Chat UI thread.
 //!
 //! A chat thread is an ordered `Vec<ThreadEntry>`. This is the message-history
-//! model OxiMux lacks today (the OSC-9999 sideband keeps only single-slot
+//! model TREX lacks today (the OSC-9999 sideband keeps only single-slot
 //! `Option<String>` values, overwritten per turn). Pure data — no gpui.
 
 use serde::{Deserialize, Serialize};

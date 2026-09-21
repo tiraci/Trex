@@ -1,7 +1,7 @@
-//! The client session's failure taxonomy — distinguishes a transport drop from a
+﻿//! The client session's failure taxonomy — distinguishes a transport drop from a
 //! codec fault from a protocol-level rejection the host reported.
 
-use oximux_remote_proto::RpcError;
+use trex_remote_proto::RpcError;
 
 /// A remote-session call failure.
 #[derive(Debug, thiserror::Error)]

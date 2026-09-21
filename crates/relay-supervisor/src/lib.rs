@@ -1,6 +1,6 @@
-//! RelaySupervisor — ensures an `oximux-relay` daemon is alive and
+﻿//! RelaySupervisor — ensures an `trex-relay` daemon is alive and
 //! returns a connected `RelayClient`. On every host launch (the desktop app
-//! or `oximux serve` — both consume this one crate):
+//! or `TREX serve` — both consume this one crate):
 //!
 //! 1. Try a quick socket-connect to the canonical path. If the
 //!    handshake succeeds, an existing daemon is alive — reuse it.
@@ -27,8 +27,8 @@ use std::process::{Command, Stdio};
 use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
-use oximux_relay_client::{ClientError, RelayClient};
-use oximux_relay_proto::ErrCode;
+use trex_relay_client::{ClientError, RelayClient};
+use trex_relay_proto::ErrCode;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -46,7 +46,7 @@ pub enum SupervisorError {
 // Bumped to v8 alongside `PROTOCOL_VERSION`: the handshake no longer puts the
 // token on the wire, exchanging nonce-bound proofs instead. Earlier bumps:
 // v7 `Notification::Gapped` + `Request::Replay`, v6 `Request::AgentStatus`
-// (agent hooks report structured status via `oximux agent-status`), v5
+// (agent hooks report structured status via `TREX agent-status`), v5
 // `Spawn.args` (direct agent argv), v4 multi-client attach (`attachment_id` +
 // `Detach`), v3 Notify/Attention, v2 `AttachOk` dims.
 // The bincode wire format isn't self-describing, so a fresh client must NOT
@@ -68,9 +68,9 @@ pub struct RelaySupervisor {
 
 impl RelaySupervisor {
     // `runtime_dir` is the app's data dir (e.g.
-    // `~/Library/Application Support/dev.nhtera.oximux`). `log_dir`
+    // `~/Library/Application Support/dev.tiraci.trex`). `log_dir`
     // is where the daemon's stdout/stderr lands (e.g.
-    // `~/Library/Logs/dev.nhtera.oximux`).
+    // `~/Library/Logs/dev.tiraci.trex`).
     pub fn new(runtime_dir: PathBuf, log_dir: PathBuf) -> Self {
         Self {
             runtime_dir,
@@ -168,7 +168,7 @@ impl RelaySupervisor {
         tracing::info!(
             binary = %binary.display(),
             socket = %self.socket_path().display(),
-            "spawned oximux-relay detached"
+            "spawned trex-relay detached"
         );
 
         // Path 3: wait for the daemon to start listening. The
@@ -321,19 +321,19 @@ fn write_token(path: &Path, token: &str) -> Result<()> {
     // is applied rather than inherited — and its failure is propagated, because
     // a readable token is not a smaller problem than no token at all.
     drop(f);
-    oximux_owner_only::restrict_file(path)
+    trex_owner_only::restrict_file(path)
         .with_context(|| format!("restrict token file {}", path.display()))?;
     Ok(())
 }
 
-// Where to find the `oximux-relay` binary. Resolution order:
-// 1. `OXIMUX_RELAY_BINARY` env var (tests + power-user override).
+// Where to find the `trex-relay` binary. Resolution order:
+// 1. `trex_RELAY_BINARY` env var (tests + power-user override).
 // 2. Sibling of the current executable. Works for both dev
-//    (`target/debug/oximux` → `target/debug/oximux-relay`) and prod
-//    (`OxiMux.app/Contents/MacOS/oximux` → same dir +
-//    `/oximux-relay`).
+//    (`target/debug/TREX` → `target/debug/trex-relay`) and prod
+//    (`trex.app/Contents/MacOS/TREX` → same dir +
+//    `/trex-relay`).
 //
-// The name carries `EXE_SUFFIX` because the sibling is `oximux-relay.exe` on
+// The name carries `EXE_SUFFIX` because the sibling is `trex-relay.exe` on
 // Windows. Spawning would have survived the omission — `CreateProcessW` appends
 // `.exe` to an extensionless name itself — but the `exists()` gate below would
 // not, and it fails in the quietest possible way: the supervisor reports no
@@ -341,10 +341,10 @@ fn write_token(path: &Path, token: &str) -> Result<()> {
 // symptom is that terminals stop surviving a relaunch, which is the entire
 // reason the daemon exists.
 pub fn resolve_binary_path() -> Result<PathBuf> {
-    if let Ok(p) = std::env::var("OXIMUX_RELAY_BINARY") {
+    if let Ok(p) = std::env::var("TREX_RELAY_BINARY") {
         let p = PathBuf::from(p);
         if !p.exists() {
-            bail!("OXIMUX_RELAY_BINARY={} does not exist", p.display());
+            bail!("TREX_RELAY_BINARY={} does not exist", p.display());
         }
         return Ok(p);
     }
@@ -353,16 +353,16 @@ pub fn resolve_binary_path() -> Result<PathBuf> {
     let candidate = parent.join(relay_binary_name());
     if !candidate.exists() {
         bail!(
-            "expected oximux-relay binary at {} (override with OXIMUX_RELAY_BINARY)",
+            "expected trex-relay binary at {} (override with trex_RELAY_BINARY)",
             candidate.display()
         );
     }
     Ok(candidate)
 }
 
-/// The daemon's file name on this platform — `oximux-relay`, `.exe` and all.
+/// The daemon's file name on this platform — `trex-relay`, `.exe` and all.
 fn relay_binary_name() -> String {
-    format!("oximux-relay{}", std::env::consts::EXE_SUFFIX)
+    format!("trex-relay{}", std::env::consts::EXE_SUFFIX)
 }
 
 fn spawn_detached(
@@ -424,7 +424,7 @@ fn spawn_detached(
     // likely. Nothing depends on those handlers — the 5s checkpoint tick
     // plus flush-on-last-disconnect is what bounds scrollback loss.
     {
-        use oximux_no_window::NoWindow as _;
+        use trex_no_window::NoWindow as _;
         cmd.no_window();
     }
 
@@ -467,7 +467,7 @@ mod tests {
         let dir = tempfile::TempDir::new().unwrap();
         let path = dir.path().join("tok");
         write_token(&path, "deadbeef").unwrap();
-        assert!(oximux_owner_only::is_restricted_to_owner(&path).unwrap());
+        assert!(trex_owner_only::is_restricted_to_owner(&path).unwrap());
     }
 
     #[test]
@@ -485,13 +485,13 @@ mod tests {
 
         write_token(&path, "deadbeef").unwrap();
 
-        assert!(oximux_owner_only::is_restricted_to_owner(&path).unwrap());
+        assert!(trex_owner_only::is_restricted_to_owner(&path).unwrap());
     }
 
     #[test]
     fn resolve_binary_uses_env_override_when_set() {
         let dir = tempfile::TempDir::new().unwrap();
-        let fake = dir.path().join("oximux-relay-fake");
+        let fake = dir.path().join("trex-relay-fake");
         std::fs::write(&fake, "").unwrap();
         // SAFETY: tests run in a single-threaded harness when using
         // serial-test, but cargo test parallelism could race here.
@@ -499,11 +499,11 @@ mod tests {
         // is consulted; we don't depend on the binary actually being
         // executable.
         unsafe {
-            std::env::set_var("OXIMUX_RELAY_BINARY", &fake);
+            std::env::set_var("TREX_RELAY_BINARY", &fake);
         }
         let resolved = resolve_binary_path().unwrap();
         unsafe {
-            std::env::remove_var("OXIMUX_RELAY_BINARY");
+            std::env::remove_var("TREX_RELAY_BINARY");
         }
         assert_eq!(resolved, fake);
     }
@@ -515,12 +515,12 @@ mod tests {
         // literal keeps this a statement about the platform contract instead of
         // a second place to hardcode ".exe".
         let name = relay_binary_name();
-        assert_eq!(name, format!("oximux-relay{}", std::env::consts::EXE_SUFFIX));
-        assert!(name.starts_with("oximux-relay"));
+        assert_eq!(name, format!("trex-relay{}", std::env::consts::EXE_SUFFIX));
+        assert!(name.starts_with("trex-relay"));
         if cfg!(windows) {
-            assert_eq!(name, "oximux-relay.exe");
+            assert_eq!(name, "trex-relay.exe");
         } else {
-            assert_eq!(name, "oximux-relay");
+            assert_eq!(name, "trex-relay");
         }
     }
 

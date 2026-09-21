@@ -1,7 +1,7 @@
-//! `ChatThread` — the in-memory conversation state machine.
+﻿//! `ChatThread` — the in-memory conversation state machine.
 //!
 //! Folds a stream of `ThreadEvent`s into an ordered `Vec<ThreadEntry>` (the
-//! message history OxiMux lacks today). Pure and gpui-free: the app crate
+//! message history TREX lacks today). Pure and gpui-free: the app crate
 //! owns a GPUI entity that holds a `ChatThread`, calls `apply` on each event,
 //! and repaints.
 //!

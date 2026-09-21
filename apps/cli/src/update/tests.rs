@@ -1,4 +1,4 @@
-//! The pipeline end to end, against a fetcher that serves bytes from a map.
+﻿//! The pipeline end to end, against a fetcher that serves bytes from a map.
 //!
 //! What these assert is *ordering*, which is the part of a trust chain that
 //! silently rots: a gate that runs after the thing it was supposed to guard is
@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::Path;
 
-use oximux_auto_update::release::testkit::MinisignKeypair;
+use trex_auto_update::release::testkit::MinisignKeypair;
 use super::*;
 
 const TARGET: &str = "x86_64-unknown-linux-gnu";
@@ -57,7 +57,7 @@ impl Release {
         let honest_digest = verify::sha256_hex(&archive);
         let served = if corrupt_archive { b"tampered bytes".to_vec() } else { archive };
 
-        let name = format!("oximux-{version}-{TARGET}.tar.gz");
+        let name = format!("trex-{version}-{TARGET}.tar.gz");
         let raw = format!(
             r#"{{"schemaVersion":1,"version":"{version}","channel":"stable","targets":{{"{TARGET}":{{"archive":"{name}","size":{},"sha256":"{honest_digest}"}}}}}}"#,
             served.len().max(1)
@@ -227,7 +227,7 @@ fn a_platform_the_release_skipped_is_named_not_guessed() {
 /// reason about. The answer is its command, not ours.
 #[test]
 fn a_homebrew_install_is_told_to_use_brew() {
-    let err = Install::at(Path::new("/opt/homebrew/Cellar/oximux/0.1.6/bin/oximux"))
+    let err = Install::at(Path::new("/opt/homebrew/Cellar/TREX/0.1.6/bin/TREX"))
         .expect_err("must refuse");
     assert!(matches!(err, UpdateError::ManagedInstall { manager: "Homebrew", .. }), "{err}");
     assert!(into_failure(err).next_steps.iter().any(|s| s.contains("brew upgrade")));
@@ -235,7 +235,7 @@ fn a_homebrew_install_is_told_to_use_brew() {
 
 #[test]
 fn an_ordinary_install_is_not_mistaken_for_a_managed_one() {
-    let install = Install::at(Path::new("/home/dev/.local/bin/oximux")).expect("plain install");
+    let install = Install::at(Path::new("/home/dev/.local/bin/TREX")).expect("plain install");
     assert_eq!(install.dir, Path::new("/home/dev/.local/bin"));
     assert_eq!(install.relay, Path::new("/home/dev/.local/bin").join(relay_name()));
 }

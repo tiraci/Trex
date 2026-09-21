@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  OxiMux Dark Syntax — a TextMate theme using a conventional dark-editor token
+  TREX Dark Syntax — a TextMate theme using a conventional dark-editor token
   palette (keyword #569cd6, string #ce9178, comment #6a9955, …) for the diff
   viewer's syntax highlighting. Hand-authored from individual color values;
   not copied from any source file.
 
   Only foreground colors are consumed by the renderer (HiToken r/g/b); the
-  `background` here is inert — OxiMux paints its own charcoal surface.
+  `background` here is inert — TREX paints its own charcoal surface.
 -->
 <plist version="1.0">
 <dict>
   <key>name</key>
-  <string>OxiMux Dark Syntax</string>
+  <string>TREX Dark Syntax</string>
   <key>settings</key>
   <array>
     <dict>

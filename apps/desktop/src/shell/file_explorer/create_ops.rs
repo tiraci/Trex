@@ -1,4 +1,4 @@
-//! Inline new-file / new-folder creation for the file explorer.
+﻿//! Inline new-file / new-folder creation for the file explorer.
 //!
 //! Mirrors `rename_ops`: instead of transforming an existing row, an extra
 //! placeholder row is injected under the target parent directory (or at the
@@ -35,7 +35,7 @@ pub struct CreateState {
 /// NUL byte so it can never equal a real filesystem path; the row builder
 /// matches on it to mount the create input.
 pub fn create_sentinel(parent: &Path) -> PathBuf {
-    parent.join("\u{0}__oximux_new__")
+    parent.join("\u{0}__trex_new__")
 }
 
 impl FileExplorer {
@@ -121,7 +121,7 @@ impl FileExplorer {
         let target = parent.join(trimmed);
         if target.exists() {
             tracing::warn!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 path = %target.display(),
                 "create aborted: target already exists"
             );
@@ -136,7 +136,7 @@ impl FileExplorer {
         match result {
             Ok(()) => {
                 tracing::info!(
-                    target: "oximux_app::file_explorer",
+                    target: "trex_app::file_explorer",
                     path = %target.display(),
                     is_dir,
                     "create succeeded"
@@ -150,7 +150,7 @@ impl FileExplorer {
             }
             Err(err) => {
                 tracing::warn!(
-                    target: "oximux_app::file_explorer",
+                    target: "trex_app::file_explorer",
                     path = %target.display(),
                     error = %err,
                     "create failed"

@@ -1,6 +1,6 @@
-//! Syntax highlighting as *neutral kinds*, not colors.
+﻿//! Syntax highlighting as *neutral kinds*, not colors.
 //!
-//! One highlighter for every code surface OxiMux draws, emitting
+//! One highlighter for every code surface TREX draws, emitting
 //! [`HighlightKind`] spans that a theme resolves to colors at paint time.
 //!
 //! ## The discipline (the part that matters more than the code)
@@ -19,7 +19,7 @@
 //!
 //! The path this replaces copied literal sRGB out of a bundled theme into each
 //! token. That made a color change a *re-tokenization* — and tied the palette to
-//! a `.tmTheme` file rather than to OxiMux's own theme. Kinds are stable facts
+//! a `.tmTheme` file rather than to TREX's own theme. Kinds are stable facts
 //! about the source; colors are a preference. Separating them means an
 //! appearance change recolors existing spans with no parsing at all.
 //!
@@ -29,7 +29,7 @@
 //! isolation.
 //!
 //! ```
-//! use oximux_syntax::{HighlightKind, detect, highlight};
+//! use trex_syntax::{HighlightKind, detect, highlight};
 //!
 //! let lang = detect(None, Some("rust"), "").expect("rust is a known fence tag");
 //! let doc = highlight(&lang, "let x = 1; // note\n");

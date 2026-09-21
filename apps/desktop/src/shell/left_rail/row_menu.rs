@@ -1,4 +1,4 @@
-//! Per-workspace-row action menu — small popover anchored under the "…"
+﻿//! Per-workspace-row action menu — small popover anchored under the "…"
 //! trigger button. Routes the user's selection back to `WorkspaceRoot`
 //! via a `WeakEntity` callback, mirroring the pattern established by the
 //! adapter / project pickers.
@@ -19,8 +19,8 @@ use gpui::{
     Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement, Render,
     Styled, WeakEntity, Window, div, px, svg,
 };
-use oximux_core::{Project, WorkPhase, Workspace};
-use oximux_settings::{Density, OpenInApp, ScriptKind, Theme, Typography};
+use trex_core::{Project, WorkPhase, Workspace};
+use trex_settings::{Density, OpenInApp, ScriptKind, Theme, Typography};
 
 use crate::shell::left_rail::open_in;
 use crate::shell::pane_group::TabColor;
@@ -28,7 +28,7 @@ use crate::workspace_root::WorkspaceRoot;
 
 /// Which per-project lifecycle scripts are defined for the workspace under
 /// the menu — drives which Run-* rows appear. Computed at menu-open time by
-/// loading `.oximux/scripts.toml` so undefined scripts surface no row.
+/// loading `.trex/scripts.toml` so undefined scripts surface no row.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct ScriptAvail {
     pub setup: bool,
@@ -115,7 +115,7 @@ pub enum WorkspaceRowAction {
     Unarchive,
     /// Adopted rows only: remove the row, leave the worktree on disk.
     StopTracking,
-    /// Un-vetted rows only: open the worktree's `.oximux/scripts.toml`.
+    /// Un-vetted rows only: open the worktree's `.trex/scripts.toml`.
     ReviewScripts,
     /// Un-vetted rows only: the explicit act that lets the scripts run.
     MarkScriptsReviewed,
@@ -692,7 +692,7 @@ impl WorkspaceRowMenu {
 
 impl Render for WorkspaceRowMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let Some(state) = self.open_for.clone() else {
             return div().into_any_element();
         };
@@ -1051,7 +1051,7 @@ mod tests {
             branch_minted: false,
             name: "Fix login".into(),
             slug: "fix-login".into(),
-            branch: "oximux/fix-login".into(),
+            branch: "TREX/fix-login".into(),
             worktree_path: "/tmp/repo-wt/fix-login".into(),
             status: "active".into(),
             created_at: String::new(),

@@ -1,10 +1,10 @@
-//! Integration tests for branch operations on `Repository`: `list_branches`,
+﻿//! Integration tests for branch operations on `Repository`: `list_branches`,
 //! `create_branch`, `switch_branch`. Tempdir + real `git` binary on PATH.
 
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_git::{GitError, Repository};
+use trex_git::{GitError, Repository};
 
 #[tokio::test]
 async fn list_branches_single_main() {
@@ -244,7 +244,7 @@ async fn list_branches_detached_head_hides_pseudo_entry() {
 
 /// The property the rail's branch chip rests on: `head_branch` answers where
 /// this checkout is *now*, so a plain `git checkout` — the thing a user does in
-/// a terminal, with no OxiMux involvement at all — changes the answer.
+/// a terminal, with no TREX involvement at all — changes the answer.
 #[tokio::test]
 async fn head_branch_follows_a_checkout() {
     let tmp = tempfile::tempdir().unwrap();
@@ -255,20 +255,20 @@ async fn head_branch_follows_a_checkout() {
     run_git(p, &["commit", "-m", "init"]);
 
     assert_eq!(
-        oximux_git::head_branch(p).await.unwrap(),
+        trex_git::head_branch(p).await.unwrap(),
         Some("main".to_string())
     );
 
     run_git(p, &["checkout", "-b", "feat/initial-setup"]);
     assert_eq!(
-        oximux_git::head_branch(p).await.unwrap(),
+        trex_git::head_branch(p).await.unwrap(),
         Some("feat/initial-setup".to_string()),
         "a checkout in a terminal must change the answer"
     );
 
     run_git(p, &["checkout", "main"]);
     assert_eq!(
-        oximux_git::head_branch(p).await.unwrap(),
+        trex_git::head_branch(p).await.unwrap(),
         Some("main".to_string()),
         "and switching back must change it back"
     );
@@ -287,7 +287,7 @@ async fn head_branch_is_none_when_detached() {
     run_git(p, &["commit", "-m", "init"]);
     run_git(p, &["checkout", "--detach"]);
 
-    assert_eq!(oximux_git::head_branch(p).await.unwrap(), None);
+    assert_eq!(trex_git::head_branch(p).await.unwrap(), None);
 }
 
 /// Every row in the rail but one is a linked worktree, whose `.git` is a file
@@ -311,17 +311,17 @@ async fn head_branch_is_per_worktree_not_per_repository() {
             "worktree",
             "add",
             "-b",
-            "oximux/task",
+            "TREX/task",
             linked.to_str().unwrap(),
         ],
     );
 
     assert_eq!(
-        oximux_git::head_branch(&linked).await.unwrap(),
-        Some("oximux/task".to_string())
+        trex_git::head_branch(&linked).await.unwrap(),
+        Some("TREX/task".to_string())
     );
     assert_eq!(
-        oximux_git::head_branch(&root).await.unwrap(),
+        trex_git::head_branch(&root).await.unwrap(),
         Some("main".to_string())
     );
 }

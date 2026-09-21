@@ -1,4 +1,4 @@
-//! Pure (cx-free) renderer for the inline "agent is signed out" banner.
+﻿//! Pure (cx-free) renderer for the inline "agent is signed out" banner.
 //!
 //! Some agent CLIs answer a prompt with a plain "Not logged in · Please run
 //! /login" reply instead of a hard error — which otherwise settles as an
@@ -10,7 +10,7 @@
 //! a `Context` listener the view owns; this stays pure.
 
 use gpui::{AnyElement, IntoElement, ParentElement, SharedString, Styled, div, px};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Build the inline signed-out banner: a warn-tinted panel naming the provider
 /// plus a caller-supplied `action` control ("Open terminal to sign in").

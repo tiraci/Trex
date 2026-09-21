@@ -1,4 +1,4 @@
-//! Two attachments to one terminal, against a real relay daemon booted
+﻿//! Two attachments to one terminal, against a real relay daemon booted
 //! in-process.
 //!
 //! The property under test belongs to the daemon: it runs a PTY at the smallest
@@ -17,12 +17,12 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use oximux_relay::{ServerConfig, run_server};
-use oximux_relay_client::RelayClient;
-use oximux_relay_proto::{Request, Response};
-use oximux_relay_terminals::RelayTerminals;
-use oximux_remote_host::TerminalSource;
-use oximux_shell_env::test_support::{test_cwd, test_shell};
+use trex_relay::{ServerConfig, run_server};
+use trex_relay_client::RelayClient;
+use trex_relay_proto::{Request, Response};
+use trex_relay_terminals::RelayTerminals;
+use trex_remote_host::TerminalSource;
+use trex_shell_env::test_support::{test_cwd, test_shell};
 use tempfile::TempDir;
 
 struct TestRelay {

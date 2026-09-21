@@ -1,6 +1,6 @@
-//! Headless end-to-end verification of the `session/load` restore path: when the
+﻿//! Headless end-to-end verification of the `session/load` restore path: when the
 //! agent advertises `loadSession`, the client must resume via `session/load` with
-//! the stored id, SUPPRESS the agent's replayed history (OxiMux repaints its own
+//! the stored id, SUPPRESS the agent's replayed history (TREX repaints its own
 //! blob), keep the same session id, and still render live updates afterward.
 //!
 //! Spawns the sibling `mock_acp_load_agent` with a resume id; asserts the
@@ -8,14 +8,14 @@
 //! post-load prompt IS, and `SessionInit` carries the resumed id. Exits non-zero
 //! otherwise.
 //!
-//! Run: `cargo run -p oximux-agents --example acp_load_smoke`
+//! Run: `cargo run -p trex-agents --example acp_load_smoke`
 
 use std::sync::mpsc::RecvTimeoutError;
 use std::time::{Duration, Instant};
 
-use oximux_agents::thread::acp::AcpConnection;
-use oximux_agents::thread::connection::AgentConnection;
-use oximux_agents::thread::event::ThreadEvent;
+use trex_agents::thread::acp::AcpConnection;
+use trex_agents::thread::connection::AgentConnection;
+use trex_agents::thread::event::ThreadEvent;
 
 const RESUME_ID: &str = "known-session";
 
@@ -26,7 +26,7 @@ fn main() {
         .expect("locate mock_acp_load_agent");
     if !agent_bin.exists() {
         eprintln!(
-            "FAIL: {} not built — run `cargo build -p oximux-agents --example mock_acp_load_agent` first",
+            "FAIL: {} not built — run `cargo build -p trex-agents --example mock_acp_load_agent` first",
             agent_bin.display()
         );
         std::process::exit(1);

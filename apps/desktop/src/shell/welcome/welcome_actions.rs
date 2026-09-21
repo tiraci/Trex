@@ -1,10 +1,10 @@
-//! Actionable launch panel for the welcome surface.
+﻿//! Actionable launch panel for the welcome surface.
 
 use gpui::{
     App, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement, Styled,
     Window, div, px, svg,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{
     OpenAddProjectDialog, OpenCommandPalette, OpenProjectPicker, OpenWorkspaceCreate,

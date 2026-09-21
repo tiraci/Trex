@@ -1,4 +1,4 @@
-import type { SessionSummary } from 'oximux-core';
+﻿import type { SessionSummary } from 'trex-core';
 
 /**
  * Sessions matching `query`, case-insensitively, over title and model.

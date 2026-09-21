@@ -1,4 +1,4 @@
-//! "Committed on Branch" section — the files this branch has changed in
+﻿//! "Committed on Branch" section — the files this branch has changed in
 //! its own (typically unpushed) commits, relative to its base.
 //!
 //! Self-contained section component (like the commit graph / stash panel),
@@ -22,8 +22,8 @@ use gpui::{
     ease_out_quint, px, svg,
 };
 use gpui_component::{Icon, IconName};
-use oximux_core::{BranchCommittedFile, BranchRange, DiffStatus};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{BranchCommittedFile, BranchRange, DiffStatus};
+use trex_settings::{Density, Theme, Typography};
 use std::path::PathBuf;
 
 /// Emitted when a branch-committed row is clicked. Carries the revision
@@ -99,7 +99,7 @@ impl BranchCommitsPanel {
 
 impl Render for BranchCommitsPanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let style = self.style();
         // Hide the whole section when the branch carries no committed work

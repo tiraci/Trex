@@ -1,4 +1,4 @@
-//! The ACP session worker: runs the `agent-client-protocol` client against any
+﻿//! The ACP session worker: runs the `agent-client-protocol` client against any
 //! configured ACP CLI subprocess (Cursor, Amp, Gemini, …) under
 //! `futures::executor::block_on` on a dedicated thread. It bridges our sync
 //! `Outbound` queue to async prompts and streams `SessionUpdate`s back as
@@ -145,7 +145,7 @@ async fn session(
                             s.config_options = u.config_options.clone();
                         }
                         // During a `session/load` replay, drop transcript-bearing
-                        // updates: OxiMux repaints from its own persisted blob, so
+                        // updates: TREX repaints from its own persisted blob, so
                         // replayed message/tool events would double-render. Control
                         // updates (mode/model/slash/title) still pass — they re-sync
                         // live pickers, not history.
@@ -511,7 +511,7 @@ async fn new_session(
 }
 
 /// Host-declared servers → ACP's `McpServer` vocabulary. Stdio-only: every
-/// server OxiMux supplies is a local sidecar it spawns, so the Http/Sse/Acp
+/// server TREX supplies is a local sidecar it spawns, so the Http/Sse/Acp
 /// variants have no host-side producer here.
 fn acp_mcp_servers(specs: &[McpServerSpec]) -> Vec<McpServer> {
     specs
@@ -678,7 +678,7 @@ async fn run_login_terminal(
 
 /// Whether a mapped event carries transcript content (assistant/thought text,
 /// tool activity, plan) as opposed to control state (mode, slash commands, model
-/// config, title). During `session/load` replay we drop the former — OxiMux
+/// config, title). During `session/load` replay we drop the former — TREX
 /// already repainted its persisted blob — but let control updates through, since
 /// they re-sync live pickers rather than re-render history.
 fn is_transcript_event(ev: &ThreadEvent) -> bool {

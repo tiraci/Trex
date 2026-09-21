@@ -1,8 +1,8 @@
-//! `oximux update` — replace this installation with the latest signed release.
+﻿//! `TREX update` — replace this installation with the latest signed release.
 //!
 //! Talks to no host: the release server is the only thing it contacts, so the
 //! verb runs without a runtime, a socket, or a database. That also means it
-//! works on a machine whose `oximux serve` is wedged, which is exactly when
+//! works on a machine whose `TREX serve` is wedged, which is exactly when
 //! someone reaches for it.
 
 use serde_json::{Value, json};
@@ -16,7 +16,7 @@ use crate::update::{self, Install, download::HttpFetcher};
 /// than a line that is always true. What the command guarantees is the part
 /// that matters — it does not restart anything itself.
 const RESTART_HINT: &str =
-    "Restart any running `oximux serve` to pick this up; the update never restarts it for you.";
+    "Restart any running `TREX serve` to pick this up; the update never restarts it for you.";
 
 pub fn run(check_only: bool) -> Result<(Value, String), Failure> {
     let fetcher = HttpFetcher;
@@ -37,15 +37,15 @@ pub fn run(check_only: bool) -> Result<(Value, String), Failure> {
             "target_available": has_build,
         });
         let human = if !newer {
-            format!("oximux {current} is current (latest release: {})", manifest.version)
+            format!("TREX {current} is current (latest release: {})", manifest.version)
         } else if has_build {
             format!(
-                "oximux {} is available (you have {current}). Run `oximux update` to install it.",
+                "TREX {} is available (you have {current}). Run `TREX update` to install it.",
                 manifest.version
             )
         } else {
             format!(
-                "oximux {} is available, but that release carries no build for {} (it has: {}).",
+                "TREX {} is available, but that release carries no build for {} (it has: {}).",
                 manifest.version,
                 build_info::TARGET,
                 manifest.targets.keys().cloned().collect::<Vec<_>>().join(", ")
@@ -75,7 +75,7 @@ pub fn run(check_only: bool) -> Result<(Value, String), Failure> {
             .collect::<Vec<_>>(),
     });
     let human = format!(
-        "updated oximux {} → {} in {}\n{RESTART_HINT}",
+        "updated TREX {} → {} in {}\n{RESTART_HINT}",
         applied.from,
         applied.to,
         install.dir.display()
@@ -87,7 +87,7 @@ fn applied_path(path: &std::path::Path) -> String {
     path.display().to_string()
 }
 
-/// `oximux version` — what this build is, and what it can verify.
+/// `TREX version` — what this build is, and what it can verify.
 pub fn version() -> (Value, String) {
     let signed = build_info::release_public_key().is_some();
     let data = json!({
@@ -95,15 +95,15 @@ pub fn version() -> (Value, String) {
         "channel": build_info::CHANNEL,
         "commit": build_info::GIT_SHA,
         "target": build_info::TARGET,
-        "protocol_version": oximux_remote_proto::proto::PROTOCOL_VERSION,
+        "protocol_version": trex_remote_proto::proto::PROTOCOL_VERSION,
         // A build that cannot verify a release cannot self-update. Saying so
-        // here means `oximux version` answers "why did update refuse?".
+        // here means `TREX version` answers "why did update refuse?".
         "self_update": signed,
     });
     let human = format!(
-        "oximux {} (protocol v{}){}",
+        "TREX {} (protocol v{}){}",
         build_info::describe(),
-        oximux_remote_proto::proto::PROTOCOL_VERSION,
+        trex_remote_proto::proto::PROTOCOL_VERSION,
         if signed { "" } else { "\nself-update: unavailable (no release key in this build)" }
     );
     (data, human)
@@ -113,7 +113,7 @@ pub fn version() -> (Value, String) {
 mod tests {
     use super::*;
 
-    /// `oximux version` is what a bug report pastes, so every build fact has
+    /// `TREX version` is what a bug report pastes, so every build fact has
     /// to be in it — and the honest answer about self-update, since a build
     /// with no key will refuse to update and this is where that is explained.
     #[test]

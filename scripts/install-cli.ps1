@@ -1,9 +1,9 @@
-<#
+﻿<#
 .SYNOPSIS
-    Install the `oximux` CLI and its relay on Windows.
+    Install the `TREX` CLI and its relay on Windows.
 
 .DESCRIPTION
-    irm https://raw.githubusercontent.com/nhtera/OxiMux/main/scripts/install-cli.ps1 | iex
+    irm https://raw.githubusercontent.com/tiraci/Trex/main/scripts/install-cli.ps1 | iex
 
     What this trusts, and what it cannot
     ------------------------------------
@@ -21,7 +21,7 @@
     CI uses it.
 
     The installed binary does not inherit the weakness: it carries the same key
-    compiled in, and every `oximux update` afterwards verifies or refuses. This
+    compiled in, and every `TREX update` afterwards verifies or refuses. This
     is trust-on-first-install and only that.
 
     The archive is .tar.gz on every platform, unpacked with the bsdtar that
@@ -29,28 +29,28 @@
     project already requires.
 
 .PARAMETER Dir
-    Where to install. Default: $env:LOCALAPPDATA\Programs\oximux
+    Where to install. Default: $env:LOCALAPPDATA\Programs\TREX
 
 .PARAMETER RequireSignature
     Fail unless the manifest signature is verified.
 #>
 [CmdletBinding()]
 param(
-    [string] $Dir = $(if ($env:OXIMUX_INSTALL_DIR) { $env:OXIMUX_INSTALL_DIR }
-                      else { Join-Path $env:LOCALAPPDATA 'Programs\oximux' }),
+    [string] $Dir = $(if ($env:TREX_INSTALL_DIR) { $env:TREX_INSTALL_DIR }
+                      else { Join-Path $env:LOCALAPPDATA 'Programs\TREX' }),
     [switch] $RequireSignature
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$Repo = 'nhtera/OxiMux'
+$Repo = 'tiraci/Trex'
 # Overridable so the installer itself can be tested against a local fake
 # release. Unlike the compiled updater — whose equivalent override is
 # debug-build-only, because a release binary must carry no way to repoint its
 # own trust chain — this costs nothing: anyone who can set an environment
 # variable for this script can equally well edit the script.
-$BaseUrl = if ($env:OXIMUX_INSTALL_BASE_URL) { $env:OXIMUX_INSTALL_BASE_URL }
+$BaseUrl = if ($env:TREX_INSTALL_BASE_URL) { $env:TREX_INSTALL_BASE_URL }
            else { "https://github.com/$Repo/releases" }
 $Latest = "$BaseUrl/latest/download"
 
@@ -60,7 +60,7 @@ $Latest = "$BaseUrl/latest/download"
 $ReleasePublicKey = 'RWQ4owMUFazkg7fHezLB688BjTGDGJBBQ4EPLVbLDp8baal1VsMJ71FJ'
 
 function Die([string] $Message) {
-    Write-Error "oximux: $Message"
+    Write-Error "TREX: $Message"
     exit 1
 }
 
@@ -76,9 +76,9 @@ function Get-Target {
 }
 
 $target = Get-Target
-Write-Host "oximux: installing for $target"
+Write-Host "TREX: installing for $target"
 
-$tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("oximux-install-" + [System.Guid]::NewGuid().ToString('N'))
+$tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("trex-install-" + [System.Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $tmp -Force | Out-Null
 try {
     $manifestPath = Join-Path $tmp 'manifest.json'
@@ -95,7 +95,7 @@ try {
         if ($RequireSignature) {
             Die 'this installer carries no release key, so -RequireSignature cannot be satisfied'
         }
-        Write-Warning 'oximux: this installer carries no release key; falling back to checksum-only trust.'
+        Write-Warning 'TREX: this installer carries no release key; falling back to checksum-only trust.'
     } elseif ($minisign) {
         $sigPath = Join-Path $tmp 'manifest.json.minisig'
         try {
@@ -106,18 +106,18 @@ try {
         $pubPath = Join-Path $tmp 'release.pub'
         # ASCII with a trailing newline: minisign parses this file by line.
         [System.IO.File]::WriteAllText(
-            $pubPath, "untrusted comment: oximux release key`n$ReleasePublicKey`n",
+            $pubPath, "untrusted comment: TREX release key`n$ReleasePublicKey`n",
             [System.Text.Encoding]::ASCII)
         & $minisign.Source -V -p $pubPath -x $sigPath -m $manifestPath | Out-Null
         if ($LASTEXITCODE -ne 0) {
             Die ("the release manifest signature did NOT verify. Do not retry blindly - this is " +
                  "what a tampered release looks like. Check https://github.com/$Repo/releases")
         }
-        Write-Host 'oximux: manifest signature verified'
+        Write-Host 'TREX: manifest signature verified'
     } elseif ($RequireSignature) {
         Die 'minisign is not installed and -RequireSignature was given (winget install jedisct1.minisign)'
     } else {
-        Write-Warning ('oximux: minisign is not installed, so the release signature was NOT checked. ' +
+        Write-Warning ('TREX: minisign is not installed, so the release signature was NOT checked. ' +
                        'Falling back to the manifest sha256 over TLS. Install minisign and re-run ' +
                        'with -RequireSignature for the full check.')
     }
@@ -141,7 +141,7 @@ try {
         Die "the manifest names an unsafe archive path: $($asset.archive)"
     }
 
-    Write-Host "oximux: downloading $version ($($asset.archive))"
+    Write-Host "TREX: downloading $version ($($asset.archive))"
     $archivePath = Join-Path $tmp $asset.archive
     # Built from the *signed* version and file name rather than read out of the
     # manifest as a URL, so a manifest can never name a download host of its own.
@@ -157,7 +157,7 @@ try {
     if ($got -ne $want) {
         Die "checksum mismatch for $($asset.archive): expected $want, got $got"
     }
-    Write-Host 'oximux: checksum ok'
+    Write-Host 'TREX: checksum ok'
 
     # --- install -------------------------------------------------------------
 
@@ -166,7 +166,7 @@ try {
     & tar.exe -xzf $archivePath -C $unpack
     if ($LASTEXITCODE -ne 0) { Die "could not unpack $($asset.archive)" }
 
-    $binaries = @('oximux.exe', 'oximux-relay.exe')
+    $binaries = @('TREX.exe', 'trex-relay.exe')
     foreach ($bin in $binaries) {
         if (-not (Test-Path (Join-Path $unpack $bin))) {
             Die "$($asset.archive) does not contain $bin"
@@ -186,11 +186,11 @@ try {
     # that lands one and not the other leaves an installation that cannot talk
     # to itself. Moving them in a plain loop produces exactly that whenever the
     # second fails, so this is the same two-pass swap-with-rollback that
-    # `oximux update` performs.
+    # `TREX update` performs.
     #
     # Staging INSIDE the install directory is load-bearing: a rename is atomic
     # only within one filesystem, and %TEMP% is frequently a different volume.
-    $stage = Join-Path $Dir (".oximux-install-" + [System.Guid]::NewGuid().ToString('N'))
+    $stage = Join-Path $Dir (".trex-install-" + [System.Guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
     try {
         foreach ($bin in $binaries) {
@@ -219,7 +219,7 @@ try {
                 foreach ($m in $moved) {
                     Move-Item -Force $m.Backup (Join-Path $Dir $m.Name) -ErrorAction SilentlyContinue
                 }
-                Die "could not replace $dest - is oximux still running? ($_)"
+                Die "could not replace $dest - is TREX still running? ($_)"
             }
         }
 
@@ -251,7 +251,7 @@ try {
         Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
     }
 
-    Write-Host "oximux: installed $version to $Dir"
+    Write-Host "TREX: installed $version to $Dir"
 
     # --- PATH ----------------------------------------------------------------
 
@@ -261,7 +261,7 @@ try {
     if (-not $onPath) {
         $newPath = if ($userPath) { "$userPath;$Dir" } else { $Dir }
         [Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
-        Write-Host "oximux: added $Dir to your user PATH - open a new terminal to pick it up"
+        Write-Host "TREX: added $Dir to your user PATH - open a new terminal to pick it up"
     }
 } finally {
     Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue

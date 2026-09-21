@@ -1,4 +1,4 @@
-import type { Recurrence, Schedule, ScheduleRun } from 'oximux-core';
+﻿import type { Recurrence, Schedule, ScheduleRun } from 'trex-core';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useClient } from './client';

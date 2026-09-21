@@ -1,4 +1,4 @@
-//! Integration tests for the file_tree backend.
+﻿//! Integration tests for the file_tree backend.
 //!
 //! `TempDir` setup creates a `.git/` marker so `WalkBuilder::git_ignore`
 //! engages (the `ignore` crate looks for `.git` to decide if a directory
@@ -6,7 +6,7 @@
 //! ignored — exactly the kind of test/prod divergence the parent plan
 //! warns against.
 
-use oximux_editor::file_tree::walker::{list_children, sort_entries};
+use trex_editor::file_tree::walker::{list_children, sort_entries};
 use std::{fs, path::PathBuf, time::Instant};
 use tempfile::TempDir;
 

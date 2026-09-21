@@ -1,4 +1,4 @@
-//! Left-rail drag-resize handle.
+﻿//! Left-rail drag-resize handle.
 //!
 //! The handle lives on the RIGHT edge of the rail column. Because the
 //! rail's left edge is pinned at window x=0, the new width during a
@@ -49,7 +49,7 @@ impl Render for LeftRailResizeGhost {
 /// Hovering the hit area paints a wider `border_active` bar over it —
 /// an absolute overlay so the highlight widens without any layout
 /// shift, and the edge never reads as two offset lines.
-pub fn build_handle(resizing: bool, theme: oximux_settings::Theme) -> AnyElement {
+pub fn build_handle(resizing: bool, theme: trex_settings::Theme) -> AnyElement {
     let stripe = div()
         .h_full()
         .w(px(HANDLE_STRIPE_PX))

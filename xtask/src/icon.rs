@@ -1,4 +1,4 @@
-//! `xtask icon` — derive the Windows application icon from the macOS one.
+﻿//! `xtask icon` — derive the Windows application icon from the macOS one.
 //!
 //! Windows wants a multi-resolution `.ico`; macOS wants a multi-resolution
 //! `.icns`. Rather than keep two hand-made binaries in step by memory, the
@@ -41,7 +41,7 @@ use image::{ExtendedColorType, RgbaImage};
 const SOURCE: &str = "assets/AppIcon.icns";
 /// The derived Windows icon, checked in so a Windows build needs no toolchain
 /// beyond cargo.
-const OUTPUT: &str = "assets/windows/OxiMux.ico";
+const OUTPUT: &str = "assets/windows/trex.ico";
 
 /// Sizes Windows actually asks for: 16 in the title bar and tree views, 32 in
 /// Alt-Tab and the taskbar, 48 in Explorer's medium view, 256 in its extra-large

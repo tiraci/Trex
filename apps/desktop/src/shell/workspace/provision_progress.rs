@@ -1,4 +1,4 @@
-//! The provisioning card's model: one create's progress, and the one line
+﻿//! The provisioning card's model: one create's progress, and the one line
 //! formatter the transcript file and the card share.
 //!
 //! No GPUI in here, so every rule — when a card reveals, what a failure
@@ -9,7 +9,7 @@ use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::time::Duration;
 
-use oximux_worktree_ops::{ProvisionEvent, SetupOutcome};
+use trex_worktree_ops::{ProvisionEvent, SetupOutcome};
 
 /// How long provisioning must have been running before a card appears.
 pub const SHOW_AFTER: Duration = Duration::from_millis(600);
@@ -133,7 +133,7 @@ pub fn card_outcome_for_setup(outcome: &SetupOutcome) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_worktree_ops::include::Skip;
+    use trex_worktree_ops::include::Skip;
 
     fn progress() -> ProvisionProgress {
         ProvisionProgress::new(1, "amber".into(), "p-1".into(), PathBuf::from("/t/amber.log"))

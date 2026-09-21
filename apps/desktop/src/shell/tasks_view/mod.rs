@@ -1,4 +1,4 @@
-//! Tasks page — rendered when the Tasks pane tab is active.
+﻿//! Tasks page — rendered when the Tasks pane tab is active.
 //!
 //! A GitHub/GitLab issue/PR browser. Lists across a chosen **scope** — every
 //! known project at once ([`TaskScope::All`], the default) or a single one —
@@ -30,8 +30,8 @@ use gpui::{
     div, px, uniform_list,
 };
 use gpui_component::input::{InputEvent, InputState};
-use oximux_core::Project;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::Project;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::forge::{
     AuthState, Forge, ForgeItem, ForgeListFilter, ForgeProvider, ForgeState, ItemDetail,
@@ -365,8 +365,8 @@ impl TasksView {
 
         let cwd = PathBuf::from(&project.root_path);
         let kind = match self.kind {
-            TaskKind::Issues => oximux_core::ForgeRefKind::Issue,
-            TaskKind::Prs => oximux_core::ForgeRefKind::Pull,
+            TaskKind::Issues => trex_core::ForgeRefKind::Issue,
+            TaskKind::Prs => trex_core::ForgeRefKind::Pull,
         };
         let (tx, rx) = tokio::sync::oneshot::channel::<Option<ItemDetail>>();
         match tokio::runtime::Handle::try_current() {
@@ -652,7 +652,7 @@ impl Focusable for TasksView {
 
 impl Render for TasksView {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Tasks sits on the content canvas (`bg_panel`), not the rail surface.
         let root = div()
             .flex()

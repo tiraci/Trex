@@ -1,6 +1,6 @@
-//! Pure unit tests for `RightTab` and `visible_tabs`. No GPUI runtime needed.
+﻿//! Pure unit tests for `RightTab` and `visible_tabs`. No GPUI runtime needed.
 
-use oximux_app::shell::right_sidebar::tab::{RightTab, TabVisibility, visible_tabs};
+use trex_app::shell::right_sidebar::tab::{RightTab, TabVisibility, visible_tabs};
 
 #[test]
 fn a_repo_project_shows_the_full_tab_row_in_order() {

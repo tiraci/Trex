@@ -1,4 +1,4 @@
-//! Per-agent-session persistence watcher.
+﻿//! Per-agent-session persistence watcher.
 //!
 //! The `agent_sessions` table and its boot-time interrupted-marking have
 //! existed since the storage phase, but nothing ever inserted rows or wrote
@@ -23,8 +23,8 @@
 //! exits.
 
 use gpui::Context;
-use oximux_agents::AgentStatusStream;
-use oximux_core::{AgentSessionId, AgentStatus};
+use trex_agents::AgentStatusStream;
+use trex_core::{AgentSessionId, AgentStatus};
 
 use crate::shell::agent_presentation::adapter_display_name;
 use crate::shell::session_live_store::LiveAgentEntry;
@@ -238,9 +238,9 @@ pub(crate) fn spawn_for_session(
 /// Returns `true` when a new title was written, so the caller can repaint the
 /// rail — a fresh prompt with no status edge would otherwise not refresh it.
 async fn persist_title_if_changed(
-    repo: &oximux_storage::AgentSessionRepo,
+    repo: &trex_storage::AgentSessionRepo,
     row_id: &str,
-    detail: &Option<oximux_core::SidebandDetail>,
+    detail: &Option<trex_core::SidebandDetail>,
     last_title: &mut Option<String>,
     cx: &gpui::AsyncApp,
 ) -> bool {
@@ -276,9 +276,9 @@ async fn persist_title_if_changed(
 /// blank/absent message is ignored (keeps the prior reply). Best-effort: a write
 /// failure is logged, never propagated.
 async fn persist_message_if_changed(
-    repo: &oximux_storage::AgentSessionRepo,
+    repo: &trex_storage::AgentSessionRepo,
     row_id: &str,
-    detail: &Option<oximux_core::SidebandDetail>,
+    detail: &Option<trex_core::SidebandDetail>,
     last_msg: &mut Option<String>,
     cx: &gpui::AsyncApp,
 ) {
@@ -310,7 +310,7 @@ async fn persist_message_if_changed(
 /// background executor. Failures are logged, never propagated — the badge
 /// keeps working off the watch channel even when row history is lossy.
 async fn write_status(
-    repo: &oximux_storage::AgentSessionRepo,
+    repo: &trex_storage::AgentSessionRepo,
     row_id: &str,
     status: &AgentStatus,
     cx: &gpui::AsyncApp,

@@ -1,6 +1,6 @@
-//! The folded-thread projection the app renders.
+﻿//! The folded-thread projection the app renders.
 //!
-//! [`SessionSubscription`](oximux_remote_session::SessionSubscription) already
+//! [`SessionSubscription`](trex_remote_session::SessionSubscription) already
 //! holds a [`ChatThread`] — the *same* `agent-core` fold the desktop renders. This
 //! module projects it to JSON so React renders that fold rather than
 //! reimplementing one in TypeScript, which would be a second implementation to
@@ -13,7 +13,7 @@
 //! mirroring every variant into an FFI type would mean re-cutting the bindings
 //! on each change.
 
-use oximux_agent_core::thread::{
+use trex_agent_core::thread::{
     ChatThread, PlanEntryLite, ThreadEntry, ToolCallStatus, TurnUsage,
 };
 use serde::Serialize;
@@ -110,8 +110,8 @@ fn awaits_user(entries: &[ThreadEntry]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use oximux_agent_core::thread::event::ThreadEvent;
-    use oximux_agent_core::thread::tool_call::{PermissionKind, PermissionRequest};
+    use trex_agent_core::thread::event::ThreadEvent;
+    use trex_agent_core::thread::tool_call::{PermissionKind, PermissionRequest};
     use serde_json::Value;
 
     use super::*;

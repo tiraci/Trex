@@ -1,4 +1,4 @@
-//! Temporary-index guard: lets checkpoint commands stage the whole worktree
+﻿//! Temporary-index guard: lets checkpoint commands stage the whole worktree
 //! without ever touching the user's real `.git/index` (or its lock).
 
 use super::{CheckpointError, Result};
@@ -9,7 +9,7 @@ static COUNTER: AtomicU64 = AtomicU64::new(0);
 
 /// Copy of the real index at a private path. Pass [`Self::path`] as
 /// `GIT_INDEX_FILE` to every command inside the guard's lifetime. The temp
-/// file is removed on drop (best-effort; a leaked `oximux-index-*.tmp` in the
+/// file is removed on drop (best-effort; a leaked `trex-index-*.tmp` in the
 /// git dir is harmless and swept by the next guard construction).
 pub(crate) struct TempIndexGuard {
     path: PathBuf,
@@ -20,7 +20,7 @@ impl TempIndexGuard {
         sweep_stale(git_dir);
         let n = COUNTER.fetch_add(1, Ordering::Relaxed);
         let path = git_dir.join(format!(
-            "oximux-index-{}-{}.tmp",
+            "trex-index-{}-{}.tmp",
             std::process::id(),
             n
         ));
@@ -53,7 +53,7 @@ fn sweep_stale(git_dir: &Path) {
     for entry in entries.flatten() {
         let name = entry.file_name();
         let name = name.to_string_lossy();
-        if name.starts_with("oximux-index-") && name.ends_with(".tmp") {
+        if name.starts_with("trex-index-") && name.ends_with(".tmp") {
             let _ = std::fs::remove_file(entry.path());
         }
     }
@@ -80,7 +80,7 @@ mod tests {
     #[test]
     fn tolerates_missing_index_and_sweeps_stale() {
         let dir = tempfile::tempdir().unwrap();
-        let stale = dir.path().join("oximux-index-999-0.tmp");
+        let stale = dir.path().join("trex-index-999-0.tmp");
         std::fs::write(&stale, b"stale").unwrap();
         let guard = TempIndexGuard::new(dir.path()).unwrap();
         assert!(!stale.exists(), "stale temp index swept");

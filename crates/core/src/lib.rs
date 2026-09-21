@@ -1,4 +1,4 @@
-//! oximux-core
+﻿//! trex-core
 //!
 //! Domain types shared across the workspace: Project, Workspace,
 //! PaneSession, AgentSession. Kept dependency-free beyond serde/thiserror

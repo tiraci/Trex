@@ -1,4 +1,4 @@
-//! Forge-provider seam: a thin abstraction over a code-hosting forge's
+﻿//! Forge-provider seam: a thin abstraction over a code-hosting forge's
 //! pull-request + CI surface.
 //!
 //! The `gh`-CLI implementation ([`github_gh::GithubForge`]) is the only one
@@ -7,7 +7,7 @@
 //! the UI goes through [`ForgeProvider`], never the CLI directly.
 //!
 //! Kept deliberately minimal (YAGNI): one trait, one impl, only the methods
-//! the current UI needs. The low-level transport stays in `oximux_git::gh`;
+//! the current UI needs. The low-level transport stays in `trex_git::gh`;
 //! this layer is the contract the app depends on.
 
 pub mod github_gh;
@@ -16,31 +16,31 @@ pub mod ref_parse;
 
 use std::path::Path;
 
-use oximux_git::Result;
+use trex_git::Result;
 
 /// One CI check run for the current branch's PR. Re-exported from the `gh`
 /// transport so call sites depend on the forge layer, not the CLI wrapper.
-pub use oximux_git::gh::CheckRun;
+pub use trex_git::gh::CheckRun;
 
 /// Options for creating a pull request. Re-exported from the transport so the
 /// dialog + call sites depend on the forge layer.
-pub use oximux_git::gh::CreatePrOptions;
+pub use trex_git::gh::CreatePrOptions;
 
 /// PR merge strategy. Re-exported from the transport so the menu + call sites
 /// depend on the forge layer.
-pub use oximux_git::gh::MergeMethod;
+pub use trex_git::gh::MergeMethod;
 
 /// Issue/PR listing types. Re-exported so the Tasks page depends on the forge
 /// layer, not the CLI wrapper.
-pub use oximux_git::gh::{ForgeAssignee, ForgeItem, ForgeLabel, ForgeListFilter, ForgeState};
+pub use trex_git::gh::{ForgeAssignee, ForgeItem, ForgeLabel, ForgeListFilter, ForgeState};
 
 /// Forge-CLI auth classification, for the Tasks page's empty-vs-unauthenticated
 /// hint. Re-exported so the page stays off the raw CLI wrapper.
-pub use oximux_git::gh::AuthState;
+pub use trex_git::gh::AuthState;
 
 /// Lazily-fetched issue/PR body + author for the Tasks detail view. Re-exported
 /// so the page depends on the forge layer, not the CLI wrapper.
-pub use oximux_git::gh::ItemDetail;
+pub use trex_git::gh::ItemDetail;
 
 pub use github_gh::GithubForge;
 pub use gitlab_glab::GitlabForge;
@@ -70,11 +70,11 @@ pub trait ForgeProvider {
     /// surface can suppress a duplicate-PR offer and the Publish row can show
     /// its "PR Status" variant. Default derives from [`has_open_pr`] (open vs
     /// none) for providers that don't implement the richer query.
-    async fn pr_state(&self, cwd: &Path) -> oximux_core::PrState {
+    async fn pr_state(&self, cwd: &Path) -> trex_core::PrState {
         if self.has_open_pr(cwd).await {
-            oximux_core::PrState::Open
+            trex_core::PrState::Open
         } else {
-            oximux_core::PrState::None
+            trex_core::PrState::None
         }
     }
 
@@ -141,12 +141,12 @@ impl Forge {
 
     /// Auth state of the backing forge's CLI, for the Tasks page's
     /// empty-vs-unauthenticated hint. Only GitHub is probed (`gh auth status`,
-    /// see [`oximux_git::gh::auth_state`]); GitLab has no equally-cheap probe
+    /// see [`trex_git::gh::auth_state`]); GitLab has no equally-cheap probe
     /// wired here, so it reports [`AuthState::Ok`] and relies on its list call
     /// degrading gracefully to empty when unauthenticated.
     pub async fn auth_state(&self, cwd: &Path) -> AuthState {
         match self {
-            Forge::Github(_) => oximux_git::gh::auth_state(cwd).await,
+            Forge::Github(_) => trex_git::gh::auth_state(cwd).await,
             Forge::Gitlab(_) => AuthState::Ok,
         }
     }
@@ -160,15 +160,15 @@ impl Forge {
     /// pair (two identical `git remote` shell-outs) — `detect().is_some()` is
     /// the gate.
     ///
-    /// The classification itself lives in [`oximux_git::forge::detect`], not
+    /// The classification itself lives in [`trex_git::forge::detect`], not
     /// here: the remote surface needs the same answer and cannot reach this
     /// crate. Its GitHub-first ordering is load-bearing (a `github.com` URL can
     /// carry `gitlab` in its path), which is exactly the kind of detail two
     /// copies would eventually disagree about.
     pub async fn detect(cwd: &Path) -> Option<Self> {
-        match oximux_git::forge::detect(cwd).await? {
-            oximux_git::forge::ForgeHost::Github => Some(Forge::Github(GithubForge)),
-            oximux_git::forge::ForgeHost::Gitlab => Some(Forge::Gitlab(GitlabForge)),
+        match trex_git::forge::detect(cwd).await? {
+            trex_git::forge::ForgeHost::Github => Some(Forge::Github(GithubForge)),
+            trex_git::forge::ForgeHost::Gitlab => Some(Forge::Gitlab(GitlabForge)),
         }
     }
 }
@@ -180,13 +180,13 @@ impl Forge {
 pub async fn fetch_ref_title(
     forge: Forge,
     cwd: &Path,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u32,
     repo: Option<&str>,
 ) -> Option<String> {
     match forge {
-        Forge::Github(_) => oximux_git::gh::item_title(cwd, kind, number, repo).await,
-        Forge::Gitlab(_) => oximux_git::glab::item_title(cwd, kind, number, repo).await,
+        Forge::Github(_) => trex_git::gh::item_title(cwd, kind, number, repo).await,
+        Forge::Gitlab(_) => trex_git::glab::item_title(cwd, kind, number, repo).await,
     }
 }
 
@@ -196,12 +196,12 @@ pub async fn fetch_ref_title(
 pub async fn fetch_item_detail(
     forge: Forge,
     cwd: &Path,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u64,
 ) -> Option<ItemDetail> {
     match forge {
-        Forge::Github(_) => oximux_git::gh::item_detail(cwd, kind, number, None).await,
-        Forge::Gitlab(_) => oximux_git::glab::item_detail(cwd, kind, number, None).await,
+        Forge::Github(_) => trex_git::gh::item_detail(cwd, kind, number, None).await,
+        Forge::Gitlab(_) => trex_git::glab::item_detail(cwd, kind, number, None).await,
     }
 }
 
@@ -220,7 +220,7 @@ impl ForgeProvider for Forge {
         }
     }
 
-    async fn pr_state(&self, cwd: &Path) -> oximux_core::PrState {
+    async fn pr_state(&self, cwd: &Path) -> trex_core::PrState {
         match self {
             Forge::Github(f) => f.pr_state(cwd).await,
             Forge::Gitlab(f) => f.pr_state(cwd).await,

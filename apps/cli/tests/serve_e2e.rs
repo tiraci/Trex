@@ -1,4 +1,4 @@
-//! The headless host, end to end: boot the compiled binary as `serve`, parse
+﻿//! The headless host, end to end: boot the compiled binary as `serve`, parse
 //! its readiness contract, drive it with the same binary as a client, restart
 //! it, and prove the catalog's restart-visibility claim — a session persisted
 //! before the restart is listed and readable after it. Also the two pairing
@@ -20,12 +20,12 @@ use std::time::Duration;
 use std::time::Instant;
 
 fn bin() -> Command {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_oximux-cli"));
-    cmd.env_remove(oximux_remote_local::SESSION_ENV_VAR);
-    cmd.env_remove(oximux_remote_local::SESSION_TOKEN_ENV_VAR);
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_trex-cli"));
+    cmd.env_remove(trex_remote_local::SESSION_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_TOKEN_ENV_VAR);
     // Keep the relay out of it: a nonexistent override fails fast, and serve
     // degrades to "no terminals", which this suite never touches.
-    cmd.env("OXIMUX_RELAY_BINARY", "/nonexistent/oximux-relay-for-tests");
+    cmd.env("TREX_RELAY_BINARY", "/nonexistent/trex-relay-for-tests");
     cmd
 }
 
@@ -78,11 +78,11 @@ fn boot_serve_with_projects(data_dir: &Path, projects: &[&Path]) -> ServeUnderTe
         .expect("serve prints its readiness line");
     let ready: serde_json::Value =
         serde_json::from_str(line.trim()).expect("the readiness line is JSON");
-    assert_eq!(ready["type"], "oximux_serve_ready");
+    assert_eq!(ready["type"], "trex_serve_ready");
     assert_eq!(ready["schemaVersion"], 1);
     assert_eq!(
         ready["protocolVersion"],
-        oximux_remote_proto::proto::PROTOCOL_VERSION
+        trex_remote_proto::proto::PROTOCOL_VERSION
     );
     assert_eq!(ready["endpointId"].as_str().map(str::len), Some(64), "endpoint id, hex");
     ServeUnderTest { child, ready }
@@ -121,7 +121,7 @@ impl ServeUnderTest {
 /// The backstop. Every test below ends with an explicit `stop_hard` or
 /// `stop_gracefully` — but those are the LAST line of each test body, so a
 /// failed assertion, a panic, or a Ctrl+C'd `cargo test` skipped them entirely
-/// and left a real `oximux serve` running forever, holding a socket and a
+/// and left a real `TREX serve` running forever, holding a socket and a
 /// SQLite handle against a temp dir that had already been deleted.
 ///
 /// CI never noticed (each job is a fresh container); developer machines
@@ -141,8 +141,8 @@ impl Drop for ServeUnderTest {
 /// under the settings key the catalog scans.
 fn seed_session(data_dir: &Path, session_id: &str) {
     std::fs::create_dir_all(data_dir).unwrap();
-    let db = oximux_storage::open(&data_dir.join("oximux.db")).expect("open db");
-    let settings = oximux_storage::SettingsRepo::new(db);
+    let db = trex_storage::open(&data_dir.join("trex.db")).expect("open db");
+    let settings = trex_storage::SettingsRepo::new(db);
     let blob = serde_json::json!({
         "session_id": session_id,
         "model": "seeded-model",
@@ -254,7 +254,7 @@ fn pairing_tickets_never_reach_a_non_terminal_unforced() {
     assert!(!ticket.is_empty());
     assert_eq!(v["data"]["read_only"], true);
     // The ticket names the endpoint the readiness line announced.
-    let decoded = oximux_remote_proto::pairing::PairingTicket::decode(ticket).unwrap();
+    let decoded = trex_remote_proto::pairing::PairingTicket::decode(ticket).unwrap();
     let hex: String = decoded.endpoint_id.iter().map(|b| format!("{b:02x}")).collect();
     assert_eq!(hex, serve.ready["endpointId"].as_str().unwrap());
 
@@ -286,7 +286,7 @@ fn stdout_carries_the_readiness_line_and_nothing_else() {
     let stdout = String::from_utf8_lossy(&out.stdout);
     let lines: Vec<&str> = stdout.lines().filter(|l| !l.trim().is_empty()).collect();
     assert_eq!(lines.len(), 1, "exactly one stdout line, got: {stdout:?}");
-    assert!(lines[0].contains("oximux_serve_ready"));
+    assert!(lines[0].contains("trex_serve_ready"));
 }
 
 /// PATH-shaped environments (a systemd unit's minimal env) must not break the
@@ -302,7 +302,7 @@ fn serve_boots_under_a_minimal_environment() {
         cmd.env("HOME", home);
     }
     cmd.env("PATH", "/usr/bin:/bin");
-    cmd.env("OXIMUX_RELAY_BINARY", "/nonexistent/oximux-relay-for-tests");
+    cmd.env("TREX_RELAY_BINARY", "/nonexistent/trex-relay-for-tests");
     let mut child = cmd
         .args(["serve", "--data-dir", data_dir.to_str().unwrap()])
         .stdout(Stdio::piped())
@@ -317,7 +317,7 @@ fn serve_boots_under_a_minimal_environment() {
         let _ = tx.send(line);
     });
     let line = rx.recv_timeout(Duration::from_secs(60)).expect("readiness under minimal env");
-    assert!(line.contains("oximux_serve_ready"), "got: {line:?}");
+    assert!(line.contains("trex_serve_ready"), "got: {line:?}");
     let _ = child.kill();
     let _ = child.wait();
 }
@@ -333,10 +333,10 @@ fn a_contended_ticker_declines_but_schedules_stay_editable() {
     std::fs::create_dir_all(&data_dir).unwrap();
 
     // Hold the role, as the other host would.
-    let lock_path = data_dir.join(oximux_agents::schedule::TICKER_LOCK_FILENAME);
-    let _held = match oximux_single_instance::try_acquire(&lock_path).unwrap() {
-        oximux_single_instance::AcquireOutcome::Acquired(guard) => guard,
-        oximux_single_instance::AcquireOutcome::AlreadyRunning { .. } => {
+    let lock_path = data_dir.join(trex_agents::schedule::TICKER_LOCK_FILENAME);
+    let _held = match trex_single_instance::try_acquire(&lock_path).unwrap() {
+        trex_single_instance::AcquireOutcome::Acquired(guard) => guard,
+        trex_single_instance::AcquireOutcome::AlreadyRunning { .. } => {
             panic!("fresh dir must acquire")
         }
     };
@@ -455,7 +455,7 @@ fn serve_creates_and_removes_worktrees_for_its_configured_projects() {
         "worktree landed outside this host's data dir ({}): {path}",
         data_dir.display()
     );
-    assert_eq!(created["data"]["branch"], "oximux/feat-x");
+    assert_eq!(created["data"]["branch"], "TREX/feat-x");
 
     let out = client(&data_dir).args(["--json", "worktree", "ls"]).output().unwrap();
     let rows = json_stdout(&out);

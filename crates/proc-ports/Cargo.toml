@@ -1,5 +1,5 @@
-[package]
-name = "oximux-proc-ports"
+﻿[package]
+name = "trex-proc-ports"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

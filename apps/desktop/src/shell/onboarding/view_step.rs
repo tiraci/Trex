@@ -1,11 +1,11 @@
-//! Onboarding step 2: the Chat UI vs Terminal choice. Two radio cards writing
+﻿//! Onboarding step 2: the Chat UI vs Terminal choice. Two radio cards writing
 //! `AgentLaunchSettings::default_open_mode` on Finish.
 
 use gpui::{
     Context, InteractiveElement as _, MouseButton, ParentElement as _, Styled as _, div,
     prelude::FluentBuilder as _, px, svg,
 };
-use oximux_settings::OpenMode;
+use trex_settings::OpenMode;
 
 use super::OnboardingWizard;
 

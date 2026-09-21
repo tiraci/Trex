@@ -1,4 +1,4 @@
-//! Persistence + clamps for the SCM sidebar panel width and the
+﻿//! Persistence + clamps for the SCM sidebar panel width and the
 //! commit-graph section height (Phase 13).
 //!
 //! Both values live in the global `SettingsRepo` key/value store — they
@@ -11,7 +11,7 @@
 //! clamped on load AND save so a corrupt write can't leak past either
 //! direction.
 
-use oximux_storage::SettingsRepo;
+use trex_storage::SettingsRepo;
 
 // ---------------------------------------------------------------------------
 // Keys
@@ -107,7 +107,7 @@ pub fn save_panel_width(repo: &SettingsRepo, value: f32) {
     let encoded = format!("{value}");
     if let Err(err) = repo.set(KEY_SCM_PANEL_WIDTH, &encoded) {
         tracing::warn!(
-            target: "oximux_app::scm_layout_settings",
+            target: "trex_app::scm_layout_settings",
             "failed to persist scm_panel_width: {err}"
         );
     }
@@ -136,7 +136,7 @@ pub fn save_graph_height(repo: &SettingsRepo, value: f32) {
     let encoded = format!("{value}");
     if let Err(err) = repo.set(KEY_SCM_GRAPH_HEIGHT, &encoded) {
         tracing::warn!(
-            target: "oximux_app::scm_layout_settings",
+            target: "trex_app::scm_layout_settings",
             "failed to persist scm_graph_height: {err}"
         );
     }
@@ -183,7 +183,7 @@ pub fn next_graph_height(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::open_memory;
+    use trex_storage::open_memory;
 
     fn repo() -> SettingsRepo {
         SettingsRepo::new(open_memory().expect("open memory"))

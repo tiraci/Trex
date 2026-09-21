@@ -1,4 +1,4 @@
-//! Resolve a pid to the executable behind it.
+﻿//! Resolve a pid to the executable behind it.
 //!
 //! A grant is recorded against a pid, but a pid is a recycled integer: the
 //! process that owned it can exit and a completely different program can be
@@ -10,7 +10,7 @@
 //!
 //! macOS: `proc_pidpath` fills a buffer with the absolute path of a pid's
 //! executable. Declared directly rather than via a crate, matching how
-//! `oximux-proc-cwd` handles the neighbouring `proc_pidinfo` call.
+//! `trex-proc-cwd` handles the neighbouring `proc_pidinfo` call.
 //!
 //! Windows: `QueryFullProcessImageNameW` against a handle opened with
 //! `PROCESS_QUERY_LIMITED_INFORMATION` — the least-privileged right that still
@@ -19,7 +19,7 @@
 //!
 //! A higher-integrity target (anything elevated) refuses the open and resolves
 //! to `None`. That is the **correct** answer rather than a limitation to work
-//! around: OxiMux could not drive such a process anyway, because UIPI blocks
+//! around: TREX could not drive such a process anyway, because UIPI blocks
 //! input injection across the integrity boundary. A `None` here and a refusal
 //! there are the same fact reaching the user twice, which is why the contract
 //! above says `None` means refuse.

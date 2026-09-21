@@ -1,4 +1,4 @@
-//! `attach`'s two mid-stream gap-recovery branches, deterministically.
+﻿//! `attach`'s two mid-stream gap-recovery branches, deterministically.
 //!
 //! The real dispatcher only produces a live-frame seq jump when a broadcast
 //! ring laps under a slow subscriber — scheduling-dependent and unforceable
@@ -15,17 +15,17 @@
 use std::path::Path;
 use std::process::Command;
 
-use oximux_agent_core::thread::ThreadEvent;
-use oximux_remote_local::{LocalControlListener, generate_token};
-use oximux_remote_proto::messages::{HelloAckWire, SessionStatusWire, TranscriptPageWire};
-use oximux_remote_proto::proto::{MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Request, Response};
-use oximux_remote_proto::{HostEvent, Transport};
+use trex_agent_core::thread::ThreadEvent;
+use trex_remote_local::{LocalControlListener, generate_token};
+use trex_remote_proto::messages::{HelloAckWire, SessionStatusWire, TranscriptPageWire};
+use trex_remote_proto::proto::{MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Request, Response};
+use trex_remote_proto::{HostEvent, Transport};
 
 fn bin(runtime_dir: &Path) -> Command {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_oximux-cli"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_trex-cli"));
     cmd.args(["--dir", runtime_dir.to_str().unwrap(), "--timeout", "10"]);
-    cmd.env_remove(oximux_remote_local::SESSION_ENV_VAR);
-    cmd.env_remove(oximux_remote_local::SESSION_TOKEN_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_TOKEN_ENV_VAR);
     cmd
 }
 

@@ -1,4 +1,4 @@
-//! oximux-pty
+﻿//! trex-pty
 //!
 //! Terminal backend abstraction + a `portable-pty` concrete implementation.
 //! The `TerminalBackend` trait is the seam that lets the UI render against

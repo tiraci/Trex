@@ -1,33 +1,33 @@
-//! The desktop's worktree locator: a configured, browsable root.
+﻿//! The desktop's worktree locator: a configured, browsable root.
 //!
 //! Rail-created worktrees used to live at
 //! `<data_dir>/projects/<uuid>/worktrees/<slug>` — inside Application Support,
 //! under an opaque project id, findable by nothing. Chat-created ones lived
-//! somewhere else again, as a sibling `oximux-wt-<slug>` beside the repo. Both
+//! somewhere else again, as a sibling `trex-wt-<slug>` beside the repo. Both
 //! now resolve through this one locator, under a root the user can see and
-//! change: `~/OxiMux/worktrees/<project>/<slug>` by default.
+//! change: `~/TREX/worktrees/<project>/<slug>` by default.
 //!
 //! **Existing rows are not moved.** The row stores its own `worktree_path`, so
 //! a worktree created under the old scheme keeps working at its old location
 //! forever; the setting affects only the next create.
 //!
-//! The RPC surface does not use this. `oximux serve` and the desktop's own
+//! The RPC surface does not use this. `TREX serve` and the desktop's own
 //! remote service keep the host-derived scheme through
-//! [`oximux_worktree_ops::HostDerivedLocator`], which they construct themselves.
+//! [`trex_worktree_ops::HostDerivedLocator`], which they construct themselves.
 
 use std::path::{Path, PathBuf};
 
 use gpui::App;
-use oximux_core::Project;
-use oximux_settings::git::GitSettings;
-use oximux_storage::ProjectRepo;
-use oximux_worktree_ops::{
+use trex_core::Project;
+use trex_settings::git::GitSettings;
+use trex_storage::ProjectRepo;
+use trex_worktree_ops::{
     LocateError, WorktreeLocator, project_dir_name, validate_worktree_root,
     validate_worktree_root_shape,
 };
 
 /// The default root, beneath the home directory.
-pub const DEFAULT_ROOT_UNDER_HOME: &str = "OxiMux/worktrees";
+pub const DEFAULT_ROOT_UNDER_HOME: &str = "TREX/worktrees";
 
 /// Where the desktop puts a new worktree: `<root>/<project>/<slug>`.
 #[derive(Debug, Clone)]
@@ -153,13 +153,13 @@ mod tests {
         let home = Path::new("/home/u");
         assert_eq!(
             ConfiguredLocator::root_from(&with_dir(None), Some(home)),
-            Some(PathBuf::from("/home/u/OxiMux/worktrees"))
+            Some(PathBuf::from("/home/u/TREX/worktrees"))
         );
         // Blank means unset — a user who cleared the field gets the default,
         // not a worktree at the current directory.
         assert_eq!(
             ConfiguredLocator::root_from(&with_dir(Some("   ")), Some(home)),
-            Some(PathBuf::from("/home/u/OxiMux/worktrees"))
+            Some(PathBuf::from("/home/u/TREX/worktrees"))
         );
     }
 
@@ -202,7 +202,7 @@ mod tests {
         let locator = ConfiguredLocator::new(Some(root.clone()), None, vec![p.clone()]);
         assert_eq!(
             locator.locate(&p, "fix-login").expect("locate"),
-            oximux_worktree_ops::canonicalize_lenient(&root)
+            trex_worktree_ops::canonicalize_lenient(&root)
                 .join("api-service")
                 .join("fix-login")
         );

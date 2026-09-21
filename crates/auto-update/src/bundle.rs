@@ -1,10 +1,10 @@
-//! Self-inspection: is this process an updatable install, and what identity
+﻿//! Self-inspection: is this process an updatable install, and what identity
 //! must an update prove?
 
 use std::path::{Path, PathBuf};
 
 #[cfg(target_os = "macos")]
-use oximux_macos_trust::SignaturePolicy;
+use trex_macos_trust::SignaturePolicy;
 
 /// Why the updater is disabled for this process. Each variant surfaces in
 /// settings, so they name the actual obstacle rather than a generic "no".
@@ -29,7 +29,7 @@ impl UnsupportedReason {
         match self {
             Self::NotABundle => "updates are unavailable in development builds",
             Self::Translocated => {
-                "move OxiMux to Applications to enable updates (macOS is running a translocated copy)"
+                "move TREX to Applications to enable updates (macOS is running a translocated copy)"
             }
             Self::RootNotWritable => "can't write next to the installed app",
             Self::NoPinnableSignature => "this build isn't signed for updates",
@@ -73,7 +73,7 @@ pub fn eligibility(exe: &Path) -> Result<InstalledApp, UnsupportedReason> {
         return Err(UnsupportedReason::RootNotWritable);
     }
 
-    let signature = oximux_macos_trust::read_signature(&bundle_root)
+    let signature = trex_macos_trust::read_signature(&bundle_root)
         .map_err(|_| UnsupportedReason::NoPinnableSignature)?;
     if !signature.pinnable() {
         return Err(UnsupportedReason::NoPinnableSignature);
@@ -110,7 +110,7 @@ pub fn bundle_root_of(exe: &Path) -> Option<PathBuf> {
 /// macOS.
 #[cfg(target_os = "macos")]
 fn dir_is_writable(dir: &Path) -> bool {
-    let probe = dir.join(format!(".oximux-write-probe-{}", std::process::id()));
+    let probe = dir.join(format!(".trex-write-probe-{}", std::process::id()));
     let ok = std::fs::write(&probe, b"").is_ok();
     if ok {
         let _ = std::fs::remove_file(&probe);
@@ -125,17 +125,17 @@ mod tests {
     #[test]
     fn a_bundle_exe_resolves_to_its_app_root() {
         let root = bundle_root_of(Path::new(
-            "/Applications/OxiMux.app/Contents/MacOS/oximux",
+            "/Applications/trex.app/Contents/MacOS/TREX",
         ));
-        assert_eq!(root, Some(PathBuf::from("/Applications/OxiMux.app")));
+        assert_eq!(root, Some(PathBuf::from("/Applications/trex.app")));
     }
 
     #[test]
     fn a_dev_build_path_is_not_a_bundle() {
         for exe in [
-            "/Users/dev/proj/target/debug/oximux",
-            "/usr/local/bin/oximux",
-            "/Applications/NotAnApp/Contents/MacOS/oximux",
+            "/Users/dev/proj/target/debug/TREX",
+            "/usr/local/bin/TREX",
+            "/Applications/NotAnApp/Contents/MacOS/TREX",
         ] {
             assert_eq!(bundle_root_of(Path::new(exe)), None, "{exe}");
         }
@@ -148,7 +148,7 @@ mod tests {
         // component gives them away. eligibility() must catch it before the
         // (nonexistent) path fails some later, vaguer check.
         let exe = Path::new(
-            "/private/var/folders/ab/xyz/T/AppTranslocation/1234/d/OxiMux.app/Contents/MacOS/oximux",
+            "/private/var/folders/ab/xyz/T/AppTranslocation/1234/d/trex.app/Contents/MacOS/TREX",
         );
         assert_eq!(
             eligibility(exe).expect_err("must refuse"),

@@ -1,4 +1,4 @@
-//! `keybindings.toml` round-trip — the user's keyboard-shortcut overrides.
+﻿//! `keybindings.toml` round-trip — the user's keyboard-shortcut overrides.
 //!
 //! The file is a flat table of `action_id = "chord"` entries; an empty
 //! string unbinds the action. This module only parses and serializes the
@@ -46,7 +46,7 @@ impl KeybindingOverrides {
     /// order) so repeated saves produce stable diffs.
     pub fn to_toml_string(overrides: &BTreeMap<String, String>) -> String {
         let mut out = String::from(
-            "# OxiMux keyboard-shortcut overrides.\n\
+            "# TREX keyboard-shortcut overrides.\n\
              # One `action_id = \"chord\"` per line; action ids are shown in\n\
              # Settings -> Keybindings. Chords use gpui syntax, e.g.\n\
              # \"secondary-shift-t\" or multi-stroke \"secondary-k secondary-b\".\n\

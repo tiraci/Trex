@@ -1,4 +1,4 @@
-//! In-window floating ("picture-in-picture") terminal: a draggable, resizable
+﻿//! In-window floating ("picture-in-picture") terminal: a draggable, resizable
 //! terminal card that floats above the workspace panels. Distinct from the
 //! OS-level tear-off (a second window) — this is one overlay inside the main
 //! window, toggled with `Cmd+Shift+T`.
@@ -23,12 +23,12 @@ use gpui::{
     IntoElement, MouseButton, ParentElement, Pixels, Point, Render,
     StatefulInteractiveElement, Styled, Task, Window, div, point, prelude::FluentBuilder, px,
 };
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::SettingsRepo;
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::SettingsRepo;
 use serde::{Deserialize, Serialize};
 
-use oximux_agents::SharedBackend;
-use oximux_pty::TerminalSessionId;
+use trex_agents::SharedBackend;
+use trex_pty::TerminalSessionId;
 
 use crate::shell::context_env::SurfaceIds;
 use crate::shell::floating_terminal_persistence::{FloatingTabsBlob, PersistedFloatingTab};
@@ -506,7 +506,7 @@ impl FloatingTerminal {
 
 impl Render for FloatingTerminal {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = self.typography.clone();
@@ -703,7 +703,7 @@ mod tests {
 
     #[test]
     fn load_reads_persisted_geometry_from_repo() {
-        let repo = SettingsRepo::new(oximux_storage::open_memory().unwrap());
+        let repo = SettingsRepo::new(trex_storage::open_memory().unwrap());
         let g = FloatingGeom { x: 5.0, y: 6.0, w: 700.0, h: 500.0 };
         repo.set(GEOMETRY_KEY, &serde_json::to_string(&g).unwrap())
             .unwrap();
@@ -714,7 +714,7 @@ mod tests {
     fn load_falls_back_to_default_on_garbage_json_in_repo() {
         // A corrupt value on disk must not panic — load swallows the parse
         // error and returns the default.
-        let repo = SettingsRepo::new(oximux_storage::open_memory().unwrap());
+        let repo = SettingsRepo::new(trex_storage::open_memory().unwrap());
         repo.set(GEOMETRY_KEY, "not valid json").unwrap();
         assert_eq!(FloatingGeom::load(&Some(repo)), FloatingGeom::default());
     }

@@ -1,4 +1,4 @@
-//! Pure data layer for the agents dashboard — no GPUI runtime required.
+﻿//! Pure data layer for the agents dashboard — no GPUI runtime required.
 //!
 //! Provides `AgentRow` (one row per agent session across all projects),
 //! `attention_rank` (priority tier for sorting), and `sort_agent_rows` (stable
@@ -8,7 +8,7 @@
 //! `row_builder` module; this file is the pure `AgentRow` model + ranking and
 //! is testable without a window.
 
-use oximux_core::{AgentStatus, Workspace};
+use trex_core::{AgentStatus, Workspace};
 
 use crate::shell::left_rail::RailAgentTarget;
 
@@ -121,12 +121,12 @@ mod tests {
         Workspace {
             id: id.to_string(),
             project_id: project_id.to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: format!("ws-{id}"),
             slug: id.to_string(),
-            branch: format!("oximux/{id}"),
+            branch: format!("TREX/{id}"),
             worktree_path: format!("/tmp/{project_id}/{id}"),
             status: "active".to_string(),
             created_at: "2026-06-01T00:00:00Z".to_string(),

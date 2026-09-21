@@ -1,5 +1,5 @@
-[package]
-name = "oximux-computer-use"
+﻿[package]
+name = "trex-computer-use"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -17,9 +17,9 @@ path = "src/lib.rs"
 windows-screen-control = []
 
 [dependencies]
-oximux-agent-core.workspace = true
+trex-agent-core.workspace = true
 # CREATE_NO_WINDOW on driver subprocess runs.
-oximux-no-window = { workspace = true }
+trex-no-window = { workspace = true }
 # Shared codesign/spctl gates and atomic-swap primitives (also used by the
 # app's own updater — the two must not fork).
 #
@@ -27,7 +27,7 @@ oximux-no-window = { workspace = true }
 # has not been split yet, and on Windows its `codesign` call fails as a
 # `Spawn` error, which is an honest "no trust gate here" rather than a wrong
 # answer. Moves under `cfg(target_os = "macos")` when the trust gate splits.
-oximux-macos-trust.workspace = true
+trex-macos-trust.workspace = true
 serde.workspace = true
 # Cross-process lock for the grant store: `flock` on unix, `LockFileEx` on
 # Windows, contention normalised on both. Same crate as the app's

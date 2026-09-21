@@ -1,4 +1,4 @@
-//! Every agent CLI that reports status through a hooks file, in one table.
+﻿//! Every agent CLI that reports status through a hooks file, in one table.
 //!
 //! Detecting an agent from the process tree tells the rail *that* it is there,
 //! and its window title says roughly what it is doing. Neither can say what the
@@ -8,7 +8,7 @@
 //!
 //! The agents differ far less than they look. Every one of them runs a command
 //! at fixed lifecycle points and hands it the event as JSON **on stdin**, so
-//! the existing `oximux agent-status` CLI is the hook for all of them
+//! the existing `TREX agent-status` CLI is the hook for all of them
 //! unchanged. What differs is only: which file the hooks live in, how one entry
 //! is spelled in it, what the events are called, and which key carries the
 //! reply. All four are data, which is what [`DIALECTS`] is — the installer in
@@ -80,7 +80,7 @@ pub enum EntryShape {
     },
 }
 
-/// How an agent is taught to report, and what OxiMux writes to teach it.
+/// How an agent is taught to report, and what TREX writes to teach it.
 ///
 /// Both variants are one file in the agent's own config directory. They differ
 /// in what is IN it: a list of commands the agent shells out to, or a program
@@ -95,7 +95,7 @@ pub enum Install {
         /// rejects unknown fields (or where we own the whole file and need no
         /// marker to find our own entries again).
         marker: Option<&'static str>,
-        /// True when nothing but OxiMux ever writes this file, so removing our
+        /// True when nothing but TREX ever writes this file, so removing our
         /// hooks means deleting it rather than pruning entries out of it.
         owns_file: bool,
         /// Root-level schema version the file must declare, where it declares
@@ -108,7 +108,7 @@ pub enum Install {
     /// event API is the hook, so there is nothing to merge: the file is ours
     /// alone, written whole and deleted whole.
     Extension {
-        /// Renders the source, given the absolute path of the `oximux` binary
+        /// Renders the source, given the absolute path of the `TREX` binary
         /// the extension calls back into.
         source: fn(&Path) -> String,
     },
@@ -125,7 +125,7 @@ pub struct HookDialect {
     /// agent that relocates it via env is honoured.
     ///
     /// Separate from [`Self::file`] because its EXISTENCE is the test for
-    /// whether the agent is installed at all. OxiMux adds to an agent's home;
+    /// whether the agent is installed at all. TREX adds to an agent's home;
     /// it never conjures one, so a user who has never run a given agent never
     /// finds its dotfile appear.
     pub home: fn() -> Option<PathBuf>,
@@ -141,7 +141,7 @@ pub struct HookDialect {
 }
 
 impl HookDialect {
-    /// Absolute path of the file OxiMux writes, or `None` with no home
+    /// Absolute path of the file TREX writes, or `None` with no home
     /// directory to resolve it against.
     pub fn path(&self) -> Option<PathBuf> {
         Some((self.home)()?.join(self.file))
@@ -167,10 +167,10 @@ impl HookDialect {
     }
 }
 
-/// Marks an entry as OxiMux-owned so re-install/remove touches only our hooks.
-pub(crate) const MANAGED_MARKER: &str = "_oximux_managed";
+/// Marks an entry as trex-owned so re-install/remove touches only our hooks.
+pub(crate) const MANAGED_MARKER: &str = "_trex_managed";
 
-/// Every agent whose status hooks OxiMux installs.
+/// Every agent whose status hooks TREX installs.
 ///
 /// Ordered as they were measured. Claude is first because its row is the one
 /// every other row is trying to look like.
@@ -203,7 +203,7 @@ const CLAUDE: HookDialect = HookDialect {
         events: &[
             EventSpec { event: "PreToolUse", matcher: Some("*"), state: "working", flags: "" },
             // Fires the instant the user submits — whether typed into the agent's
-            // own TUI or sent from OxiMux — carrying the prompt that becomes the
+            // own TUI or sent from TREX — carrying the prompt that becomes the
             // row's title. Without it a text-only reply that calls no tool would
             // look idle for its whole turn.
             EventSpec { event: "UserPromptSubmit", matcher: None, state: "working", flags: "" },
@@ -289,7 +289,7 @@ const DROID: HookDialect = HookDialect {
     reads_transcript: true,
 };
 
-/// GitHub Copilot — `~/.copilot/hooks/oximux.json`.
+/// GitHub Copilot — `~/.copilot/hooks/TREX.json`.
 ///
 /// Reads a *directory* of hook files, so ours is a file of our own and nothing
 /// of the user's is ever merged, marked or pruned. Its entries are flat — the
@@ -302,7 +302,7 @@ const COPILOT: HookDialect = HookDialect {
     slug: "copilot",
     agent: "GitHub Copilot",
     home: copilot_home,
-    file: "hooks/oximux.json",
+    file: "hooks/TREX.json",
     install: Install::HooksFile {
         marker: None,
         owns_file: true,
@@ -388,7 +388,7 @@ const CURSOR: HookDialect = HookDialect {
     reads_transcript: false,
 };
 
-/// Grok — `~/.grok/hooks/oximux.json`.
+/// Grok — `~/.grok/hooks/TREX.json`.
 ///
 /// Another directory of hook files, so again ours is our own.
 ///
@@ -400,7 +400,7 @@ const GROK: HookDialect = HookDialect {
     slug: "grok",
     agent: "Grok",
     home: grok_home,
-    file: "hooks/oximux.json",
+    file: "hooks/TREX.json",
     install: Install::HooksFile {
         marker: None,
         owns_file: true,
@@ -420,10 +420,10 @@ const GROK: HookDialect = HookDialect {
     reads_transcript: true,
 };
 
-/// Pi — `~/.pi/agent/extensions/oximux-agent-status.ts`.
+/// Pi — `~/.pi/agent/extensions/trex-agent-status.ts`.
 ///
 /// The one agent here with no hooks file. Its extension point is an in-process
-/// TypeScript API, so instead of a list of commands OxiMux writes a small
+/// TypeScript API, so instead of a list of commands TREX writes a small
 /// program that subscribes to Pi's own events and shells out to the same CLI
 /// every other dialect does. See [`crate::pi_status_extension`] for the source
 /// and for the measured event sequence it depends on.
@@ -443,7 +443,7 @@ const PI: HookDialect = HookDialect {
     reads_transcript: false,
 };
 
-/// omp — `~/.omp/agent/extensions/oximux-agent-status-omp.ts`.
+/// omp — `~/.omp/agent/extensions/trex-agent-status-omp.ts`.
 ///
 /// A Pi fork that kept Pi's extension API and event dialect — re-measured
 /// live against omp 18.0.4: same event sequence, same double-fire pairs, the
@@ -649,7 +649,7 @@ mod tests {
     use super::*;
 
     fn binary() -> &'static Path {
-        Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux")
+        Path::new("/Applications/trex.app/Contents/MacOS/TREX")
     }
 
     fn dialect(slug: &str) -> &'static HookDialect {
@@ -668,7 +668,7 @@ mod tests {
                     // An extension dispatches its own events, so the claim has
                     // to be checked against the source we are about to write.
                     Install::Extension { source } => {
-                        source(Path::new("/x/oximux")).contains(&format!(r#"report("{state}""#))
+                        source(Path::new("/x/TREX")).contains(&format!(r#"report("{state}""#))
                     }
                 };
                 assert!(reports, "{} never reports {state}", d.slug);
@@ -730,7 +730,7 @@ mod tests {
 
     #[test]
     fn an_absent_agent_is_never_given_a_home() {
-        // The gate that keeps OxiMux from creating ~/.cursor, ~/.grok and the
+        // The gate that keeps TREX from creating ~/.cursor, ~/.grok and the
         // rest for a user who has installed none of them.
         for d in DIALECTS {
             let home = (d.home)().expect("a home dir");
@@ -801,9 +801,9 @@ mod tests {
     #[test]
     fn a_path_with_a_quote_cannot_break_out_of_the_command() {
         for d in DIALECTS {
-            for spec in hook_specs(d, Path::new("/Users/O'X/oximux")) {
+            for spec in hook_specs(d, Path::new("/Users/O'X/TREX")) {
                 assert!(
-                    spec.command.contains(r"/Users/O'\''X/oximux"),
+                    spec.command.contains(r"/Users/O'\''X/TREX"),
                     "{} left an embedded quote unescaped: {:?}",
                     d.slug,
                     spec.command

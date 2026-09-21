@@ -1,4 +1,4 @@
-//! Row rendering for the palette modal — command rows, file rows, group
+﻿//! Row rendering for the palette modal — command rows, file rows, group
 //! labels, and keybinding chips. Pure composition fed resolved state by the
 //! owning entity; click activation flows through the shared `on_activate`
 //! callback so mouse and keyboard converge on one dispatch path.
@@ -9,7 +9,7 @@ use gpui::{
     App, HighlightStyle, InteractiveElement, IntoElement, MouseButton, ParentElement, Styled,
     StyledText, Window, div, prelude::FluentBuilder, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::command_palette::entry::PaletteItem;
 use crate::shell::command_palette::match_engine::match_ranges;

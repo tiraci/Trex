@@ -1,9 +1,9 @@
-# OxiMux — Codebase Summary
+﻿# TREX — Codebase Summary
 
 **Updated**: 2026-07-31  
 **Phase**: 5 + multiplexer enhancements + UI/UX batch (settings modal, Quick Open index, lifecycle scripts, Create PR + CI checks, floating PiP terminal) + Agent Chat (round-7) shipped to main; Remote Control Phase 1-2 groundwork in progress on `feat/remote-control-headless-registry` (agent-core split + SessionRegistry, not yet wired into the view); external-CLI auto-provisioning (bundled ripgrep + `cua-driver` one-click installer) shipped; desktop auto-update shipped  
 **Tests**: workspace suite green on macOS **and Windows**. It was macOS-only until the six
-`oximux-macos-trust` tests that shell out to `/bin/sh` and `/usr/bin/ditto` were gated to
+`trex-macos-trust` tests that shell out to `/bin/sh` and `/usr/bin/ditto` were gated to
 macOS — the crate is a macOS-only *dependency* but an unconditional *workspace member*, so
 `cargo test --workspace` had always run them everywhere and always failed off macOS.
 
@@ -12,7 +12,7 @@ macOS — the crate is a macOS-only *dependency* but an unconditional *workspace
 ## Workspace layout
 
 ```
-oximux/
+TREX/
 ├── Cargo.toml              workspace root; all crate deps declared here
 ├── xtask/                  CI helpers: file-size-lint, build checks
 └── crates/
@@ -24,7 +24,7 @@ oximux/
     ├── core/               domain types with zero tokio/GPUI deps
     ├── pty/                portable-pty + alacritty_terminal backend
     ├── git/                git CLI wrappers, poller, diff parser
-    ├── agent-core/         oximux-agent-core — portable ThreadEvent vocabulary + stream-json
+    ├── agent-core/         trex-agent-core — portable ThreadEvent vocabulary + stream-json
     │                       decoder + ChatThread fold, extracted from agents/ (serde/serde_json/
     │                       tracing only, no pty/rusqlite/ACP/gpui/tokio) so it cross-compiles
     │                       for a mobile Rust core; agents/ re-exports it under the original paths
@@ -103,7 +103,7 @@ src/
     │   ├── project_drag.rs drag payloads, insertion_side, paint_insertion_line (2px accent line),
     │   │                   SidebarDragPreview ghost chip, WorkspaceDragConfig, reorder_slot_value
     │   └── toolbar.rs      Add Project + settings (stubs)
-    ├── integrations/       External CLIs OxiMux shells out to, and their health
+    ├── integrations/       External CLIs TREX shells out to, and their health
     │   ├── catalog.rs      Tool enum (git/gh/glab/rg): what each is for, docs link,
     │   │                   whether it has a sign-in, and the per-platform install
     │   │                   recipe. Pure data + pure wording. Linux deliberately has no
@@ -209,7 +209,7 @@ src/
     │                       diagonals U+2571–U+2573 fall through to the font
     ├── key_input.rs        Keystroke → PTY bytes (xterm escapes, C0, Alt-prefix)
     ├── cell_metrics.rs     character cell size constants
-    ├── file_tree_view.rs   FileTreeView GPUI entity (step 4); subscribes to Entity<FileTree> from oximux-editor;
+    ├── file_tree_view.rs   FileTreeView GPUI entity (step 4); subscribes to Entity<FileTree> from trex-editor;
     │                       lazy expand via placeholder child (RowKind::Placeholder sentinel → real rows on Loaded event);
     │                       on_open: Arc<dyn Fn(PathBuf,…)> fires on file click; wired to WorkspaceRoot::open_file_in_active_pane (step 5);
     │                       file rows emit `FilePathDragPayload` (shell/pane_group/file_drag.rs) on .on_drag — dropped on
@@ -224,9 +224,9 @@ src/
     │                       there by bundle-macos.sh) first, bare "rg" (PATH lookup) as the
     │                       dev-build fallback; used by all 3 rg call sites (search panel
     │                       run_ripgrep/detect_rg_available, Quick Open scan_files)
-    ├── context_env.rs      SurfaceIds struct; builds OXIMUX_* env var list for every spawned shell:
-│                       OXIMUX_WORKSPACE_ID (project root path), OXIMUX_SURFACE_ID,
-│                       OXIMUX_TAB_ID (minted UUIDs), OXIMUX_SOCKET_PATH; ids persisted
+    ├── context_env.rs      SurfaceIds struct; builds TREX_* env var list for every spawned shell:
+│                       TREX_WORKSPACE_ID (project root path), TREX_SURFACE_ID,
+│                       TREX_TAB_ID (minted UUIDs), TREX_SOCKET_PATH; ids persisted
 │                       in per-pane layout blob (serde-default; no SQL migration);
 │                       restored stably and re-injected on dormant respawn
     ├── file_explorer/      FileExplorer entity; virtualized git-aware file tree (uniform_list, lazy load, git status badges)
@@ -299,11 +299,11 @@ src/
 **Tier-1 foldering (2026-06):** the formerly-flat top-level modules are grouped
 one folder deep for traversal (each folder re-exports its submodules at the
 crate root, so `crate::<name>::…` paths are unchanged):
-- `app_settings/` — terminal/motion/scm_layout/keybindings/commit_message_ai/agent_launch/auto_update settings (host-level; distinct from the `oximux-settings` crate)
+- `app_settings/` — terminal/motion/scm_layout/keybindings/commit_message_ai/agent_launch/auto_update settings (host-level; distinct from the `trex-settings` crate)
 - `agent_glue/` — agent_awake, agent_hooks_global, agent_status_hooks
 - `session_restore/` — relay_cold_restore, relay_supervisor, restore_fallback, persisted_terminals, git_state_cache (several are `impl WorkspaceRoot`, so they stay in `app`)
 - `platform/` — app_nap, single_instance, window_factory, window_registry, menu, relaunch (detached-helper "restart to update")
-- `loaders/` — custom_commands_loader, `project_scripts_loader` (reads `.oximux/scripts.toml`), browser_profiles, file_http_client
+- `loaders/` — custom_commands_loader, `project_scripts_loader` (reads `.trex/scripts.toml`), browser_profiles, file_http_client
 - `shell/terminal/` — the ~18 terminal-surface modules (terminal_view/canvas/row/links/palette/scrollbar/search*/context_menu/key_input/mouse_report/cell_metrics/box_drawing/adapter_picker/floating_terminal*)
 
 At `apps/desktop/src/` root: `lib.rs`, `main.rs`, `actions.rs`,
@@ -313,11 +313,11 @@ and `notifier/` folders.
 
 ---
 
-## crates/ui — shared widgets (oximux-ui)
+## crates/ui — shared widgets (trex-ui)
 
 App-agnostic widget layer, extracted from `app/src/ui/` in 2026-06. Depends only
-downward (`gpui`, `gpui-component`, `oximux-settings`) and **never** on
-`oximux-app`; the host re-exports it as `crate::ui` (`pub use oximux_ui as ui`).
+downward (`gpui`, `gpui-component`, `trex-settings`) and **never** on
+`trex-app`; the host re-exports it as `crate::ui` (`pub use TREX_ui as ui`).
 
 ```
 src/
@@ -330,7 +330,7 @@ src/
 Generic dialogs that **stay in `app`** because they reach host state: `toast`
 (uses `crate::motion_settings::active`) and `divider` (uses
 `crate::shell::pane_tree::Axis`) — moving either would create a forbidden
-`oximux-ui → oximux-app` edge.
+`trex-ui → trex-app` edge.
 
 ---
 
@@ -351,7 +351,7 @@ src/
 ├── stash.rs        push/list/apply/pop/drop + is_dirty precheck
 ├── branch.rs       list/create/switch; current_branch + default_branch
 │                   (origin/HEAD → local main/master → None, never a guess)
-├── worktree.rs     add/list/remove (branch convention oximux/<slug>)
+├── worktree.rs     add/list/remove (branch convention TREX/<slug>)
 ├── merge.rs        merge with auto-stash recovery; MergeOutcome; is_ancestor;
 │                   AUTO_STASH_MESSAGE (the stash label callers resolve by)
 └── gh.rs           GhCmd wrapper for gh CLI: available / is_github_remote / has_open_pr /
@@ -450,7 +450,7 @@ src/
 
 Backs the **Agent Chat** view (`apps/desktop/src/shell/agent_chat/`): three provider adapters (Claude, Codex, ACP) each decode their own wire protocol into one `ThreadEvent` vocabulary. Full adapter-coverage matrix in `docs/system-architecture.md` → "Agent Chat adapters".
 
-**Agent-core split (2026-07-18):** the pure fold + wire vocabulary + stream-json decoder (`event.rs`, `state.rs`, `entry.rs`, `tool_call.rs`, `question.rs`, `background_task.rs`, `tool_detail.rs`, `turn_diff.rs`, `context_chip.rs`, `stream_json.rs`) now live in `crates/agent-core` (`oximux-agent-core`), a dependency-minimal crate (serde/serde_json/tracing only) so the same `ChatThread` fold can cross-compile for a mobile Rust core. `crates/agents/src/thread/mod.rs` re-exports every module under its original `crate::thread::*` path, so all downstream import sites are unchanged. Provider adapters (`connection.rs`, `claude_stream_json.rs`, `codex/`, `acp/`, `connect.rs`) and the codex/pi import fixtures stay in `oximux-agents` — they need pty/ACP/tokio.
+**Agent-core split (2026-07-18):** the pure fold + wire vocabulary + stream-json decoder (`event.rs`, `state.rs`, `entry.rs`, `tool_call.rs`, `question.rs`, `background_task.rs`, `tool_detail.rs`, `turn_diff.rs`, `context_chip.rs`, `stream_json.rs`) now live in `crates/agent-core` (`trex-agent-core`), a dependency-minimal crate (serde/serde_json/tracing only) so the same `ChatThread` fold can cross-compile for a mobile Rust core. `crates/agents/src/thread/mod.rs` re-exports every module under its original `crate::thread::*` path, so all downstream import sites are unchanged. Provider adapters (`connection.rs`, `claude_stream_json.rs`, `codex/`, `acp/`, `connect.rs`) and the codex/pi import fixtures stay in `trex-agents` — they need pty/ACP/tokio.
 
 | File | Role |
 |---|---|
@@ -467,17 +467,17 @@ Backs the **Agent Chat** view (`apps/desktop/src/shell/agent_chat/`): three prov
 | `codex/approvals.rs` | Approval + elicitation decision encoding (`to_codex_elicitation`) |
 | `acp/` | `agent-client-protocol` 1.2 adapter — generic tail for Cursor/Amp/other ACP agents |
 
-**`crates/agents/src/session_registry.rs` (2026-07-18, groundwork, not yet wired into the view):** a process-wide, gpui-free `SessionRegistry` mapping `session_id → SessionHandle` — the event bus + command surface a remote (network) layer will subscribe to and command off the GPUI thread, built for the Remote Control plan (`plans/260717-2037-oximux-remote-control/`). Each `SessionHandle` holds the shared `Arc<dyn AgentConnection>`, a seq-indexed bounded backlog replayable via `events_since` (reconnect gap-fill; the live `broadcast` channel alone can't replay past a lagging receiver), and an atomic idempotent-resolve gate so one `request_id` is decided through exactly one path. seq-assignment, backlog append, and broadcast happen under one lock so producers can't reorder the backlog. This is what forced `AgentConnection` to gain the `Sync` supertrait and the agent-chat view to switch from `Box<dyn AgentConnection>` to `Arc<dyn AgentConnection>` (`apps/desktop/src/shell/agent_chat/mod.rs`) — pure ownership change, no behavior change, so the registry can share the same connection the view drives.
+**`crates/agents/src/session_registry.rs` (2026-07-18, groundwork, not yet wired into the view):** a process-wide, gpui-free `SessionRegistry` mapping `session_id → SessionHandle` — the event bus + command surface a remote (network) layer will subscribe to and command off the GPUI thread, built for the Remote Control plan (`plans/260717-2037-trex-remote-control/`). Each `SessionHandle` holds the shared `Arc<dyn AgentConnection>`, a seq-indexed bounded backlog replayable via `events_since` (reconnect gap-fill; the live `broadcast` channel alone can't replay past a lagging receiver), and an atomic idempotent-resolve gate so one `request_id` is decided through exactly one path. seq-assignment, backlog append, and broadcast happen under one lock so producers can't reorder the backlog. This is what forced `AgentConnection` to gain the `Sync` supertrait and the agent-chat view to switch from `Box<dyn AgentConnection>` to `Arc<dyn AgentConnection>` (`apps/desktop/src/shell/agent_chat/mod.rs`) — pure ownership change, no behavior change, so the registry can share the same connection the view drives.
 
-**`crates/remote-proto` (`oximux-remote-proto`, 2026-07-18, new crate, groundwork):** the Remote Control feature's transport-free wire vocabulary, shared by the future desktop host and the phone's Rust core. `proto.rs` — append-only postcard `Request`/`Response` RPC envelope, `PROTOCOL_VERSION = 1` (mirrors `relay-proto`'s versioning discipline). `messages.rs` — the request/response payload structs and the `HostEvent` stream frame. `pairing.rs` — `PairingTicket` codec for the `oximux://connect?ticket=` deep link (base64url-encoded postcard; `handshake_secret` redacted in `Debug`). `transport.rs` — the transport-agnostic `Transport` trait (framed bidirectional seam); iroh will be one impl, a `cfg(test)` in-memory loopback drives tests today. Only dep beyond serde/postcard/thiserror is `async-trait` (proc-macro, no runtime), so the crate stays mobile-portable. `ThreadEvent` and `PermissionDecision` carry `serde_json::Value`, which postcard (non-self-describing) can't deserialize, and both types are also on the persisted-JSON path — so on the remote wire they ride as a `serde_json` string nested inside the postcard envelope (`HostEvent.event_json`, `ResolvePermissionReq.decision_json`) rather than a shadow type or an on-disk format change. Enabled by additive `Serialize`/`Deserialize` derives on the reachable agent-core event types (`ThreadEvent`, `TurnUsage`, `AuthMethodInfo`, `AuthMethodKind`, `PlanEntryLite`, `PermissionDecision`). No host, client, or transport impl consumes this crate yet.
+**`crates/remote-proto` (`trex-remote-proto`, 2026-07-18, new crate, groundwork):** the Remote Control feature's transport-free wire vocabulary, shared by the future desktop host and the phone's Rust core. `proto.rs` — append-only postcard `Request`/`Response` RPC envelope, `PROTOCOL_VERSION = 1` (mirrors `relay-proto`'s versioning discipline). `messages.rs` — the request/response payload structs and the `HostEvent` stream frame. `pairing.rs` — `PairingTicket` codec for the `TREX://connect?ticket=` deep link (base64url-encoded postcard; `handshake_secret` redacted in `Debug`). `transport.rs` — the transport-agnostic `Transport` trait (framed bidirectional seam); iroh will be one impl, a `cfg(test)` in-memory loopback drives tests today. Only dep beyond serde/postcard/thiserror is `async-trait` (proc-macro, no runtime), so the crate stays mobile-portable. `ThreadEvent` and `PermissionDecision` carry `serde_json::Value`, which postcard (non-self-describing) can't deserialize, and both types are also on the persisted-JSON path — so on the remote wire they ride as a `serde_json` string nested inside the postcard envelope (`HostEvent.event_json`, `ResolvePermissionReq.decision_json`) rather than a shadow type or an on-disk format change. Enabled by additive `Serialize`/`Deserialize` derives on the reachable agent-core event types (`ThreadEvent`, `TurnUsage`, `AuthMethodInfo`, `AuthMethodKind`, `PlanEntryLite`, `PermissionDecision`). No host, client, or transport impl consumes this crate yet.
 
-`apps/desktop/src/shell/agent_chat/` (GPUI views, not yet foldered into the Tier-1 map above): `plan_approval_card.rs` (Claude `ExitPlanMode` 3-way approval card), `tool_card.rs` (per-kind tool card renderer; `⤢` expand affordance on substantial cards), `tool_bodies.rs` (per-kind body renderers with a `full: bool` size-mode — inline caps vs lifted sheet caps), `tool_sheet.rs` (fullscreen tool-payload overlay: virtualized-diff `uniform_list` or capped-lifted text body, Copy + Esc/backdrop/✕ dismiss, reads the tool call live by id), `rewind_menu.rs` (shared rewind/fork UI; branches on `rewind_is_server_side()` for Claude disk-fork vs Codex connection-fork; "Fork from here" to a new tab reads Claude's on-disk `~/.claude` session log and is hidden for Codex, which has no equivalent log), `apply_patch.rs` (Codex `apply_patch` tool call's `changes` array → the shared `DiffLine` stream `diff_card.rs` renders, so a Codex edit shows the same colored diff card as Claude/ACP instead of raw JSON; diff rows are syntax-highlighted and memoized per `(path, line)` since the transcript is not virtualized and stream-delta batching repaints at ~20Hz), `session_detail.rs` (read-only popover of what a session advertised at `system/init` — model, cwd, tools, MCP servers + status, subagents — cached with the transcript via `SessionMeta` so a restored chat answers before its resumed process speaks; hidden entirely when the backend advertises nothing, which is Codex and ACP today). Attention notifications live in `apps/desktop/src/notifier/` (macOS `UNUserNotificationCenter` banners + dock badge, per-tab coalesced, focus-cleared, per-event toggles in Settings → Notifications); a real codesigning identity (`scripts/bundle-macos.sh --sign` / `OXIMUX_CODESIGN_IDENTITY`) is required for the OS to honor the notification-authorization grant — the default ad-hoc-signed dev bundle silently drops it. **Worktree-per-agent, first-class `Workspace`** (`roster.rs` + `workspace_root/render.rs`): the New Agent composer's worktree pill + slug input stages the send, then routes up rather than creating a git-only worktree — the leaf carries no `WorkspaceRepo` (thin-leaf convention). `roster.rs` emits `AgentChatEvent::WorktreeWorkspaceRequested{slug}`, `pane_group/tabs.rs` dispatches the `CreateWorktreeWorkspaceForActiveChat{slug}` action, and `workspace_root/render.rs`'s handler resolves the active chat view (`active_agent_chat_view` on `pane_group/state.rs` + `project_panes/state.rs`, captured synchronously before the async step), runs the existing `workspace_ops::create_workspace_with_rollback` (git worktree **+** DB `Workspace` row insert, full rollback on failure), calls `mark_rail_dirty`, then hands the outcome back through `AgentChatView::on_worktree_create_outcome` (rebinds `cwd`, resumes the staged send). The worktree agent now gets a sidebar workspace card + `⌘J` entry and is removable via the Worktree panel; inline failure banner still offers Retry or "continue without a worktree"; hidden for non-git projects. The git-only `create_agent_chat_worktree` helper was retired.
+`apps/desktop/src/shell/agent_chat/` (GPUI views, not yet foldered into the Tier-1 map above): `plan_approval_card.rs` (Claude `ExitPlanMode` 3-way approval card), `tool_card.rs` (per-kind tool card renderer; `⤢` expand affordance on substantial cards), `tool_bodies.rs` (per-kind body renderers with a `full: bool` size-mode — inline caps vs lifted sheet caps), `tool_sheet.rs` (fullscreen tool-payload overlay: virtualized-diff `uniform_list` or capped-lifted text body, Copy + Esc/backdrop/✕ dismiss, reads the tool call live by id), `rewind_menu.rs` (shared rewind/fork UI; branches on `rewind_is_server_side()` for Claude disk-fork vs Codex connection-fork; "Fork from here" to a new tab reads Claude's on-disk `~/.claude` session log and is hidden for Codex, which has no equivalent log), `apply_patch.rs` (Codex `apply_patch` tool call's `changes` array → the shared `DiffLine` stream `diff_card.rs` renders, so a Codex edit shows the same colored diff card as Claude/ACP instead of raw JSON; diff rows are syntax-highlighted and memoized per `(path, line)` since the transcript is not virtualized and stream-delta batching repaints at ~20Hz), `session_detail.rs` (read-only popover of what a session advertised at `system/init` — model, cwd, tools, MCP servers + status, subagents — cached with the transcript via `SessionMeta` so a restored chat answers before its resumed process speaks; hidden entirely when the backend advertises nothing, which is Codex and ACP today). Attention notifications live in `apps/desktop/src/notifier/` (macOS `UNUserNotificationCenter` banners + dock badge, per-tab coalesced, focus-cleared, per-event toggles in Settings → Notifications); a real codesigning identity (`scripts/bundle-macos.sh --sign` / `TREX_CODESIGN_IDENTITY`) is required for the OS to honor the notification-authorization grant — the default ad-hoc-signed dev bundle silently drops it. **Worktree-per-agent, first-class `Workspace`** (`roster.rs` + `workspace_root/render.rs`): the New Agent composer's worktree pill + slug input stages the send, then routes up rather than creating a git-only worktree — the leaf carries no `WorkspaceRepo` (thin-leaf convention). `roster.rs` emits `AgentChatEvent::WorktreeWorkspaceRequested{slug}`, `pane_group/tabs.rs` dispatches the `CreateWorktreeWorkspaceForActiveChat{slug}` action, and `workspace_root/render.rs`'s handler resolves the active chat view (`active_agent_chat_view` on `pane_group/state.rs` + `project_panes/state.rs`, captured synchronously before the async step), runs the existing `workspace_ops::create_workspace_with_rollback` (git worktree **+** DB `Workspace` row insert, full rollback on failure), calls `mark_rail_dirty`, then hands the outcome back through `AgentChatView::on_worktree_create_outcome` (rebinds `cwd`, resumes the staged send). The worktree agent now gets a sidebar workspace card + `⌘J` entry and is removable via the Worktree panel; inline failure banner still offers Retry or "continue without a worktree"; hidden for non-git projects. The git-only `create_agent_chat_worktree` helper was retired.
 
 **Composer control placement** (`composer.rs`): the draft's controls split by how often they change. Session **context** — the worktree pill (`render_worktree_picker`) and Import session — sits in `render_context_row` **above** the input; session **behavior** — attach, permission mode, model, effort, feature controls — sits in the toolbar **below**. Context is bound at first send and immutable after; behavior is retuned mid-session. Both rows live inside the composer's centered `max_w(CONTENT_MAX_W)` column, which is what keeps them aligned with the transcript at any window width. The worktree pill drives a `Popover` directly (not `render_dropdown_shell`, whose `PopupMenu` rows cannot host the slug's text field) and emits `ComposerEvent::WorktreeIsolationPicked(bool)` — the desired state, not a flip. **`ComposerView` keeps its own `unbound` flag**, pushed down by the parent: `sync_unbound_composer` owns the draft shape, and `sync_composer`'s bound branch must explicitly clear anything draft-only (agent picker, worktree pill) or it lingers against a live session.
 
-`apps/desktop/src/shell/session_history/` — the `⌘⇧H` session-history / import modal (centered overlay, sibling of `command_palette`). `mod.rs` is the thin view (chip row, list, preview, keys); `picker.rs` holds the pure, unit-tested logic: `session_row_*` labels, the fuzzy filter, the `AgentTypeFilter` segment (`All | Claude | Codex | Copilot | OpenCode | Pi | omp`, cycled by `Tab`) + `filter_sessions_typed` (type gate ∘ query), and `entry_slug` (the row's registry slug for icon + resume routing). Default import (`↵` / click) is surface-aware via `AgentLaunchSettings::opens_as_chat(id)` — the single routing gate shared with the new-agent launcher (`workspace_root`): chat tab when the adapter's resolved open mode is `Chat` + chat-capable, else terminal resume. `⇧↵` forks, `⌘↵` force-opens as chat — including OpenCode/Pi rows, which open as a transcript-only import-bridge tab (round-7; see below) rather than a live chat. The index (`oximux-agents` `session_log/session_index.rs`) sources Claude from `~/.claude/projects/**/*.jsonl` and Codex by scanning the CLI rollout store `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` (the same files `codex resume` lists) — each rollout's `session_meta` head yields id/cwd/git-branch/start-time and its first non-injected user turn the title; both rollout shapes (newer `response_item`+`session_id`, older top-level `message`+`id`) are handled. Three more providers are indexed by `session_log/import_provider_index.rs` directly from their own stores: **OpenCode** (`~/.local/share/opencode/opencode.db` `session` table), **Copilot** (`~/.copilot/session-store.db` `sessions`+`turns`), **Pi** (`~/.pi/agent/sessions/**/*.jsonl`), and **omp** (`~/.omp/agent/sessions/**/*.jsonl` — same rollout shape as Pi's by fork lineage, read by the same parser; omp adds a padded `{"type":"title"}` record above the session header, its subagent child rollouts nest under a `<ts>_<uuid>/` dir and are excluded from the list, and resume is by the FULL canonical session id only — `import_resume_command` refuses anything shorter because omp's resolver prefix-matches with a silent cross-project fallback). These ride `AgentAdapter::Custom` + a `SessionEntry.preset_id` slug (not new core adapter variants); resume spawns a `Custom` PTY via `oximux-settings::import_resume_command` (`opencode --session <id>` / `copilot --resume=<id>` / `pi --session <file>` / `omp --resume <full-uuid>`). Every source scopes by recorded cwd, degrades to "absent" on a missing/foreign store, and SQLite is opened read-only. The preview pane (`session_preview.rs`) renders a short blurb for all five providers via `load_import_provider_preview` (`opencode_preview`/`copilot_preview`/`pi_preview` in `import_provider_index.rs`, alongside Claude/Codex's own preview paths).
+`apps/desktop/src/shell/session_history/` — the `⌘⇧H` session-history / import modal (centered overlay, sibling of `command_palette`). `mod.rs` is the thin view (chip row, list, preview, keys); `picker.rs` holds the pure, unit-tested logic: `session_row_*` labels, the fuzzy filter, the `AgentTypeFilter` segment (`All | Claude | Codex | Copilot | OpenCode | Pi | omp`, cycled by `Tab`) + `filter_sessions_typed` (type gate ∘ query), and `entry_slug` (the row's registry slug for icon + resume routing). Default import (`↵` / click) is surface-aware via `AgentLaunchSettings::opens_as_chat(id)` — the single routing gate shared with the new-agent launcher (`workspace_root`): chat tab when the adapter's resolved open mode is `Chat` + chat-capable, else terminal resume. `⇧↵` forks, `⌘↵` force-opens as chat — including OpenCode/Pi rows, which open as a transcript-only import-bridge tab (round-7; see below) rather than a live chat. The index (`trex-agents` `session_log/session_index.rs`) sources Claude from `~/.claude/projects/**/*.jsonl` and Codex by scanning the CLI rollout store `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` (the same files `codex resume` lists) — each rollout's `session_meta` head yields id/cwd/git-branch/start-time and its first non-injected user turn the title; both rollout shapes (newer `response_item`+`session_id`, older top-level `message`+`id`) are handled. Three more providers are indexed by `session_log/import_provider_index.rs` directly from their own stores: **OpenCode** (`~/.local/share/opencode/opencode.db` `session` table), **Copilot** (`~/.copilot/session-store.db` `sessions`+`turns`), **Pi** (`~/.pi/agent/sessions/**/*.jsonl`), and **omp** (`~/.omp/agent/sessions/**/*.jsonl` — same rollout shape as Pi's by fork lineage, read by the same parser; omp adds a padded `{"type":"title"}` record above the session header, its subagent child rollouts nest under a `<ts>_<uuid>/` dir and are excluded from the list, and resume is by the FULL canonical session id only — `import_resume_command` refuses anything shorter because omp's resolver prefix-matches with a silent cross-project fallback). These ride `AgentAdapter::Custom` + a `SessionEntry.preset_id` slug (not new core adapter variants); resume spawns a `Custom` PTY via `trex-settings::import_resume_command` (`opencode --session <id>` / `copilot --resume=<id>` / `pi --session <file>` / `omp --resume <full-uuid>`). Every source scopes by recorded cwd, degrades to "absent" on a missing/foreign store, and SQLite is opened read-only. The preview pane (`session_preview.rs`) renders a short blurb for all five providers via `load_import_provider_preview` (`opencode_preview`/`copilot_preview`/`pi_preview` in `import_provider_index.rs`, alongside Claude/Codex's own preview paths).
 
-**Round-6 full-transcript mappers, wired to open-as-chat in round-7** (`session_log/import_transcript_opencode.rs`, `session_log/import_transcript_pi.rs`, dispatched by `load_import_provider_transcript` in `import_provider_index.rs`): map OpenCode's SQLite `message`/`part` rows and Pi's JSONL `message` lines into the same `Vec<ThreadEntry>` shape the Claude/Codex chat importers build. Consecutive text parts fold into one bubble; reasoning/thinking folds into the assistant entry's `thinking` field; unrecognized parts degrade to a plain notice row (never raw JSON). `⌘↵` on an OpenCode row now opens a chat tab seeded from this mapper (Pi and omp rows open LIVE instead — `open_pi_session_live` / `open_omp_session_live` spawn their real chat backends with the transcript pre-seeded; omp's live open also warns when an ambient omp is running in the same pane group, since a second writer against one session file is the hazard) — `pane_group/tabs.rs`'s `open_import_bridge_chat` builds an `AgentChatView::new_import_bridge` (`connect_now:false`, no live connection) and swaps the composer for a "Resume in terminal" footer (`render_import_bridge_footer`) that re-dispatches the existing `ResumeAgentSession` PTY resume via `import_resume_command`; default `↵`/click is unchanged (still resumes in a terminal). Bridge tabs are excluded from tab persistence (no live session id to restore against) and re-open from Session History, deduped on `(preset_id, session_id)`. Copilot's `session-store.db` `turns` table was confirmed to hold readable transcript text too, but Copilot has no chat surface in OxiMux to seed, so it stays resume-only with no transcript mapper.
+**Round-6 full-transcript mappers, wired to open-as-chat in round-7** (`session_log/import_transcript_opencode.rs`, `session_log/import_transcript_pi.rs`, dispatched by `load_import_provider_transcript` in `import_provider_index.rs`): map OpenCode's SQLite `message`/`part` rows and Pi's JSONL `message` lines into the same `Vec<ThreadEntry>` shape the Claude/Codex chat importers build. Consecutive text parts fold into one bubble; reasoning/thinking folds into the assistant entry's `thinking` field; unrecognized parts degrade to a plain notice row (never raw JSON). `⌘↵` on an OpenCode row now opens a chat tab seeded from this mapper (Pi and omp rows open LIVE instead — `open_pi_session_live` / `open_omp_session_live` spawn their real chat backends with the transcript pre-seeded; omp's live open also warns when an ambient omp is running in the same pane group, since a second writer against one session file is the hazard) — `pane_group/tabs.rs`'s `open_import_bridge_chat` builds an `AgentChatView::new_import_bridge` (`connect_now:false`, no live connection) and swaps the composer for a "Resume in terminal" footer (`render_import_bridge_footer`) that re-dispatches the existing `ResumeAgentSession` PTY resume via `import_resume_command`; default `↵`/click is unchanged (still resumes in a terminal). Bridge tabs are excluded from tab persistence (no live session id to restore against) and re-open from Session History, deduped on `(preset_id, session_id)`. Copilot's `session-store.db` `turns` table was confirmed to hold readable transcript text too, but Copilot has no chat surface in TREX to seed, so it stays resume-only with no transcript mapper.
 
 ---
 
@@ -604,7 +604,7 @@ and the swap primitives now delegate here.
 
 Checks for a release in the background, downloads and stages a verified copy of
 the app next to the installed one, and lets the app's own quit path do the swap
-— the install is never replaced while OxiMux is running. Full rationale +
+— the install is never replaced while TREX is running. Full rationale +
 trust-anchor detail: `docs/system-architecture.md` → "Auto-update".
 
 ```
@@ -619,7 +619,7 @@ src/
 │   │                restore_or_sweep_backups for the deferred Windows half
 │   └── testkit.rs   real minisign keypairs (feature `testkit`)
 ├── feed.rs      macOS only: GitHub /releases/latest, pins the exact asset name
-│                OxiMux-{version}-macos-arm64.dmg
+│                trex-{version}-macos-arm64.dmg
 ├── version.rs   plain x.y.z parse/compare
 ├── bundle.rs    macOS eligibility() + boot-time signature pin; UnsupportedReason
 ├── pipeline.rs  macOS: download → mount DMG → stage → verify
@@ -627,7 +627,7 @@ src/
 └── windows/
     ├── install.rs   eligibility() — install dir + write probe; refuses a
     │                cargo target dir so an update never eats a dev build
-    ├── archive.rs   unzip the `OxiMux\` payload, traversal-fatal not -skipped
+    ├── archive.rs   unzip the `TREX\` payload, traversal-fatal not -skipped
     ├── pipeline.rs  verify manifest → verify digest → extract → record
     └── staging.rs   PendingUpdate, per-file receipt, apply_pending, boot_sweep
 ```
@@ -668,9 +668,9 @@ one-shot "Updated to vX.Y.Z" toast after an update lands.
 |---|---|
 | `lib.rs` | Re-exports `Db`, `open`, `open_memory`, `StorageError`, `Migration`, `MIGRATIONS`, and 5 repository structs |
 | `db.rs` | `Db(Arc<Mutex<Connection>>)` newtype; `open(path)` (file-backed, WAL) + `open_memory()` (test helper, `#[doc(hidden)]`); `with_conn(|c| …)` closure accessor; `set_pragmas` applies WAL/foreign_keys/busy_timeout=5000/synchronous=NORMAL/wal_autocheckpoint=1000 on every connection |
-| `migrations.rs` | `Migration { version, name, sql }`; `run_migrations(conn, &[Migration])` per-migration transactions; bookkeeping in `__oximux_migrations(version, name, applied_at)`; downgrade-by-max ordered before gap detection; `strip_sql_comments` helper so `contains_transaction_keyword` guard ignores prose; `migration_ladder_matches_files` CI guard |
+| `migrations.rs` | `Migration { version, name, sql }`; `run_migrations(conn, &[Migration])` per-migration transactions; bookkeeping in `__TREX_migrations(version, name, applied_at)`; downgrade-by-max ordered before gap detection; `strip_sql_comments` helper so `contains_transaction_keyword` guard ignores prose; `migration_ladder_matches_files` CI guard |
 | `error.rs` | `StorageError` (thiserror): `Open`, `Pragma`, `Migration{version,source}`, `SchemaMigrationDowngrade{db_version,code_version}`, `Query`, `Conflict{table,constraint}` |
-| `model.rs` | Row types (`ProjectRow`, `WorkspaceRow`, `AgentSessionRow`, `PaneSessionRow`) with `from_row(&rusqlite::Row)` + `From<XxxRow> for Xxx` impls returning `oximux-core` domain types; unknown `AgentStatus` slug degrades to `Interrupted` |
+| `model.rs` | Row types (`ProjectRow`, `WorkspaceRow`, `AgentSessionRow`, `PaneSessionRow`) with `from_row(&rusqlite::Row)` + `From<XxxRow> for Xxx` impls returning `trex-core` domain types; unknown `AgentStatus` slug degrades to `Interrupted` |
 | `repositories/mod.rs` | Shared helpers: `now()` (RFC 3339), `new_id()` (UUIDv4), `classify_unique` (maps SQLite UNIQUE/PK extended codes 2067/1555 → `StorageError::Conflict`). Module doc locks the silent-ok-on-missing-row contract |
 | `repositories/project.rs` | `ProjectRepo`: insert / get_by_id / list_recent (LIFO by last_opened) / update_last_opened_at / delete (FK CASCADE) |
 | `repositories/workspace.rs` | `WorkspaceRepo`: insert (UNIQUE(project_id, slug) → `Conflict`) / get_by_id / list_for_project (excludes archived) / mark_archived / rename / delete (worktree-rollback contract) |
@@ -781,7 +781,7 @@ src/file_tree/
 Step 4 owns UI diffing; step 3 emits coarse `Refresh(id)` only.
 
 Workspace deps: `lsp-types = "0.97"`, `url = "2"` (percent-encoding for file URIs).  
-New action: `SaveFile` (in `oximux-editor`; bound in `app/src/main.rs` via `use oximux_editor::SaveFile`).
+New action: `SaveFile` (in `trex-editor`; bound in `app/src/main.rs` via `use TREX_editor::SaveFile`).
 
 ---
 
@@ -791,7 +791,7 @@ New action: `SaveFile` (in `oximux-editor`; bound in `app/src/main.rs` via `use 
 src/
 ├── main.rs         CLI entry: --pid-file, --log-dir flags
 │                   Layered tracing: stderr text + daily-rolled JSON (tracing-appender, 7-day purge)
-│                     + macOS oslog mirror; OXIMUX_RELAY_TRACE=1 → trace level
+│                     + macOS oslog mirror; TREX_RELAY_TRACE=1 → trace level
 │                   Calls purge_old_logs at startup; boots tokio + Server
 ├── server.rs       Server: UnixListener accept loop; Notify-based graceful shutdown
 │                   Handles Request::Shutdown via Notify signal; SIGTERM/SIGINT handler
@@ -816,8 +816,8 @@ src/
   branches on `VersionMismatch` → macOS banner, no auto-respawn
 
 **scripts** additions:
-- `scripts/oximux-launchd-install.sh` — opt-in launchd agent installer; `plutil`-lints plist; refuses if token file absent
-- `scripts/oximux-uninstall.sh` — full uninstall hygiene (socket, pid, log dir, launchd label)
+- `scripts/trex-launchd-install.sh` — opt-in launchd agent installer; `plutil`-lints plist; refuses if token file absent
+- `scripts/trex-uninstall.sh` — full uninstall hygiene (socket, pid, log dir, launchd label)
 - `scripts/fetch-ripgrep.sh` — downloads pinned ripgrep 15.2.0, sha256-verifies vs the
   release's own `.sha256` asset, arch-matched (lipo for universal) + stamp-file cached;
   `bundle-macos.sh` copies the result to `Contents/MacOS/rg` and signs it nested-first

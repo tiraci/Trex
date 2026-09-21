@@ -1,8 +1,8 @@
-//! `filter_files` covers empty/whitespace queries, case-insensitive substrings,
+﻿//! `filter_files` covers empty/whitespace queries, case-insensitive substrings,
 //! and multi-path nested matches.
 
-use oximux_app::shell::source_control::filter::filter_files;
-use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+use trex_app::shell::source_control::filter::filter_files;
+use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 use std::path::PathBuf;
 
 fn fs(path: &str) -> FileStatus {

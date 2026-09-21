@@ -1,4 +1,4 @@
-# Packaging OxiMux for Windows
+﻿# Packaging TREX for Windows
 
 macOS ships an `.app` bundle: a directory with a required internal shape, an
 `Info.plist` that names things, a code signature sealing all of it, and a
@@ -10,22 +10,22 @@ manifest to get wrong — but there is also nothing that *notices* when a file i
 missing. `scripts/bundle-windows.ps1` is where the noticing lives.
 
 ```powershell
-./scripts/bundle-windows.ps1                                  # dist/OxiMux (release)
+./scripts/bundle-windows.ps1                                  # dist/TREX (release)
 ./scripts/bundle-windows.ps1 -Profile debug -SkipBuild        # inner loop
 ./scripts/bundle-windows.ps1 -Target x86_64-pc-windows-msvc -Zip -Installer
 ```
 
 ## What is in the directory, and what happens without it
 
-Everything OxiMux locates at runtime, it locates as a **sibling of the running
+Everything TREX locates at runtime, it locates as a **sibling of the running
 executable** (`current_exe().parent()`), which is why the layout is flat and why
 the script asserts rather than copies-and-hopes.
 
 | File | Missing means |
 |---|---|
-| `oximux.exe` | — |
-| `oximux-relay.exe` | Terminals fall back to an in-process backend that dies on quit. Sessions never survive a relaunch. |
-| `oximux-screen-gate.exe` | **Every agent chat runs unenforced.** One warning in the log, otherwise indistinguishable from normal. |
+| `TREX.exe` | — |
+| `trex-relay.exe` | Terminals fall back to an in-process backend that dies on quit. Sessions never survive a relaunch. |
+| `trex-screen-gate.exe` | **Every agent chat runs unenforced.** One warning in the log, otherwise indistinguishable from normal. |
 | `rg.exe` | Search and Quick Open report "ripgrep missing". |
 | `onnxruntime.dll`, `sherpa-onnx-*.dll`, `cargs.dll` | The app does not start at all. Windows resolves imports at load time, so there is no degraded mode. |
 
@@ -43,7 +43,7 @@ nothing, quietly — hence the explicit assertion that `onnxruntime.dll` and
 ## The application icon
 
 The icon is **not** a file in the directory. It is a resource compiled into
-`oximux.exe`, because that is the only place Explorer, the taskbar, and Alt-Tab
+`TREX.exe`, because that is the only place Explorer, the taskbar, and Alt-Tab
 look. `apps/desktop/build.rs` embeds it at **resource ID 1** — not an arbitrary
 choice: GPUI's Windows backend calls
 `LoadImageW(module, PCWSTR(1), IMAGE_ICON, …)` for the window icon, so any other
@@ -52,7 +52,7 @@ id links cleanly and leaves the window showing the default placeholder.
 The `.ico` itself is generated, not drawn:
 
 ```powershell
-cargo run -p xtask -- icon           # regenerate assets/windows/OxiMux.ico
+cargo run -p xtask -- icon           # regenerate assets/windows/trex.ico
 cargo run -p xtask -- icon --check   # fail if it is stale (CI runs this)
 ```
 
@@ -88,16 +88,16 @@ Ctrl+C works); launched from anywhere else the call fails and no window ever
 exists. This is Zed's recipe — their `AttachConsole` sits behind an explicit
 `--foreground` flag because attaching ties the app's life to the launching
 terminal, which is right for a dev run and wrong for a release app started
-from a shell; OxiMux gates on build profile until it grows a CLI surface.
+from a shell; TREX gates on build profile until it grows a CLI surface.
 The release consequence is unchanged and worth stating plainly: **a release
 build has no stdout anywhere**. Anything that has to survive a packaged run
 must reach a file, not `eprintln!`.
 
 ## The installer
 
-`-Installer` compiles `packaging/windows/oximux.iss` with
+`-Installer` compiles `packaging/windows/TREX.iss` with
 [Inno Setup](https://jrsoftware.org/isinfo.php) into
-`dist/OxiMux-<version>-x64-setup.exe`. A release carries both it and the zip,
+`dist/trex-<version>-x64-setup.exe`. A release carries both it and the zip,
 because they answer different questions — "let me try this" versus "put it in my
 Start menu and let me uninstall it later" — from one payload directory, so they
 cannot disagree about what shipped.
@@ -107,14 +107,14 @@ winget install JRSoftware.InnoSetup     # 6.3+; preinstalled on windows-latest
 ```
 
 The `.iss` does not know the file list. `bundle-windows.ps1` owns it, asserts it,
-and hands over `dist/OxiMux` wholesale; a second copy of the manifest here is a
-second copy that can silently disagree about `oximux-screen-gate.exe`.
+and hands over `dist/TREX` wholesale; a second copy of the manifest here is a
+second copy that can silently disagree about `trex-screen-gate.exe`.
 
 Three choices in it are worth the words:
 
-**Per-user, into `%LOCALAPPDATA%\Programs\OxiMux`** (`PrivilegesRequired=lowest`,
+**Per-user, into `%LOCALAPPDATA%\Programs\TREX`** (`PrivilegesRequired=lowest`,
 with no override offered). Not modesty — `crates/auto-update` replaces
-`oximux.exe` and its siblings in this directory at quit
+`TREX.exe` and its siblings in this directory at quit
 (`crates/auto-update/src/windows/`), and a directory it can write unelevated is
 the only shape that works without shipping an elevated helper service purely to
 copy files. Machine scope would buy a UAC prompt on every upgrade and nothing
@@ -127,14 +127,14 @@ someone moved into `Program Files` by hand turns updates *off* and says so in
 Settings → About, rather than failing halfway through a swap.
 
 **`CloseApplications=yes`.** The relay daemon outlives the app on purpose, so an
-upgrade that only looked for `oximux.exe` would still find the directory busy:
+upgrade that only looked for `TREX.exe` would still find the directory busy:
 Windows refuses to replace a mapped image, and left alone that surfaces as
 "cannot write `onnxruntime.dll`" — a file nobody touched. This is the same
 failure `bundle-windows.ps1` guards with its `Get-Process` check, in the one
 place a user meets it.
 
-**The uninstaller asks before deleting `%LOCALAPPDATA%\dev.nhtera.oximux`**, and
-defaults to keeping it. That directory is `oximux.db` — every transcript of every
+**The uninstaller asks before deleting `%LOCALAPPDATA%\dev.tiraci.trex`**, and
+defaults to keeping it. That directory is `trex.db` — every transcript of every
 project — plus session snapshots and any downloaded speech models, which are
 hundreds of megabytes nobody wants to fetch twice. An uninstall is also how a
 reinstall starts.
@@ -151,7 +151,7 @@ artifacts are unsigned and SmartScreen will warn on first run.
 
 **The installer does not change this.** A `setup.exe` is a packaging
 convenience, not a trust story: SmartScreen warns on it exactly as it warns on
-an `oximux.exe` extracted from the zip.
+an `TREX.exe` extracted from the zip.
 
 That is deliberate rather than unfinished. A self-signed binary would *look*
 signed while still triggering the same warning, which is worse than being
@@ -162,14 +162,14 @@ made — and over the payload *before* `iscc` reads it as well as over the
 unsigned.
 
 Note the asymmetry with the driver-trust story in
-`docs/windows-port-exclusions.md`: OxiMux asks users to pin an unsigned
+`docs/windows-port-exclusions.md`: TREX asks users to pin an unsigned
 third-party binary by hash, and ships unsigned itself. Both follow from the same
 platform fact, and neither is a reason to overstate the other.
 
 ## CI
 
 `release.yml` has a `release-windows` job that builds, packages, and attaches
-both `OxiMux-<version>-windows-x64.zip` and `OxiMux-<version>-x64-setup.exe` to
+both `trex-<version>-windows-x64.zip` and `trex-<version>-x64-setup.exe` to
 the draft release. It does not depend on the macOS job: notarization can stall
 for an hour, and there is no reason a Windows artifact should wait behind that.
 Both jobs may therefore try to create the draft release, so whichever loses that
@@ -178,7 +178,7 @@ requires *both* files — a release that quietly carries only the zip is exactly
 the failure a user following a "download the installer" link would hit.
 
 `ci.yml`'s `windows-check` job parse-checks `install-cli.ps1` and
-`bundle-windows.ps1`, and *compiles* `oximux.iss` against a stand-in payload.
+`bundle-windows.ps1`, and *compiles* `TREX.iss` against a stand-in payload.
 Inno Setup has no syntax-only mode, and the `[Code]` section is Pascal that
 nothing else here would look at; without this step a typo in either file first
 surfaces after a tag, at the end of an hour-long build.

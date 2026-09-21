@@ -1,4 +1,4 @@
-//! Pure (cx-free) renderer for the queued-retry card.
+﻿//! Pure (cx-free) renderer for the queued-retry card.
 //!
 //! Shown in place of the error card when a turn failed on a provider limit and
 //! the app has scheduled itself to send it again. The card exists so a waiting
@@ -6,7 +6,7 @@
 //! it will go, and gives the user both overrides — send it now, or drop it.
 
 use gpui::{AnyElement, IntoElement, ParentElement, Styled, div, px};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Human countdown to a wake time: `45s`, `12m`, `3h 10m`.
 ///
@@ -70,7 +70,7 @@ pub(super) fn retry_card(
             div()
                 .text_size(px(typo.t_label_xs))
                 .text_color(theme.fg_muted)
-                .child(format!("Attempt {} of {}", attempt + 1, oximux_agents::retry::MAX_ATTEMPTS)),
+                .child(format!("Attempt {} of {}", attempt + 1, trex_agents::retry::MAX_ATTEMPTS)),
         )
         .child(
             div()

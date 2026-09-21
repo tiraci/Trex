@@ -1,4 +1,4 @@
-//! The local-operator pairing administration (v16): mint a pairing window,
+﻿//! The local-operator pairing administration (v16): mint a pairing window,
 //! list enrollments, erase one. The runtime commands a headless host takes
 //! instead of a `--pair` boot flag — a flag would reprint the bearer ticket
 //! into the journal on every restart.
@@ -10,9 +10,9 @@
 //!
 //! [`may_administer_pairing`]: crate::auth::AuthStore::may_administer_pairing
 
-use oximux_remote_proto::messages::{PairedDeviceWire, PairingIssuedWire};
-use oximux_remote_proto::pairing::PairingTicket;
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::messages::{PairedDeviceWire, PairingIssuedWire};
+use trex_remote_proto::pairing::PairingTicket;
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::{PAIRING_WINDOW_SECS, PairingSlot, Peer, mint_pairing_secret};

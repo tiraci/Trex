@@ -1,17 +1,17 @@
-# Deployment Guide
+﻿# Deployment Guide
 
-How an OxiMux release gets built, signed, notarized, and published. The user-facing
-artifact is a styled DMG (`OxiMux-<version>-macos-arm64.dmg`) whose Finder window
+How an TREX release gets built, signed, notarized, and published. The user-facing
+artifact is a styled DMG (`trex-<version>-macos-arm64.dmg`) whose Finder window
 shows the app icon, an Applications alias, and a drag arrow.
 
 The asset name is load-bearing beyond distribution: the in-app auto-updater
 (`crates/auto-update/src/feed.rs`) pins the exact filename
-`OxiMux-{version}-macos-arm64.dmg` when resolving a release's download URL.
+`trex-{version}-macos-arm64.dmg` when resolving a release's download URL.
 Renaming the DMG artifact breaks auto-update for every install until the
 updater is changed to match.
 
 **The Windows zip is load-bearing the same way**, by a different route. The
-Windows updater downloads `OxiMux-<version>-windows-x64.zip` — *not* the
+Windows updater downloads `trex-<version>-windows-x64.zip` — *not* the
 installer `.exe`, which is for humans — and refuses it unless its sha256
 matches the signed `manifest.json`. The name is written by
 `scripts/bundle-windows.ps1` and read back by the `APP_TRIPLE` map in
@@ -24,7 +24,7 @@ app build for your platform".
 
 | Piece | Role |
 |---|---|
-| `scripts/bundle-macos.sh` | Build + assemble + sign `dist/OxiMux.app` (`--hardened` for release) |
+| `scripts/bundle-macos.sh` | Build + assemble + sign `dist/trex.app` (`--hardened` for release) |
 | `scripts/make-dmg.sh` | Package the app into the styled DMG; `--notarize` submits, staples, and Gatekeeper-gates it |
 | `scripts/generate-dmg-background.swift` | Regenerates `assets/dmg-background.tiff` (HiDPI, 660x400) |
 | `assets/dmg-background.tiff` | DMG window backdrop — its arrow position and `make-dmg.sh`'s icon coordinates are ONE layout; change them together |
@@ -58,10 +58,10 @@ occasionally stalls; re-running is the fix, not re-tagging. Uploads use
 ```bash
 ./scripts/bundle-macos.sh --hardened --sign "Developer ID Application: <name> (<TEAMID>)"
 ./scripts/make-dmg.sh --sign "Developer ID Application: <name> (<TEAMID>)" --notarize
-gh release create vX.Y.Z dist/OxiMux-X.Y.Z-macos-arm64.dmg --title vX.Y.Z --notes-file <notes>
+gh release create vX.Y.Z dist/trex-X.Y.Z-macos-arm64.dmg --title vX.Y.Z --notes-file <notes>
 ```
 
-Local notarization credentials live in the `oximux-notary` keychain profile
+Local notarization credentials live in the `trex-notary` keychain profile
 (`xcrun notarytool store-credentials`). CI uses an App Store Connect API key
 via env vars instead (`NOTARY_KEY_PATH`/`NOTARY_KEY_ID`/`NOTARY_ISSUER_ID`) —
 `make-dmg.sh` prefers the env vars when set.
@@ -88,10 +88,10 @@ a key under the cert).
 
 ## Gatekeeper facts worth remembering
 
-- Sign inside-out, never `--deep`: dylibs → `oximux-relay` → `oximux-screen-gate`
-  → `oximux` → the bundle. `bundle-macos.sh` encodes this order.
+- Sign inside-out, never `--deep`: dylibs → `trex-relay` → `trex-screen-gate`
+  → `TREX` → the bundle. `bundle-macos.sh` encodes this order.
 - Hardened runtime (`--options runtime`) + secure timestamp + entitlements
-  (`assets/OxiMux.entitlements`, currently mic-only) are notarization requirements.
+  (`assets/trex.entitlements`, currently mic-only) are notarization requirements.
 - "Apple Development" certs sign locally but are REJECTED at notarization;
   only "Developer ID Application" works. Both scripts check this up front.
 - Notary wait is usually 1–15 min; occasionally much longer. The service keeps

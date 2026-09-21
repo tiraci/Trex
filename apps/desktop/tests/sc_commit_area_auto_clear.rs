@@ -1,4 +1,4 @@
-//! End-to-end regression test for commit-area auto-clear: after a
+﻿//! End-to-end regression test for commit-area auto-clear: after a
 //! successful `git commit`, the inline composer textarea clears
 //! itself rather than holding the just-committed message until the
 //! user wipes it manually.
@@ -13,11 +13,11 @@
 //!   (failure path).
 
 use gpui::{AppContext, Context, Entity, IntoElement, Render, TestAppContext, Window, div};
-use oximux_app::shell::source_control::commit_area::CommitArea;
-use oximux_app::shell::source_control::primary_action::{PrimaryAction, PrimaryActionKind};
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::{Db, WorktreeSettingsRepo, open_memory};
+use trex_app::shell::source_control::commit_area::CommitArea;
+use trex_app::shell::source_control::primary_action::{PrimaryAction, PrimaryActionKind};
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::{Db, WorktreeSettingsRepo, open_memory};
 use std::path::Path;
 use std::process::Command;
 
@@ -48,7 +48,7 @@ fn seed_repo_with_staged_file(p: &Path, name: &str, body: &str) {
             .expect("git on PATH");
     };
     st(&["init", "-b", "main"]);
-    st(&["config", "user.email", "test@oximux.dev"]);
+    st(&["config", "user.email", "test@TREX.dev"]);
     st(&["config", "user.name", "Test"]);
     std::fs::write(p.join("README"), "seed\n").expect("write seed");
     st(&["add", "README"]);

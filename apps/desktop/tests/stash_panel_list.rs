@@ -1,7 +1,7 @@
-//! Pure-unit tests for the stash row-label formatter.
+﻿//! Pure-unit tests for the stash row-label formatter.
 
-use oximux_app::shell::stash_panel::list_render::row_label;
-use oximux_core::{StashEntry, StashRef};
+use trex_app::shell::stash_panel::list_render::row_label;
+use trex_core::{StashEntry, StashRef};
 
 fn entry(index: usize, branch: &str, message: &str) -> StashEntry {
     StashEntry {

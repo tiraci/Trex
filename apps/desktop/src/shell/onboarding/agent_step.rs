@@ -1,4 +1,4 @@
-//! Onboarding step 1: the default-agent picker. Roster assembly (pure,
+﻿//! Onboarding step 1: the default-agent picker. Roster assembly (pure,
 //! unit-tested), install detection state, model-source resolution, and the
 //! card-list render.
 //!
@@ -15,8 +15,8 @@ use gpui::{
 use gpui_component::Sizable as _;
 use gpui_component::searchable_list::SearchableListItem;
 use gpui_component::select::Select;
-use oximux_agents::thread::{ModelChoice, claude_model_choices};
-use oximux_settings::ACP_PRESETS;
+use trex_agents::thread::{ModelChoice, claude_model_choices};
+use trex_settings::ACP_PRESETS;
 
 use super::OnboardingWizard;
 

@@ -1,4 +1,4 @@
-//! SQLite-backed per-worktree settings persistence helpers for the
+﻿//! SQLite-backed per-worktree settings persistence helpers for the
 //! Source Control panel.
 //!
 //! Free functions only — no `impl SourceControlPanel` here. The panel
@@ -13,8 +13,8 @@
 //! a UX nicety, not a panel invariant. Restart will reset to the repo
 //! default rather than wedge the panel.
 
-use oximux_git::Repository;
-use oximux_storage::WorktreeSettingsRepo;
+use trex_git::Repository;
+use trex_storage::WorktreeSettingsRepo;
 
 /// Write the per-workspace base ref into the V006 `worktree_settings`
 /// row, preserving sibling fields (`commit_draft`, `view_mode_override`)
@@ -26,7 +26,7 @@ pub fn merge_base_ref_into_settings(
     settings_repo: &WorktreeSettingsRepo,
     workspace_id: &str,
     value: Option<String>,
-) -> Result<(), oximux_storage::StorageError> {
+) -> Result<(), trex_storage::StorageError> {
     settings_repo.modify(workspace_id, |s| s.base_ref = value)
 }
 
@@ -46,7 +46,7 @@ pub(super) fn load_initial_base_ref(
         Ok(None) => None,
         Err(err) => {
             tracing::warn!(
-                target: "oximux_app::source_control",
+                target: "trex_app::source_control",
                 error = %err,
                 workspace_id = %workspace_id,
                 "worktree_settings.get failed; base ref defaults to repo default",
@@ -76,7 +76,7 @@ pub fn load_initial_commit_draft(
         Ok(None) => None,
         Err(err) => {
             tracing::warn!(
-                target: "oximux_app::commit_area",
+                target: "trex_app::commit_area",
                 error = %err,
                 workspace_id = %workspace_id,
                 "worktree_settings.get failed; commit draft starts empty",

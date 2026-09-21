@@ -1,4 +1,4 @@
-//! Screen Control pane — the master switch, the driver's health, the projects
+﻿//! Screen Control pane — the master switch, the driver's health, the projects
 //! opted in, and the apps that no longer raise a card.
 //!
 //! Nothing here is on by default and nothing here turns itself on. The pane's
@@ -10,7 +10,7 @@
 use gpui::{AnyElement, IntoElement, ParentElement, Styled, div, px};
 #[cfg(target_os = "macos")]
 use gpui::SharedString;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 use super::controls::{toggle_switch, value_chip};
@@ -45,12 +45,12 @@ pub(crate) enum DriverStatus {
 impl DriverStatus {
     /// Look for the driver and put it through every gate.
     pub(crate) fn resolve() -> Self {
-        match oximux_computer_use::prepare() {
+        match trex_computer_use::prepare() {
             Ok(driver) => DriverStatus::Ready {
                 version: driver.version.to_string(),
             },
-            Err(oximux_computer_use::Error::NotFound { .. }) => DriverStatus::NotInstalled,
-            Err(oximux_computer_use::Error::DriverTooOld { found, minimum }) => {
+            Err(trex_computer_use::Error::NotFound { .. }) => DriverStatus::NotInstalled,
+            Err(trex_computer_use::Error::DriverTooOld { found, minimum }) => {
                 DriverStatus::Outdated {
                     found: found.to_string(),
                     minimum: minimum.to_string(),
@@ -226,9 +226,9 @@ fn driver_detail(
 ///
 /// The second was measured during the coverage spike, and it is the reason the
 /// per-project wording elsewhere in this pane had to change. Turning screen
-/// control on requires OxiMux to hold macOS Accessibility — it is what lets an
+/// control on requires TREX to hold macOS Accessibility — it is what lets an
 /// agent act on another app's UI at all. macOS attributes
-/// that grant to OxiMux as the responsible process and **every descendant
+/// that grant to TREX as the responsible process and **every descendant
 /// inherits it**, which includes each agent's shell tool, in every project,
 /// whether or not that project appears above. The list below controls which
 /// projects are handed the screen-control *tools*. It does not, and cannot,
@@ -239,14 +239,14 @@ fn driver_detail(
 #[cfg(target_os = "macos")]
 const FOOTNOTES: &[&str] = &[
     "Guards against an agent's mistakes, not an agent trying to get around them.",
-    "Enabling this grants OxiMux macOS Accessibility, which is how agents drive apps.",
+    "Enabling this grants TREX macOS Accessibility, which is how agents drive apps.",
     "Every agent's shell inherits that grant — in all projects, not only those listed.",
     "Esc needs Input Monitoring as well — a separate switch, granted separately.",
     TELEMETRY_NOTE,
 ];
 
 /// Disclosed because the install acts on the user's behalf: upstream turns
-/// product telemetry on by default, and OxiMux turns it back off rather than
+/// product telemetry on by default, and TREX turns it back off rather than
 /// enrolling anyone silently. Shared by both platforms — the driver behaves the
 /// same way on each.
 const TELEMETRY_NOTE: &str =
@@ -701,7 +701,7 @@ mod tests {
     }
 
     use super::*;
-    use oximux_settings::ComputerUseSettings;
+    use trex_settings::ComputerUseSettings;
 
     /// The pane must keep saying that the permission is not project-scoped.
     ///
@@ -709,7 +709,7 @@ mod tests {
     /// for being wordy — and because the sentence it replaced ("each project
     /// opts in separately") read as a guarantee the OS does not make. The claim
     /// was measured during the coverage spike: an agent's shell inherits
-    /// OxiMux's Accessibility grant regardless of which projects are listed.
+    /// TREX's Accessibility grant regardless of which projects are listed.
     /// macOS only: every claim below names a macOS permission. The Windows list
     /// makes different promises and is pinned by
     /// `the_windows_footnotes_disclose_the_unsigned_driver`.

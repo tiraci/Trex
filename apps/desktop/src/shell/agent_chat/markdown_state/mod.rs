@@ -1,4 +1,4 @@
-//! The mutable half of chat markdown: parser state per message, and code
+﻿//! The mutable half of chat markdown: parser state per message, and code
 //! highlighting that arrives when it arrives.
 //!
 //! [`super::markdown_render`] is pure and knows none of this. It asks a
@@ -29,8 +29,8 @@ use gpui::{
     AnyElement, App, Context, EntityId, FocusHandle, InteractiveElement, IntoElement, MouseButton,
     MouseDownEvent, MouseMoveEvent, ParentElement, ScrollHandle, SharedString, Styled, Window, div,
 };
-use oximux_markdown::{BlockTree, IncrementalParser, TopBlock};
-use oximux_syntax::{HighlightCache, HighlightedDocument, LanguageId};
+use trex_markdown::{BlockTree, IncrementalParser, TopBlock};
+use trex_syntax::{HighlightCache, HighlightedDocument, LanguageId};
 
 use super::AgentChatView;
 mod row_cache;
@@ -397,7 +397,7 @@ impl MarkdownState {
                 let task = cx.update(|cx| {
                     let (lang, code) = (lang.clone(), code.clone());
                     cx.background_executor()
-                        .spawn(async move { oximux_syntax::highlight(&lang, &code) })
+                        .spawn(async move { trex_syntax::highlight(&lang, &code) })
                 });
                 let doc = Arc::new(task.await);
                 {
@@ -468,12 +468,12 @@ fn job_key(lang: &LanguageId, code: &str) -> u64 {
 ///
 /// An escape hatch, not a feature, and the same shape as the transcript's:
 /// chat markdown is the most-looked-at surface in the product, and
-/// `OXIMUX_LEGACY_MARKDOWN=1` is the way back without waiting for a release.
+/// `trex_LEGACY_MARKDOWN=1` is the way back without waiting for a release.
 /// Read once per process so a mid-session flip cannot leave half the transcript
 /// rendered each way.
 pub(super) fn owned_renderer() -> bool {
     static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *ON.get_or_init(|| std::env::var_os("OXIMUX_LEGACY_MARKDOWN").is_none())
+    *ON.get_or_init(|| std::env::var_os("TREX_LEGACY_MARKDOWN").is_none())
 }
 
 #[cfg(test)]
@@ -492,11 +492,11 @@ mod tests {
 
         assert!(matches!(
             reply.blocks[0].block,
-            oximux_markdown::Block::Heading { .. }
+            trex_markdown::Block::Heading { .. }
         ));
         assert!(matches!(
             thinking.blocks[0].block,
-            oximux_markdown::Block::Paragraph { .. }
+            trex_markdown::Block::Paragraph { .. }
         ));
         assert_eq!(state.parsers.len(), 2);
     }
@@ -569,7 +569,7 @@ mod tests {
     fn a_fence_is_dispatched_once_not_once_per_frame() {
         let state = MarkdownState::default();
         let store = state.highlights();
-        let lang = oximux_syntax::detect(None, Some("rust"), "").expect("rust grammar");
+        let lang = trex_syntax::detect(None, Some("rust"), "").expect("rust grammar");
 
         assert!(store.colors(&lang, "let x = 1;\n").is_none());
         assert!(store.colors(&lang, "let x = 1;\n").is_none());

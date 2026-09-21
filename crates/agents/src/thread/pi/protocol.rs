@@ -1,4 +1,4 @@
-//! Wire types for `pi --mode rpc` — one `\n`-terminated JSON value per message.
+﻿//! Wire types for `pi --mode rpc` — one `\n`-terminated JSON value per message.
 //!
 //! Three inbound kinds, distinguished by `type`:
 //! - **response** (`type: "response"` + `command` + `success`) → routed to the
@@ -233,7 +233,7 @@ impl Model {
     }
 
     /// Whether this model accepts image input. Pi's `prompt` command does carry
-    /// an `images` field, but OxiMux does not send one yet, so today this only
+    /// an `images` field, but TREX does not send one yet, so today this only
     /// describes the model rather than gating a live affordance.
     pub fn accepts_images(&self) -> bool {
         self.input.iter().any(|i| i == "image")
@@ -285,7 +285,7 @@ pub struct AvailableModels {
 ///
 /// Richer than the bare names Claude advertises: pi gives a `description` and
 /// says where the command came from, so the palette can group and attribute rows
-/// without OxiMux scanning any config directory itself.
+/// without TREX scanning any config directory itself.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SlashCommand {

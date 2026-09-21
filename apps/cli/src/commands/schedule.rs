@@ -1,16 +1,16 @@
-//! `oximux schedule` — scheduled agent runs over the v10 schedule RPCs plus
+﻿//! `TREX schedule` — scheduled agent runs over the v10 schedule RPCs plus
 //! the v17 manual fire. The host owns every clock: cadence validation, the
 //! next-fire arithmetic, and run recording all happen there, so this side
 //! only shapes arguments and renders replies.
 
 use std::path::PathBuf;
 
-use oximux_agents::schedule::recurrence::MIN_INTERVAL_MINUTES;
-use oximux_remote_proto::messages::{
+use trex_agents::schedule::recurrence::MIN_INTERVAL_MINUTES;
+use trex_remote_proto::messages::{
     RecurrenceV2Wire, RecurrenceWire, RunOutcomeWire, ScheduleRunWire, ScheduleV2Wire,
     ScheduleWire,
 };
-use oximux_remote_proto::proto::{Request, Response, SCHEDULE_CRON_MIN_VERSION};
+use trex_remote_proto::proto::{Request, Response, SCHEDULE_CRON_MIN_VERSION};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -336,12 +336,12 @@ pub async fn run_once(client: &Client, id: &str) -> Result<(Value, String), Fail
                 let detail =
                     run.detail.clone().unwrap_or_else(|| "the run failed".to_string());
                 return Err(Failure::new("run-once", exit::ERROR, detail).with_steps([format!(
-                    "see the recorded run with `oximux schedule logs {id}`"
+                    "see the recorded run with `TREX schedule logs {id}`"
                 )]));
             }
             let human = match &run.session_id {
                 Some(session) => format!(
-                    "fired {id} — running in session {session}\nfollow it with `oximux attach {session}`"
+                    "fired {id} — running in session {session}\nfollow it with `TREX attach {session}`"
                 ),
                 None => format!("fired {id}"),
             };

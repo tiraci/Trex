@@ -1,5 +1,5 @@
-[package]
-name = "oximux-job-object"
+﻿[package]
+name = "trex-job-object"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

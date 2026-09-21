@@ -1,4 +1,4 @@
-//! Live event forwarding for `Subscribe`.
+﻿//! Live event forwarding for `Subscribe`.
 //!
 //! A subscription turns a session's registry broadcast into a `'static` stream of
 //! tagged [`LiveFrame`]s that the serve loop merges (`SelectAll`) and pushes to the
@@ -15,11 +15,11 @@
 use std::collections::HashMap;
 
 use futures::stream::{self, BoxStream, StreamExt};
-use oximux_agent_core::thread::ThreadEvent;
-use oximux_agents::session_registry::{Seq, SessionHandle, SessionId};
-use oximux_remote_proto::messages::SessionStatusWire;
-use oximux_remote_proto::proto::{Response, RpcError};
-use oximux_remote_proto::{HostEvent, Transport};
+use trex_agent_core::thread::ThreadEvent;
+use trex_agents::session_registry::{Seq, SessionHandle, SessionId};
+use trex_remote_proto::messages::SessionStatusWire;
+use trex_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::{HostEvent, Transport};
 use tokio::sync::{broadcast, watch};
 
 use super::Dispatcher;
@@ -55,7 +55,7 @@ pub(super) enum Live {
     /// snapshot to recompute at forward time, and the payload is one small row.
     /// Forwarded as [`Response::ScheduleRunsChanged`] behind a per-frame
     /// `may_read_schedules` recheck.
-    ScheduleRun(oximux_remote_proto::messages::ScheduleRunWire),
+    ScheduleRun(trex_remote_proto::messages::ScheduleRunWire),
     /// A coordination key was written or deleted (`None` is a delete). Carries
     /// the entry for the same reason [`Live::ScheduleRun`] does — there is no
     /// cheap snapshot to recompute, and it is one small row. Prefix filtering
@@ -66,7 +66,7 @@ pub(super) enum Live {
     /// once, and a peer-level flag has no way to tell them apart. Sending the
     /// cursor-bearing ordinal to the cursor-less watcher would drop its whole
     /// connection, since it has no decoder for it.
-    StateChange { change: oximux_remote_proto::messages::StateChangeWire, with_cursor: bool },
+    StateChange { change: trex_remote_proto::messages::StateChangeWire, with_cursor: bool },
 }
 
 /// Turn a session's broadcast receiver into a `'static` stream of [`LiveFrame`]s.
@@ -104,7 +104,7 @@ fn live_stream(
 /// Ends when the registry goes away (the host is shutting down), which is the only
 /// way the session can become permanently unreachable.
 fn deferred_live_stream(
-    registry: std::sync::Arc<oximux_agents::session_registry::SessionRegistry>,
+    registry: std::sync::Arc<trex_agents::session_registry::SessionRegistry>,
     session_id: SessionId,
     after_seq: Seq,
 ) -> BoxStream<'static, LiveFrame> {
@@ -153,7 +153,7 @@ fn sessions_stream(rx: watch::Receiver<u64>) -> BoxStream<'static, Live> {
 /// they are still in run history, and `schedule logs` is the resync path. The
 /// stream ends when the host drops the sender.
 fn schedule_runs_stream(
-    rx: broadcast::Receiver<oximux_remote_proto::messages::ScheduleRunWire>,
+    rx: broadcast::Receiver<trex_remote_proto::messages::ScheduleRunWire>,
 ) -> BoxStream<'static, Live> {
     stream::unfold(rx, |mut rx| async move {
         loop {
@@ -176,7 +176,7 @@ fn schedule_runs_stream(
 /// versioned write path is what makes that safe: a caller acting on a stale
 /// value loses its conditional write rather than clobbering.
 fn state_changes_stream(
-    rx: broadcast::Receiver<oximux_remote_proto::messages::StateChangeWire>,
+    rx: broadcast::Receiver<trex_remote_proto::messages::StateChangeWire>,
     prefix: Option<String>,
     with_cursor: bool,
 ) -> BoxStream<'static, Live> {
@@ -415,7 +415,7 @@ impl Dispatcher {
         &self,
         peer: &Peer,
         transport: &dyn Transport,
-        change: oximux_remote_proto::messages::StateChangeWire,
+        change: trex_remote_proto::messages::StateChangeWire,
         with_cursor: bool,
     ) -> bool {
         if !self.auth.may_read_state(peer) {
@@ -443,7 +443,7 @@ impl Dispatcher {
         &self,
         peer: &Peer,
         transport: &dyn Transport,
-        run: oximux_remote_proto::messages::ScheduleRunWire,
+        run: trex_remote_proto::messages::ScheduleRunWire,
     ) -> bool {
         if !self.auth.may_read_schedules(peer) {
             return true;

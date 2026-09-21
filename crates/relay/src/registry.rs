@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+﻿use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicI32, AtomicU64, Ordering};
@@ -7,10 +7,10 @@ use std::time::{Duration, Instant};
 
 use anyhow::Context;
 use dashmap::DashMap;
-use oximux_relay_proto::{
+use trex_relay_proto::{
     ErrCode, Notification, PtyDescriptor, PtyStats, UNROUTED_ATTACHMENT,
 };
-use oximux_shell_env::{clear_inherited_colour_suppression, seed_utf8_locale};
+use trex_shell_env::{clear_inherited_colour_suppression, seed_utf8_locale};
 use portable_pty::{ChildKiller, CommandBuilder, MasterPty, PtySize, native_pty_system};
 use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::error::TrySendError;
@@ -60,7 +60,7 @@ const READ_CHUNK_BYTES: usize = 8 * 1024;
 const RESIZE_RESEND_DELAYS_MS: [u64; 2] = [40, 120];
 
 // Error returned by registry operations. Keep small and convert into
-// `oximux_relay_proto::ErrCode` in the server layer.
+// `trex_relay_proto::ErrCode` in the server layer.
 #[derive(Debug, thiserror::Error)]
 pub enum RegistryError {
     #[error("pty not found: {0}")]
@@ -135,7 +135,7 @@ struct Entry {
     // dropping this reaps the tree, which is what makes a daemon crash clean up
     // after itself.
     #[cfg(windows)]
-    job: Option<Arc<oximux_job_object::JobObject>>,
+    job: Option<Arc<trex_job_object::JobObject>>,
     // Phase-07: per-PTY counters surfaced by `Request::Stats`.
     bytes_in: AtomicU64,
     bytes_out: Arc<AtomicU64>,
@@ -190,9 +190,9 @@ impl PtyRegistry {
         // Resolved here, not client-side, and that ordering is the point: a
         // paired phone asking for "a terminal" has no idea what shells the
         // host has, so the host is the only end that can answer.
-        let shell = args.shell.unwrap_or_else(oximux_shell_env::default_shell);
+        let shell = args.shell.unwrap_or_else(trex_shell_env::default_shell);
         // Mint the PTY id up front so it can be injected into the child's
-        // environment as OXIMUX_PTY_ID — the `oximux notify` CLI reads it to
+        // environment as trex_PTY_ID — the `TREX notify` CLI reads it to
         // tell the daemon which pane to raise attention on.
         let pty_id = Uuid::new_v4().to_string();
         let mut command = CommandBuilder::new(&shell);
@@ -212,15 +212,15 @@ impl PtyRegistry {
         command.env("COLORTERM", "truecolor");
         // Host-terminal identity: tools and AI agents detect the emulator
         // via TERM_PROGRAM to toggle features (clickable links, keybinds).
-        command.env("TERM_PROGRAM", "oximux");
-        // Pane handle for `oximux notify` (set before the caller loop so an
+        command.env("TERM_PROGRAM", "TREX");
+        // Pane handle for `TREX notify` (set before the caller loop so an
         // explicit override still wins, though callers shouldn't set it).
-        command.env("OXIMUX_PTY_ID", &pty_id);
+        command.env("TREX_PTY_ID", &pty_id);
         seed_utf8_locale(&mut command);
         // The daemon is the worst-affected spawn site, and the reason this call
         // exists. It is started detached by the app and outlives it, so it
         // carries whatever environment the app was launched with — forever.
-        // Launch OxiMux once from a coding agent's shell and every pane in
+        // Launch TREX once from a coding agent's shell and every pane in
         // every session from then on renders monochrome, with nothing in any
         // log to say why. Before the caller loop, so an explicit
         // `args.env` entry still wins.
@@ -238,7 +238,7 @@ impl PtyRegistry {
         // after spawn, so the only escapee would be something the shell forked
         // before its first instruction ran.
         #[cfg(windows)]
-        let job = pid.and_then(|pid| match oximux_job_object::JobObject::adopt_pid(pid) {
+        let job = pid.and_then(|pid| match trex_job_object::JobObject::adopt_pid(pid) {
             Ok(job) => Some(Arc::new(job)),
             Err(e) => {
                 // Not fatal: the PTY still works and the direct child is still
@@ -438,7 +438,7 @@ impl PtyRegistry {
     }
 
     /// Fan out an explicit attention notification to every subscriber of
-    /// `pty_id` — driven by `Request::Notify` (the `oximux notify` CLI). The
+    /// `pty_id` — driven by `Request::Notify` (the `TREX notify` CLI). The
     /// owning client maps the `Attention` notification to a pane attention
     /// signal (ring + tab dot).
     pub fn notify(&self, pty_id: &str, title: String, body: String) -> Result<(), RegistryError> {
@@ -458,7 +458,7 @@ impl PtyRegistry {
     }
 
     /// Inject a structured agent-status packet into `pty_id`'s output stream —
-    /// driven by `Request::AgentStatus` (the `oximux agent-status` CLI an agent
+    /// driven by `Request::AgentStatus` (the `TREX agent-status` CLI an agent
     /// hook invokes). `payload` is an opaque JSON object string; we wrap it as
     /// an OSC-9999 sequence and fan it out as live `Output` to subscribers, so
     /// the app's existing OSC scanner decodes it into agent status. The daemon
@@ -620,7 +620,7 @@ impl PtyRegistry {
             // ACTIVE pty per tick) — shells don't reliably announce cwd
             // changes in-band, and the cold-restore consumer wants the
             // directory the user was actually in when the daemon died.
-            let live_cwd = e.pid.and_then(oximux_proc_cwd::cwd_of_pid);
+            let live_cwd = e.pid.and_then(trex_proc_cwd::cwd_of_pid);
             match store.write_scrollback(&e.pty_id, &bytes, cols, rows, live_cwd.as_deref()) {
                 // Store the pre-snapshot counter: output that landed
                 // mid-write is picked up by the next pass.
@@ -807,7 +807,7 @@ const EXIT_CODE_NONE: i32 = i32::MIN;
 /// of `Exit`. It only ever delays a session that has already ended.
 ///
 /// A deadline from the moment of reaping rather than an idle timeout, for the same
-/// reason as its twin in `oximux-pty`: a detached grandchild that inherits the pty
+/// reason as its twin in `trex-pty`: a detached grandchild that inherits the pty
 /// and keeps writing would hold an idle timeout open forever, and the session
 /// would never report `Exit` — the original bug, reintroduced.
 const POST_EXIT_DRAIN: Duration = Duration::from_millis(200);
@@ -1010,10 +1010,10 @@ mod detach_tests {
         let reg = PtyRegistry::new();
         let pty_id = reg
             .spawn(SpawnArgs {
-                cwd: oximux_shell_env::test_support::test_cwd(),
+                cwd: trex_shell_env::test_support::test_cwd(),
                 cols: 80,
                 rows: 24,
-                shell: Some(oximux_shell_env::test_support::test_shell()),
+                shell: Some(trex_shell_env::test_support::test_shell()),
                 args: Vec::new(),
                 env: Vec::new(),
             })

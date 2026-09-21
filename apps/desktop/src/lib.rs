@@ -1,7 +1,7 @@
-//! OxiMux app library surface.
+﻿//! TREX app library surface.
 //!
 //! Module declarations live here (rather than `main.rs`) so integration
-//! tests under `tests/` can `use oximux_app::shell::*;`. The `oximux`
+//! tests under `tests/` can `use trex_app::shell::*;`. The `TREX`
 //! binary at `src/main.rs` imports from this library.
 
 pub mod actions;
@@ -23,14 +23,14 @@ pub mod state;
 pub mod updater;
 pub mod workspace_root;
 
-// Shared widget layer extracted to the `oximux-ui` crate. Re-exported under the
+// Shared widget layer extracted to the `trex-ui` crate. Re-exported under the
 // historical `crate::ui` path so every `crate::ui::…` call site resolves
 // unchanged (host depends on ui; ui never depends on the host).
-pub use oximux_ui as ui;
+pub use trex_ui as ui;
 
 // --- Grouped module folders (Tier-1 reorg) ---------------------------------
 // Files are foldered one level deep for traversal; each submodule is
-// re-exported below so existing `crate::<name>::…` / `oximux_app::<name>::…`
+// re-exported below so existing `crate::<name>::…` / `trex_app::<name>::…`
 // call sites keep resolving unchanged.
 pub mod agent_glue;
 pub mod app_settings;

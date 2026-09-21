@@ -1,4 +1,4 @@
-//! The installed `claude`'s own model catalog, asked for over stream-json.
+﻿//! The installed `claude`'s own model catalog, asked for over stream-json.
 //!
 //! The CLI has no `models` subcommand, but it answers a `list_models` control
 //! request on stdin with the same rows its `/model` picker shows — wire value,
@@ -108,7 +108,7 @@ pub fn list_models_request_json() -> Value {
 /// argv for the probe process.
 ///
 /// `--setting-sources ""` is deliberate: a probe must not run the user's
-/// SessionStart hooks (ten hook lines observed without it), and OxiMux's own
+/// SessionStart hooks (ten hook lines observed without it), and TREX's own
 /// status hook would otherwise paint a phantom session on the rail. Verified
 /// accepted on 2.1.245 and 2.1.260. No `--permission-prompt-tool`, no
 /// `--include-partial-messages`: nothing here starts a turn.
@@ -223,7 +223,7 @@ pub fn probe_claude_catalog() -> Result<ClaudeCatalog> {
 /// [`probe_claude_catalog`] over an already-built command, so tests can drive
 /// it with a fake CLI.
 pub fn probe_command(mut cmd: Command) -> Result<ClaudeCatalog> {
-    use oximux_no_window::NoWindow as _;
+    use trex_no_window::NoWindow as _;
     cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).no_window();
     let mut child = cmd.spawn().context("spawn claude for list_models")?;
     let mut stdin = child.stdin.take().context("claude stdin missing")?;
@@ -443,14 +443,14 @@ mod tests {
 
     #[test]
     fn probe_command_fails_when_the_binary_is_missing() {
-        let err = probe_command(Command::new("oximux-no-such-claude-binary-xyz"))
+        let err = probe_command(Command::new("trex-no-such-claude-binary-xyz"))
             .expect_err("spawn failure is an error");
         assert!(err.to_string().contains("spawn"), "{err}");
     }
 
     /// Live: the installed `claude` answers `list_models` with the same rows
     /// its `/model` picker shows. Ignored by default (spawns the real binary,
-    /// ~2s); run with `cargo test -p oximux-agents -- --ignored live_probe`.
+    /// ~2s); run with `cargo test -p trex-agents -- --ignored live_probe`.
     #[test]
     #[ignore]
     fn live_probe_reads_the_installed_cli() {

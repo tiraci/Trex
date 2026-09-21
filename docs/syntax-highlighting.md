@@ -1,6 +1,6 @@
-# Syntax highlighting
+﻿# Syntax highlighting
 
-How OxiMux colors code, and — more importantly — the two decisions behind it
+How TREX colors code, and — more importantly — the two decisions behind it
 that look wrong until you know why.
 
 ## The discipline
@@ -40,7 +40,7 @@ sides are obtainable. It is the other three rows that decide it.
 opt-level entries in the root manifest, and the diff view's per-line
 `ParseState` path all remain. This was a pre-decided branch, not a failure.
 
-## Decision 2 — `oximux-syntax` is built on syntect, not tree-sitter
+## Decision 2 — `trex-syntax` is built on syntect, not tree-sitter
 
 Follows from the first, and inverts the original plan.
 
@@ -59,7 +59,7 @@ design. `crates/syntax/src/kinds.rs` maps those to a small closed
 
 What the old diff path actually did wrong was copy literal sRGB out of a bundled
 `.tmTheme` into every token. That made a color change a **re-tokenization**, and
-tied the palette to a theme file rather than to OxiMux's own theme. The engine
+tied the palette to a theme file rather than to TREX's own theme. The engine
 was never the defect.
 
 So syntect it is, which also keeps ~250 grammars where tree-sitter needs a
@@ -67,7 +67,7 @@ pinned crate plus a `highlights.scm` per language.
 
 **What this does not claim.** syntect is not removed and neither is the dev
 opt-level hack; this work makes the *kinds* neutral, not the dependency count
-smaller. Migrating the diff view onto `oximux-syntax` is now unblocked — it would
+smaller. Migrating the diff view onto `trex-syntax` is now unblocked — it would
 give one code path for both surfaces and put diff colors under the app theme —
 but it is not done, and is not counted as delivered.
 

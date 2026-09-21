@@ -1,4 +1,4 @@
-//! The quit-and-relaunch half of a workspace rename.
+﻿//! The quit-and-relaunch half of a workspace rename.
 //!
 //! Moving the directory and the branch is only half of "atomic in effect".
 //! `worktree_path` is also a **join key**: the persisted pane blob names it, and
@@ -14,13 +14,13 @@
 //! extra job — legacy-key fallback and corrupt-payload handling — is not what
 //! is under test here.)
 
-use oximux_app::session_restore::persisted_terminals::{
+use trex_app::session_restore::persisted_terminals::{
     PersistedAgentTab, PersistedLeafTab, PersistedSubPane, PersistedTab, PersistedTabs,
     settings_key,
 };
-use oximux_app::shell::rename_ops::repoint_persisted_tabs_in;
-use oximux_core::AgentAdapter;
-use oximux_storage::{SettingsRepo, open_memory};
+use trex_app::shell::rename_ops::repoint_persisted_tabs_in;
+use trex_core::AgentAdapter;
+use trex_storage::{SettingsRepo, open_memory};
 
 const PROJECT: &str = "proj_abc";
 const OLD: &str = "/wt/fix-lgoin";

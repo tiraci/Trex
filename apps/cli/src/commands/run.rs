@@ -1,11 +1,11 @@
-//! `oximux run` — create a session (optionally inside a fresh worktree), send
+﻿//! `TREX run` — create a session (optionally inside a fresh worktree), send
 //! the prompt, and either stay attached to the turn or background out with the
 //! session id.
 
 use std::path::PathBuf;
 
-use oximux_remote_proto::messages::SendPromptReq;
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::messages::SendPromptReq;
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use super::attach::{Stop, StreamEnd, StreamOpts, stream_session};
@@ -66,7 +66,7 @@ async fn confirm_mode(client: &Client, session_id: &str, want: &str) -> Result<(
         format!("this session accepts: {}", known.join(", ")),
         format!(
             "the session {session_id} exists and is idle — retry with \
-             `oximux send {session_id} …` after `oximux mode set`"
+             `TREX send {session_id} …` after `TREX mode set`"
         ),
     ]))
 }
@@ -152,7 +152,7 @@ pub async fn run(client: &Client, args: RunArgs, json_mode: bool) -> Result<(Val
             Response::Error(e) => {
                 return Err(rpc_failure(e).with_steps([
                     format!("the session {session_id} was created but keeps its default model"),
-                    format!("send into it anyway with `oximux send {session_id} …`"),
+                    format!("send into it anyway with `TREX send {session_id} …`"),
                 ]));
             }
             other => return Err(unexpected_reply("SetModel", &other)),
@@ -177,7 +177,7 @@ pub async fn run(client: &Client, args: RunArgs, json_mode: bool) -> Result<(Val
                         "the session {session_id} was created but keeps its default \
                          permission mode"
                     ),
-                    format!("`oximux model ls {session_id}` lists the modes it accepts"),
+                    format!("`TREX model ls {session_id}` lists the modes it accepts"),
                 ]));
             }
             other => return Err(unexpected_reply("SetPermissionMode", &other)),
@@ -208,7 +208,7 @@ pub async fn run(client: &Client, args: RunArgs, json_mode: bool) -> Result<(Val
         // Accepted ≠ finished: the id is the handle for wait/attach.
         return Ok((
             base,
-            format!("{session_id}\naccepted — watch with `oximux attach {session_id}` or `oximux wait {session_id} --until done`"),
+            format!("{session_id}\naccepted — watch with `TREX attach {session_id}` or `TREX wait {session_id} --until done`"),
         ));
     }
 

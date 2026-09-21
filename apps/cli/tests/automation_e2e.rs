@@ -1,4 +1,4 @@
-//! The v18 automation verbs, compiled binary against a live host: heartbeats an
+﻿//! The v18 automation verbs, compiled binary against a live host: heartbeats an
 //! agent arms on itself, a two-role team run that converges as its roles
 //! report, the run surviving a host restart, and the blackboard's
 //! optimistic-concurrency exit code.
@@ -8,31 +8,31 @@ use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use oximux_agents::coord::CoordStore;
-use oximux_agents::schedule::ScheduleStore;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::team::TeamStore;
-use oximux_agents::thread::StubConnection;
-use oximux_remote_host::{
+use trex_agents::coord::CoordStore;
+use trex_agents::schedule::ScheduleStore;
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::team::TeamStore;
+use trex_agents::thread::StubConnection;
+use trex_remote_host::{
     AuthStore, Dispatcher, LaunchError, LocalScope, SessionLauncher,
 };
-use oximux_remote_local::{
+use trex_remote_local::{
     LocalClaim, LocalControlListener, generate_token,
 };
 
 fn bin(runtime_dir: &Path) -> Command {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_oximux-cli"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_trex-cli"));
     cmd.args(["--dir", runtime_dir.to_str().unwrap(), "--timeout", "10"]);
-    cmd.env_remove(oximux_remote_local::SESSION_ENV_VAR);
-    cmd.env_remove(oximux_remote_local::SESSION_TOKEN_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_TOKEN_ENV_VAR);
     cmd
 }
 
 /// The binary as a confined agent child sees it.
 fn agent_bin(runtime_dir: &Path, label: &str, secret: &str) -> Command {
     let mut cmd = bin(runtime_dir);
-    cmd.env(oximux_remote_local::SESSION_ENV_VAR, label);
-    cmd.env(oximux_remote_local::SESSION_TOKEN_ENV_VAR, secret);
+    cmd.env(trex_remote_local::SESSION_ENV_VAR, label);
+    cmd.env(trex_remote_local::SESSION_TOKEN_ENV_VAR, secret);
     cmd
 }
 
@@ -89,7 +89,7 @@ struct Host {
 /// Boot a host on `runtime_dir` against the database at `db_path`, so a second
 /// boot over the same path is a genuine restart.
 fn boot(rt: &tokio::runtime::Runtime, runtime_dir: &Path, db_path: &Path) -> Host {
-    let db = oximux_storage::open(db_path).expect("open db");
+    let db = trex_storage::open(db_path).expect("open db");
     let launched_agents: LaunchedWith = Arc::new(Mutex::new(Vec::new()));
     let registry = Arc::new(SessionRegistry::new());
     registry.register("sess-1".into(), Arc::new(StubConnection::default()));
@@ -137,7 +137,7 @@ fn an_agent_arms_lists_and_disarms_its_own_heartbeat() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("host");
-    let host = boot(&rt, &runtime_dir, &dir.path().join("oximux.db"));
+    let host = boot(&rt, &runtime_dir, &dir.path().join("trex.db"));
 
     let armed = agent_bin(&runtime_dir, "sess-1", &host.agent_secret)
         .args([
@@ -184,7 +184,7 @@ fn an_unmappable_cron_is_a_usage_error_that_teaches_the_supported_set() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("host");
-    let host = boot(&rt, &runtime_dir, &dir.path().join("oximux.db"));
+    let host = boot(&rt, &runtime_dir, &dir.path().join("trex.db"));
 
     let out = agent_bin(&runtime_dir, "sess-1", &host.agent_secret)
         .args(["--json", "heartbeat", "create", "x", "--name", "n", "--cron", "0 9 1 * *"])
@@ -207,7 +207,7 @@ fn a_two_role_run_converges_as_its_roles_report() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("host");
-    let _host = boot(&rt, &runtime_dir, &dir.path().join("oximux.db"));
+    let _host = boot(&rt, &runtime_dir, &dir.path().join("trex.db"));
 
     let opened = bin(&runtime_dir)
         .args([
@@ -264,7 +264,7 @@ fn a_two_role_run_converges_as_its_roles_report() {
 fn a_team_run_survives_a_host_restart() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
-    let db_path = dir.path().join("oximux.db");
+    let db_path = dir.path().join("trex.db");
     let run_id = {
         let runtime_dir = dir.path().join("host-1");
         let _host = boot(&rt, &runtime_dir, &db_path);
@@ -316,7 +316,7 @@ fn per_role_agents_reach_the_launcher_and_show_on_the_board() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("host");
-    let host = boot(&rt, &runtime_dir, &dir.path().join("oximux.db"));
+    let host = boot(&rt, &runtime_dir, &dir.path().join("trex.db"));
 
     let opened = bin(&runtime_dir)
         .args([
@@ -386,7 +386,7 @@ fn a_role_agent_for_an_unknown_role_starts_nothing() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("host");
-    let host = boot(&rt, &runtime_dir, &dir.path().join("oximux.db"));
+    let host = boot(&rt, &runtime_dir, &dir.path().join("trex.db"));
 
     let out = bin(&runtime_dir)
         .args([
@@ -420,7 +420,7 @@ fn a_lost_conditional_write_exits_denied_with_the_current_value() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("host");
-    let _host = boot(&rt, &runtime_dir, &dir.path().join("oximux.db"));
+    let _host = boot(&rt, &runtime_dir, &dir.path().join("trex.db"));
 
     // Absent reads as unset, at exit 0 — "nobody has claimed this" is an answer.
     let empty = bin(&runtime_dir).args(["--json", "state", "get", "claim"]).output().expect("run");
@@ -459,7 +459,7 @@ fn a_non_json_state_value_is_refused_locally() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let runtime_dir = dir.path().join("host");
-    let _host = boot(&rt, &runtime_dir, &dir.path().join("oximux.db"));
+    let _host = boot(&rt, &runtime_dir, &dir.path().join("trex.db"));
 
     let out = bin(&runtime_dir)
         .args(["--json", "state", "set", "k", "claimed"])

@@ -1,4 +1,4 @@
-//! Shared UI-side state machine for the one-click driver install.
+﻿//! Shared UI-side state machine for the one-click driver install.
 //!
 //! Both surfaces that offer the install (the Computer use settings pane and
 //! the onboarding wizard) hold the same [`DriverInstallUi`] and drive it the
@@ -13,8 +13,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, TryRecvError};
 use std::thread::JoinHandle;
 
-use oximux_computer_use::install::{self, Anchor, InstallError, InstallEvent, InstallStage};
-use oximux_computer_use::{VerifiedDriver, Version};
+use trex_computer_use::install::{self, Anchor, InstallError, InstallEvent, InstallStage};
+use trex_computer_use::{VerifiedDriver, Version};
 
 /// Where the official releases live — the "Download manually" escape hatch
 /// when the in-app path fails.
@@ -29,7 +29,7 @@ pub(crate) enum DriverInstallUi {
     },
     /// The download is staged and gated as far as this platform can gate it,
     /// and now needs a person. Only reached where there is no publisher to
-    /// check — see `oximux_computer_use::trust`. The install is parked until
+    /// check — see `trex_computer_use::trust`. The install is parked until
     /// [`approve`] or [`decline`], so this is *not* a terminal state.
     AwaitingApproval {
         version: Version,
@@ -213,7 +213,7 @@ pub(crate) fn stage_label(stage: &InstallStage) -> String {
 }
 
 /// The user approved the staged bytes. The parked install resumes and pins
-/// them; it does not become "verified" — see `oximux_computer_use::trust`.
+/// them; it does not become "verified" — see `trex_computer_use::trust`.
 pub(crate) fn approve() {
     install::approve();
 }

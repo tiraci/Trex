@@ -1,4 +1,4 @@
-//! `EditorView` — per-file viewer that renders one of three modes:
+﻿//! `EditorView` — per-file viewer that renders one of three modes:
 //!
 //! - `Text` — gpui-component `code_editor` `InputState` with tree-sitter
 //!   highlighting, soft-wrap, LSP hover, diagnostics. The primary path.
@@ -31,7 +31,7 @@ use gpui_component::{
     input::{Editor, EditorState, InputState, TabSize},
     resizable::{h_resizable, resizable_panel},
 };
-use oximux_settings::AutosaveSettings;
+use trex_settings::AutosaveSettings;
 
 use gpui::{Global, actions};
 
@@ -46,7 +46,7 @@ use crate::mermaid;
 use crate::pdf_preview::{self, PdfContent, PdfDocument};
 
 actions!(
-    oximux,
+    TREX,
     [
         SaveFile,
         /// Increase the editor font size (Cmd+=). Editor-global.
@@ -145,7 +145,7 @@ fn current_zoom(cx: &App) -> EditorZoom {
 /// owns the file tree. `PathBuf` isn't a valid action payload, so the path
 /// travels as a `String`.
 #[derive(Clone, Debug, Default, PartialEq, gpui::Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct RevealInExplorer {
     pub path: String,
 }
@@ -1311,8 +1311,8 @@ impl Render for EditorView {
         // snapshot, so there is nothing to go stale and nothing for
         // `appearance-lint` to hold it to. Taken before the theme borrow,
         // which the placeholder helpers below already work around.
-        let typo = oximux_settings::appearance::typography(cx);
-        let density = oximux_settings::appearance::density(cx);
+        let typo = trex_settings::appearance::typography(cx);
+        let density = trex_settings::appearance::density(cx);
 
         // Markdown preview source, pre-processed BEFORE the long-lived theme
         // borrow below: `mermaid.process` kicks background renders and needs
@@ -1564,7 +1564,7 @@ impl Render for EditorView {
         // handlers. Mirrors the pattern used by `TerminalView` and
         // `DiffView`.
         gpui::div()
-            .id(("oximux-editor-view", cx.entity_id()))
+            .id(("trex-editor-view", cx.entity_id()))
             .track_focus(&self.focus_handle)
             .flex()
             .flex_col()

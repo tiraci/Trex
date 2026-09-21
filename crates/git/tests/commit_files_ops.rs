@@ -1,12 +1,12 @@
-//! Integration tests for `Repository::commit_files(sha)` — multi-file
+﻿//! Integration tests for `Repository::commit_files(sha)` — multi-file
 //! patch retrieval for a single commit, backing the commit-detail tab
 //! in the SCM panel.
 
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_core::DiffStatus;
-use oximux_git::Repository;
+use trex_core::DiffStatus;
+use trex_git::Repository;
 use std::path::Path;
 
 #[tokio::test]

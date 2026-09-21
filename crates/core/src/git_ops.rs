@@ -1,6 +1,6 @@
-//! Domain types for stash/branch/worktree/merge ops. Plain data — no IO,
-//! no git invocation. Lives in `oximux-core` so UI layers can hold these
-//! without depending on `oximux-git`.
+﻿//! Domain types for stash/branch/worktree/merge ops. Plain data — no IO,
+//! no git invocation. Lives in `trex-core` so UI layers can hold these
+//! without depending on `trex-git`.
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -9,7 +9,7 @@ use std::path::PathBuf;
 /// `stash@{N}` at the time the ref was minted.
 ///
 /// **v1 caveat:** the index is only stable while no other process mutates the
-/// stash stack. v1 is single-user (OxiMux + the user's terminal), so concurrent
+/// stash stack. v1 is single-user (TREX + the user's terminal), so concurrent
 /// stash ops are unlikely; callers that hold a `StashRef` across a long
 /// suspension should re-fetch via [`stash_list`](crate::git_ops) before use.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -115,8 +115,8 @@ pub enum MergeOutcome {
 /// rebase is the live operation, the `MERGE_HEAD` is a straggler.
 ///
 /// The plain-data shape (no IO, no git invocation) keeps it inside
-/// `oximux-core` so UI layers can hold it without depending on
-/// `oximux-git`.
+/// `trex-core` so UI layers can hold it without depending on
+/// `trex-git`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GitOperation {
     Merge,

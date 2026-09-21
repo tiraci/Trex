@@ -1,4 +1,4 @@
-import { Paperclip } from 'lucide-react-native';
+﻿import { Paperclip } from 'lucide-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { relativeAge } from '@/native/forge';
-import type { ForgeItem } from 'oximux-core';
+import type { ForgeItem } from 'trex-core';
 
 /** Colour for an item's lifecycle state, mirroring forge conventions. */
 function stateColor(state: string, theme: ReturnType<typeof useTheme>): string {

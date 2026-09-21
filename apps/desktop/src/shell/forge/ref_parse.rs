@@ -1,8 +1,8 @@
-//! Parse a pasted forge reference — issue/PR/MR URL or `#123` — into the
+﻿//! Parse a pasted forge reference — issue/PR/MR URL or `#123` — into the
 //! pieces the title prefill needs. Pure string work (no regex crate, no
 //! IO) so every form is unit-testable.
 
-use oximux_core::ForgeRefKind;
+use trex_core::ForgeRefKind;
 
 /// A recognized forge reference from the workspace-name field.
 #[derive(Debug, Clone, PartialEq, Eq)]

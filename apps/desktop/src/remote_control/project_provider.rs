@@ -1,4 +1,4 @@
-//! Serving the desktop's projects to a paired device as new-session targets.
+﻿//! Serving the desktop's projects to a paired device as new-session targets.
 //!
 //! Unlike [`launch_bridge`](crate::remote_control::launch_bridge), this needs no
 //! GPUI hop: the project list is durable data the storage layer already owns, not
@@ -6,9 +6,9 @@
 //! reads it off the async reactor. It is the read-side complement to the launcher
 //! — this says *where* the phone may start a session, the launcher then starts it.
 
-use oximux_remote_host::ProjectProvider;
-use oximux_remote_proto::ProjectSummaryWire;
-use oximux_storage::ProjectRepo;
+use trex_remote_host::ProjectProvider;
+use trex_remote_proto::ProjectSummaryWire;
+use trex_storage::ProjectRepo;
 
 /// How many projects to offer the phone — the desktop's own recent-projects cap,
 /// so the remote list matches the sidebar rather than dumping the full history.

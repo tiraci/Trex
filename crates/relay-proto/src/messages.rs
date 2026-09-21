@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+﻿use serde::{Deserialize, Serialize};
 
 use crate::auth::{Nonce, Proof};
 use crate::error::ErrCode;
@@ -23,7 +23,7 @@ use crate::error::ErrCode;
 // daemon, and any stale v4 daemon idles out on its own socket.
 //
 // v6: `Request::AgentStatus` lets a child process (an agent CLI hook,
-// invoked via `oximux agent-status`) report structured status. The daemon
+// invoked via `TREX agent-status`) report structured status. The daemon
 // frames the opaque payload as an OSC-9999 sequence and fans it out on the
 // PTY's existing output channel, so the app's status scanner decodes it
 // with no new app-side plumbing — and an agent hook can report status
@@ -154,7 +154,7 @@ pub enum Request {
     ListPtys,
     Stats,
     Shutdown,
-    /// Explicit attention request for a PTY — sent by the `oximux notify`
+    /// Explicit attention request for a PTY — sent by the `TREX notify`
     /// CLI (which agent hooks / scripts invoke). The daemon fans out a
     /// `Notification::Attention` to that PTY's subscribers so the owning
     /// pane raises its attention signal. Appended last to keep existing
@@ -175,7 +175,7 @@ pub enum Request {
         pty_id: String,
         attachment_id: u64,
     },
-    /// Structured agent status for a PTY — sent by the `oximux agent-status`
+    /// Structured agent status for a PTY — sent by the `TREX agent-status`
     /// CLI, which an agent's hooks invoke (e.g. Claude Code `PreToolUse` /
     /// `Stop`). `payload` is an opaque JSON object string (e.g.
     /// `{"v":1,"state":"working","tool":"Bash"}`); the daemon does NOT parse

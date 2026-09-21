@@ -1,14 +1,14 @@
-//! PaneSessionRepo integration tests — ordering, update, and the
+﻿//! PaneSessionRepo integration tests — ordering, update, and the
 //! `agent_session_id` SET NULL behaviour when an agent row is deleted.
 
-use oximux_storage::{AgentSessionRepo, PaneSessionRepo, ProjectRepo, WorkspaceRepo, open_memory};
+use trex_storage::{AgentSessionRepo, PaneSessionRepo, ProjectRepo, WorkspaceRepo, open_memory};
 use rusqlite::params;
 
 fn fixture() -> (
     String,
     PaneSessionRepo,
     AgentSessionRepo,
-    oximux_storage::Db,
+    trex_storage::Db,
 ) {
     let db = open_memory().expect("open memory");
     let projects = ProjectRepo::new(db.clone());
@@ -18,7 +18,7 @@ fn fixture() -> (
 
     let p = projects.insert("Acme", "/r", "main").expect("project");
     let w = workspaces
-        .insert(&p.id, "F", "f", "oximux/f", "/wt/f", true)
+        .insert(&p.id, "F", "f", "TREX/f", "/wt/f", true)
         .expect("workspace");
     (w.id, panes, agents, db)
 }

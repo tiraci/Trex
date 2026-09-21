@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>OxiMux</string>
+	<string>TREX</string>
 	<key>CFBundleExecutable</key>
-	<string>oximux</string>
+	<string>TREX</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
-	<string>dev.nhtera.oximux</string>
+	<string>dev.tiraci.trex</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>OxiMux</string>
+	<string>TREX</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,9 +27,9 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSInputMonitoringUsageDescription</key>
-	<string>OxiMux watches for the Escape key so you can stop an agent that is controlling your screen.</string>
+	<string>TREX watches for the Escape key so you can stop an agent that is controlling your screen.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>OxiMux uses the microphone for voice dictation.</string>
+	<string>TREX uses the microphone for voice dictation.</string>
 	<key>NSRequiresAquaSystemAppearance</key>
 	<false/>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>

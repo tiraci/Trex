@@ -1,8 +1,8 @@
-//! macOS application menu.
+﻿//! macOS application menu.
 //!
 //! Without an installed main menu, macOS titles the bold application menu
 //! from the launching process, so a dev build surfaces under the wrong name.
-//! Installing a menu whose first entry is named "OxiMux" fixes the menu bar
+//! Installing a menu whose first entry is named "TREX" fixes the menu bar
 //! and gives the standard macOS items (About / Hide / Quit / Window) their
 //! conventional shape and keyboard shortcuts.
 //!
@@ -18,8 +18,8 @@ use crate::actions::{CheckForUpdates, OpenAbout};
 
 /// Where the Help menu's two links go. Same destinations the Windows `⋯` menu
 /// offers, named here once so the two menus cannot drift.
-pub const DOCS_URL: &str = "https://github.com/nhtera/OxiMux#readme";
-pub const ISSUES_URL: &str = "https://github.com/nhtera/OxiMux/issues";
+pub const DOCS_URL: &str = "https://github.com/tiraci/Trex#readme";
+pub const ISSUES_URL: &str = "https://github.com/tiraci/Trex/issues";
 
 // Menu actions. `Quit` and the native window/app items carry handlers wired
 // in `main.rs`; the Edit entries are driven by the OS via their `OsAction`
@@ -30,10 +30,10 @@ pub const ISSUES_URL: &str = "https://github.com/nhtera/OxiMux/issues";
 // Windows menu and the palette use, so both platforms land on the one pane
 // that can answer "is there a newer version" as well as "what am I running".
 actions!(
-    oximux,
+    TREX,
     [
         Quit,
-        /// Help → OxiMux Documentation. Handled in `main.rs`, which is where
+        /// Help → TREX Documentation. Handled in `main.rs`, which is where
         /// the `&mut App` needed to open a URL is available; the Windows menu
         /// opens the same URL directly from its popup item.
         OpenDocs,
@@ -53,16 +53,16 @@ actions!(
     ]
 );
 
-/// The application menu bar. First entry's name ("OxiMux") becomes the bold
+/// The application menu bar. First entry's name ("TREX") becomes the bold
 /// app-menu title in the macOS menu bar. v1 is macOS-only, so the Services
 /// submenu is always present (no platform gate needed).
 pub fn app_menus() -> Vec<Menu> {
     vec![
         Menu {
-            name: "OxiMux".into(),
+            name: "TREX".into(),
             disabled: false,
             items: vec![
-                MenuItem::action("About OxiMux", OpenAbout),
+                MenuItem::action("About TREX", OpenAbout),
                 // Directly under About and above the separator, which is where
                 // macOS apps have put it since Sparkle made it a convention —
                 // and where anyone looking for it will look first.
@@ -70,11 +70,11 @@ pub fn app_menus() -> Vec<Menu> {
                 MenuItem::separator(),
                 MenuItem::os_submenu("Services", SystemMenuType::Services),
                 MenuItem::separator(),
-                MenuItem::action("Hide OxiMux", HideApp),
+                MenuItem::action("Hide TREX", HideApp),
                 MenuItem::action("Hide Others", HideOthers),
                 MenuItem::action("Show All", ShowAll),
                 MenuItem::separator(),
-                MenuItem::action("Quit OxiMux", Quit),
+                MenuItem::action("Quit TREX", Quit),
             ],
         },
         Menu {
@@ -108,7 +108,7 @@ pub fn app_menus() -> Vec<Menu> {
             name: "Help".into(),
             disabled: false,
             items: vec![
-                MenuItem::action("OxiMux Documentation", OpenDocs),
+                MenuItem::action("TREX Documentation", OpenDocs),
                 MenuItem::action("Report an Issue", ReportIssue),
             ],
         },

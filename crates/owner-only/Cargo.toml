@@ -1,5 +1,5 @@
-[package]
-name = "oximux-owner-only"
+﻿[package]
+name = "trex-owner-only"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

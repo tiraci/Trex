@@ -1,4 +1,4 @@
-//! Single-card painter for the agents dashboard.
+﻿//! Single-card painter for the agents dashboard.
 //!
 //! Each card is a per-agent-session row mirroring the reference cockpit's
 //! agent card:
@@ -6,7 +6,7 @@
 //!   ┌──────────────────────────────────────────────────────────┐
 //!   │ (✓) ✳  add tests · Edit: foo.rs              10 hours ago │  line 1
 //!   │        All set — the suite is green.                      │  line 2
-//!   │        [oximux]  main                                     │  line 3
+//!   │        [TREX]  main                                     │  line 3
 //!   └──────────────────────────────────────────────────────────┘
 //!
 //! The state glyph (emerald check / stepped spinner / colored dot) and the
@@ -16,8 +16,8 @@
 //! read as "come look at me".
 
 use gpui::{Div, InteractiveElement, ParentElement, Styled, div, px, svg};
-use oximux_core::AgentStatus;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::AgentStatus;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::agents_dashboard::model::{AgentRow, attention_rank};
 use crate::shell::agents_dashboard::sections::SectionKind;

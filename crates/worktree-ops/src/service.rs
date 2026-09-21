@@ -1,4 +1,4 @@
-//! Serving worktree create/list/remove to an authorized client — the host's
+﻿//! Serving worktree create/list/remove to an authorized client — the host's
 //! implementation of remote-host's [`WorktreeService`] seam.
 //!
 //! Reuses the New-Worktree flow's own pieces rather than paralleling them: the
@@ -14,17 +14,17 @@
 //! creates resolve a configured root.
 //!
 //! No view state anywhere: everything here is durable data plus git
-//! subprocesses, which is what lets `oximux serve` host it unchanged. The
+//! subprocesses, which is what lets `TREX serve` host it unchanged. The
 //! desktop sidebar picks up remotely-created rows on its next rebuild (project
 //! switch or restart), the same way it absorbs changes from another window.
 
 use std::path::PathBuf;
 
-use oximux_git::{Repository, validate_slug};
-use oximux_git::worktree::{derive_slug, validate_ref_name};
-use oximux_remote_host::{WorktreeError, WorktreeService};
-use oximux_remote_proto::messages::{CreateBaseWire, WorktreeProgressWire, WorktreeWire};
-use oximux_storage::{ProjectRepo, WorkspaceRepo};
+use trex_git::{Repository, validate_slug};
+use trex_git::worktree::{derive_slug, validate_ref_name};
+use trex_remote_host::{WorktreeError, WorktreeService};
+use trex_remote_proto::messages::{CreateBaseWire, WorktreeProgressWire, WorktreeWire};
+use trex_storage::{ProjectRepo, WorkspaceRepo};
 
 use crate::branch_name;
 use crate::{
@@ -37,7 +37,7 @@ pub struct RepoWorktrees {
     projects: ProjectRepo,
     workspaces: WorkspaceRepo,
     /// The root new worktrees are derived under, and where `git.toml` is
-    /// read from. The desktop passes its app data dir; `oximux serve` passes
+    /// read from. The desktop passes its app data dir; `TREX serve` passes
     /// its `--data-dir`, so a server keeps its worktrees under its own root.
     data_dir: PathBuf,
     /// Host-derived, built here from `data_dir` and nowhere else.
@@ -54,7 +54,7 @@ impl RepoWorktrees {
     /// construction; crate-visible so a test can pin that it stays so. The
     /// `expect` is the contract: [`HostDerivedLocator::locate`] validates
     /// nothing and cannot refuse.
-    pub(crate) fn target_path(&self, project: &oximux_core::Project, slug: &str) -> PathBuf {
+    pub(crate) fn target_path(&self, project: &trex_core::Project, slug: &str) -> PathBuf {
         self.locator
             .locate(project, slug)
             .expect("the host-derived locator validates nothing and cannot refuse")
@@ -63,7 +63,7 @@ impl RepoWorktrees {
     /// Resolve a client-named project root against the host's own records.
     /// Exact match only — the client is echoing a path a `ListProjects` row
     /// handed it, and anything else is refused rather than guessed at.
-    fn project_by_path(&self, project_path: &str) -> Result<oximux_core::Project, WorktreeError> {
+    fn project_by_path(&self, project_path: &str) -> Result<trex_core::Project, WorktreeError> {
         self.projects
             .get_by_root_path(project_path)
             .map_err(|err| {
@@ -82,7 +82,7 @@ impl RepoWorktrees {
 /// not have to say the directory twice.
 ///
 /// **The derivation lives here, on the host, deliberately.** `derive_slug` is
-/// in `oximux-git`, which is kept off `oximux-cli`'s dependency path — the same
+/// in `trex-git`, which is kept off `trex-cli`'s dependency path — the same
 /// edge this crate was extracted to protect. A client-side copy of the rule
 /// would be a second naming implementation free to disagree with this one, and
 /// the disagreement would only show up as a directory named something the user
@@ -99,7 +99,7 @@ fn effective_slug(slug: &str, base: &CreateBaseWire) -> String {
 }
 
 /// One DB row as the wire shows it.
-fn wire(row: oximux_core::Workspace, project_path: &str) -> WorktreeWire {
+fn wire(row: trex_core::Workspace, project_path: &str) -> WorktreeWire {
     WorktreeWire {
         id: row.id,
         project_path: project_path.to_string(),
@@ -173,11 +173,11 @@ impl WorktreeService for RepoWorktrees {
         let target = self.target_path(&project, slug);
         // Same branch name the desktop would mint for this slug: one resolver,
         // reading the same `git.toml`. A remote-created worktree that carried
-        // the hardcoded `oximux/` prefix while the sidebar minted the
+        // the hardcoded `TREX/` prefix while the sidebar minted the
         // configured one would put two conventions in one rail — and
         // `reclaim_orphan` would stop recognising its own debris.
         let root = std::path::Path::new(&project.root_path);
-        let git_settings = oximux_settings::git::GitSettings::load_from_dir(&self.data_dir);
+        let git_settings = trex_settings::git::GitSettings::load_from_dir(&self.data_dir);
         // Existing-branch mode mints no name at all — it adopts one — so the
         // resolver runs only for the two modes that create a branch.
         let create_base = match base {
@@ -189,7 +189,7 @@ impl WorktreeService for RepoWorktrees {
                     // real failure; naming the branch the shipped way here keeps
                     // that the error the caller sees.
                     Err(_) => {
-                        branch_name::branch_name(Some(oximux_settings::git::DEFAULT_PREFIX), slug)
+                        branch_name::branch_name(Some(trex_settings::git::DEFAULT_PREFIX), slug)
                     }
                 };
                 match base {
@@ -415,8 +415,8 @@ impl WorktreeService for RepoWorktrees {
 #[cfg(test)]
 mod progress_tests {
     use super::*;
-    use oximux_storage::db::open_memory;
-    use oximux_storage::repositories::{ProjectRepo, WorkspaceRepo};
+    use trex_storage::db::open_memory;
+    use trex_storage::repositories::{ProjectRepo, WorkspaceRepo};
 
     /// A service over an in-memory database with one project and two
     /// worktrees. Returns the service, the project root, and both ids.
@@ -425,8 +425,8 @@ mod progress_tests {
         let projects = ProjectRepo::new(db.clone());
         let workspaces = WorkspaceRepo::new(db.clone());
         let project = projects.insert("p", "/p", "main").expect("project");
-        let a = workspaces.insert(&project.id, "a", "a", "oximux/a", "/p/a", true).expect("a");
-        let b = workspaces.insert(&project.id, "b", "b", "oximux/b", "/p/b", true).expect("b");
+        let a = workspaces.insert(&project.id, "a", "a", "TREX/a", "/p/a", true).expect("a");
+        let b = workspaces.insert(&project.id, "b", "b", "TREX/b", "/p/b", true).expect("b");
         let service = RepoWorktrees::new(projects, workspaces, "/data".into());
         (service, project.root_path, a.id, b.id)
     }
@@ -498,15 +498,15 @@ mod progress_tests {
 
 /// The headline safety property of adoption, on the headless removal path:
 /// an adopted worktree's cleanup script does not run on the way out until the
-/// user has reviewed it, while a worktree OxiMux provisioned still gets its
+/// user has reviewed it, while a worktree TREX provisioned still gets its
 /// cleanup. Real git, real `sh`; the script leaves a marker file the
 /// assertion looks for.
 #[cfg(unix)]
 #[cfg(test)]
 mod adoption_removal_tests {
     use super::*;
-    use oximux_storage::db::open_memory;
-    use oximux_storage::repositories::{ProjectRepo, WorkspaceRepo};
+    use trex_storage::db::open_memory;
+    use trex_storage::repositories::{ProjectRepo, WorkspaceRepo};
     use std::path::Path;
 
     fn git(cwd: &Path, args: &[&str]) {
@@ -523,7 +523,7 @@ mod adoption_removal_tests {
         assert!(ok, "git {args:?}");
     }
 
-    /// A repo with a linked worktree whose `.oximux/scripts.toml` cleanup
+    /// A repo with a linked worktree whose `.trex/scripts.toml` cleanup
     /// writes `marker`; returns the service, the project id and the worktree path.
     fn fixture(tmp: &Path, marker: &Path) -> (RepoWorktrees, String, std::path::PathBuf) {
         let root = tmp.join("repo");
@@ -535,15 +535,15 @@ mod adoption_removal_tests {
         git(&root, &["commit", "-q", "-m", "init"]);
         let wt = tmp.join("wt");
         git(&root, &["worktree", "add", "-q", "-b", "topic", wt.to_str().unwrap()]);
-        std::fs::create_dir_all(wt.join(".oximux")).unwrap();
+        std::fs::create_dir_all(wt.join(".trex")).unwrap();
         std::fs::write(
-            wt.join(".oximux").join("scripts.toml"),
+            wt.join(".trex").join("scripts.toml"),
             format!("cleanup = \"touch '{}'\"\n", marker.display()),
         )
         .unwrap();
         // Committed, so the non-force removal the service performs is not
         // refused for an untracked file.
-        git(&wt, &["add", ".oximux"]);
+        git(&wt, &["add", ".trex"]);
         git(&wt, &["commit", "-q", "-m", "scripts"]);
         let db = open_memory().expect("db");
         let projects = ProjectRepo::new(db.clone());
@@ -591,7 +591,7 @@ mod adoption_removal_tests {
 #[cfg(test)]
 mod locator_tests {
     use super::*;
-    use oximux_storage::open_memory;
+    use trex_storage::open_memory;
 
     /// The remote surface's guarantee, pinned: whatever the desktop configures
     /// for its own creates, a worktree created through this service lands
@@ -606,7 +606,7 @@ mod locator_tests {
         let data_dir = tempfile::tempdir().expect("tempdir");
         // A configured root the desktop would honour; the service must not.
         std::fs::write(
-            data_dir.path().join(oximux_settings::git::GitSettings::FILE_NAME),
+            data_dir.path().join(trex_settings::git::GitSettings::FILE_NAME),
             "worktree_dir = \"/somewhere/the/user/chose\"\n",
         )
         .expect("write git.toml");

@@ -1,9 +1,9 @@
-//! oximux-dictation
+﻿//! trex-dictation
 //!
 //! Local, offline voice dictation: cpal microphone capture → linear resample to
 //! 16 kHz → sherpa-onnx offline decode (Whisper for Vietnamese, Parakeet for
 //! English). The crate exposes a channel-based [`DictationController`] handle
-//! (mirroring the `oximux-pty` convention) plus a model catalog + download
+//! (mirroring the `trex-pty` convention) plus a model catalog + download
 //! manager. It has **no GPUI dependency** — the app drains [`DictationEvent`]s
 //! and drives the mic button; every cpal/sherpa type stays inside here.
 //!

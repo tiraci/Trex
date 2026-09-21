@@ -1,4 +1,4 @@
-//! Async project file index for Quick Open.
+﻿//! Async project file index for Quick Open.
 //!
 //! Lists the project's tracked + untracked-but-not-ignored files via
 //! `rg --files` (same runtime dependency the search panel already relies
@@ -8,7 +8,7 @@
 use std::path::PathBuf;
 use std::process::Stdio;
 
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 

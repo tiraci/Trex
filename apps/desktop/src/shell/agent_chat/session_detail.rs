@@ -1,4 +1,4 @@
-//! Session-detail popover — what this chat's agent was started with.
+﻿//! Session-detail popover — what this chat's agent was started with.
 //!
 //! A session advertises its inventory once, at init: the model and working
 //! directory, the tools it loaded, the MCP servers it connected (and whether
@@ -20,7 +20,7 @@ use gpui::{
     div, px, AnyElement, Context, InteractiveElement, IntoElement, ParentElement,
     SharedString, StatefulInteractiveElement, Styled,
 };
-use oximux_agents::thread::SessionMeta;
+use trex_agents::thread::SessionMeta;
 
 use super::{AgentChatView, RAIL_W};
 
@@ -142,7 +142,7 @@ impl AgentChatView {
 }
 
 /// A `label: value` line for a single fact.
-fn row(label: &str, value: String, theme: oximux_settings::Theme) -> AnyElement {
+fn row(label: &str, value: String, theme: trex_settings::Theme) -> AnyElement {
     div()
         .flex()
         .flex_row()
@@ -168,8 +168,8 @@ fn row(label: &str, value: String, theme: oximux_settings::Theme) -> AnyElement 
 /// A muted section heading.
 fn section(
     label: String,
-    theme: oximux_settings::Theme,
-    typo: &oximux_settings::Typography,
+    theme: trex_settings::Theme,
+    typo: &trex_settings::Typography,
 ) -> AnyElement {
     div()
         .w_full()
@@ -181,7 +181,7 @@ fn section(
 }
 
 /// A wrapping run of comma-joined names.
-fn wrapped(text: String, theme: oximux_settings::Theme) -> AnyElement {
+fn wrapped(text: String, theme: trex_settings::Theme) -> AnyElement {
     div()
         .w_full()
         .min_w(px(0.0))
@@ -196,8 +196,8 @@ mod tests {
     use std::sync::Arc;
 
     use gpui::TestAppContext;
-    use oximux_agents::thread::{McpServerStatus, StubConnection};
-    use oximux_settings::{Density, Theme, Typography};
+    use trex_agents::thread::{McpServerStatus, StubConnection};
+    use trex_settings::{Density, Theme, Typography};
 
     /// The trigger only exists once a session has advertised something — a
     /// backend that advertises nothing (Codex, ACP) must not show an affordance

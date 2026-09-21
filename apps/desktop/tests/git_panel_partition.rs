@@ -1,4 +1,4 @@
-//! Pure-unit tests for `partition_files` — no GPUI, no tokio. Fast.
+﻿//! Pure-unit tests for `partition_files` — no GPUI, no tokio. Fast.
 //!
 //! Covers:
 //!   - clean tree → all empty
@@ -8,8 +8,8 @@
 //!   - ignored entries are filtered out of every section
 //!   - section vec lengths match what render reads via `.len()`
 
-use oximux_app::shell::git_panel::changed_files::partition_files;
-use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+use trex_app::shell::git_panel::changed_files::partition_files;
+use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 use std::path::PathBuf;
 
 fn fs(path: &str, index: IndexStatus, worktree: WorktreeStatus) -> FileStatus {

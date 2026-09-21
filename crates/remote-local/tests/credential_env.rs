@@ -1,4 +1,4 @@
-//! Which credential a process presents, as decided by its environment.
+﻿//! Which credential a process presents, as decided by its environment.
 //!
 //! A test binary of its own, holding exactly ONE test, and that is the whole
 //! point. `std::env::set_var` mutates process-global state — unsafe in Rust
@@ -10,7 +10,7 @@
 //!
 //! Keep it that way: adding a second `#[test]` here reintroduces the hazard.
 
-use oximux_remote_local::{
+use trex_remote_local::{
     LocalIdentity, SESSION_ENV_VAR, SESSION_TOKEN_ENV_VAR, credential, token_path,
     write_token_file,
 };

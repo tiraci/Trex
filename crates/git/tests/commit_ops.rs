@@ -1,11 +1,11 @@
-//! Integration tests for commit operations on `Repository`: `commit` (staged
+﻿//! Integration tests for commit operations on `Repository`: `commit` (staged
 //! changes only) and `commit_paths` (stage-and-commit specific files).
 //! Tempdir + real `git` binary on PATH.
 
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_git::{GitError, Repository};
+use trex_git::{GitError, Repository};
 use std::path::Path;
 
 /// Read HEAD SHA via the shell — independent of the method under test.
@@ -129,7 +129,7 @@ async fn commit_paths_stages_and_commits_selected_only() {
         .iter()
         .find(|f| f.path == Path::new("p2.txt"))
         .expect("p2.txt still untracked in status");
-    use oximux_core::IndexStatus;
+    use trex_core::IndexStatus;
     assert_eq!(p2.index, IndexStatus::Untracked, "p2 must remain untracked");
     // And p1 is no longer in status (it's committed and clean).
     assert!(
@@ -161,7 +161,7 @@ async fn commit_paths_leaves_independently_staged_other_file_alone() {
 
     // p2 should STILL be staged (Added in index), not folded into the commit.
     let st = repo.status().await.unwrap();
-    use oximux_core::IndexStatus;
+    use trex_core::IndexStatus;
     let p2 = st
         .files
         .iter()

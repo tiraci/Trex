@@ -1,4 +1,4 @@
-//! The worktree pill's popover body, lifted out of `composer`.
+﻿//! The worktree pill's popover body, lifted out of `composer`.
 //!
 //! A pure assembler: every input arrives as a parameter, so it needs nothing
 //! from the view beyond the entity it emits events back into. It lives here
@@ -12,7 +12,7 @@ use gpui::{
 use gpui_component::Sizable as _;
 use gpui_component::input::Input;
 use gpui_component::popover::PopoverState;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::composer::{ComposerEvent, ComposerView, WorktreeDraft};
 

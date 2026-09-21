@@ -1,6 +1,6 @@
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+﻿import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
-import type { ChatImage } from 'oximux-core';
+import type { ChatImage } from 'trex-core';
 
 /**
  * A picked image, held by the composer until the prompt is sent.

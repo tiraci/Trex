@@ -1,6 +1,6 @@
-//! Map a Pi rollout (`~/.pi/agent/sessions/<cwd-slug>/<ts>_<uuid>.jsonl`) into a
+﻿//! Map a Pi rollout (`~/.pi/agent/sessions/<cwd-slug>/<ts>_<uuid>.jsonl`) into a
 //! chat transcript (`Vec<ThreadEntry>`), the same shape the Claude/Codex
-//! importers build so a session started outside OxiMux renders with the same
+//! importers build so a session started outside TREX renders with the same
 //! fidelity once reopened.
 //!
 //! Pi's rollout is line-delimited JSON. Only `{"type":"message",...}` lines are

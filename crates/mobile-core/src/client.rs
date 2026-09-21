@@ -1,4 +1,4 @@
-//! [`MobileClient`] — the handle the app holds: connect to a paired host, then
+﻿//! [`MobileClient`] — the handle the app holds: connect to a paired host, then
 //! drive sessions. This module owns construction + the connection lifecycle; the
 //! async RPCs live in [`rpc`](crate::client::rpc) and subscription in
 //! [`subscription`](crate::subscription).
@@ -8,9 +8,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex as StdMutex};
 
 use futures::channel::oneshot;
-use oximux_remote_iroh::{IrohConnector, bind_client};
-use oximux_remote_proto::PairingTicket;
-use oximux_remote_session::{Bootstrap, ClientSigner, Connector, RemoteSession};
+use trex_remote_iroh::{IrohConnector, bind_client};
+use trex_remote_proto::PairingTicket;
+use trex_remote_session::{Bootstrap, ClientSigner, Connector, RemoteSession};
 use tokio::sync::Mutex;
 
 use crate::callbacks::ConnStateListener;
@@ -149,7 +149,7 @@ impl MobileClient {
     }
 
     /// Pair with and connect to the host named by a scanned
-    /// `oximux://connect?ticket=…` deep link, over iroh. On success the session is
+    /// `TREX://connect?ticket=…` deep link, over iroh. On success the session is
     /// live and `listener` has seen [`ConnState::Connected`](crate::ConnState); the
     /// connection then self-heals across drops until [`disconnect`](Self::disconnect).
     pub async fn connect(
@@ -182,7 +182,7 @@ impl MobileClient {
     /// The transport-agnostic connect path (production injects the iroh
     /// [`Connector`]; a test or a future WebSocket transport injects its own). Not
     /// part of the FFI surface — it takes an `Arc<dyn Connector>`. Hands the pieces
-    /// to the self-healing [`maintain_connection`](oximux_remote_session::maintain_connection)
+    /// to the self-healing [`maintain_connection`](trex_remote_session::maintain_connection)
     /// driver and returns once the first pairing lands (or fails); the driver then
     /// keeps the link alive across drops in the background.
     pub async fn connect_with(

@@ -1,10 +1,10 @@
-//! Per-agent driver sessions, and cleaning up the ones a crash left behind.
+﻿//! Per-agent driver sessions, and cleaning up the ones a crash left behind.
 //!
 //! A driver session is the unit that makes N agents driving N apps possible:
 //! each declares its own id, which owns that run's agent cursor and per-session
-//! capture policy. One OxiMux agent chat maps to one session.
+//! capture policy. One TREX agent chat maps to one session.
 //!
-//! Sessions are also the *only* thing OxiMux may clean up. The daemon is shared
+//! Sessions are also the *only* thing TREX may clean up. The daemon is shared
 //! with every other MCP client on the machine (see [`crate::daemon`]), so the
 //! recovery story is not "kill orphaned daemons" but "revoke the sessions we
 //! opened and never closed". The ledger exists because that has to survive a
@@ -86,7 +86,7 @@ impl SessionId {
         } else {
             trimmed.chars().take(MAX_ID_LEN).collect()
         };
-        Self(format!("oximux-{body}"))
+        Self(format!("trex-{body}"))
     }
 
     pub fn as_str(&self) -> &str {
@@ -100,7 +100,7 @@ impl std::fmt::Display for SessionId {
     }
 }
 
-/// On-disk record of sessions OxiMux has opened and not yet ended.
+/// On-disk record of sessions TREX has opened and not yet ended.
 #[derive(Debug, Clone)]
 pub struct SessionLedger {
     path: PathBuf,
@@ -184,7 +184,7 @@ impl Reconciliation {
 
 /// End every session the ledger still lists, then clear it.
 ///
-/// Runs on OxiMux launch. Scoped to recorded ids — never `revoke --all`, which
+/// Runs on TREX launch. Scoped to recorded ids — never `revoke --all`, which
 /// would also kill sessions belonging to other MCP clients sharing the daemon.
 pub fn reconcile(
     driver: &Path,
@@ -223,7 +223,7 @@ mod tests {
     fn derives_a_readable_prefixed_id() {
         assert_eq!(
             SessionId::for_agent("abc123").as_str(),
-            "oximux-abc123"
+            "trex-abc123"
         );
     }
 
@@ -232,7 +232,7 @@ mod tests {
         // The id becomes a CLI argument and an on-screen label.
         assert_eq!(
             SessionId::for_agent("a b/c;rm -rf").as_str(),
-            "oximux-a-b-c-rm--rf"
+            "trex-a-b-c-rm--rf"
         );
         assert!(!SessionId::for_agent("../../etc/passwd")
             .as_str()
@@ -241,15 +241,15 @@ mod tests {
 
     #[test]
     fn an_empty_or_all_punctuation_id_still_yields_a_usable_session() {
-        assert_eq!(SessionId::for_agent("").as_str(), "oximux-session");
-        assert_eq!(SessionId::for_agent("///").as_str(), "oximux-session");
+        assert_eq!(SessionId::for_agent("").as_str(), "trex-session");
+        assert_eq!(SessionId::for_agent("///").as_str(), "trex-session");
     }
 
     #[test]
     fn caps_length() {
         let long = "x".repeat(500);
         let id = SessionId::for_agent(&long);
-        assert_eq!(id.as_str().len(), "oximux-".len() + MAX_ID_LEN);
+        assert_eq!(id.as_str().len(), "trex-".len() + MAX_ID_LEN);
     }
 
     #[test]

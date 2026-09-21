@@ -1,4 +1,4 @@
-//! Tokio-based wrapper around the GitLab CLI (`glab`).
+﻿//! Tokio-based wrapper around the GitLab CLI (`glab`).
 //!
 //! The GitLab counterpart to [`crate::gh`]: same off-thread invocation, hard
 //! timeout, and `kill_on_drop` discipline, but spawns `glab` and speaks GitLab's
@@ -19,7 +19,7 @@ use crate::gh::{
     CreatePrOptions, ForgeAssignee, ForgeAuthor, ForgeItem, ForgeLabel, ForgeListFilter, ItemDetail,
     MergeMethod,
 };
-use oximux_core::PrState;
+use trex_core::PrState;
 use serde::Deserialize;
 use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
@@ -133,13 +133,13 @@ pub async fn has_open_mr(cwd: impl AsRef<Path>) -> bool {
 /// the user's typed text stands.
 pub async fn item_title(
     cwd: impl AsRef<Path>,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u32,
     repo: Option<&str>,
 ) -> Option<String> {
     let subcommand = match kind {
-        oximux_core::ForgeRefKind::Issue => "issue",
-        oximux_core::ForgeRefKind::Pull => "mr",
+        trex_core::ForgeRefKind::Issue => "issue",
+        trex_core::ForgeRefKind::Pull => "mr",
     };
     let mut cmd = GlabCmd::new(cwd).args([
         subcommand,
@@ -249,13 +249,13 @@ pub async fn mr_merge(cwd: impl AsRef<Path>, method: MergeMethod) -> Result<()> 
 /// [`crate::gh::item_detail`].
 pub async fn item_detail(
     cwd: impl AsRef<Path>,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u64,
     repo: Option<&str>,
 ) -> Option<ItemDetail> {
     let subcommand = match kind {
-        oximux_core::ForgeRefKind::Issue => "issue",
-        oximux_core::ForgeRefKind::Pull => "mr",
+        trex_core::ForgeRefKind::Issue => "issue",
+        trex_core::ForgeRefKind::Pull => "mr",
     };
     let mut cmd = GlabCmd::new(cwd).args([subcommand, "view", &number.to_string(), "-F", "json"]);
     if let Some(slug) = repo {

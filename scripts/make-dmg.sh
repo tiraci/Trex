@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 #
-# Package dist/OxiMux.app into a styled, signed (and optionally notarized)
-# DMG: dist/OxiMux-<version>-macos-<arch>.dmg
+# Package dist/trex.app into a styled, signed (and optionally notarized)
+# DMG: dist/trex-<version>-macos-<arch>.dmg
 #
 # The DMG opens as the classic drag-to-install window: the app icon on the
 # left, an Applications alias on the right, a dashed arrow between them
@@ -14,7 +14,7 @@
 #   ./scripts/make-dmg.sh --sign "Developer ID Application: … (TEAMID)"
 #   ./scripts/make-dmg.sh --sign "…" --notarize      # submit + staple + gate
 #
-# Expects dist/OxiMux.app to already exist and be signed (hardened runtime
+# Expects dist/trex.app to already exist and be signed (hardened runtime
 # for a notarized release): run
 #   ./scripts/bundle-macos.sh --hardened --sign "Developer ID Application: …"
 # first. This script deliberately does NOT rebuild — packaging a stale bundle
@@ -25,7 +25,7 @@
 #        NOTARY_KEY_PATH  — path to the AuthKey_<id>.p8 file
 #        NOTARY_KEY_ID    — the key id
 #        NOTARY_ISSUER_ID — the issuer id
-#   2. Keychain profile "$OXIMUX_NOTARY_PROFILE" (default oximux-notary),
+#   2. Keychain profile "$TREX_NOTARY_PROFILE" (default trex-notary),
 #      created once with `xcrun notarytool store-credentials` (the local path,
 #      same profile bundle-macos.sh --notarize uses).
 #
@@ -39,11 +39,11 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-APP_DIR="dist/OxiMux.app"
+APP_DIR="dist/trex.app"
 BACKGROUND="assets/dmg-background.tiff"
-NOTARY_PROFILE="${OXIMUX_NOTARY_PROFILE:-oximux-notary}"
+NOTARY_PROFILE="${TREX_NOTARY_PROFILE:-trex-notary}"
 
-SIGN_ID="${OXIMUX_CODESIGN_IDENTITY:-}"
+SIGN_ID="${TREX_CODESIGN_IDENTITY:-}"
 NOTARIZE=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -76,7 +76,7 @@ command -v create-dmg >/dev/null || {
     exit 2
 }
 [[ -n "$SIGN_ID" ]] || {
-    echo "error: a signing identity is required (--sign or OXIMUX_CODESIGN_IDENTITY):" >&2
+    echo "error: a signing identity is required (--sign or TREX_CODESIGN_IDENTITY):" >&2
     echo "       an unsigned DMG around a signed app still trips Gatekeeper heuristics" >&2
     exit 2
 }
@@ -97,13 +97,13 @@ if [[ "$VERSION" != "$CARGO_VERSION" ]]; then
 fi
 
 ARCH="$(uname -m)"   # arm64 on Apple silicon
-DMG="dist/OxiMux-${VERSION}-macos-${ARCH}.dmg"
+DMG="dist/trex-${VERSION}-macos-${ARCH}.dmg"
 
 # ---- assemble ------------------------------------------------------------
 
 # create-dmg copies the whole source folder into the image, so stage the app
 # alone — dist/ also holds zips and build leftovers that must not ship.
-STAGING="$(mktemp -d "${TMPDIR:-/tmp}/oximux-dmg.XXXXXX")"
+STAGING="$(mktemp -d "${TMPDIR:-/tmp}/trex-dmg.XXXXXX")"
 trap 'rm -rf "$STAGING"' EXIT
 cp -a "$APP_DIR" "$STAGING/"
 
@@ -116,14 +116,14 @@ rm -f "$DMG"
 # both of which are intermittently flaky on CI runners; retries are the
 # tool's own supported mitigation.
 create-dmg \
-    --volname "OxiMux ${VERSION}" \
+    --volname "TREX ${VERSION}" \
     --volicon "assets/AppIcon.icns" \
     --background "$BACKGROUND" \
     --window-pos 200 120 \
     --window-size 660 400 \
     --icon-size 128 \
-    --icon "OxiMux.app" 165 190 \
-    --hide-extension "OxiMux.app" \
+    --icon "trex.app" 165 190 \
+    --hide-extension "trex.app" \
     --app-drop-link 495 190 \
     --hdiutil-retries 5 \
     "$DMG" \

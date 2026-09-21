@@ -1,4 +1,4 @@
-//! Keeping screen captures off any surface that leaves this machine.
+﻿//! Keeping screen captures off any surface that leaves this machine.
 //!
 //! A screenshot tool returns a picture of whatever was on screen — a password
 //! manager mid-unlock, a private document, someone else's message. On the
@@ -213,7 +213,7 @@ mod tests {
     #[test]
     fn a_screenshot_is_dropped_on_the_way_out() {
         let mut filter = ScreenshotFilter::new();
-        filter.scrub(&mut started("t1", "mcp__oximux-computer-use__screenshot"));
+        filter.scrub(&mut started("t1", "mcp__trex-computer-use__screenshot"));
 
         let mut event = images_for("t1");
         assert!(filter.scrub(&mut event));
@@ -249,7 +249,7 @@ mod tests {
         // Parallel tool calls are the normal case, so the correlation has to
         // survive a screenshot and an ordinary read being open at once.
         let mut filter = ScreenshotFilter::new();
-        filter.scrub(&mut started("shot", "mcp__oximux-computer-use__zoom"));
+        filter.scrub(&mut started("shot", "mcp__trex-computer-use__zoom"));
         filter.scrub(&mut started("read", "Read"));
 
         let mut shot = images_for("shot");
@@ -268,7 +268,7 @@ mod tests {
         for i in 0..REMEMBERED_CALLS * 3 {
             filter.scrub(&mut started(
                 &format!("t{i}"),
-                "mcp__oximux-computer-use__screenshot",
+                "mcp__trex-computer-use__screenshot",
             ));
         }
         assert_eq!(filter.screen_calls.len(), REMEMBERED_CALLS);
@@ -282,7 +282,7 @@ mod tests {
     fn a_repeated_id_does_not_consume_the_window_twice() {
         let mut filter = ScreenshotFilter::new();
         for _ in 0..10 {
-            filter.scrub(&mut started("t1", "mcp__oximux-computer-use__screenshot"));
+            filter.scrub(&mut started("t1", "mcp__trex-computer-use__screenshot"));
         }
         assert_eq!(filter.screen_calls.len(), 1);
     }
@@ -317,7 +317,7 @@ mod tests {
     #[test]
     fn a_folded_transcript_loses_only_the_screen_captures() {
         let transcript = folded(&[
-            ("mcp__oximux-computer-use__get_window_state", &["AAAA"]),
+            ("mcp__trex-computer-use__get_window_state", &["AAAA"]),
             ("Read", &["BBBB"]),
         ]);
 
@@ -333,7 +333,7 @@ mod tests {
     /// phone.
     #[test]
     fn a_capture_is_found_through_the_entry_variant_tag() {
-        let transcript = folded(&[("mcp__oximux-computer-use__zoom", &["AAAA"])]);
+        let transcript = folded(&[("mcp__trex-computer-use__zoom", &["AAAA"])]);
         assert!(
             transcript.contains("\"ToolCall\""),
             "the fold is externally tagged, which is the whole point: {transcript}"

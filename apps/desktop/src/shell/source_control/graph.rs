@@ -1,4 +1,4 @@
-//! Commit-graph panel (flat recent commits list, no DAG drawing for v1).
+﻿//! Commit-graph panel (flat recent commits list, no DAG drawing for v1).
 //!
 //! Loads `Repository::log_recent(20)` on mount; "Load more" extends in
 //! 20-row chunks. State machine: `Loading → Ready | Failed`.
@@ -16,10 +16,10 @@ use gpui_component::{
     Disableable as _, Icon, IconName, Sizable as _,
     button::{Button, ButtonVariants},
 };
-use oximux_core::CommitInfo;
-use oximux_git::{GitError, Repository};
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::SettingsRepo;
+use trex_core::CommitInfo;
+use trex_git::{GitError, Repository};
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::SettingsRepo;
 use tokio::sync::oneshot;
 
 use crate::scm_layout_settings;
@@ -331,7 +331,7 @@ impl CommitGraph {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::source_control::graph",
+                    target: "trex_app::source_control::graph",
                     "no tokio runtime; commit graph stays in Loading state"
                 );
                 return;
@@ -449,7 +449,7 @@ impl CommitGraph {
 
 /// Fetch per-commit numstat for every OID in `commits` (if `Some`),
 /// returning a `oid → (added, removed)` map. Each commit is queried
-/// sequentially via `oximux_git::diff_numstat_commit`; failures are
+/// sequentially via `trex_git::diff_numstat_commit`; failures are
 /// silently dropped — the tooltip caller treats a missing entry the
 /// same as a successful zero-change diff and just omits the stats
 /// slot. Returns an empty map when `commits` is `None` or empty.
@@ -479,7 +479,7 @@ async fn collect_commit_stats(
         .map(|c| {
             let oid = c.oid.clone();
             async move {
-                let res = oximux_git::diff_numstat_commit(workdir, &oid).await;
+                let res = trex_git::diff_numstat_commit(workdir, &oid).await;
                 (oid, res)
             }
         })
@@ -496,7 +496,7 @@ async fn collect_commit_stats(
             }
             Err(err) => {
                 tracing::debug!(
-                    target: "oximux_app::source_control::graph",
+                    target: "trex_app::source_control::graph",
                     oid = %oid,
                     error = %err,
                     "diff_numstat_commit failed; tooltip stats slot will be absent for this row"
@@ -517,7 +517,7 @@ impl Focusable for CommitGraph {
 
 impl Render for CommitGraph {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // A drag-resize is over once no drag is active: releasing the mouse
         // produces no further drag-move ticks, so the flag (and the latched
         // anchor) are cleared here on the next render instead.

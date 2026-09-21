@@ -1,9 +1,9 @@
-//! Git status badge logic for the file explorer.
+﻿//! Git status badge logic for the file explorer.
 //!
 //! Pure module — no GPUI imports. Derives `BadgeStatus` from raw `FileStatus`
 //! records, computes priority-based dominant status for folder propagation.
 
-use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -144,7 +144,7 @@ pub fn label_for(s: BadgeStatus) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+    use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 
     fn fs(path: &str, index: IndexStatus, worktree: WorktreeStatus) -> FileStatus {
         FileStatus::with_status(PathBuf::from(path), index, worktree)

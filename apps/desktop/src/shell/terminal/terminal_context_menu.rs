@@ -1,11 +1,11 @@
-//! Terminal GRID right-click context menu — Copy / Paste / Select All /
+﻿//! Terminal GRID right-click context menu — Copy / Paste / Select All /
 //! Clear / link actions / send-to-agent / split / tab ops.
 //!
 //! Mirrors `TabContextMenu`: one shared entity owned by `WorkspaceRoot`,
 //! opened via the `OpenTerminalContextMenuAt` payload action. The menu holds
 //! a `WeakEntity<TerminalView>` so grid operations (copy, paste, clear, …)
 //! call the right view directly even across splits — the documented
-//! overlay-action-dispatch fragility (`oximux-overlay-dispatch-needs-root-
+//! overlay-action-dispatch fragility (`trex-overlay-dispatch-needs-root-
 //! fallback`) is sidestepped by mutating the view, not dispatching down into
 //! it. Genuine tab/split operations (Split, Set Title, Close Tab) dispatch
 //! workspace-level actions up the focused element path, which DOES resolve.
@@ -14,7 +14,7 @@ use gpui::{
     ClipboardItem, Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
     ParentElement, Render, Styled, WeakEntity, Window, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{CloseTab, RequestRenameTabAt, SplitSubPaneDown, SplitSubPaneRight};
 use crate::shell::terminal_view::TerminalView;
@@ -114,7 +114,7 @@ impl TerminalContextMenu {
 
 impl Render for TerminalContextMenu {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

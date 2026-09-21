@@ -1,8 +1,8 @@
-//! Keeps the menu-bar indicator honest about what agents are driving.
+﻿//! Keeps the menu-bar indicator honest about what agents are driving.
 //!
 //! # Why this polls rather than being told
 //!
-//! Grants are not created in one place. OxiMux records one when the user
+//! Grants are not created in one place. TREX records one when the user
 //! approves a consent card — but the `PreToolUse` hook is a separate short-lived
 //! process, and it resolves build provenance itself, so an agent driving a
 //! binary it just built gets a grant this process never sees. Anything wired to
@@ -26,7 +26,7 @@ use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
 use gpui::{App, AsyncApp, Global};
-use oximux_computer_use::{Driving, GrantTable};
+use trex_computer_use::{Driving, GrantTable};
 
 use crate::platform::escape_tap::{self, EscapeTap};
 use crate::platform::screen_control_indicator::{EscapeState, ScreenControlIndicator};

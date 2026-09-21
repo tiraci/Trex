@@ -1,17 +1,17 @@
-// End-to-end: boot the real `oximux-relay` daemon in-process, then
+﻿// End-to-end: boot the real `trex-relay` daemon in-process, then
 // drive it through `RelayBackend` (sync TerminalBackend API). Proves
 // the trait contract is upheld across the socket.
 
 use std::sync::Arc;
 use std::time::Duration;
 
-use oximux_pty::{SpawnConfig, TerminalBackend, TerminalEvent, TerminalSessionId};
+use trex_pty::{SpawnConfig, TerminalBackend, TerminalEvent, TerminalSessionId};
 // Only the in-process latency probe uses this, and that probe is unix-only.
 #[cfg(unix)]
-use oximux_pty::PortablePtyBackend;
-use oximux_shell_env::test_support::{echo_two_vars, lines, test_cwd, test_shell};
-use oximux_relay::{ServerConfig, run_server};
-use oximux_relay_client::{RelayBackend, RelayClient};
+use trex_pty::PortablePtyBackend;
+use trex_shell_env::test_support::{echo_two_vars, lines, test_cwd, test_shell};
+use trex_relay::{ServerConfig, run_server};
+use trex_relay_client::{RelayBackend, RelayClient};
 use tempfile::TempDir;
 use tokio::runtime::Runtime;
 
@@ -217,8 +217,8 @@ fn spawn_config_env_reaches_child_via_backend() {
         cols: 80,
         rows: 24,
         env: vec![
-            ("OXIMUX_WORKSPACE_ID".into(), "WS_CLIENT_MARKER_5".into()),
-            ("OXIMUX_TAB_ID".into(), "TAB_CLIENT_MARKER_9".into()),
+            ("TREX_WORKSPACE_ID".into(), "WS_CLIENT_MARKER_5".into()),
+            ("TREX_TAB_ID".into(), "TAB_CLIENT_MARKER_9".into()),
         ],
         ..SpawnConfig::default()
     };
@@ -226,7 +226,7 @@ fn spawn_config_env_reaches_child_via_backend() {
     fx.backend
         .write(
             id,
-            &lines(&[&echo_two_vars("OXIMUX_WORKSPACE_ID", "OXIMUX_TAB_ID"), "exit"]),
+            &lines(&[&echo_two_vars("TREX_WORKSPACE_ID", "TREX_TAB_ID"), "exit"]),
         )
         .expect("write");
 
@@ -402,7 +402,7 @@ fn resize_applies_to_local_grid_synchronously() {
 // End-to-end keystroke latency probe. Measures write→echo round-trip
 // for N single-byte writes against a real /bin/sh through the live
 // daemon. Run with:
-//   cargo test --release -p oximux-relay-client \
+//   cargo test --release -p trex-relay-client \
 //       --test relay_client_integration -- --ignored --nocapture \
 //       keystroke_echo_latency
 // Ignored by default so the normal `cargo test` cycle stays under 1s.
@@ -568,10 +568,10 @@ fn attach_existing_replays_into_local_state() {
     let relay_pty_id = {
         let resp = fx
             ._runtime
-            .block_on(client.request(oximux_relay_proto::Request::ListPtys))
+            .block_on(client.request(trex_relay_proto::Request::ListPtys))
             .expect("list");
         match resp {
-            oximux_relay_proto::Response::PtyList(v) => v[0].pty_id.clone(),
+            trex_relay_proto::Response::PtyList(v) => v[0].pty_id.clone(),
             other => panic!("{other:?}"),
         }
     };

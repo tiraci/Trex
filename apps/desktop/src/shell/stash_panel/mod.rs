@@ -1,4 +1,4 @@
-//! StashPanel — list git stash entries with per-row Apply / Pop / Drop.
+﻿//! StashPanel — list git stash entries with per-row Apply / Pop / Drop.
 //!
 //! Drop is destructive, so the panel only sets a `pending_drop` flag; the
 //! shell host (step 14) observes the entity, opens a `ConfirmDialog`, and
@@ -28,9 +28,9 @@ use gpui_component::{
     Icon, Sizable as _,
     button::{Button, ButtonVariants},
 };
-use oximux_core::{StashEntry, StashRef};
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{StashEntry, StashRef};
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
 use tokio::sync::oneshot;
 
 /// Resting opacity of a stash row's Apply/Pop/Drop cluster — ghosted enough to
@@ -139,7 +139,7 @@ impl StashPanel {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::stash_panel",
+                    target: "trex_app::stash_panel",
                     "no tokio runtime; stash_list skipped (step 14 wires runtime)"
                 );
                 return;
@@ -214,7 +214,7 @@ impl StashPanel {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::stash_panel",
+                    target: "trex_app::stash_panel",
                     "no tokio runtime; stash_push skipped"
                 );
                 return;
@@ -235,7 +235,7 @@ impl StashPanel {
     fn spawn_op<F, Fut>(&mut self, op: F, label: &'static str, cx: &mut Context<Self>)
     where
         F: FnOnce(Repository) -> Fut + Send + 'static,
-        Fut: std::future::Future<Output = oximux_git::Result<()>> + Send + 'static,
+        Fut: std::future::Future<Output = trex_git::Result<()>> + Send + 'static,
     {
         let repo = self.repo.clone();
         let (tx, rx) = oneshot::channel::<Result<(), String>>();
@@ -247,7 +247,7 @@ impl StashPanel {
                 });
             }
             Err(_) => {
-                tracing::warn!(target: "oximux_app::stash_panel", op = label, "no tokio runtime; op skipped");
+                tracing::warn!(target: "trex_app::stash_panel", op = label, "no tokio runtime; op skipped");
                 return;
             }
         }
@@ -274,7 +274,7 @@ impl Focusable for StashPanel {
 
 impl Render for StashPanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let count = match &self.state {
             StashListState::Ready(entries) => entries.len(),
             _ => 0,

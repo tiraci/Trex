@@ -1,4 +1,4 @@
-//! End-to-end regression test for the StashPanel's `push` plumbing.
+﻿//! End-to-end regression test for the StashPanel's `push` plumbing.
 //! Drives a real `tokio::Runtime` + GPUI test context against a temp
 //! git repo with one dirty file:
 //!
@@ -24,9 +24,9 @@
 use gpui::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, TestAppContext, Window, div,
 };
-use oximux_app::shell::stash_panel::StashPanel;
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::stash_panel::StashPanel;
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
 use std::path::Path;
 use std::process::Command;
 
@@ -46,14 +46,14 @@ fn seed_dirty_repo(p: &Path) {
             .args(args)
             .current_dir(p)
             .env("GIT_AUTHOR_NAME", "Test")
-            .env("GIT_AUTHOR_EMAIL", "test@oximux.dev")
+            .env("GIT_AUTHOR_EMAIL", "test@TREX.dev")
             .env("GIT_COMMITTER_NAME", "Test")
-            .env("GIT_COMMITTER_EMAIL", "test@oximux.dev")
+            .env("GIT_COMMITTER_EMAIL", "test@TREX.dev")
             .status()
             .expect("git on PATH");
     };
     st(&["init", "-b", "main"]);
-    st(&["config", "user.email", "test@oximux.dev"]);
+    st(&["config", "user.email", "test@TREX.dev"]);
     st(&["config", "user.name", "Test"]);
     std::fs::write(p.join("alpha.txt"), "base\n").expect("write");
     st(&["add", "alpha.txt"]);

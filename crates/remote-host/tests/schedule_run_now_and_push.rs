@@ -1,4 +1,4 @@
-//! The v17 schedule surface: the run-now gates (authorization before
+﻿//! The v17 schedule surface: the run-now gates (authorization before
 //! capability), and the recorded-run push — delivered to a subscriber that
 //! declared v17, never to one that declared an older version, because a push
 //! reaches peers that never asked and an old decoder would drop the whole
@@ -9,12 +9,12 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use futures::executor::block_on;
 use futures::future::join;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{AuthStore, Dispatcher, LocalScope, RunNowError, ScheduleRunner};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::{HelloReq, RunOutcomeWire, ScheduleRunWire};
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{AuthStore, Dispatcher, LocalScope, RunNowError, ScheduleRunner};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::{HelloReq, RunOutcomeWire, ScheduleRunWire};
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 async fn call(client: &dyn Transport, req: Request) -> Response {
     client.send(req.to_bytes().unwrap()).await.unwrap();
@@ -115,7 +115,7 @@ fn a_v17_subscriber_receives_the_run_push() {
         let hello = call(
             &client,
             Request::Hello(HelloReq {
-                protocol_version: oximux_remote_proto::proto::PROTOCOL_VERSION,
+                protocol_version: trex_remote_proto::proto::PROTOCOL_VERSION,
             }),
         )
         .await;

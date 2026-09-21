@@ -1,9 +1,9 @@
-//! Durable device persistence for the [`AuthStore`](super::AuthStore).
+﻿//! Durable device persistence for the [`AuthStore`](super::AuthStore).
 //!
 //! The store is kept authoritative in memory; a [`DeviceStore`] is an optional
 //! write-through/seed sink so the authorized set + revocations survive a restart.
 //! `AuthStore` depends only on the trait (mockable, no DB in unit tests);
-//! [`StorageDeviceStore`] is the concrete `oximux-storage` binding.
+//! [`StorageDeviceStore`] is the concrete `trex-storage` binding.
 //!
 //! Reconnect `session_token`s are deliberately NOT persisted — they are an
 //! ephemeral fast path; after a restart a client simply falls back to the
@@ -11,7 +11,7 @@
 
 use std::sync::Arc;
 
-use oximux_storage::{RemoteDeviceRepo, RemoteScope};
+use trex_storage::{RemoteDeviceRepo, RemoteScope};
 
 use super::{AppPubkey, AuthStore, DeviceRecord, DeviceScope};
 
@@ -142,7 +142,7 @@ impl AuthStore {
     }
 }
 
-/// The `oximux-storage`-backed [`DeviceStore`]. Maps `StoredDevice` ↔ the repo's
+/// The `trex-storage`-backed [`DeviceStore`]. Maps `StoredDevice` ↔ the repo's
 /// `RemoteScope`/rows and hex-encodes the 32-byte pubkey for the TEXT key.
 pub struct StorageDeviceStore {
     repo: RemoteDeviceRepo,
@@ -238,8 +238,8 @@ mod tests {
     use crate::auth::Peer;
     use crate::registration_proof;
     use ed25519_dalek::SigningKey;
-    use oximux_remote_proto::messages::RegisterReq;
-    use oximux_storage::open_memory;
+    use trex_remote_proto::messages::RegisterReq;
+    use trex_storage::open_memory;
     use std::sync::Mutex;
 
     const SECRET: [u8; 16] = [0x22; 16];
@@ -427,7 +427,7 @@ mod tests {
             auth.set_pairing(super::super::PairingSlot::new(SECRET, None, false));
             assert_eq!(
                 auth.register(&reg(pubkey, None), NOW),
-                Err(oximux_remote_proto::RpcError::Unauthorized),
+                Err(trex_remote_proto::RpcError::Unauthorized),
                 "a revoked-and-persisted device cannot re-register"
             );
         }

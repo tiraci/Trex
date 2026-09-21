@@ -1,4 +1,4 @@
-//! The headless [`SessionCatalog`]: persisted sessions enumerated straight
+﻿//! The headless [`SessionCatalog`]: persisted sessions enumerated straight
 //! from storage, opened by resuming the agent — no window, no panes.
 //!
 //! The index of what exists is the `agent_chat:` blob set (the same one the
@@ -13,12 +13,12 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::{ConnectSpec, connect};
-use oximux_remote_host::catalog::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::{ConnectSpec, connect};
+use trex_remote_host::catalog::{
     DormantChoice, DormantChoices, DormantSession, DormantTranscript, OpenGate, SessionCatalog,
 };
-use oximux_storage::SettingsRepo;
+use trex_storage::SettingsRepo;
 
 use super::blob::{self, CHAT_KEY_PREFIX, ChatBlob};
 use super::pump::{self, PumpSet, PumpSpec};
@@ -76,7 +76,7 @@ pub struct HeadlessCatalog {
     /// freshly launched one is. A resume is the easy half of that job: the
     /// session id already exists, so the credential is granted under it
     /// directly and never needs rebinding.
-    local: Arc<oximux_remote_local::LocalControlListener>,
+    local: Arc<trex_remote_local::LocalControlListener>,
 }
 
 impl HeadlessCatalog {
@@ -88,7 +88,7 @@ impl HeadlessCatalog {
         pumps: Arc<PumpSet>,
         draining: Arc<AtomicBool>,
         index: Arc<SessionIndex>,
-        local: Arc<oximux_remote_local::LocalControlListener>,
+        local: Arc<trex_remote_local::LocalControlListener>,
     ) -> Self {
         match settings.list_prefixed(CHAT_KEY_PREFIX) {
             Ok(rows) => {
@@ -132,7 +132,7 @@ impl HeadlessCatalog {
             .clone()
             .ok_or_else(|| "this session's working directory is unknown".to_string())?;
         let mut spec = ConnectSpec::for_backend(
-            &oximux_agents::thread::ChatBackend {
+            &trex_agents::thread::ChatBackend {
                 transport: blob.provider,
                 acp_command: blob.acp_command.clone(),
                 acp_args: blob.acp_args.clone(),
@@ -235,7 +235,7 @@ impl SessionCatalog for HeadlessCatalog {
 
     fn choices(&self, session_id: &str) -> Option<DormantChoices> {
         let blob = blob::load(&self.settings, session_id)?;
-        let map = |c: &oximux_agents::thread::ModelChoice| DormantChoice {
+        let map = |c: &trex_agents::thread::ModelChoice| DormantChoice {
             id: c.wire.clone(),
             label: c.label.clone(),
             description: c.description.clone(),

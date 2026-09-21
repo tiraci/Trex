@@ -1,4 +1,4 @@
-//! Pane content variants — terminal split-tree or editor leaf.
+﻿//! Pane content variants — terminal split-tree or editor leaf.
 //!
 //! Carries the per-tab content inside a `PaneGroup`. Terminal tabs can
 //! hold MULTIPLE PTYs in a sub-pane split tree (Cmd+D / Cmd+Shift+D);
@@ -10,7 +10,7 @@
 use std::path::Path;
 
 use gpui::{App, Entity, FocusHandle, Focusable};
-use oximux_editor::EditorView;
+use trex_editor::EditorView;
 
 use crate::shell::agent_chat::AgentChatView;
 use crate::shell::automations_view::AutomationsView;

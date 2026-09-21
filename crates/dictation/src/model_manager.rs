@@ -1,4 +1,4 @@
-//! Model download / verify / extract manager.
+﻿//! Model download / verify / extract manager.
 //!
 //! Disk is the source of truth: on init we scan the model store and mark a model
 //! Ready only when all its files exist. Downloads are resumable (HTTP Range into
@@ -446,7 +446,7 @@ mod tests {
         use std::sync::atomic::{AtomicU64, Ordering};
         static N: AtomicU64 = AtomicU64::new(0);
         let n = N.fetch_add(1, Ordering::SeqCst);
-        p.push(format!("oximux-dictation-test-{:?}-{n}", std::thread::current().id()));
+        p.push(format!("trex-dictation-test-{:?}-{n}", std::thread::current().id()));
         std::fs::create_dir_all(&p).unwrap();
         p
     }

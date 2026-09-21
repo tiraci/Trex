@@ -1,4 +1,4 @@
-//! LeftRail — full workspace + nav rail.
+﻿//! LeftRail — full workspace + nav rail.
 //!
 //! Composition (top → bottom):
 //!
@@ -6,7 +6,7 @@
 //!    Automations open pane tabs; Agents swaps the rail body; Search is
 //!    still a shell.
 //! 2. WORKSPACES section header with filter / sort / + controls
-//! 3. Workspace list — per-project groups rendering OxiMux `Workspace`
+//! 3. Workspace list — per-project groups rendering TREX `Workspace`
 //!    rows with status dots derived from the latest agent session.
 //! 4. Spacer
 //! 5. Bottom toolbar: "Add Project" + settings cog
@@ -50,9 +50,9 @@ use gpui::{
     div, point, px, svg,
 };
 use gpui_component::input::{InputEvent, InputState};
-use oximux_core::{AgentStatus, Project, SidebandDetail, Workspace};
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::SettingsRepo;
+use trex_core::{AgentStatus, Project, SidebandDetail, Workspace};
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::SettingsRepo;
 
 use crate::shell::left_rail::worktree_stats::WorktreeStats;
 use crate::shell::workspace::discovery::UntrackedWorktree;
@@ -340,10 +340,10 @@ impl LeftRail {
     /// WorkspaceRoot resolves the same way in its own `new`, so the rail and
     /// root always agree.
     pub fn new(weak_root: WeakEntity<WorkspaceRoot>, cx: &mut Context<Self>) -> Self {
-        let appearance = oximux_settings::appearance::active(cx);
+        let appearance = trex_settings::appearance::active(cx);
         let density = Density::for_appearance(appearance);
         let theme = Theme::for_appearance(appearance);
-        let typography = oximux_settings::appearance::typography(cx);
+        let typography = trex_settings::appearance::typography(cx);
         Self {
             active_nav: None,
             weak_root,
@@ -1251,7 +1251,7 @@ fn agents_display_equal(a: &WorkspaceAgentList, b: &WorkspaceAgentList) -> bool 
 
 impl Render for LeftRail {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // A resize drag is over once no drag is active — releasing the
         // button produces no further drag-move ticks, so the flag is
         // cleared here on the next render instead.
@@ -1916,18 +1916,18 @@ mod tests {
     use super::WorkspaceGroupMode;
     use crate::shell::left_rail::project_group::FLAT_ARCHIVED_KEY;
     use std::collections::HashMap;
-    use oximux_core::Workspace;
+    use trex_core::Workspace;
 
     fn ws(id: &str) -> Workspace {
         Workspace {
             id: id.to_string(),
             project_id: "p".to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: id.to_string(),
             slug: id.to_string(),
-            branch: format!("oximux/{id}"),
+            branch: format!("TREX/{id}"),
             worktree_path: format!("/tmp/{id}"),
             status: "active".to_string(),
             created_at: "2026-06-16T00:00:00+00:00".to_string(),
@@ -1999,7 +1999,7 @@ mod tests {
     #[test]
     fn agents_display_equal_skips_status_rx_catches_visible_fields() {
         use crate::shell::left_rail::{RailAgentRow, RailAgentTarget};
-        use oximux_core::{AgentSnapshot, AgentStatus};
+        use trex_core::{AgentSnapshot, AgentStatus};
         use std::collections::HashMap;
         use tokio::sync::watch;
 

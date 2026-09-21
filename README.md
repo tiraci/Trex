@@ -1,6 +1,6 @@
-# OxiMux
+﻿# TREX
 
-[![ci](https://github.com/nhtera/OxiMux/actions/workflows/ci.yml/badge.svg)](https://github.com/nhtera/OxiMux/actions/workflows/ci.yml)
+[![ci](https://github.com/tiraci/Trex/actions/workflows/ci.yml/badge.svg)](https://github.com/tiraci/Trex/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Greptile: The War on Bugs](https://www.greptile.com/badge.svg)](https://www.greptile.com/?utm_source=oss_badge&utm_medium=readme&utm_campaign=greptile_for_open_source)
 
@@ -12,7 +12,7 @@ A Rust-native, multi-agent development cockpit for macOS and Windows. Open a rep
   list of macOS-shaped features is excluded on Windows — see
   [`docs/windows-port-exclusions.md`](docs/windows-port-exclusions.md).
 
-![The OxiMux cockpit — projects and agents in the rail, agent chat tabs in the center, Git changes and commit graph on the right](apps/landing/src/assets/shots/cockpit.png)
+![The TREX cockpit — projects and agents in the rail, agent chat tabs in the center, Git changes and commit graph on the right](apps/landing/src/assets/shots/cockpit.png)
 
 ![Claude Code and Codex running side by side in an isolated worktree, with the Git panel tracking changes](apps/landing/src/assets/shots/worktrees.png)
 
@@ -22,14 +22,14 @@ A Rust-native, multi-agent development cockpit for macOS and Windows. Open a rep
 # Build the PTY relay daemon first — the app resolves it as a sibling of
 # its own binary, and without it terminals fall back to in-process PTYs
 # that don't survive a relaunch.
-cargo build -p oximux-relay --release
+cargo build -p trex-relay --release
 
 # Build + run the shell (release ~slow first time due to GPUI compile)
-cargo run -p oximux-app --release
+cargo run -p trex-app --release
 
-# Or produce an .app bundle in dist/ (bundles oximux + oximux-relay)
+# Or produce an .app bundle in dist/ (bundles TREX + trex-relay)
 ./scripts/bundle-macos.sh
-open dist/OxiMux.app
+open dist/trex.app
 ```
 
 ### Building on Windows
@@ -40,14 +40,14 @@ behind is recorded in
 [`docs/windows-port-exclusions.md`](docs/windows-port-exclusions.md).
 
 ```powershell
-# Produce dist/OxiMux — the app plus every sibling it resolves at runtime
+# Produce dist/TREX — the app plus every sibling it resolves at runtime
 # (relay daemon, screen-control hook, ripgrep, dictation DLLs).
 ./scripts/bundle-windows.ps1
-./dist/OxiMux/oximux.exe
+./dist/TREX/TREX.exe
 ```
 
 Running straight out of `target/` works too, but only the bundle carries
-`oximux-screen-gate.exe`, and without it agent chats run unpoliced. See
+`trex-screen-gate.exe`, and without it agent chats run unpoliced. See
 [`docs/windows-packaging.md`](docs/windows-packaging.md).
 
 Beyond the Rust toolchain and the MSVC build tools, Windows needs **LLVM**, which
@@ -57,8 +57,8 @@ macOS gets for free from Xcode:
 winget install LLVM.LLVM
 ```
 
-`sherpa-rs-sys` — reached only through `oximux-dictation`, and so only by
-`oximux-app` — runs `bindgen`, which needs `libclang`. Nothing else in the
+`sherpa-rs-sys` — reached only through `trex-dictation`, and so only by
+`trex-app` — runs `bindgen`, which needs `libclang`. Nothing else in the
 workspace does, which is why every crate except the desktop app builds without
 this.
 
@@ -71,21 +71,21 @@ Neither requirement shows up in CI — GitHub's Windows runners preinstall LLVM 
 so the compile gate passing is not evidence that a clean machine can build.
 
 `--workspace` commands need one macOS-only crate excluded, the same way the
-Windows CI job spells it. `oximux-computer-use` used to sit beside it and no
+Windows CI job spells it. `trex-computer-use` used to sit beside it and no
 longer does — it compiles and its tests pass on Windows:
 
 ```powershell
-cargo check --workspace --all-targets --exclude oximux-macos-trust
+cargo check --workspace --all-targets --exclude trex-macos-trust
 
-# Build the relay first here too — the app resolves `oximux-relay.exe` as a
+# Build the relay first here too — the app resolves `trex-relay.exe` as a
 # sibling of its own binary.
-cargo build -p oximux-relay -p oximux-app
+cargo build -p trex-relay -p trex-app
 ```
 
-## The `oximux` CLI
+## The `TREX` CLI
 
-`oximux` is the scriptable client of a running host — the desktop app, or
-`oximux serve` on a headless machine. It drives sessions, agents, schedules, git,
+`TREX` is the scriptable client of a running host — the desktop app, or
+`TREX serve` on a headless machine. It drives sessions, agents, schedules, git,
 and worktrees from a shell or a CI job, locally or over a paired remote link.
 
 See [docs/cli-reference.md](docs/cli-reference.md) for every command and flag.
@@ -93,22 +93,22 @@ It's generated straight from the parser (`scripts/gen-cli-docs.sh`), so it
 can't drift from what the binary actually accepts.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nhtera/OxiMux/main/scripts/install-cli.sh | sh
+curl -fsSL https://raw.githubusercontent.com/tiraci/Trex/main/scripts/install-cli.sh | sh
 ```
 
 ```powershell
-irm https://raw.githubusercontent.com/nhtera/OxiMux/main/scripts/install-cli.ps1 | iex
+irm https://raw.githubusercontent.com/tiraci/Trex/main/scripts/install-cli.ps1 | iex
 ```
 
-Installs `oximux` and `oximux-relay` into `~/.local/bin` (macOS/Linux) or
-`%LOCALAPPDATA%\Programs\oximux` (Windows). Both binaries, always: they speak a
+Installs `TREX` and `trex-relay` into `~/.local/bin` (macOS/Linux) or
+`%LOCALAPPDATA%\Programs\TREX` (Windows). Both binaries, always: they speak a
 handshake versioned in lockstep, so one without the other cannot talk to itself.
 
 Afterwards it updates itself:
 
 ```bash
-oximux update --check   # what's available, changes nothing
-oximux update           # verify signature, then replace both binaries
+TREX update --check   # what's available, changes nothing
+TREX update           # verify signature, then replace both binaries
 ```
 
 Updates are verified against a maintainer signature over the release manifest,
@@ -119,8 +119,8 @@ there is a verified binary to run — and take `--require-signature`
 (`-RequireSignature`) to close that gap when `minisign` is available. See
 [docs/release-signing.md](docs/release-signing.md).
 
-Installed through Homebrew instead? `oximux update` will tell you to use
-`brew upgrade oximux` — two things owning one set of files is a state neither
+Installed through Homebrew instead? `TREX update` will tell you to use
+`brew upgrade TREX` — two things owning one set of files is a state neither
 can reason about.
 
 ## Repo layout
@@ -130,16 +130,16 @@ sidecars they consume.
 
 ```
 apps/
-├── cli/          Scriptable client of a running host + `oximux serve`
-│                 (headless host), bin `oximux-cli` (package `oximux-cli`),
-│                 installed on PATH as `oximux` — see docs/cli-reference.md
-├── desktop/      GPUI host shell, bin `oximux` (package `oximux-app`):
+├── cli/          Scriptable client of a running host + `TREX serve`
+│                 (headless host), bin `trex-cli` (package `trex-cli`),
+│                 installed on PATH as `TREX` — see docs/cli-reference.md
+├── desktop/      GPUI host shell, bin `TREX` (package `trex-app`):
 │                 panes/tabs/splits, SCM, diff viewer, command palette,
 │                 agent chat. Modules are foldered by concern
 │                 (app_settings/ agent_glue/ session_restore/ platform/
 │                 loaders/ shell/terminal/)
 ├── mobile/       Expo / React Native client for pairing a phone to a
-│                 desktop host. modules/oximux-core is the uniffi turbo
+│                 desktop host. modules/trex-core is the uniffi turbo
 │                 module generated from crates/mobile-core (untracked —
 │                 regenerate with `npm run bindings`)
 └── landing/      Astro marketing site (also the source of the screenshots
@@ -207,7 +207,7 @@ plans/            implementation plans + reports — gitignored
 
 ## Capabilities
 
-- **Workspaces & worktrees** — open a repo, spin up isolated `oximux/<slug>` worktrees per task; create, switch, archive, stash.
+- **Workspaces & worktrees** — open a repo, spin up isolated `TREX/<slug>` worktrees per task; create, switch, archive, stash.
 - **Panes & terminals** — split panes, tabs, a floating terminal; PTYs run out-of-process via the relay daemon and survive an app relaunch.
 - **CLI agents** — spawn Claude Code / Codex / Pi / omp in tabs; an agents dashboard tracks per-session status (`Running`, `NeedsApproval`, `Done`, `Failed`).
 - **Git / SCM** — status poller, staged/unstaged review, commit (with AI-drafted messages), commit graph, branch picker, push/pull/sync, CI badge, `gh pr create`.
@@ -220,8 +220,8 @@ plans/            implementation plans + reports — gitignored
 - **Voice dictation** — offline speech-to-text (sherpa-onnx) into any text field.
 - **Remote control** — pair a phone to a desktop host over an iroh P2P link; the `apps/mobile` client mirrors chats, terminals, and the Git panel.
 - **Ports** — a panel listing the local TCP ports the processes you spawned are listening on.
-- **Design system** — charcoal dark theme, cockpit density, typography scale (`oximux-settings`; see `docs/design-guidelines.md`).
-- **Updates** — signature-verified in-app auto-update for the bundle, and `oximux update` for the CLI pair.
+- **Design system** — charcoal dark theme, cockpit density, typography scale (`trex-settings`; see `docs/design-guidelines.md`).
+- **Updates** — signature-verified in-app auto-update for the bundle, and `TREX update` for the CLI pair.
 - **Guardrails** — `xtask` lints: file size (warn > 1500 LOC / fail > 3000, with a ratchet allowlist that only shrinks), data-dir, literal, appearance, reliability-gates, icon. Plus a font-kit feature check, migration ladder count check, and a producer/consumer pre-commit hook.
 
 ## Working agreements
@@ -240,10 +240,10 @@ Warns (does not block) when a staged diff deletes a public symbol so consumers c
 
 ## License
 
-[Apache License 2.0](LICENSE). You may use, modify, and redistribute OxiMux —
+[Apache License 2.0](LICENSE). You may use, modify, and redistribute TREX —
 including commercially — provided you retain the copyright notice, the
 [`NOTICE`](NOTICE) file, and mark any files you change.
 
-"OxiMux" and the OxiMux logo are **not** covered by the license grant
-(Apache-2.0 §6): forks are welcome, forks distributed under the OxiMux name are
+"TREX" and the TREX logo are **not** covered by the license grant
+(Apache-2.0 §6): forks are welcome, forks distributed under the TREX name are
 not.

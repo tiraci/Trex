@@ -1,4 +1,4 @@
-//! Embed the Windows application icon into `oximux.exe`.
+﻿//! Embed the Windows application icon into `TREX.exe`.
 //!
 //! Two things read this icon and neither of them reads a file:
 //!
@@ -26,7 +26,7 @@
 use std::path::{Path, PathBuf};
 
 /// Repo-relative path to the checked-in Windows icon.
-const ICON: &str = "assets/windows/OxiMux.ico";
+const ICON: &str = "assets/windows/trex.ico";
 
 fn main() {
     // Guard on the *target*, not the host: a cross-compile to Windows from a
@@ -57,7 +57,7 @@ fn main() {
     }
 
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").expect("cargo always sets OUT_DIR"));
-    let rc_path = out_dir.join("oximux.rc");
+    let rc_path = out_dir.join("TREX.rc");
 
     // `.rc` string literals are C-like, so a Windows path's backslashes have to
     // be doubled or `rc.exe` reads `\O`, `\w` &c. as escapes.

@@ -1,4 +1,4 @@
-//! Naming contract for the screen-control MCP server.
+﻿//! Naming contract for the screen-control MCP server.
 //!
 //! Just four items, and they live here rather than beside the driver they
 //! describe for one reason: the transcript scrubber in [`crate::redact`] keys
@@ -7,7 +7,7 @@
 //! Splitting the *name* from the *implementation* is what lets the redaction
 //! path stay unconditional.
 //!
-//! Everything here is a pure string predicate. `oximux-computer-use` re-exports
+//! Everything here is a pure string predicate. `trex-computer-use` re-exports
 //! these under its own paths, so there is still exactly one definition.
 
 /// Name the server is declared under. It is not cosmetic: agents namespace MCP
@@ -19,7 +19,7 @@
 /// never appears in the session's server list at all, with no error, and the
 /// agent simply reports the tools missing. A namespaced name also avoids
 /// colliding with a server the user has configured themselves.
-pub const SERVER_NAME: &str = "oximux-computer-use";
+pub const SERVER_NAME: &str = "trex-computer-use";
 
 /// The namespaced prefix agents give this server's tools.
 pub fn tool_prefix() -> String {
@@ -50,7 +50,7 @@ mod tests {
 
     #[test]
     fn namespaced_tools_are_recognised() {
-        assert!(is_computer_use_tool("mcp__oximux-computer-use__click"));
+        assert!(is_computer_use_tool("mcp__trex-computer-use__click"));
         assert!(!is_computer_use_tool("mcp__other-server__click"));
         assert!(!is_computer_use_tool("Bash"));
     }
@@ -58,11 +58,11 @@ mod tests {
     #[test]
     fn bare_name_strips_the_namespace() {
         assert_eq!(
-            bare_tool_name("mcp__oximux-computer-use__screenshot"),
+            bare_tool_name("mcp__trex-computer-use__screenshot"),
             Some("screenshot")
         );
         // A prefix with nothing after it names no tool.
-        assert_eq!(bare_tool_name("mcp__oximux-computer-use__"), None);
+        assert_eq!(bare_tool_name("mcp__trex-computer-use__"), None);
         assert_eq!(bare_tool_name("Bash"), None);
     }
 }

@@ -1,4 +1,4 @@
-//! Keeping the rail's active workspace in step with what the user is looking at.
+﻿//! Keeping the rail's active workspace in step with what the user is looking at.
 //!
 //! The rail's selection has two sources that can disagree. A click on a rail
 //! row sets it deliberately and, by design, does NOT switch tabs ("selection
@@ -8,7 +8,7 @@
 //! moves, and a deliberate selection survives until it does.
 
 use gpui::{Context, Window};
-use oximux_core::Workspace;
+use trex_core::Workspace;
 
 use crate::workspace_root::WorkspaceRoot;
 
@@ -171,7 +171,7 @@ impl WorkspaceRoot {
 #[cfg(test)]
 mod tests {
     use super::focus_follow_target;
-    use oximux_core::Workspace;
+    use trex_core::Workspace;
 
     fn workspace(id: &str, path: &str) -> Workspace {
         Workspace {

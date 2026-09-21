@@ -1,4 +1,4 @@
-//! Composer tests, lifted out of `composer.rs` so that file can ratchet back
+﻿//! Composer tests, lifted out of `composer.rs` so that file can ratchet back
 //! under the size cap. A pure move of the `#[cfg(test)]` items — the
 //! test-only `impl ComposerView` helpers and the three test modules —
 //! with no change to any of them.
@@ -352,7 +352,7 @@ async fn send_queued_now_steers_mid_turn_when_the_backend_takes_it(cx: &mut Test
 }
 
 /// A queued message carrying an image never steers — pi's `steer` accepts
-/// images but OxiMux has never sent one, and reordering keeps the attachment
+/// images but TREX has never sent one, and reordering keeps the attachment
 /// rather than quietly dropping it.
 #[gpui::test]
 async fn a_queued_message_with_an_image_reorders_instead_of_steering(cx: &mut TestAppContext) {
@@ -508,7 +508,7 @@ async fn context_chip_serializes_into_wire_on_drain(cx: &mut TestAppContext) {
             c.set_state(false, true, cx); // streaming → submit parks it
             c.stage_context_chip_for_test(
                 ContextChip::new(
-                    oximux_agents::thread::ContextKind::Diff,
+                    trex_agents::thread::ContextKind::Diff,
                     None,
                     "diff --git a b".into(),
                     false,
@@ -536,7 +536,7 @@ async fn queued_context_chip_restored_on_edit(cx: &mut TestAppContext) {
             c.set_state(false, true, cx);
             c.stage_context_chip_for_test(
                 ContextChip::new(
-                    oximux_agents::thread::ContextKind::Clipboard,
+                    trex_agents::thread::ContextKind::Clipboard,
                     None,
                     "pasted".into(),
                     false,
@@ -558,7 +558,7 @@ fn rank_context_sources_prefix_then_substring_then_all() {
     let sources = vec![
         ContextSource::diff(),                                    // key "diff"
         ContextSource::clipboard(),                              // key "clipboard"
-        ContextSource::terminal(oximux_pty::TerminalSessionId(1), "diffbuild"), // key "terminal diffbuild"
+        ContextSource::terminal(trex_pty::TerminalSessionId(1), "diffbuild"), // key "terminal diffbuild"
     ];
     // Empty query → all sources in order.
     assert_eq!(rank_context_sources(&sources, ""), vec![0, 1, 2]);

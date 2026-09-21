@@ -1,4 +1,4 @@
-//! Autosave coordination.
+﻿//! Autosave coordination.
 //!
 //! Two concerns live here:
 //!
@@ -13,7 +13,7 @@
 //!
 //! 2. The debounced write pump itself lives on [`crate::editor_view::EditorView`]
 //!    (it needs the buffer + GPUI context); the cadence comes from
-//!    `oximux_settings::AutosaveSettings`.
+//!    `trex_settings::AutosaveSettings`.
 //!
 //! All functions here are infallible. Resuming a path that was never paused is
 //! a harmless no-op.
@@ -34,7 +34,7 @@ fn paused() -> &'static Mutex<HashMap<PathBuf, u32>> {
 /// each call with exactly one [`resume_autosave`].
 pub fn pause_autosave(path: &Path) {
     tracing::trace!(
-        target: "oximux_editor::autosave",
+        target: "trex_editor::autosave",
         path = %path.display(),
         "pause_autosave"
     );
@@ -46,7 +46,7 @@ pub fn pause_autosave(path: &Path) {
 /// [`pause_autosave`] is harmless (the refcount floors at zero).
 pub fn resume_autosave(path: &Path) {
     tracing::trace!(
-        target: "oximux_editor::autosave",
+        target: "trex_editor::autosave",
         path = %path.display(),
         "resume_autosave"
     );
@@ -77,7 +77,7 @@ mod tests {
 
     #[test]
     fn pause_resume_round_trip() {
-        let p = PathBuf::from("/tmp/oximux-autosave-test-a.rs");
+        let p = PathBuf::from("/tmp/trex-autosave-test-a.rs");
         assert!(!is_autosave_paused(&p));
         pause_autosave(&p);
         assert!(is_autosave_paused(&p));
@@ -87,7 +87,7 @@ mod tests {
 
     #[test]
     fn refcount_survives_nested_pause() {
-        let p = PathBuf::from("/tmp/oximux-autosave-test-b.rs");
+        let p = PathBuf::from("/tmp/trex-autosave-test-b.rs");
         pause_autosave(&p);
         pause_autosave(&p);
         resume_autosave(&p);
@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn resume_without_pause_is_noop() {
-        let p = PathBuf::from("/tmp/oximux-autosave-test-c.rs");
+        let p = PathBuf::from("/tmp/trex-autosave-test-c.rs");
         resume_autosave(&p); // must not panic / underflow
         assert!(!is_autosave_paused(&p));
     }

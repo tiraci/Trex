@@ -1,4 +1,4 @@
-//! Async execution machinery for the commit area's primary action AND
+﻿//! Async execution machinery for the commit area's primary action AND
 //! every dropdown-driven remote verb (Push / Pull / Sync / Fetch /
 //! Commit & Push / Commit & Sync).
 //!
@@ -148,7 +148,7 @@ pub fn run_commit(
         }
         Err(_) => {
             tracing::warn!(
-                target: "oximux_app::source_control",
+                target: "trex_app::source_control",
                 "no tokio runtime entered; commit skipped"
             );
             area.status =
@@ -243,8 +243,8 @@ pub fn run_commit_verb(area: &mut CommitArea, verb: CommitVerb, cx: &mut Context
 /// history) — these resolve a *paused* operation.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum OperationRecovery {
-    Abort(oximux_core::GitOperation),
-    Continue(oximux_core::GitOperation),
+    Abort(trex_core::GitOperation),
+    Continue(trex_core::GitOperation),
 }
 
 impl OperationRecovery {

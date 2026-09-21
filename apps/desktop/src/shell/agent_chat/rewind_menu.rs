@@ -1,4 +1,4 @@
-//! Rewind: per-turn checkpoints + "restore conversation (± files)".
+﻿//! Rewind: per-turn checkpoints + "restore conversation (± files)".
 //!
 //! Flow (strictly sequenced — each step gates the next):
 //! 1. `cancel_and_wait` — the child must be CONFIRMED dead before the session
@@ -20,9 +20,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::{div, px, Context, InteractiveElement, IntoElement, ParentElement, SharedString,
     StatefulInteractiveElement, Styled, Window};
-use oximux_agents::thread::session_file_fork::{self, ForkError};
-use oximux_agents::thread::ThreadEntry;
-use oximux_git::checkpoint::{CheckpointEngine, CheckpointError, CheckpointSha};
+use trex_agents::thread::session_file_fork::{self, ForkError};
+use trex_agents::thread::ThreadEntry;
+use trex_git::checkpoint::{CheckpointEngine, CheckpointError, CheckpointSha};
 
 use super::AgentChatView;
 
@@ -216,8 +216,8 @@ impl AgentChatView {
         ordinal: usize,
         include_files: bool,
         cx: &mut Context<Self>,
-    ) -> Result<(), oximux_remote_host::RewindError> {
-        use oximux_remote_host::RewindError;
+    ) -> Result<(), trex_remote_host::RewindError> {
+        use trex_remote_host::RewindError;
 
         // A restored session the desktop hasn't rendered yet is dormant: no
         // connection, so `backend_supports_rewind` below would read as
@@ -402,7 +402,7 @@ impl AgentChatView {
                 // (the `Failed` arm below) leaves every subscriber's transcript
                 // exactly as the desktop's own.
                 if let Some(binding) = &self.remote {
-                    binding.ingest(oximux_agents::thread::ThreadEvent::Rewound { ordinal });
+                    binding.ingest(trex_agents::thread::ThreadEvent::Rewound { ordinal });
                 }
                 // Entry indices shift when the tail is dropped — clear the jump
                 // highlight so it can't tint the wrong bubble. The rail/list read
@@ -592,7 +592,7 @@ impl AgentChatView {
 /// state — the caller owns the swap.
 #[allow(clippy::too_many_arguments)]
 async fn run_rewind_background(
-    conn: Option<std::sync::Arc<dyn oximux_agents::thread::AgentConnection>>,
+    conn: Option<std::sync::Arc<dyn trex_agents::thread::AgentConnection>>,
     engine: Option<std::sync::Arc<CheckpointEngine>>,
     old_sid: String,
     ordinal: usize,

@@ -1,4 +1,4 @@
-# Build and publish the release artifacts: a signed, notarized macOS DMG and an
+﻿# Build and publish the release artifacts: a signed, notarized macOS DMG and an
 # unsigned Windows x64 zip plus setup.exe.
 #
 # Trigger: pushing a version tag (v0.1.3), or manually via workflow_dispatch —
@@ -147,7 +147,7 @@ jobs:
       - name: Install create-dmg
         run: brew install create-dmg
 
-      - name: Build and sign OxiMux.app
+      - name: Build and sign trex.app
         run: ./scripts/bundle-macos.sh --hardened --sign "$MACOS_SIGN_IDENTITY"
 
       - name: Package, notarize, and staple the DMG
@@ -171,12 +171,12 @@ jobs:
           if [[ "${GITHUB_REF_TYPE}" != "tag" ]]; then
             TAG="v$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
           fi
-          DMG=(dist/OxiMux-*-macos-arm64.dmg)
+          DMG=(dist/trex-*-macos-arm64.dmg)
           # Stable-name duplicate: the landing page links
-          # releases/latest/download/OxiMux-macos-arm64.dmg, which only resolves
+          # releases/latest/download/trex-macos-arm64.dmg, which only resolves
           # if every release carries an asset under exactly that name.
-          cp "${DMG[0]}" dist/OxiMux-macos-arm64.dmg
-          DMG+=(dist/OxiMux-macos-arm64.dmg)
+          cp "${DMG[0]}" dist/trex-macos-arm64.dmg
+          DMG+=(dist/trex-macos-arm64.dmg)
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${DMG[@]}" --clobber
           else
@@ -283,10 +283,10 @@ jobs:
             throw "tag $env:GITHUB_REF_NAME does not match Cargo.toml v$cargo"
           }
 
-      # The bundle script builds, lays out dist/OxiMux, asserts the icon
+      # The bundle script builds, lays out dist/TREX, asserts the icon
       # resource made it into the executable, zips, and compiles
-      # packaging/windows/oximux.iss. Its assertions are the point: a Windows
-      # build that silently omits oximux-screen-gate.exe runs every agent chat
+      # packaging/windows/TREX.iss. Its assertions are the point: a Windows
+      # build that silently omits trex-screen-gate.exe runs every agent chat
       # unenforced and otherwise looks normal.
       #
       # No step installs Inno Setup: the windows-latest image ships it (6.7.1 at
@@ -308,22 +308,22 @@ jobs:
                         Select-Object -First 1).Matches[0].Groups[1].Value
             $tag = "v$version"
           }
-          $zip = Get-ChildItem dist/OxiMux-*-windows-*.zip | Select-Object -First 1
+          $zip = Get-ChildItem dist/trex-*-windows-*.zip | Select-Object -First 1
           if (-not $zip) { throw 'no zip in dist/ - did bundle-windows.ps1 run?' }
           # Both are required, not best-effort. A release that quietly carries
           # only one of them is the failure this check exists to prevent: users
           # who followed a "download the installer" link find a zip instead.
           # The Where-Object keeps a re-run of this step from matching the
           # stable-name copy made below and copying the file onto itself.
-          $setup = Get-ChildItem dist/OxiMux-*-x64-setup.exe |
-            Where-Object Name -ne 'OxiMux-windows-x64-setup.exe' |
+          $setup = Get-ChildItem dist/trex-*-x64-setup.exe |
+            Where-Object Name -ne 'trex-windows-x64-setup.exe' |
             Select-Object -First 1
           if (-not $setup) { throw 'no setup.exe in dist/ - did -Installer run?' }
 
           # Stable-name duplicate: the landing page links
-          # releases/latest/download/OxiMux-windows-x64-setup.exe, which only
+          # releases/latest/download/trex-windows-x64-setup.exe, which only
           # resolves if every release carries an asset under exactly that name.
-          Copy-Item $setup.FullName dist/OxiMux-windows-x64-setup.exe -Force
+          Copy-Item $setup.FullName dist/trex-windows-x64-setup.exe -Force
 
           # `gh release view` failing means "not created yet". Creating it may
           # still lose to the macOS job doing the same thing a second earlier,
@@ -334,7 +334,7 @@ jobs:
             gh release create $tag --draft --generate-notes --title $tag
             if ($LASTEXITCODE -ne 0) { Write-Host 'release already created by another job' }
           }
-          gh release upload $tag $zip.FullName $setup.FullName dist/OxiMux-windows-x64-setup.exe --clobber
+          gh release upload $tag $zip.FullName $setup.FullName dist/trex-windows-x64-setup.exe --clobber
           if ($LASTEXITCODE -ne 0) { throw "gh release upload failed with exit code $LASTEXITCODE" }
           Write-Host "uploaded $($zip.Name) and $($setup.Name) to $tag"
 
@@ -351,16 +351,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-x86_64-pc-windows-msvc
-          path: dist/OxiMux-*-windows-x64.zip
+          path: dist/trex-*-windows-x64.zip
           if-no-files-found: error
           retention-days: 1
 
   # ---------------------------------------------------------------------------
-  # The `oximux` CLI, for every platform it runs on.
+  # The `TREX` CLI, for every platform it runs on.
   #
-  # This is what `oximux update` and the two bootstrap installers consume, and
+  # This is what `TREX update` and the two bootstrap installers consume, and
   # its output contract is exact: one flat `<name>.tar.gz` per target holding
-  # `oximux` and `oximux-relay` (plus `.exe` on Windows) at the archive root.
+  # `TREX` and `trex-relay` (plus `.exe` on Windows) at the archive root.
   # apps/cli/src/update/archive.rs extracts by allow-list against precisely
   # those two names, so an archive with a leading directory installs nothing.
   #
@@ -390,7 +390,7 @@ jobs:
           # `uname -m` of aarch64/arm64 to exactly this triple, so without it
           # the documented one-line install downloads a 404 on Graviton,
           # Ampere, Oracle's ARM tier and a Pi — which is precisely the cheap
-          # always-on box a headless `oximux serve` belongs on. Native runner
+          # always-on box a headless `TREX serve` belongs on. Native runner
           # (free for public repos) rather than cross: the CLI links rusqlite's
           # bundled sqlite and ring, both of which want a real target toolchain.
           # Same oldest-glibc reasoning as the x86_64 arm above.
@@ -446,21 +446,21 @@ jobs:
             exit 1
           fi
 
-      # OXIMUX_BUILD_CHANNEL is what `oximux version` reports and what a future
+      # TREX_BUILD_CHANNEL is what `TREX version` reports and what a future
       # channel-aware update would follow. build.rs defaults a release profile
       # to `stable` anyway; setting it here makes the release the thing that
       # decides, rather than the profile.
       - name: Build the CLI and the relay
         shell: bash
         env:
-          OXIMUX_BUILD_CHANNEL: stable
+          TREX_BUILD_CHANNEL: stable
           # Target-scoped, so inert on every non-musl leg: cargo consults them
           # only when building the matching musl target.
           CC_x86_64_unknown_linux_musl: musl-gcc
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
           CC_aarch64_unknown_linux_musl: musl-gcc
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
-        run: cargo build --release --target ${{ matrix.target }} -p oximux-cli -p oximux-relay
+        run: cargo build --release --target ${{ matrix.target }} -p trex-cli -p trex-relay
 
       # macOS only, and only when the certificate secret is configured — a fork
       # without one still produces a working (ad-hoc signed) artifact.
@@ -504,14 +504,14 @@ jobs:
             | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)"
           [[ -n "$IDENTITY" ]] || { echo "no Developer ID identity in the .p12" >&2; exit 1; }
 
-          for bin in oximux-cli oximux-relay; do
+          for bin in trex-cli trex-relay; do
             codesign --force --timestamp --options runtime \
               --sign "$IDENTITY" "target/${{ matrix.target }}/release/$bin"
             codesign --verify --strict --verbose=2 "target/${{ matrix.target }}/release/$bin"
           done
 
-      # The cargo bin is `oximux-cli` because apps/desktop owns the bin name
-      # `oximux`; the command users type is `oximux`, so the rename happens
+      # The cargo bin is `trex-cli` because apps/desktop owns the bin name
+      # `TREX`; the command users type is `TREX`, so the rename happens
       # here — the archive is the contract, not the cargo target name.
       - name: Package
         shell: bash
@@ -523,26 +523,26 @@ jobs:
           [[ "$TARGET" == *windows* ]] && EXE=".exe"
 
           STAGE="$(mktemp -d)"
-          cp "target/${TARGET}/release/oximux-cli${EXE}" "${STAGE}/oximux${EXE}"
-          cp "target/${TARGET}/release/oximux-relay${EXE}" "${STAGE}/oximux-relay${EXE}"
-          chmod 755 "${STAGE}/oximux${EXE}" "${STAGE}/oximux-relay${EXE}"
+          cp "target/${TARGET}/release/trex-cli${EXE}" "${STAGE}/TREX${EXE}"
+          cp "target/${TARGET}/release/trex-relay${EXE}" "${STAGE}/trex-relay${EXE}"
+          chmod 755 "${STAGE}/TREX${EXE}" "${STAGE}/trex-relay${EXE}"
 
           mkdir -p dist
-          ARCHIVE="oximux-${VERSION}-${TARGET}.tar.gz"
+          ARCHIVE="trex-${VERSION}-${TARGET}.tar.gz"
           # -C so the two binaries sit at the archive root, flat.
-          tar -czf "dist/${ARCHIVE}" -C "$STAGE" "oximux${EXE}" "oximux-relay${EXE}"
+          tar -czf "dist/${ARCHIVE}" -C "$STAGE" "TREX${EXE}" "trex-relay${EXE}"
 
           # Prove the contract rather than trusting the tar invocation: a
           # leading directory here installs nothing, and the extractor's
-          # allow-list would report it as "the archive does not contain oximux".
+          # allow-list would report it as "the archive does not contain TREX".
           # Both sides sorted, by the same `sort`. Writing the expectation out
-          # by hand is only ever right on one platform: `oximux` sorts before
-          # `oximux-relay`, but `oximux-relay.exe` sorts before `oximux.exe`,
+          # by hand is only ever right on one platform: `TREX` sorts before
+          # `trex-relay`, but `trex-relay.exe` sorts before `TREX.exe`,
           # because the `-` falls under the `.` once a suffix follows the
           # common prefix. Order is not part of the contract here — the
           # extractor matches by name — so compare the sets, not a literal.
           listing="$(tar -tzf "dist/${ARCHIVE}" | sort | tr '\n' ' ')"
-          expected="$(printf '%s\n' "oximux${EXE}" "oximux-relay${EXE}" | sort | tr '\n' ' ')"
+          expected="$(printf '%s\n' "TREX${EXE}" "trex-relay${EXE}" | sort | tr '\n' ' ')"
           if [[ "$listing" != "$expected" ]]; then
             echo "archive layout is wrong: got [${listing}] want [${expected}]" >&2
             exit 1
@@ -565,7 +565,7 @@ jobs:
           fi
 
   # ---------------------------------------------------------------------------
-  # The signed manifest — the trust root every `oximux update` starts from.
+  # The signed manifest — the trust root every `TREX update` starts from.
   #
   # This runs only after every CLI target has produced an archive, because the
   # manifest describes all of them at once and a partial manifest would tell
@@ -612,7 +612,7 @@ jobs:
       - name: Install minisign
         run: sudo apt-get update && sudo apt-get install -y minisign
 
-      # Refuse to publish an unsigned manifest. `oximux update` treats a missing
+      # Refuse to publish an unsigned manifest. `TREX update` treats a missing
       # signature as a hard failure — never as "verification is optional" — so a
       # release published without one is a release nobody can update to, and it
       # is better to fail the workflow than to ship that.
@@ -637,15 +637,15 @@ jobs:
           VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)"
 
           # Derive each target from its archive name rather than restating the
-          # matrix: oximux-<version>-<target>.tar.gz. A target that failed to
+          # matrix: trex-<version>-<target>.tar.gz. A target that failed to
           # build is simply absent, and the updater's "no build for <triple>
           # (it has: ...)" is the honest thing for a user on that platform to
           # read.
           targets='{}'
           shopt -s nullglob
-          for archive in incoming/oximux-"${VERSION}"-*.tar.gz; do
+          for archive in incoming/trex-"${VERSION}"-*.tar.gz; do
             name="$(basename "$archive")"
-            target="${name#oximux-${VERSION}-}"
+            target="${name#trex-${VERSION}-}"
             target="${target%.tar.gz}"
             sha="$(sha256sum "$archive" | awk '{print $1}')"
             size="$(stat -c%s "$archive")"
@@ -670,7 +670,7 @@ jobs:
           # maps names to triples explicitly. A new platform adds a line here.
           apps='{}'
           declare -A APP_TRIPLE=(
-            ["OxiMux-${VERSION}-windows-x64.zip"]="x86_64-pc-windows-msvc"
+            ["trex-${VERSION}-windows-x64.zip"]="x86_64-pc-windows-msvc"
           )
           for name in "${!APP_TRIPLE[@]}"; do
             payload="incoming-apps/${name}"
@@ -706,7 +706,7 @@ jobs:
           #
           # `apps` is additive to schema 1, not a bump: a v1 parser ignores a
           # field it does not know, and bumping would strand every already-
-          # released client on "install a newer oximux to update further" over
+          # released client on "install a newer TREX to update further" over
           # a field that changes nothing about how the CLI verifies its archive.
           jq -cn --arg v "$VERSION" --argjson t "$targets" --argjson a "$apps" \
             '{schemaVersion: 1, version: $v, channel: "stable", targets: $t}
@@ -723,7 +723,7 @@ jobs:
           chmod 600 "$RUNNER_TEMP/minisign.key"
           if [[ "$(wc -l < "$RUNNER_TEMP/minisign.key")" -ne 2 ]]; then
             echo "MINISIGN_SECRET_KEY is not a two-line minisign key file — re-set the secret" >&2
-            echo "with: gh secret set MINISIGN_SECRET_KEY < oximux-release.key" >&2
+            echo "with: gh secret set MINISIGN_SECRET_KEY < trex-release.key" >&2
             exit 1
           fi
           # </dev/null so a password-protected key fails immediately instead of
@@ -737,7 +737,7 @@ jobs:
           # release ships. If the CI secret and the committed public key have
           # drifted, every client would refuse the update — catching that here
           # costs one command and turns a silent dead release into a red build.
-          printf 'untrusted comment: oximux release key\n%s\n' "$PUBKEY" > release.pub
+          printf 'untrusted comment: TREX release key\n%s\n' "$PUBKEY" > release.pub
           minisign -V -p release.pub -x manifest.json.minisig -m manifest.json
           echo "manifest verifies against the key compiled into this release"
 
@@ -749,8 +749,8 @@ jobs:
       - name: Generate the Homebrew formula
         run: |
           set -euo pipefail
-          ./scripts/gen-homebrew-formula.sh manifest.json > oximux.rb
-          cat oximux.rb
+          ./scripts/gen-homebrew-formula.sh manifest.json > trex.rb
+          cat trex.rb
 
       - name: Upload the release assets
         env:
@@ -767,8 +767,8 @@ jobs:
           fi
           # The manifest and its signature go up LAST. `latest/download` serves
           # whatever is attached now, so a manifest that lands before the
-          # archives it describes is a window in which `oximux update` fetches a
+          # archives it describes is a window in which `TREX update` fetches a
           # verified manifest and then 404s on the download it points to.
-          gh release upload "$TAG" incoming/*.tar.gz oximux.rb --clobber
+          gh release upload "$TAG" incoming/*.tar.gz trex.rb --clobber
           gh release upload "$TAG" manifest.json manifest.json.minisig --clobber
           echo "uploaded the CLI archives, the formula, and the signed manifest to $TAG"

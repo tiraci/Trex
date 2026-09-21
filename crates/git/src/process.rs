@@ -1,4 +1,4 @@
-//! Tokio-based wrapper around `git` invocations.
+﻿//! Tokio-based wrapper around `git` invocations.
 //!
 //! Goals:
 //! - All git I/O off the GPUI main thread (callers `await` on a tokio runtime).
@@ -7,7 +7,7 @@
 //! - Locale-stable stderr (`LANG=C`) for predictable error messages.
 
 use crate::error::{GitError, Result};
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 use std::process::ExitStatus;

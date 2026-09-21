@@ -1,4 +1,4 @@
-//! Native dropdown menus for the browser toolbar (macOS).
+﻿//! Native dropdown menus for the browser toolbar (macOS).
 //!
 //! The toolbar's profile + page-theme pickers are real `NSMenu`s rather than
 //! HTML injected into the page. A GPUI-drawn menu can't help here: the webview
@@ -57,7 +57,7 @@ struct TargetIvars {
 
 define_class!(
     #[unsafe(super(NSObject))]
-    #[name = "OxiMuxBrowserMenuTarget"]
+    #[name = "TREXBrowserMenuTarget"]
     #[ivars = TargetIvars]
     struct MenuTarget;
 

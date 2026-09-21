@@ -1,4 +1,4 @@
-//! Per-row + per-section discard copy table.
+﻿//! Per-row + per-section discard copy table.
 //!
 //! Per-row classifies a `FileStatus` into one of three user-visible
 //! flavors of "make this change go away":
@@ -18,7 +18,7 @@
 //! into [`ConfirmPrompt`].
 
 use gpui::SharedString;
-use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 
 /// User-facing flavor of a discard, used to pick title / body / button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

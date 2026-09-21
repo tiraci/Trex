@@ -1,4 +1,4 @@
-//! Relaunching the app after it quits, for "restart to update".
+﻿//! Relaunching the app after it quits, for "restart to update".
 //!
 //! # Why a detached shell instead of just spawning ourselves
 //!
@@ -19,7 +19,7 @@
 //! already happened or will on the next clean quit.
 //!
 //! Windows needs the same helper for the same two reasons, and needs it more
-//! literally: its swap renames `oximux.exe` itself, so a relaunch that raced
+//! literally: its swap renames `TREX.exe` itself, so a relaunch that raced
 //! the quit would start a file that is halfway to being replaced. See
 //! [`windows`] below.
 
@@ -82,19 +82,19 @@ mod tests {
 
     #[test]
     fn the_script_waits_for_the_pid_then_opens_a_fresh_instance() {
-        let script = relaunch_script(Path::new("/Applications/OxiMux.app"), 4242);
+        let script = relaunch_script(Path::new("/Applications/trex.app"), 4242);
         assert!(script.contains("/bin/kill -0 4242"), "{script}");
         // `-n` is what makes it a *new* instance rather than an activate of
         // whatever LaunchServices thinks is running.
         assert!(script.contains("/usr/bin/open -n"), "{script}");
-        assert!(script.contains("/Applications/OxiMux.app"), "{script}");
+        assert!(script.contains("/Applications/trex.app"), "{script}");
     }
 
     #[test]
     fn the_wait_is_bounded() {
         // Without the cap, a quit that never completes leaves a shell polling
         // for the life of the login session.
-        let script = relaunch_script(Path::new("/Applications/OxiMux.app"), 1);
+        let script = relaunch_script(Path::new("/Applications/trex.app"), 1);
         assert!(script.contains(&format!("-ge {MAX_POLLS}")), "{script}");
         assert!(script.contains("exit 0"), "{script}");
     }
@@ -111,7 +111,7 @@ mod tests {
     fn absolute_tool_paths_only() {
         // A GUI launch has no PATH; bare `kill`/`sleep`/`open` would not
         // resolve.
-        let script = relaunch_script(Path::new("/Applications/OxiMux.app"), 7);
+        let script = relaunch_script(Path::new("/Applications/trex.app"), 7);
         for tool in ["/bin/kill", "/bin/sleep", "/usr/bin/open"] {
             assert!(script.contains(tool), "missing {tool} in {script}");
         }
@@ -136,7 +136,7 @@ mod windows {
     use std::path::Path;
     use std::process::{Command, Stdio};
 
-    use oximux_no_window::NoWindow as _;
+    use trex_no_window::NoWindow as _;
 
     /// Matches the macOS helper's patience. `Wait-Process` returns as soon as
     /// the process exits, so this only bounds a quit that wedged.
@@ -186,19 +186,19 @@ mod windows {
         #[test]
         fn the_script_waits_for_the_pid_then_starts_the_installed_exe() {
             let script = relaunch_script(
-                Path::new(r"C:\Users\dev\AppData\Local\Programs\OxiMux\oximux.exe"),
+                Path::new(r"C:\Users\dev\AppData\Local\Programs\TREX\TREX.exe"),
                 4242,
             );
             assert!(script.contains("Wait-Process -Id 4242"), "{script}");
             assert!(script.contains("Start-Process"), "{script}");
-            assert!(script.contains(r"Programs\OxiMux\oximux.exe"), "{script}");
+            assert!(script.contains(r"Programs\TREX\TREX.exe"), "{script}");
         }
 
         /// Without the bound, a quit that never completes leaves a PowerShell
         /// waiting for the life of the session.
         #[test]
         fn the_wait_is_bounded() {
-            let script = relaunch_script(Path::new("oximux.exe"), 1);
+            let script = relaunch_script(Path::new("TREX.exe"), 1);
             assert!(script.contains(&format!("-Timeout {TIMEOUT_SECONDS}")), "{script}");
         }
 
@@ -206,13 +206,13 @@ mod windows {
         /// race, not an error — the relaunch must still happen.
         #[test]
         fn a_process_that_already_exited_does_not_abort_the_relaunch() {
-            let script = relaunch_script(Path::new("oximux.exe"), 1);
+            let script = relaunch_script(Path::new("TREX.exe"), 1);
             assert!(script.contains("-ErrorAction SilentlyContinue"), "{script}");
         }
 
         #[test]
         fn a_quote_in_the_path_cannot_break_out_of_the_string() {
-            let script = relaunch_script(Path::new(r"C:\We'ird\oximux.exe"), 9);
+            let script = relaunch_script(Path::new(r"C:\We'ird\TREX.exe"), 9);
             assert!(script.contains("We''ird"), "quote not escaped in {script}");
             assert!(script.ends_with('\''), "{script}");
         }

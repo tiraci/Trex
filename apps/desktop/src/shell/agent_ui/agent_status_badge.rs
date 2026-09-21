@@ -1,4 +1,4 @@
-//! Agent status badge — colored dot prepended to agent tab labels.
+﻿//! Agent status badge — colored dot prepended to agent tab labels.
 //!
 //! Renders a 6 px solid disc whose color reflects the live `AgentStatus`
 //! piped through `WorkspaceTabKind::Agent { status_rx }`. The dot is the
@@ -18,8 +18,8 @@ use gpui::{
     div, prelude::FluentBuilder, px,
 };
 use gpui_component::tooltip::Tooltip;
-use oximux_core::AgentStatus;
-use oximux_settings::Theme;
+use trex_core::AgentStatus;
+use trex_settings::Theme;
 
 const DOT_SIZE: f32 = 6.0;
 

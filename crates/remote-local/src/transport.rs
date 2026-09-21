@@ -1,4 +1,4 @@
-//! The framed [`Transport`] over one local-socket stream.
+﻿//! The framed [`Transport`] over one local-socket stream.
 //!
 //! Mirrors `remote-iroh`'s transport byte-for-byte at the framing layer —
 //! u32-BE length prefix, the same 16 MiB cap, and the same carry-buffer
@@ -10,7 +10,7 @@
 use async_trait::async_trait;
 use futures::lock::Mutex;
 use interprocess::local_socket::tokio::{RecvHalf as StreamRecv, SendHalf as StreamSend};
-use oximux_remote_proto::transport::{Transport, TransportError};
+use trex_remote_proto::transport::{Transport, TransportError};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 /// One frame's hard ceiling — the same value as `remote-iroh`'s, so a payload

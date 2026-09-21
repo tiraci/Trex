@@ -1,4 +1,4 @@
-//! What each driver tool actually does, from the driver's own schemas.
+﻿//! What each driver tool actually does, from the driver's own schemas.
 //!
 //! The plan for this feature was written against seven input tools. The shipped
 //! driver registers roughly fifty, and several of them are not input at all yet
@@ -42,7 +42,7 @@ pub enum Refusal {
     /// to take the foreground and hold it breaks that.
     StealsFocus,
     /// `kill -9` by pid, "Unsaved state is lost". Not input, not reversible,
-    /// and equally able to target the user's editor or OxiMux itself.
+    /// and equally able to target the user's editor or TREX itself.
     KillsProcesses,
     /// Captures the whole display. The session is pinned to window scope
     /// precisely so an agent sees its own target and not the user's screen.
@@ -55,7 +55,7 @@ pub enum Refusal {
     ReconfiguresDriver,
     /// Downloads and runs an installer.
     InstallsSoftware,
-    /// Session scope is OxiMux's to set. An agent that can start, end, or
+    /// Session scope is TREX's to set. An agent that can start, end, or
     /// escalate its own session can pick its own capture policy, which is what
     /// the pinning exists to prevent.
     ManagesSessions,
@@ -83,9 +83,9 @@ impl Refusal {
             Self::InstallsSoftware => "installs software",
             Self::ManagesSessions => "changes its own screen-control permissions",
             Self::UnattributableBrowserSurface => {
-                "drives a browser through a channel OxiMux cannot attribute to an app"
+                "drives a browser through a channel TREX cannot attribute to an app"
             }
-            Self::Unrecognised => "is not a screen-control action OxiMux recognises",
+            Self::Unrecognised => "is not a screen-control action TREX recognises",
         }
     }
 }
@@ -128,7 +128,7 @@ const TOOLS: &[(&str, ToolClass)] = {
         ("get_agent_cursor_state", Read),
         ("get_browser_state", Read),
         ("check_for_update", Read),
-        // The agent cursor: an overlay OxiMux wants drawn, not an input event.
+        // The agent cursor: an overlay TREX wants drawn, not an input event.
         // `set_agent_cursor_enabled` is here rather than forbidden because
         // showing a cursor is fine; hiding one is caught on the field, since
         // the tool is the same either way.
@@ -245,7 +245,7 @@ mod tests {
 
     #[test]
     fn an_agent_cannot_manage_its_own_session_scope() {
-        // Capture scope is pinned by OxiMux at session start and is immutable
+        // Capture scope is pinned by TREX at session start and is immutable
         // for the session's life. All three of these would let an agent pick
         // its own instead.
         for tool in ["start_session", "end_session", "escalate_session"] {
@@ -323,7 +323,7 @@ mod tests {
 
     #[test]
     fn the_agent_cursor_family_is_overlay() {
-        // The overlay is OxiMux's own attribution marker — it exists so the
+        // The overlay is TREX's own attribution marker — it exists so the
         // user can see which agent is acting. Refusing one of these does not
         // block an action, it removes the thing that labels the action, so a
         // rename in the driver must land here rather than fail closed.

@@ -1,12 +1,12 @@
-//! `oximux worktree` — create, list, and remove project worktrees. The host
+﻿//! `TREX worktree` — create, list, and remove project worktrees. The host
 //! derives every on-disk location; this side only names a project (by the root
 //! path it was handed) and a slug, and removes by listed id, never by path.
 
 use std::path::{Path, PathBuf};
 
-use oximux_core::WorkPhase;
-use oximux_remote_proto::messages::{CreateBaseWire, WorktreeProgressWire, WorktreeWire};
-use oximux_remote_proto::proto::{Request, Response};
+use trex_core::WorkPhase;
+use trex_remote_proto::messages::{CreateBaseWire, WorktreeProgressWire, WorktreeWire};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -80,9 +80,9 @@ fn wire_json(row: &WorktreeWire) -> Value {
 /// `--branch` makes the positional slug optional: adopting a branch takes its
 /// name, so the only thing left for a slug to name is the directory. **The
 /// derivation is the host's**, not this side's — `derive_slug` lives in
-/// `oximux-git`, which is deliberately not on the CLI's dependency path (the
-/// same edge `oximux-worktree-ops` was extracted to keep the git process layer
-/// off `oximux-cli`). Reimplementing it here would put two copies of a naming
+/// `trex-git`, which is deliberately not on the CLI's dependency path (the
+/// same edge `trex-worktree-ops` was extracted to keep the git process layer
+/// off `trex-cli`). Reimplementing it here would put two copies of a naming
 /// rule in the tree and let them disagree, so an omitted slug travels as an
 /// empty string and the host fills it in. An explicit slug still wins: a user
 /// may want the directory named something other than the branch.
@@ -145,7 +145,7 @@ pub async fn create(
     match reply {
         Response::WorktreeCreated(row) => {
             let human = format!(
-                "created {} on branch {}\n{}\nstart an agent there with `oximux run --cwd {} \"…\"`",
+                "created {} on branch {}\n{}\nstart an agent there with `TREX run --cwd {} \"…\"`",
                 row.slug, row.branch, row.path, row.path
             );
             Ok((wire_json(&row), human))

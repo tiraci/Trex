@@ -1,4 +1,4 @@
-//! Branch-picker coordination glue for the Source Control panel.
+﻿//! Branch-picker coordination glue for the Source Control panel.
 //!
 //! Two surfaces (the toolbar branch chip and the settings-2 button)
 //! both open the SAME `BranchPicker` entity. The picker's on-pick
@@ -47,7 +47,7 @@ impl SourceControlPanel {
                 }
                 Err(err) => {
                     tracing::warn!(
-                        target: "oximux_app::source_control",
+                        target: "trex_app::source_control",
                         error = %err,
                         "list_branches failed; opening picker with empty list",
                     );
@@ -97,7 +97,7 @@ impl SourceControlPanel {
             // refactor that loosens those invariants is loud.
             (mode, outcome) => {
                 tracing::warn!(
-                    target: "oximux_app::source_control",
+                    target: "trex_app::source_control",
                     ?mode,
                     ?outcome,
                     "branch picker emitted an outcome that's invalid for the active mode; ignoring",
@@ -120,7 +120,7 @@ impl SourceControlPanel {
         let workspace_id = self.repo.workdir().to_string_lossy().to_string();
         if let Err(err) = merge_base_ref_into_settings(settings_repo, &workspace_id, value) {
             tracing::warn!(
-                target: "oximux_app::source_control",
+                target: "trex_app::source_control",
                 error = %err,
                 workspace_id = %workspace_id,
                 "worktree_settings.upsert failed; base ref change won't survive restart",
@@ -151,7 +151,7 @@ impl SourceControlPanel {
                 Ok(bs) => bs.into_iter().map(|b| b.name).collect(),
                 Err(err) => {
                     tracing::warn!(
-                        target: "oximux_app::source_control",
+                        target: "trex_app::source_control",
                         error = %err,
                         "list_remote_branches failed; opening BaseRef picker with empty list",
                     );
@@ -234,7 +234,7 @@ fn write_branch_op_status(
     area: &mut CommitArea,
     verb: &'static str,
     branch: &str,
-    result: oximux_git::Result<()>,
+    result: trex_git::Result<()>,
     cx: &mut Context<CommitArea>,
 ) {
     let busy = area
@@ -243,7 +243,7 @@ fn write_branch_op_status(
     if busy {
         if let Err(ref err) = result {
             tracing::warn!(
-                target: "oximux_app::source_control",
+                target: "trex_app::source_control",
                 verb = %verb,
                 branch = %branch,
                 error = %err,

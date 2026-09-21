@@ -1,6 +1,6 @@
-use ed25519_dalek::SigningKey;
-use oximux_remote_proto::RpcError;
-use oximux_remote_proto::messages::RegisterReq;
+﻿use ed25519_dalek::SigningKey;
+use trex_remote_proto::RpcError;
+use trex_remote_proto::messages::RegisterReq;
 
 use super::{AppPubkey, AuthStore, PairingEvent, PairingSlot, Peer, registration_proof};
 

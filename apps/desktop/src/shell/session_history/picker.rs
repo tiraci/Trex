@@ -1,4 +1,4 @@
-//! Pure presentation + launch logic for the session-history picker.
+﻿//! Pure presentation + launch logic for the session-history picker.
 //!
 //! All the parts that don't touch GPUI live here so they're unit-testable:
 //! the one-line row label + dim detail line, the fuzzy filter over those
@@ -6,8 +6,8 @@
 //! [`SessionResumption`] mapping, and the fork-with-context preamble. The
 //! modal view in `mod.rs` stays a thin shell over these.
 
-use oximux_agents::session_log::session_index::SessionEntry;
-use oximux_core::{AgentAdapter, SessionResumption};
+use trex_agents::session_log::session_index::SessionEntry;
+use trex_core::{AgentAdapter, SessionResumption};
 
 use crate::shell::command_palette::match_engine::filter_and_rank;
 
@@ -441,12 +441,12 @@ mod tests {
         a.cwd = Some("/Users/x/Code/youtube/graphify-rs".into());
         a.git_branch = Some("main".into());
         let mut b = claude(Some("hi"));
-        b.cwd = Some("/Users/x/Code/projects/OxiMux".into());
+        b.cwd = Some("/Users/x/Code/projects/TREX".into());
         b.git_branch = Some("feat/agents".into());
         let entries = vec![a, b];
         // Project name matches even though both titles are "hi".
         assert_eq!(filter_sessions("graphify", &entries), vec![0]);
-        assert_eq!(filter_sessions("oximux", &entries), vec![1]);
+        assert_eq!(filter_sessions("TREX", &entries), vec![1]);
         // Branch matches too.
         assert_eq!(filter_sessions("feat/agents", &entries), vec![1]);
     }

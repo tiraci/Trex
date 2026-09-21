@@ -1,8 +1,8 @@
-//! Filter for "is this path something the editor should try to open?"
+﻿//! Filter for "is this path something the editor should try to open?"
 //!
 //! Used by the file-tree click handler before constructing an `EditorView`.
 //! The editor itself now picks a rendering mode (text / image / binary
-//! placeholder) at open time via the byte sniffer in `oximux_editor::binary`,
+//! placeholder) at open time via the byte sniffer in `trex_editor::binary`,
 //! so almost any path is fair game. The guard here only refuses paths that
 //! are pathologically heavy to open in an editor tab (archives, executables,
 //! databases) — opening a 200 MB sqlite or a packed `.dylib` provides no

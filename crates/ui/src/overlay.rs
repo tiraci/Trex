@@ -1,4 +1,4 @@
-//! Shared chrome for floating surfaces (popovers, pickers, dialogs, menus,
+﻿//! Shared chrome for floating surfaces (popovers, pickers, dialogs, menus,
 //! toasts).
 //!
 //! The recipe — overlay background, a 1px active-border outline, card-radius
@@ -14,7 +14,7 @@
 
 use gpui::{Div, ParentElement, Styled, div, px};
 
-use oximux_settings::{Density, Theme};
+use trex_settings::{Density, Theme};
 
 /// The non-interactive top inner-highlight. A plain `div` with no mouse
 /// handlers never registers a hitbox, and it is added before the surface's own

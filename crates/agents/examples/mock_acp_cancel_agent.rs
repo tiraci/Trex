@@ -1,11 +1,11 @@
-//! A deterministic mock ACP **agent** that exercises the client's cancel path:
+﻿//! A deterministic mock ACP **agent** that exercises the client's cancel path:
 //! on every prompt it sends a `session/request_permission` and parks on the
 //! response, then reports (as an assistant message the client can observe) which
 //! outcome it received. Point the companion `acp_cancel_smoke` example at it to
 //! prove that a client `session/cancel` resolves an outstanding permission
 //! request with a `Cancelled` outcome instead of hanging the agent forever.
 //!
-//! Build:  `cargo build -p oximux-agents --example mock_acp_cancel_agent`
+//! Build:  `cargo build -p trex-agents --example mock_acp_cancel_agent`
 //! Binary: `target/debug/examples/mock_acp_cancel_agent`
 
 use agent_client_protocol::schema::v1::{

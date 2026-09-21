@@ -1,15 +1,15 @@
-//! Agents / AI pane — edits the `CommitMessageAiSettings` working copy
+﻿//! Agents / AI pane — edits the `CommitMessageAiSettings` working copy
 //! (commit-message generation mode + agent + model). Applies immediately:
 //! mutate the copy, write `commit_message_ai.toml`, watcher re-applies.
 //! Desktop-notification prefs live in the Notifications pane.
 
 use gpui::{AnyElement, IntoElement, ParentElement, Styled, div, px};
-use oximux_settings::{CommitMessageAiMode, Density, Theme, Typography};
+use trex_settings::{CommitMessageAiMode, Density, Theme, Typography};
 
 use super::SettingsModal;
 use super::controls::value_chip;
 use super::layout::{SettingEntry, card_surface, entries_card, entry, section_title};
-use oximux_settings::agent_retry::MaxAutomaticWait;
+use trex_settings::agent_retry::MaxAutomaticWait;
 
 use super::segmented::{Segment, segmented};
 
@@ -30,12 +30,12 @@ const NON_CLAUDE_PRESETS: [&str; 2] = ["gpt-5.5-codex", "gpt-5.5"];
 /// same rows the chat picker shows, all valid for `claude -p`) followed by the
 /// Codex presets, or the static list until a probe has landed.
 fn model_presets() -> Vec<String> {
-    presets_from(oximux_agents::thread::shared_claude_catalog().as_deref())
+    presets_from(trex_agents::thread::shared_claude_catalog().as_deref())
 }
 
 /// [`model_presets`] over an explicit catalog, so the derivation is testable
 /// without touching the process-wide slot.
-fn presets_from(catalog: Option<&oximux_agents::thread::ClaudeCatalog>) -> Vec<String> {
+fn presets_from(catalog: Option<&trex_agents::thread::ClaudeCatalog>) -> Vec<String> {
     match catalog {
         Some(catalog) => catalog
             .models
@@ -360,7 +360,7 @@ mod tests {
     /// them — and keeps the Codex presets after them.
     #[test]
     fn presets_follow_the_claude_catalog() {
-        use oximux_agents::thread::parse_list_models;
+        use trex_agents::thread::parse_list_models;
         let fixture = include_str!(
             "../../../../../crates/agents/src/thread/testdata/claude_list_models_2_1_260.jsonl"
         );

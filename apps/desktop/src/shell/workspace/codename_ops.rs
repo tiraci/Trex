@@ -1,5 +1,5 @@
-//! Codenames from the desktop: the host half of
-//! `oximux-worktree-ops::codename`.
+﻿//! Codenames from the desktop: the host half of
+//! `trex-worktree-ops::codename`.
 //!
 //! The crate owns the vocabulary and the uniquing rule; this owns the one
 //! thing the crate refuses to guess at — which slugs already exist. Two
@@ -10,9 +10,9 @@
 //! Lifted out of `workspace_ops.rs`, which sits at the 3000-LOC hard cap
 //! `xtask file-size-lint` enforces in CI.
 
-use oximux_core::Project;
-use oximux_storage::WorkspaceRepo;
-use oximux_worktree_ops::{is_generated_codename, select_codename};
+use trex_core::Project;
+use trex_storage::WorkspaceRepo;
+use trex_worktree_ops::{is_generated_codename, select_codename};
 
 /// Every slug already in use across `projects`, active **and archived**, so
 /// a codename can be picked that collides with nothing. Archived rows count:
@@ -74,7 +74,7 @@ pub(crate) fn dedup_codename_slug(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::{ProjectRepo, open_memory};
+    use trex_storage::{ProjectRepo, open_memory};
 
     /// A leaf-picked codename that is already a row (active OR archived, in
     /// ANY open project) is re-picked; a free codename and a typed slug pass
@@ -87,9 +87,9 @@ mod tests {
         let b = projects.insert("B", "/tmp/b", "main").expect("project b");
         let repo = WorkspaceRepo::new(db);
         // `amber` lives in project A (active); `birch` in project B, archived.
-        repo.insert(&a.id, "amber", "amber", "oximux/amber", "/wt/amber", true).expect("row");
+        repo.insert(&a.id, "amber", "amber", "TREX/amber", "/wt/amber", true).expect("row");
         let archived = repo
-            .insert(&b.id, "birch", "birch", "oximux/birch", "/wt/birch", true)
+            .insert(&b.id, "birch", "birch", "TREX/birch", "/wt/birch", true)
             .expect("row");
         repo.mark_archived(&archived.id).expect("archive");
         let open = vec![a, b];
@@ -103,7 +103,7 @@ mod tests {
         assert_eq!(dedup_codename_slug("cedar".into(), &repo, &open), "cedar");
         assert_eq!(dedup_codename_slug("fix-login".into(), &repo, &open), "fix-login");
         // A typed slug that collides is left for the user to see.
-        repo.insert(&open[0].id, "fix-login", "fix-login", "oximux/fix-login", "/wt/fl", true)
+        repo.insert(&open[0].id, "fix-login", "fix-login", "TREX/fix-login", "/wt/fl", true)
             .expect("row");
         assert_eq!(dedup_codename_slug("fix-login".into(), &repo, &open), "fix-login");
     }
@@ -116,9 +116,9 @@ mod tests {
         let a = projects.insert("A", "/tmp/a", "main").expect("project a");
         let b = projects.insert("B", "/tmp/b", "main").expect("project b");
         let repo = WorkspaceRepo::new(db);
-        repo.insert(&a.id, "amber", "amber", "oximux/amber", "/wt/amber", true).expect("row");
+        repo.insert(&a.id, "amber", "amber", "TREX/amber", "/wt/amber", true).expect("row");
         let gone = repo
-            .insert(&b.id, "birch", "birch", "oximux/birch", "/wt/birch", true)
+            .insert(&b.id, "birch", "birch", "TREX/birch", "/wt/birch", true)
             .expect("row");
         repo.mark_archived(&gone.id).expect("archive");
         let mut slugs = existing_slugs_across(&repo, &[a, b]);

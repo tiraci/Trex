@@ -1,4 +1,4 @@
-//! App-side loader + persistence for [`GitSettings`], plus the cached git
+﻿//! App-side loader + persistence for [`GitSettings`], plus the cached git
 //! username the branch-name previews resolve against.
 //!
 //! **What is cached is the username, not the answer.** An earlier shape cached
@@ -8,7 +8,7 @@
 //! re-resolution would move. Caching the one genuinely expensive input instead
 //! — `git config user.name`, a subprocess, occasionally repo-scoped — lets
 //! every caller run the real resolver
-//! ([`resolve_prefix_with`](oximux_worktree_ops::branch_name::resolve_prefix_with))
+//! ([`resolve_prefix_with`](trex_worktree_ops::branch_name::resolve_prefix_with))
 //! synchronously, against whichever settings it means: the pane against its
 //! unsaved working copy, everyone else against the saved global.
 //!
@@ -21,8 +21,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use gpui::{App, AsyncApp, Global};
-use oximux_settings::git::GitSettings;
-use oximux_worktree_ops::branch_name::{branch_name, resolve_prefix_with};
+use trex_settings::git::GitSettings;
+use trex_worktree_ops::branch_name::{branch_name, resolve_prefix_with};
 
 /// `git config user.name` per repository root, as last resolved.
 ///
@@ -146,7 +146,7 @@ pub fn refresh_username(project_root: Option<PathBuf>, cx: &mut App) {
 /// git itself would consult for a global `user.name`.
 async fn read_user_name(project_root: Option<&Path>) -> Option<String> {
     let root = project_root.map(Path::to_path_buf).or_else(|| std::env::current_dir().ok())?;
-    let repo = oximux_git::Repository::open(&root).await.ok()?;
+    let repo = trex_git::Repository::open(&root).await.ok()?;
     repo.user_name().await.ok().flatten()
 }
 
@@ -165,7 +165,7 @@ pub fn install(cx: &mut App) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_settings::git::{BranchPrefixMode, DEFAULT_PREFIX};
+    use trex_settings::git::{BranchPrefixMode, DEFAULT_PREFIX};
 
     fn custom(prefix: &str) -> GitSettings {
         GitSettings {
@@ -181,7 +181,7 @@ mod tests {
 
     /// The state every headless test is in: no globals installed at all.
     /// Answering `None` there would silently mint bare branches in a suite
-    /// that has always asserted `oximux/<slug>`.
+    /// that has always asserted `TREX/<slug>`.
     #[gpui::test]
     fn an_uninstalled_cache_resolves_to_the_shipped_prefix(cx: &mut gpui::TestAppContext) {
         cx.update(|cx| {
@@ -197,8 +197,8 @@ mod tests {
         cx.update(|cx| {
             cx.set_global(GitSettings::shipped());
             cx.set_global(GitUsernames::default());
-            // Saved settings still say `oximux`; the working copy says `team`.
-            assert_eq!(branch_for_slug("feat", None, cx), "oximux/feat");
+            // Saved settings still say `TREX`; the working copy says `team`.
+            assert_eq!(branch_for_slug("feat", None, cx), "TREX/feat");
             assert_eq!(branch_for(&custom("team"), None, "feat", cx), "team/feat");
         });
     }
@@ -262,7 +262,7 @@ mod tests {
     ///
     /// Found live, not by a test: the pane resolved against the global git
     /// config while the dialog resolved against the project's, so one setting
-    /// previewed `oximux/…` in Settings and `ada-lovelace/…` in the dialog.
+    /// previewed `TREX/…` in Settings and `ada-lovelace/…` in the dialog.
     /// Both were individually correct, which is exactly why it read as a bug.
     /// The pane now carries its window's active project root.
     #[gpui::test]

@@ -1,4 +1,4 @@
-//! Canvas renderer for the commit-graph gutter — the coloured DAG lines
+﻿//! Canvas renderer for the commit-graph gutter — the coloured DAG lines
 //! and the node circle drawn to the left of each commit row.
 //!
 //! The lane geometry is computed up-front by [`graph_layout`]; this module
@@ -17,7 +17,7 @@
 use gpui::{
     Bounds, Hsla, IntoElement, ParentElement, PathBuilder, Pixels, Styled, canvas, div, point, px,
 };
-use oximux_settings::Theme;
+use trex_settings::Theme;
 
 use crate::shell::source_control::graph_layout::RowLayout;
 

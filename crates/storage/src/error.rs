@@ -1,6 +1,6 @@
-//! Typed errors for the storage layer.
+﻿//! Typed errors for the storage layer.
 //!
-//! Anything that crosses the `oximux-storage` public boundary maps into
+//! Anything that crosses the `trex-storage` public boundary maps into
 //! `StorageError`. Internally the runner uses `?` over `rusqlite::Result` and
 //! converts at the boundary. `anyhow::Error: From<StorageError>` is derived
 //! by `thiserror`, so call sites that already use `anyhow::Result` keep

@@ -1,4 +1,4 @@
-//! Multi-select state mutators for `GitPanel`.
+﻿//! Multi-select state mutators for `GitPanel`.
 //!
 //! Selection lives on `GitPanel` (the entity that already owns the
 //! rendered row list); the methods on this `impl` block are the only
@@ -29,7 +29,7 @@ use crate::shell::git_panel::changed_files::{FileSections, partition_files};
 use crate::shell::git_panel::range_select;
 use crate::shell::source_control::filter::filter_files;
 use gpui::Context;
-use oximux_core::FileStatus;
+use trex_core::FileStatus;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
@@ -151,7 +151,7 @@ impl GitPanel {
             .collect();
         let sections = partition_files(&filtered);
         match self.view_mode {
-            oximux_core::ViewMode::Flat => flatten_visible_sections(
+            trex_core::ViewMode::Flat => flatten_visible_sections(
                 &sections,
                 &self.collapsed_sections,
                 &self.expanded_row_sections,
@@ -160,7 +160,7 @@ impl GitPanel {
             // visible-leaf set must run the SAME tree → flatten → truncate
             // pipeline as the renderer — the flat approximation would let a
             // range select leaves the cap pushed off screen.
-            oximux_core::ViewMode::Tree => flatten_visible_tree_sections(
+            trex_core::ViewMode::Tree => flatten_visible_tree_sections(
                 &sections,
                 &self.collapsed_sections,
                 &self.expanded_row_sections,
@@ -214,8 +214,8 @@ impl GitPanel {
     /// [`bulk_op_in_flight`]: super::GitPanel::bulk_op_in_flight
     fn run_bulk_path_op<F, Fut>(&mut self, cx: &mut Context<Self>, label: &'static str, op: F)
     where
-        F: FnOnce(oximux_git::Repository, Vec<PathBuf>) -> Fut + Send + 'static,
-        Fut: std::future::Future<Output = oximux_git::Result<()>> + Send + 'static,
+        F: FnOnce(trex_git::Repository, Vec<PathBuf>) -> Fut + Send + 'static,
+        Fut: std::future::Future<Output = trex_git::Result<()>> + Send + 'static,
     {
         if self.selected.is_empty() || self.bulk_op_in_flight {
             return;
@@ -235,7 +235,7 @@ impl GitPanel {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::git_panel",
+                    target: "trex_app::git_panel",
                     op = label,
                     "no tokio runtime; bulk op skipped (test wiring)"
                 );
@@ -262,7 +262,7 @@ impl GitPanel {
                     }
                     Ok(Err(err)) => {
                         tracing::warn!(
-                            target: "oximux_app::git_panel",
+                            target: "trex_app::git_panel",
                             error = %err,
                             op = label,
                             "bulk path op failed; selection preserved for retry"
@@ -273,7 +273,7 @@ impl GitPanel {
                         // Same handling as a logged error — clear the
                         // flag, leave selection intact.
                         tracing::warn!(
-                            target: "oximux_app::git_panel",
+                            target: "trex_app::git_panel",
                             op = label,
                             "bulk path op sender dropped before sending result"
                         );
@@ -361,7 +361,7 @@ pub(super) fn flatten_visible_sections(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+    use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 
     fn fs(path: &str) -> FileStatus {
         FileStatus::with_status(

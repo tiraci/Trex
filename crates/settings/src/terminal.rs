@@ -1,4 +1,4 @@
-//! User-tunable terminal behavior, loaded from `terminal.toml` in the app
+﻿//! User-tunable terminal behavior, loaded from `terminal.toml` in the app
 //! data dir and held as a GPUI [`Global`] so every pane reads one source of
 //! truth. Defaults reproduce the previously-hardcoded constants exactly, so
 //! an absent or empty file is a no-op visual diff.
@@ -12,7 +12,7 @@
 
 #[cfg(feature = "gpui")]
 use gpui::Global;
-pub use oximux_shell_env::{WindowsPowerShell, WindowsShell};
+pub use trex_shell_env::{WindowsPowerShell, WindowsShell};
 use serde::{Deserialize, Serialize};
 
 /// How a terminal bell (BEL / `\a`) is surfaced.

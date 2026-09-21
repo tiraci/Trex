@@ -1,7 +1,7 @@
-//! Fuzzy custom-word correction for transcripts.
+﻿//! Fuzzy custom-word correction for transcripts.
 //!
 //! Speech models mangle proper nouns, brands, repo and command names — "oxy
-//! mux" for "OxiMux", "charge bee" for "ChargeBee", "chat GPT" for "ChatGPT". A
+//! mux" for "TREX", "charge bee" for "ChargeBee", "chat GPT" for "ChatGPT". A
 //! user-supplied dictionary lets the transcript snap those back to the intended
 //! spelling. The match is fuzzy (normalized edit distance) over 1-, 2- and
 //! 3-word windows so multi-token mishearings collapse to a single dictionary
@@ -225,8 +225,8 @@ mod tests {
 
     #[test]
     fn corrects_single_word_homophone() {
-        let out = apply("i use oximax daily", &dict(&["OxiMux"]), DEFAULT_THRESHOLD);
-        assert_eq!(out, "i use OxiMux daily");
+        let out = apply("i use oximax daily", &dict(&["TREX"]), DEFAULT_THRESHOLD);
+        assert_eq!(out, "i use TREX daily");
     }
 
     #[test]
@@ -237,26 +237,26 @@ mod tests {
 
     #[test]
     fn preserves_trailing_punctuation() {
-        let out = apply("thanks oximax.", &dict(&["OxiMux"]), DEFAULT_THRESHOLD);
-        assert_eq!(out, "thanks OxiMux.");
+        let out = apply("thanks oximax.", &dict(&["TREX"]), DEFAULT_THRESHOLD);
+        assert_eq!(out, "thanks TREX.");
     }
 
     #[test]
     fn does_not_touch_unrelated_words() {
-        // "banana" must not be dragged to "OxiMux".
-        let out = apply("i ate a banana", &dict(&["OxiMux"]), DEFAULT_THRESHOLD);
+        // "banana" must not be dragged to "TREX".
+        let out = apply("i ate a banana", &dict(&["TREX"]), DEFAULT_THRESHOLD);
         assert_eq!(out, "i ate a banana");
     }
 
     #[test]
     fn exact_match_is_left_as_the_dictionary_spelling() {
-        let out = apply("run oximux now", &dict(&["OxiMux"]), DEFAULT_THRESHOLD);
-        assert_eq!(out, "run OxiMux now");
+        let out = apply("run TREX now", &dict(&["TREX"]), DEFAULT_THRESHOLD);
+        assert_eq!(out, "run TREX now");
     }
 
     #[test]
     fn threshold_zero_disables() {
-        assert_eq!(apply("oximax", &dict(&["OxiMux"]), 0.0), "oximax");
+        assert_eq!(apply("oximax", &dict(&["TREX"]), 0.0), "oximax");
     }
 
     #[test]

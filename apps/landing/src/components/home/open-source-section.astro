@@ -1,16 +1,16 @@
----
+﻿---
 import { Icon } from "astro-icon/components";
 import { SITE } from "../../consts";
 
 /* Verbatim from the repo README quick start. If the README changes, change
    these too: a build command that does not work is worse than none. */
 const build = [
-  { prompt: true, text: "git clone https://github.com/nhtera/OxiMux.git" },
-  { prompt: true, text: "cd OxiMux" },
+  { prompt: true, text: "git clone https://github.com/tiraci/Trex.git" },
+  { prompt: true, text: "cd TREX" },
   { comment: true, text: "# the relay daemon keeps terminals alive across relaunches" },
-  { prompt: true, text: "cargo build -p oximux-relay --release" },
+  { prompt: true, text: "cargo build -p trex-relay --release" },
   { prompt: true, text: "./scripts/bundle-macos.sh" },
-  { prompt: true, text: "open dist/OxiMux.app" },
+  { prompt: true, text: "open dist/trex.app" },
 ];
 ---
 
@@ -25,7 +25,7 @@ const build = [
       Read it. Fork it. Ship your own.
     </h2>
     <p class="mt-4 max-w-2xl text-base leading-relaxed text-fg-muted" data-reveal style="--i: 1">
-      OxiMux is {SITE.license} licensed. There is no telemetry to opt out of and
+      TREX is {SITE.license} licensed. There is no telemetry to opt out of and
       no account to create. Clone it and you have the whole thing.
     </p>
 

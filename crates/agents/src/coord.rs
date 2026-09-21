@@ -1,4 +1,4 @@
-//! The coordination blackboard: a small versioned key/value store agents share
+﻿//! The coordination blackboard: a small versioned key/value store agents share
 //! without routing through anyone's transcript.
 //!
 //! **Why not just message each other.** Two agents on the same task need a
@@ -199,7 +199,7 @@ mod tests {
     use chrono::TimeZone;
 
     fn store() -> CoordStore {
-        let db = oximux_storage::db::open_memory().expect("open in-memory db");
+        let db = trex_storage::db::open_memory().expect("open in-memory db");
         CoordStore::new(db.conn())
     }
 

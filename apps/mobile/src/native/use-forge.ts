@@ -1,4 +1,4 @@
-import { ForgeItemKind, ForgeState, type CheckRun, type ForgeItem } from 'oximux-core';
+﻿import { ForgeItemKind, ForgeState, type CheckRun, type ForgeItem } from 'trex-core';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useClient } from './client';

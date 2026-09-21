@@ -1,4 +1,4 @@
-//! What is being driven right now, in words a person can read at a glance.
+﻿//! What is being driven right now, in words a person can read at a glance.
 //!
 //! The indicator's whole job is to answer "is something clicking on my screen,
 //! and what?" without the user having to go and look. That answer comes from
@@ -20,7 +20,7 @@
 //! # Read from the table, not from the approval path
 //!
 //! Grants are also created outside this process: the `PreToolUse` hook resolves
-//! provenance itself and can grant a binary the agent just built without OxiMux
+//! provenance itself and can grant a binary the agent just built without TREX
 //! ever seeing an approval. Anything that tracked grants by observing the
 //! consent card would therefore under-report — showing nothing while an agent
 //! drove its own fresh build, which is the most common case this feature has.
@@ -54,7 +54,7 @@ pub struct Driving {
 /// capture went unannounced in the first place.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DrivingSession {
-    /// The session id with its `oximux-` prefix stripped — the same label the
+    /// The session id with its `trex-` prefix stripped — the same label the
     /// agent's on-screen cursor carries, so the two can be matched up.
     pub label: String,
     /// Apps this agent holds a grant on and is driving. Deduped and ordered.
@@ -90,7 +90,7 @@ impl Driving {
             let Some(app) = name_of_pid(pid) else {
                 continue;
             };
-            let label = owner.strip_prefix("oximux-").unwrap_or(&owner).to_string();
+            let label = owner.strip_prefix("trex-").unwrap_or(&owner).to_string();
             let session = match sessions.iter_mut().position(|s| s.label == label) {
                 Some(at) => &mut sessions[at],
                 None => {
@@ -113,7 +113,7 @@ impl Driving {
         for label in grants
             .capturing()
             .into_iter()
-            .map(|owner| owner.strip_prefix("oximux-").unwrap_or(&owner).to_string())
+            .map(|owner| owner.strip_prefix("trex-").unwrap_or(&owner).to_string())
         {
             if !sessions.iter().any(|s| s.label == label) {
                 sessions.push(DrivingSession {

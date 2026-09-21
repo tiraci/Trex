@@ -1,4 +1,4 @@
-//! Round-trip the SCM base-ref persistence helper against an in-memory
+﻿//! Round-trip the SCM base-ref persistence helper against an in-memory
 //! SQLite store. Verifies:
 //!
 //! 1. A fresh workspace returns no base ref.
@@ -9,9 +9,9 @@
 //!    the base-ref write — the panel must not clobber what other
 //!    surfaces own in the same row.
 
-use oximux_app::shell::source_control::merge_base_ref_into_settings;
-use oximux_core::WorktreeSettings;
-use oximux_storage::{Db, WorktreeSettingsRepo, open_memory};
+use trex_app::shell::source_control::merge_base_ref_into_settings;
+use trex_core::WorktreeSettings;
+use trex_storage::{Db, WorktreeSettingsRepo, open_memory};
 
 /// Seed the `projects` and `workspaces` rows the FK on
 /// `worktree_settings.workspace_id` resolves against. Mirrors the

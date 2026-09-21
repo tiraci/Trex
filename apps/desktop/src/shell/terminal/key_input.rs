@@ -1,4 +1,4 @@
-//! Keystroke → PTY-bytes translation.
+﻿//! Keystroke → PTY-bytes translation.
 //!
 //! Pure function over `gpui::Keystroke`. Maps the usual xterm escape
 //! sequences (cursor keys, function keys, page nav), Ctrl-letter combos,
@@ -11,7 +11,7 @@
 //! which belong to app-level actions, not the shell).
 
 use gpui::Keystroke;
-use oximux_pty::InputMode;
+use trex_pty::InputMode;
 
 /// Translate a single Keystroke to the bytes that should be written to the
 /// PTY. `mode` carries DECCKM (app-cursor) so cursor keys pick CSI vs SS3.

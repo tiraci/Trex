@@ -1,4 +1,4 @@
-//! The terminal seam: what the dispatcher needs from the desktop's PTY layer,
+﻿//! The terminal seam: what the dispatcher needs from the desktop's PTY layer,
 //! expressed without depending on it.
 //!
 //! `remote-host` cannot reach the relay directly — the relay client lives in the
@@ -14,7 +14,7 @@
 //! spawn or kill a terminal remotely: a phone can drive terminals the desktop
 //! user already opened, not create new ones.
 
-use oximux_remote_proto::messages::TerminalSummary;
+use trex_remote_proto::messages::TerminalSummary;
 
 /// One frame from an attached terminal.
 #[derive(Debug, Clone, PartialEq)]

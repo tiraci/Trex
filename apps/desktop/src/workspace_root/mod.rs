@@ -1,4 +1,4 @@
-//! WorkspaceRoot — the top-level view mounted into the GPUI window.
+﻿//! WorkspaceRoot — the top-level view mounted into the GPUI window.
 //!
 //! Composition (per-column workspace pattern): three columns side-by-side,
 //! each topped by its own 40px header strip. There is NO full-width chrome
@@ -33,9 +33,9 @@ use gpui::{
     IntoElement, ParentElement, Render, Styled, Subscription, Task, WeakEntity, Window, div,
     prelude::FluentBuilder, px,
 };
-use oximux_agents::{AdapterRegistry, AgentRuntime, AgentSessionConfig, CliRuntime};
-use oximux_core::{AgentAdapter, Project};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::{AdapterRegistry, AgentRuntime, AgentSessionConfig, CliRuntime};
+use trex_core::{AgentAdapter, Project};
+use trex_settings::{Density, Theme, Typography};
 
 
 /// Cadence of the rail's per-worktree diff-count refresh. Deliberately slower
@@ -162,13 +162,13 @@ const ADAPTER_PICKER_LEFT_INSET: f32 = 8.0;
 
 /// Map a settings-layer launch transport to the agents-layer runtime transport
 /// (two deliberately separate enums — see the P0 seam design).
-fn to_agents_transport(t: oximux_settings::Transport) -> oximux_agents::thread::Transport {
+fn to_agents_transport(t: trex_settings::Transport) -> trex_agents::thread::Transport {
     match t {
-        oximux_settings::Transport::StreamJson => oximux_agents::thread::Transport::StreamJson,
-        oximux_settings::Transport::AppServer => oximux_agents::thread::Transport::AppServer,
-        oximux_settings::Transport::Acp => oximux_agents::thread::Transport::Acp,
-        oximux_settings::Transport::Rpc => oximux_agents::thread::Transport::Rpc,
-        oximux_settings::Transport::OmpRpc => oximux_agents::thread::Transport::OmpRpc,
+        trex_settings::Transport::StreamJson => trex_agents::thread::Transport::StreamJson,
+        trex_settings::Transport::AppServer => trex_agents::thread::Transport::AppServer,
+        trex_settings::Transport::Acp => trex_agents::thread::Transport::Acp,
+        trex_settings::Transport::Rpc => trex_agents::thread::Transport::Rpc,
+        trex_settings::Transport::OmpRpc => trex_agents::thread::Transport::OmpRpc,
     }
 }
 
@@ -177,9 +177,9 @@ fn to_agents_transport(t: oximux_settings::Transport) -> oximux_agents::thread::
 /// (shell-split). Non-ACP adapters carry an empty command — the factory ignores
 /// the `acp_*` fields for them.
 pub(crate) fn chat_backend_for(
-    settings: &oximux_settings::AgentLaunchSettings,
+    settings: &trex_settings::AgentLaunchSettings,
     adapter_id: &str,
-) -> oximux_agents::thread::ChatBackend {
+) -> trex_agents::thread::ChatBackend {
     chat_backend_for_profile(settings, adapter_id, None)
 }
 
@@ -188,13 +188,13 @@ pub(crate) fn chat_backend_for(
 /// by design, so the chat-routing gate can answer before a profile is chosen).
 /// `None` resolves the adapter's plain entry, i.e. the pre-profile behavior.
 pub(crate) fn chat_backend_for_profile(
-    settings: &oximux_settings::AgentLaunchSettings,
+    settings: &trex_settings::AgentLaunchSettings,
     adapter_id: &str,
     profile: Option<&str>,
-) -> oximux_agents::thread::ChatBackend {
+) -> trex_agents::thread::ChatBackend {
     let transport = to_agents_transport(settings.transport_for(adapter_id));
-    let is_acp = transport == oximux_agents::thread::Transport::Acp;
-    oximux_agents::thread::ChatBackend {
+    let is_acp = transport == trex_agents::thread::Transport::Acp;
+    trex_agents::thread::ChatBackend {
         transport,
         acp_command: is_acp.then(|| settings.acp_command_for(adapter_id)).flatten(),
         acp_args: if is_acp { settings.acp_args_for(adapter_id) } else { Vec::new() },
@@ -429,13 +429,13 @@ pub struct WorkspaceRoot {
     /// (workspace CRUD, project switch, the periodic diff tick as a
     /// reconciliation net) — `refresh_left_rail` only READS this, so
     /// render never touches SQLite.
-    pub(crate) rail_workspaces_by_project: HashMap<String, Vec<oximux_core::Workspace>>,
+    pub(crate) rail_workspaces_by_project: HashMap<String, Vec<trex_core::Workspace>>,
     /// Cached sidebar DB data: each project's ARCHIVED workspace rows, newest
     /// archived first. Same lifecycle as [`Self::rail_workspaces_by_project`]
     /// and gathered in the same background pass, so the rail's `Archived (N)`
     /// header has its count without a second query path to invalidate. Usually
     /// empty; archived rows are cold data.
-    pub(crate) rail_archived_by_project: HashMap<String, Vec<oximux_core::Workspace>>,
+    pub(crate) rail_archived_by_project: HashMap<String, Vec<trex_core::Workspace>>,
     /// Projects whose `Untracked (N)` group the user hid — the per-project
     /// preference, read in the same gather as the rows above.
     pub(crate) rail_hidden_untracked: HashSet<String>,
@@ -471,7 +471,7 @@ pub struct WorkspaceRoot {
     /// merges this DB history with the live `live_agents` map into the rail's
     /// per-workspace agent list. The single-row caches above stay derived from
     /// the newest session, so existing collapsed-dot behavior is unchanged.
-    pub(crate) rail_workspace_sessions: HashMap<String, Vec<oximux_core::AgentSession>>,
+    pub(crate) rail_workspace_sessions: HashMap<String, Vec<trex_core::AgentSession>>,
     /// Live tool-activity line per workspace id ("Bash: cargo test…"),
     /// refreshed by `_agent_activity_task` for Running primary-CLI
     /// sessions and pushed to the rail via `refresh_left_rail`.
@@ -482,7 +482,7 @@ pub struct WorkspaceRoot {
     /// persistence watcher (`note_agent_sideband`). Holds an entry only while
     /// the agent is `Running`; takes precedence over `agent_activity` on the
     /// dashboard's Running rows and is pushed to the rail via `refresh_left_rail`.
-    pub(crate) agent_sideband: HashMap<String, oximux_core::SidebandDetail>,
+    pub(crate) agent_sideband: HashMap<String, trex_core::SidebandDetail>,
     /// Live agent sessions keyed by `agent_sessions.id` UUID, fed directly
     /// from each tab's status watch channel by the persistence watcher. Unlike
     /// `agent_sideband` (one collapsed entry per workspace key), this holds
@@ -491,7 +491,7 @@ pub struct WorkspaceRoot {
     pub(crate) live_agents: crate::shell::session_live_store::LiveAgentMap,
     /// Latest usage-meter sample: one row per configured agent account.
     /// Empty before the first sample lands, and again if no account is set up.
-    pub(crate) usage: Vec<oximux_agents::session_log::usage::ProviderUsage>,
+    pub(crate) usage: Vec<trex_agents::session_log::usage::ProviderUsage>,
     /// Whether the in-window usage popover is open (non-macOS fallback render).
     pub(crate) usage_popover_open: bool,
     /// Whether the "What's New" popover (staged-update release notes, opened
@@ -593,7 +593,7 @@ impl WorkspaceRoot {
         }
         // Swallow the same click that just dismissed the panel (resign-key →
         // close), so it doesn't immediately reopen.
-        let since_close = oximux_agents::session_log::now_unix_ms()
+        let since_close = trex_agents::session_log::now_unix_ms()
             - crate::shell::usage_popover::LAST_CLOSED_MS
                 .load(std::sync::atomic::Ordering::SeqCst);
         if since_close < crate::shell::usage_popover::REOPEN_DEBOUNCE_MS {
@@ -651,10 +651,10 @@ impl WorkspaceRoot {
         // Seeded from the user's appearance rather than the shipped defaults:
         // every render pulls the current tokens anyway, but starting wrong
         // would paint one frame in the wrong palette and size on launch.
-        let appearance = oximux_settings::appearance::active(cx);
+        let appearance = trex_settings::appearance::active(cx);
         let theme = Theme::for_appearance(appearance);
         let density = Density::for_appearance(appearance);
-        let typography = oximux_settings::appearance::typography(cx);
+        let typography = trex_settings::appearance::typography(cx);
 
         // Construct the CLI agent runtime + adapter registry once per
         // workspace. The registry is built with every built-in adapter in dialog
@@ -808,7 +808,7 @@ impl WorkspaceRoot {
                     // global default is Terminal. `chat_capable` is the whole gate —
                     // for ACP it already requires a command. Every terminal-only
                     // adapter (and Terminal mode) takes the classic path unchanged.
-                    let launch = cx.try_global::<oximux_settings::AgentLaunchSettings>();
+                    let launch = cx.try_global::<trex_settings::AgentLaunchSettings>();
                     let open_chat = launch.map(|s| s.opens_as_chat(id)).unwrap_or(false);
                     if open_chat {
                         // `open_chat` is only true when `launch` is `Some`.
@@ -830,7 +830,7 @@ impl WorkspaceRoot {
                             None,
                             None,
                             None,
-                            oximux_core::SessionResumption::None,
+                            trex_core::SessionResumption::None,
                             None,
                             profile,
                             window,
@@ -847,7 +847,7 @@ impl WorkspaceRoot {
                     // filter): a preset id the user overrode with a non-ACP entry
                     // would otherwise resolve to stream-json and misroute to Claude,
                     // so bail rather than launch the wrong agent.
-                    let backend = match cx.try_global::<oximux_settings::AgentLaunchSettings>() {
+                    let backend = match cx.try_global::<trex_settings::AgentLaunchSettings>() {
                         Some(s) if s.chat_capable(id) => chat_backend_for(s, id),
                         _ => return,
                     };
@@ -1118,7 +1118,7 @@ impl WorkspaceRoot {
                     }
                     let mut targets: Vec<(String, String)> = Vec::new();
                     for (ws_id, status) in &this.rail_latest_status {
-                        if !matches!(status, Some(oximux_core::AgentStatus::Running)) {
+                        if !matches!(status, Some(trex_core::AgentStatus::Running)) {
                             continue;
                         }
                         if this.rail_latest_adapter.get(ws_id).map(String::as_str)
@@ -1196,11 +1196,11 @@ impl WorkspaceRoot {
         // present right after boot), then every `USAGE_METER_TICK`. Each
         // sample is a blocking Keychain + network read, so it runs on the
         // background executor.
-        use oximux_agents::session_log::usage_probe::UsageProbe as _;
+        use trex_agents::session_log::usage_probe::UsageProbe as _;
         let usage_probe: std::sync::Arc<
-            oximux_agents::session_log::usage_probe::SessionLogUsageProbe,
+            trex_agents::session_log::usage_probe::SessionLogUsageProbe,
         > = std::sync::Arc::new(
-            oximux_agents::session_log::usage_probe::SessionLogUsageProbe::new(
+            trex_agents::session_log::usage_probe::SessionLogUsageProbe::new(
                 dirs::home_dir().unwrap_or_default(),
             ),
         );
@@ -1221,7 +1221,7 @@ impl WorkspaceRoot {
                         // that don't move, so they are repainted when the
                         // numbers actually change and not once a minute.
                         let counts_down = crate::appearance_settings::active(cx).usage_detail
-                            == oximux_settings::UsageDetail::Compact;
+                            == trex_settings::UsageDetail::Compact;
                         if changed || counts_down {
                             cx.notify();
                         }
@@ -1280,7 +1280,7 @@ impl WorkspaceRoot {
                         }
                         crate::notifier::ClickTarget::TerminalSession(raw) => {
                             root.navigate_to_terminal_session(
-                                oximux_pty::TerminalSessionId(raw),
+                                trex_pty::TerminalSessionId(raw),
                                 window,
                                 cx,
                             );
@@ -1466,7 +1466,7 @@ pub(crate) fn tab_can_tear_off(
 /// executor only. A target without a fresh log simply contributes no
 /// entry, so finished/stale rows clear naturally.
 fn gather_agent_activity(targets: Vec<(String, String)>) -> HashMap<String, String> {
-    use oximux_agents::session_log::{self, activity};
+    use trex_agents::session_log::{self, activity};
 
     let mut out = HashMap::new();
     let Some(home) = dirs::home_dir() else {
@@ -1494,8 +1494,8 @@ fn gather_agent_activity(targets: Vec<(String, String)>) -> HashMap<String, Stri
 #[cfg(test)]
 mod tests {
     use super::{chat_backend_for, chat_backend_for_profile};
-    use oximux_agents::thread::Transport as AgentTransport;
-    use oximux_settings::{AgentLaunchSettings, DEFAULT_PROFILE, Transport as SettingsTransport};
+    use trex_agents::thread::Transport as AgentTransport;
+    use trex_settings::{AgentLaunchSettings, DEFAULT_PROFILE, Transport as SettingsTransport};
 
     #[test]
     fn chat_backend_for_carries_acp_command_only_for_acp_adapters() {
@@ -1610,7 +1610,7 @@ mod tests {
 
         // Still ACP, still the preset's command: a profile varies the account
         // and endpoint, never the backend.
-        assert_eq!(default.transport, oximux_agents::thread::Transport::Acp);
+        assert_eq!(default.transport, trex_agents::thread::Transport::Acp);
         assert_eq!(proxy.transport, default.transport);
         assert_eq!(proxy.acp_command, default.acp_command);
         assert_eq!(proxy.acp_command.as_deref(), Some("cursor-agent"));

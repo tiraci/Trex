@@ -1,4 +1,4 @@
-//! Test-only: mint real minisign keypairs and signatures.
+﻿//! Test-only: mint real minisign keypairs and signatures.
 //!
 //! The verifier is a third-party crate, so testing it against fixtures it
 //! produced itself would prove nothing. This mints signatures the way
@@ -63,7 +63,7 @@ impl MinisignKeypair {
         let global = self.signing.sign(&global_input).to_bytes();
 
         format!(
-            "untrusted comment: signature from the oximux test key\n{}\ntrusted comment: \
+            "untrusted comment: signature from the TREX test key\n{}\ntrusted comment: \
              {TRUSTED_COMMENT}\n{}\n",
             b64(&sig_line),
             b64(&global)

@@ -1,4 +1,4 @@
-//! Terminals end to end: the real client against the real `remote-host`
+﻿//! Terminals end to end: the real client against the real `remote-host`
 //! dispatcher over the in-memory loopback.
 //!
 //! The load-bearing case is **RPC-while-streaming**. The wire carries no
@@ -15,15 +15,15 @@ use std::sync::Arc;
 use futures::StreamExt;
 use futures::executor::block_on;
 use futures::future::join3;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{
     AttachmentId, AuthStore, Dispatcher, PairingSlot, TerminalAttach, TerminalError, TerminalFrame,
     TerminalSource,
 };
-use oximux_remote_proto::PairingTicket;
-use oximux_remote_proto::messages::TerminalSummary;
-use oximux_remote_proto::testing::duplex_pair;
-use oximux_remote_session::{ClientSigner, RemoteSession, TerminalPush};
+use trex_remote_proto::PairingTicket;
+use trex_remote_proto::messages::TerminalSummary;
+use trex_remote_proto::testing::duplex_pair;
+use trex_remote_session::{ClientSigner, RemoteSession, TerminalPush};
 use tokio::sync::mpsc;
 
 const NOW: u64 = 1_700_000_000;

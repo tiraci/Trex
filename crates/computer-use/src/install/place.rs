@@ -1,4 +1,4 @@
-//! Placing a verified `CuaDriver.app` at an install root, crash-safely.
+﻿//! Placing a verified `CuaDriver.app` at an install root, crash-safely.
 //!
 //! Replacing an existing install uses `renamex_np(RENAME_SWAP)` — macOS's
 //! atomic two-path exchange — so there is *no instant* at which the target
@@ -9,14 +9,14 @@
 //! button into an uninstaller. The daemon is deliberately untouched; a
 //! running process keeps the old inode until it respawns.
 //!
-//! The copy/exchange/disk primitives live in `oximux-macos-trust` (shared
+//! The copy/exchange/disk primitives live in `trex-macos-trust` (shared
 //! with the app updater); this module owns the driver-specific staging and
 //! rollback orchestration.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use oximux_macos_trust::{ditto_copy, dir_size, ensure_disk_space, exchange, TrustError};
+use trex_macos_trust::{ditto_copy, dir_size, ensure_disk_space, exchange, TrustError};
 
 use super::InstallError;
 use crate::discovery;
@@ -148,7 +148,7 @@ fn two_rename_swap(staging: &Path, target: &Path) -> Result<Swap, InstallError> 
 /// creating a file — directory permission bits under-report on macOS.
 fn writable_root() -> Result<PathBuf, InstallError> {
     for root in discovery::install_roots() {
-        let probe = root.join(format!(".oximux-write-probe-{}", std::process::id()));
+        let probe = root.join(format!(".trex-write-probe-{}", std::process::id()));
         if fs::write(&probe, b"").is_ok() {
             let _ = fs::remove_file(&probe);
             return Ok(root);

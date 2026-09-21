@@ -1,5 +1,5 @@
-[package]
-name = "oximux-remote-iroh"
+﻿[package]
+name = "trex-remote-iroh"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -21,15 +21,15 @@ default = ["host"]
 # `portable-pty` onto the phone, whose `termios`/`ioctl-rs` dependencies do not
 # compile for iOS or Android. The build break is the visible symptom; the real
 # point is that a phone must never carry the code that spawns local PTYs.
-host = ["dep:oximux-remote-host", "dep:tokio"]
+host = ["dep:trex-remote-host", "dep:tokio"]
 
 [dependencies]
-oximux-remote-proto = { workspace = true }
+trex-remote-proto = { workspace = true }
 # For the `Connector`/`ConnectError` dial seam this crate implements.
-oximux-remote-session = { workspace = true }
+trex-remote-session = { workspace = true }
 # The transport-agnostic `Dispatcher` the host accept loop (`serve_host`) drives
 # per connection. No cycle: `remote-host` never depends on `remote-iroh`.
-oximux-remote-host = { workspace = true, optional = true }
+trex-remote-host = { workspace = true, optional = true }
 iroh = { workspace = true }
 async-trait = { workspace = true }
 futures = { workspace = true }
@@ -43,6 +43,6 @@ tokio = { workspace = true, optional = true }
 [dev-dependencies]
 # The same-machine integration tests drive the real host dispatcher + the real
 # client session over a real QUIC link between two endpoints on one machine.
-# (`oximux-remote-host`, `tokio`, and `futures` are already normal deps above.)
-oximux-agents = { workspace = true }
+# (`trex-remote-host`, `tokio`, and `futures` are already normal deps above.)
+trex-agents = { workspace = true }
 serde_json = { workspace = true }

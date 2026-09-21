@@ -1,11 +1,11 @@
-//! Tests for `runtime_impl` — kept in a `#[path]` submodule so the runtime
+﻿//! Tests for `runtime_impl` — kept in a `#[path]` submodule so the runtime
 //! file itself stays under the file-size cap. Still a child module of
 //! `runtime_impl`, so `use super::*` reaches its private items
 //! (`lock_recover`, `POLL_INTERVAL`, `SessionEntry`, …).
 
 use super::*;
 use crate::cli::CustomCommandAdapter;
-use oximux_pty::TerminalEvent;
+use trex_pty::TerminalEvent;
 use std::path::PathBuf;
 
 // A panic while some thread held the runtime lock must not take every
@@ -34,7 +34,7 @@ fn echo_cfg(program: &str, args: Vec<String>) -> AgentSessionConfig {
         // which is not a directory to start a process in — the spawn failed with
         // "the system cannot find the path specified" before the program name
         // even mattered.
-        worktree_path: oximux_shell_env::test_support::test_cwd(),
+        worktree_path: trex_shell_env::test_support::test_cwd(),
         prompt: None,
         model: None,
         effort: None,
@@ -43,7 +43,7 @@ fn echo_cfg(program: &str, args: Vec<String>) -> AgentSessionConfig {
         cols: 80,
         rows: 24,
         custom_command: Some((program.to_string(), args)),
-        resumption: oximux_core::SessionResumption::None,
+        resumption: trex_core::SessionResumption::None,
     }
 }
 
@@ -54,10 +54,10 @@ fn echo_cfg(program: &str, args: Vec<String>) -> AgentSessionConfig {
 /// `/bin/cat`, `/bin/sh -c …`. None exist on Windows, and none are even absolute
 /// paths there, so each failed at `CreateProcessW`. Routing through
 /// `test_shell()` + `run_script()` keeps the platform spelling in
-/// `oximux-shell-env` — where this repo already decided it lives — and leaves
+/// `trex-shell-env` — where this repo already decided it lives — and leaves
 /// each test naming the behaviour it needs.
 fn shell_cfg(commands: &[&str]) -> AgentSessionConfig {
-    use oximux_shell_env::test_support::{run_script, test_shell};
+    use trex_shell_env::test_support::{run_script, test_shell};
     let args = run_script(commands);
     echo_cfg(&test_shell(), args)
 }
@@ -84,7 +84,7 @@ fn gated_marker_script() -> Vec<&'static str> {
 /// A bare `\n` is enough for `sh`'s `read`, and not enough for a Windows
 /// console: `cmd`'s `set /p` submits on CR, so `"first\n"` left it blocked
 /// forever and the session never reached a terminal status. This is the same
-/// distinction `oximux_shell_env::test_support::lines` exists for; spelled here
+/// distinction `trex_shell_env::test_support::lines` exists for; spelled here
 /// because these tests submit one line at a time rather than a whole script.
 fn line(text: &str) -> String {
     if cfg!(windows) {

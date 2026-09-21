@@ -1,4 +1,4 @@
-//! The multiplexed client connection: a single read loop (the "pump") that
+﻿//! The multiplexed client connection: a single read loop (the "pump") that
 //! demuxes the host's frames — pushed [`Response::Event`]s go to the live event
 //! stream, every other reply goes to the outstanding RPC — so a client can issue
 //! RPCs *while* subscribed to a live session, all over one transport.
@@ -15,10 +15,10 @@ use std::sync::{Arc, Mutex};
 use futures::channel::{mpsc, oneshot};
 use futures::future::{Either, select};
 use futures::lock::Mutex as AsyncMutex;
-use oximux_remote_proto::messages::SessionSummary;
-use oximux_remote_proto::proto::{Request, Response};
-use oximux_remote_proto::transport::TransportError;
-use oximux_remote_proto::{HostEvent, Transport};
+use trex_remote_proto::messages::SessionSummary;
+use trex_remote_proto::proto::{Request, Response};
+use trex_remote_proto::transport::TransportError;
+use trex_remote_proto::{HostEvent, Transport};
 
 use crate::error::SessionError;
 
@@ -224,7 +224,7 @@ mod tests {
     use async_trait::async_trait;
     use futures::executor::block_on;
     use futures::future::join;
-    use oximux_remote_proto::transport::TransportError;
+    use trex_remote_proto::transport::TransportError;
 
     /// A transport whose peer has closed the read side: `send` still succeeds, but
     /// `recv` immediately reports end-of-stream. Models the host dropping the

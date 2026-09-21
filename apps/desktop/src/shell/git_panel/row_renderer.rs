@@ -1,4 +1,4 @@
-//! Per-row rendering for the changed-files list.
+﻿//! Per-row rendering for the changed-files list.
 //!
 //! Split from `changed_files.rs` so the main module stays under the
 //! 500-LOC warn cap as Phase 02 layers three new decorations onto rows:
@@ -21,8 +21,8 @@ use gpui::{
     ParentElement, Styled, div, prelude::FluentBuilder as _, px, svg,
 };
 use gpui_component::{Icon, IconName};
-use oximux_core::{ConflictKind, FileStatus, IndexStatus, RenameInfo, WorktreeStatus};
-use oximux_settings::{Theme, Typography};
+use trex_core::{ConflictKind, FileStatus, IndexStatus, RenameInfo, WorktreeStatus};
+use trex_settings::{Theme, Typography};
 
 /// Which SCM section a row was sourced from. Drives the status badge
 /// letter + colour and the action-cluster routing. Kept private —

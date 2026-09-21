@@ -1,9 +1,9 @@
-import { parseSessionTitle } from './session-title';
+﻿import { parseSessionTitle } from './session-title';
 
 describe('parseSessionTitle', () => {
   it('splits a project-folded title into project + label', () => {
-    expect(parseSessionTitle('OxiMux · Fix parser')).toEqual({
-      project: 'OxiMux',
+    expect(parseSessionTitle('TREX · Fix parser')).toEqual({
+      project: 'TREX',
       label: 'Fix parser',
     });
   });
@@ -13,8 +13,8 @@ describe('parseSessionTitle', () => {
   });
 
   it('keeps a later separator inside the label (splits on the first only)', () => {
-    expect(parseSessionTitle('OxiMux · a · b')).toEqual({
-      project: 'OxiMux',
+    expect(parseSessionTitle('TREX · a · b')).toEqual({
+      project: 'TREX',
       label: 'a · b',
     });
   });

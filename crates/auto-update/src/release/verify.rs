@@ -1,4 +1,4 @@
-//! The three gates every update passes, in the order they must run.
+﻿//! The three gates every update passes, in the order they must run.
 //!
 //! 1. **Signature** over the manifest bytes, against the key compiled into
 //!    this binary. This is the trust root and the only gate that survives a
@@ -39,7 +39,7 @@ impl std::fmt::Display for VerifyError {
             Self::NoTrustRoot => write!(
                 f,
                 "this build has no release signing key compiled in, so it cannot verify an \
-                 update — install oximux from a release build or your package manager"
+                 update — install TREX from a release build or your package manager"
             ),
             Self::MalformedKey => write!(
                 f,
@@ -50,7 +50,7 @@ impl std::fmt::Display for VerifyError {
             }
             Self::BadSignature => write!(
                 f,
-                "the release manifest is not signed by the OxiMux release key — refusing to \
+                "the release manifest is not signed by the TREX release key — refusing to \
                  update. This is what a tampered or substituted release looks like."
             ),
             Self::DigestMismatch { expected, actual } => write!(

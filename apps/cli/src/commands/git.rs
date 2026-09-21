@@ -1,12 +1,12 @@
-//! `oximux git` — status, diffs, staging, and commits for a session's
+﻿//! `TREX git` — status, diffs, staging, and commits for a session's
 //! repository. Paths are echoes of what `git status` listed; the host
 //! re-contains every one, so nothing here validates filesystem reality.
 
-use oximux_remote_proto::messages::{
+use trex_remote_proto::messages::{
     DiffLineKindWire, FileDiffWire, GitFileWire, GitStatusWire, IndexStatusWire,
     WorktreeStatusWire,
 };
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::client::{Client, rpc_failure, unexpected_reply};

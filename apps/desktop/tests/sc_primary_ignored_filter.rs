@@ -1,4 +1,4 @@
-//! Regression: when the only "changes" are Ignored entries (git status
+﻿//! Regression: when the only "changes" are Ignored entries (git status
 //! --ignored echoes back `target/`, `dist/`, etc.), the primary action
 //! must read as a disabled Commit — NOT Stage All. The file-list panel
 //! filters those rows out, so the button has to match or the user sees
@@ -8,7 +8,7 @@
 //! sits on top of `resolve_primary_action`. The filter mirrors the
 //! ignored-skip in `changed_files::partition_files`.
 
-use oximux_app::shell::source_control::primary_action::{
+use trex_app::shell::source_control::primary_action::{
     PrimaryActionInputs, PrimaryActionKind, UpstreamStatus, resolve_primary_action,
 };
 
@@ -56,7 +56,7 @@ fn compute_inputs(
     }
 }
 
-/// Mirror of `oximux_core::IndexStatus` — kept local so this test file
+/// Mirror of `trex_core::IndexStatus` — kept local so this test file
 /// doesn't need to depend on the upstream enum (and stays insulated from
 /// future variant additions that aren't relevant to the resolver).
 #[derive(Copy, Clone)]
@@ -80,7 +80,7 @@ fn ignored_only_treats_repo_as_clean_with_upstream() {
     // `dist/` + `target/` reported by `git status --ignored`. Nothing
     // else changed. With an upstream present and 0 ahead / 0 behind,
     // the resolver should land on a disabled Commit, NOT Stage All.
-    // This mirrors the user-reported regression from the OxiMux screenshot.
+    // This mirrors the user-reported regression from the TREX screenshot.
     let inputs = compute_inputs(
         &[
             (IdxStatus::Ignored, WtStatus::Unmodified),

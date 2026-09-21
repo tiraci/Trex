@@ -1,5 +1,5 @@
-use super::*;
-use oximux_agent_core::thread::{PermissionDecision, ThreadEvent};
+﻿use super::*;
+use trex_agent_core::thread::{PermissionDecision, ThreadEvent};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -145,7 +145,7 @@ fn requests_round_trip_via_postcard() {
 /// `SendPrompt` (with image attachments) and the `Response` side round-trip too.
 #[test]
 fn send_prompt_and_responses_round_trip() {
-    use oximux_agent_core::thread::ChatImage;
+    use trex_agent_core::thread::ChatImage;
     let req = Request::SendPrompt(SendPromptReq {
         session_id: "s1".into(),
         text: "hello".into(),
@@ -195,8 +195,8 @@ fn send_prompt_and_responses_round_trip() {
             model: Some("claude".into()),
         }),
         Response::Projects(vec![ProjectSummaryWire {
-            name: "OxiMux".into(),
-            path: "/Users/me/Code/OxiMux".into(),
+            name: "TREX".into(),
+            path: "/Users/me/Code/TREX".into(),
         }]),
     ];
     for resp in responses {

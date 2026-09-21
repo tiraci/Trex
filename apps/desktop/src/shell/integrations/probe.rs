@@ -1,4 +1,4 @@
-//! Asking the machine what it actually has.
+﻿//! Asking the machine what it actually has.
 //!
 //! Blocking on purpose, and called only from a background thread. Each probe
 //! is a PATH resolution plus at most two short process spawns, which is fast
@@ -14,7 +14,7 @@
 use std::process::{Command, Stdio};
 use std::time::Duration;
 
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 
 use super::catalog::Tool;
 
@@ -72,7 +72,7 @@ pub(crate) fn probe(tool: Tool) -> Health {
 /// Whether a package manager is usable here, so the pane can offer its recipe
 /// rather than a command that will not run.
 pub(crate) fn manager_available(manager: &str) -> bool {
-    oximux_agents::cli::resolve_on_path_blocking(manager).is_some()
+    trex_agents::cli::resolve_on_path_blocking(manager).is_some()
 }
 
 /// Where `tool`'s binary is, if anywhere.
@@ -88,7 +88,7 @@ fn locate(tool: Tool) -> Option<std::path::PathBuf> {
             return Some(bundled.to_path_buf());
         }
     }
-    oximux_agents::cli::resolve_on_path_blocking(tool.binary())
+    trex_agents::cli::resolve_on_path_blocking(tool.binary())
 }
 
 /// The tool's own version string, or `None` when it will not say.

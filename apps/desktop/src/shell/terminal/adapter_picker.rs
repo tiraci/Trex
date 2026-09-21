@@ -1,4 +1,4 @@
-//! Inline adapter-picker popover — anchored to the `+` button.
+﻿//! Inline adapter-picker popover — anchored to the `+` button.
 //!
 //! Click `+` → list "+ New terminal" + every detected adapter. Click a row
 //! to spawn it immediately with the agent's default settings — no model or
@@ -19,9 +19,9 @@ use gpui::{
     ParentElement, Render, SharedString, Styled, Window, div, px,
 };
 use gpui_component::{Icon, Sizable};
-use oximux_agents::{AdapterRegistry, RegistryEntry};
-use oximux_core::AgentAdapter;
-use oximux_settings::{AgentLaunchSettings, Density, Theme, Typography};
+use trex_agents::{AdapterRegistry, RegistryEntry};
+use trex_core::AgentAdapter;
+use trex_settings::{AgentLaunchSettings, Density, Theme, Typography};
 
 use crate::shell::agent_presentation::adapter_icon_path;
 use crate::shell::agent_ui::agent_catalog::{AdapterDetection, agent_catalog};
@@ -99,7 +99,7 @@ pub struct AdapterPicker {
     /// refresh on subsequent opens.
     is_refreshing: bool,
     /// PATH availability of each built-in ACP preset (parallel to
-    /// [`oximux_settings::ACP_PRESETS`]), detected alongside the adapters.
+    /// [`trex_settings::ACP_PRESETS`]), detected alongside the adapters.
     /// `None` until the first detection completes; a preset whose command isn't
     /// installed renders greyed (like an unavailable adapter).
     preset_available: Option<Vec<bool>>,
@@ -201,9 +201,9 @@ impl AdapterPicker {
             // both are `which`-style PATH probes, so a slow mount caps them together.
             let detect = async {
                 let entries = registry.detect_available().await;
-                let mut presets = Vec::with_capacity(oximux_settings::ACP_PRESETS.len());
-                for preset in oximux_settings::ACP_PRESETS {
-                    presets.push(oximux_agents::cli::which_on_path(preset.command).await);
+                let mut presets = Vec::with_capacity(trex_settings::ACP_PRESETS.len());
+                for preset in trex_settings::ACP_PRESETS {
+                    presets.push(trex_agents::cli::which_on_path(preset.command).await);
                 }
                 (entries, presets)
             };
@@ -220,7 +220,7 @@ impl AdapterPicker {
                         p.entries = Some(Vec::new());
                     }
                     if p.preset_available.is_none() {
-                        p.preset_available = Some(vec![false; oximux_settings::ACP_PRESETS.len()]);
+                        p.preset_available = Some(vec![false; trex_settings::ACP_PRESETS.len()]);
                     }
                     p.is_refreshing = false;
                     tracing::warn!(
@@ -303,7 +303,7 @@ pub(super) fn card_container(theme: Theme, density: Density) -> Div {
 
 impl Render for AdapterPicker {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }
@@ -481,7 +481,7 @@ fn append_preset_rows(
     // Same split as `render_rows`: the catalog decides which presets exist,
     // this filter decides which of them the launcher offers right now.
     let catalog = agent_catalog(AdapterDetection::Pending(&[]), None, &launch);
-    let rows: Vec<(usize, &oximux_settings::AcpPreset)> = oximux_settings::ACP_PRESETS
+    let rows: Vec<(usize, &trex_settings::AcpPreset)> = trex_settings::ACP_PRESETS
         .iter()
         .enumerate()
         .filter(|(_, p)| catalog.iter().any(|c| c.id == p.id))
@@ -597,7 +597,7 @@ fn append_adapter_rows(
         for (px, profile) in launch
             .profile_names(id)
             .into_iter()
-            .filter(|n| n != oximux_settings::DEFAULT_PROFILE)
+            .filter(|n| n != trex_settings::DEFAULT_PROFILE)
             .enumerate()
         {
             let for_handler = profile.clone();

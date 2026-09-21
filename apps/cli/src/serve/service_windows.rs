@@ -1,4 +1,4 @@
-//! `oximux serve` under the Windows Service Control Manager.
+﻿//! `TREX serve` under the Windows Service Control Manager.
 //!
 //! The Scheduled-Task path (docs/server-install.md) already drains on console
 //! signals; this is the real service: `--install-service` registers it,
@@ -36,8 +36,8 @@ use crate::cli::exit;
 
 /// The SCM's key for the service. Renaming it orphans existing installs —
 /// they would need `--uninstall-service` under the old build first.
-const SERVICE_NAME: &str = "OxiMuxServe";
-const DISPLAY_NAME: &str = "OxiMux Serve";
+const SERVICE_NAME: &str = "TREXServe";
+const DISPLAY_NAME: &str = "TREX Serve";
 
 /// How long a stop may take before the SCM is entitled to lose patience.
 /// Comfortably above serve's whole drain path: `DRAIN_DEADLINE` (20 s) +
@@ -61,8 +61,8 @@ pub fn run_service(args: ServeArgs) -> u8 {
         Err(err) => {
             eprintln!(
                 "serve: --service is for the Service Control Manager, which did not launch \
-                 this process ({err}); run plain `oximux serve`, or install with \
-                 `oximux serve --install-service`"
+                 this process ({err}); run plain `TREX serve`, or install with \
+                 `TREX serve --install-service`"
             );
             1
         }
@@ -128,7 +128,7 @@ fn service_main(_scm_args: Vec<OsString>) {
     // kernel closes it and terminates every agent child still in the job.
     // Dropping instead of leaking would terminate US at drop time, before the
     // STOPPED report below.
-    match oximux_job_object::JobObject::adopt_pid(std::process::id()) {
+    match trex_job_object::JobObject::adopt_pid(std::process::id()) {
         Ok(job) => std::mem::forget(job),
         Err(err) => {
             // Serve still works; only the hard-kill teardown guarantee is
@@ -168,7 +168,7 @@ fn status(
     }
 }
 
-/// `oximux serve --install-service`: register the service with the SCM.
+/// `TREX serve --install-service`: register the service with the SCM.
 ///
 /// `--data-dir` is REQUIRED here even though plain serve defaults it: the
 /// service runs as LocalSystem, whose per-user default resolves to a profile
@@ -219,8 +219,8 @@ pub fn install(data_dir: Option<PathBuf>, projects: &[PathBuf]) -> u8 {
         };
         let service = manager.create_service(&info, ServiceAccess::CHANGE_CONFIG)?;
         service.set_description(
-            "OxiMux headless host: serves agent sessions, terminals, and schedules for \
-             the oximux CLI and paired devices.",
+            "TREX headless host: serves agent sessions, terminals, and schedules for \
+             the TREX CLI and paired devices.",
         )?;
         Ok(())
     })();
@@ -230,8 +230,8 @@ pub fn install(data_dir: Option<PathBuf>, projects: &[PathBuf]) -> u8 {
             println!(
                 "installed service {SERVICE_NAME} (start: automatic)\n\
                  start it now:   sc start {SERVICE_NAME}\n\
-                 watch it:       oximux status --dir {data_dir_display}\n\
-                 remove it:      oximux serve --uninstall-service"
+                 watch it:       TREX status --dir {data_dir_display}\n\
+                 remove it:      TREX serve --uninstall-service"
             );
             exit::OK
         }
@@ -246,7 +246,7 @@ pub fn install(data_dir: Option<PathBuf>, projects: &[PathBuf]) -> u8 {
     }
 }
 
-/// `oximux serve --uninstall-service`: stop (best-effort) and delete.
+/// `TREX serve --uninstall-service`: stop (best-effort) and delete.
 pub fn uninstall() -> u8 {
     let outcome = (|| -> Result<(), windows_service::Error> {
         let manager =

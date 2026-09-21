@@ -1,4 +1,4 @@
-//! The client-side view of one subscribed session: the folded [`ChatThread`] plus
+﻿//! The client-side view of one subscribed session: the folded [`ChatThread`] plus
 //! a resume cursor.
 //!
 //! Feed it the backlog (from `subscribe`/`events_since`) and then the live
@@ -9,8 +9,8 @@
 //! (or a frame was dropped), so rather than fold out of order it reports a
 //! [`FoldOutcome::Gap`] and the caller resyncs via `events_since(resume_from)`.
 
-use oximux_agent_core::thread::{ChatThread, ThreadEntry};
-use oximux_remote_proto::HostEvent;
+use trex_agent_core::thread::{ChatThread, ThreadEntry};
+use trex_remote_proto::HostEvent;
 
 use crate::error::SessionError;
 
@@ -135,8 +135,8 @@ impl SessionSubscription {
 
 #[cfg(test)]
 mod tests {
-    use oximux_agent_core::thread::ThreadEvent;
-    use oximux_remote_proto::messages::SessionStatusWire;
+    use trex_agent_core::thread::ThreadEvent;
+    use trex_remote_proto::messages::SessionStatusWire;
 
     use super::*;
 

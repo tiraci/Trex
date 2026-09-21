@@ -1,8 +1,8 @@
-//! The worktree lifecycle, shared by every host.
+﻿//! The worktree lifecycle, shared by every host.
 //!
 //! A worktree is three things that must agree: a git worktree on disk, the
 //! branch it checks out, and the `workspaces` row that names both. That branch
-//! used to be `oximux/<slug>` by construction; it is now whatever the row
+//! used to be `TREX/<slug>` by construction; it is now whatever the row
 //! records, because a worktree may be cut on a configured prefix or may adopt
 //! an existing branch outright (see [`CreateBase`]).
 //! [`create_workspace_with_rollback`] is what keeps them in agreement when the
@@ -51,10 +51,10 @@ pub use setup::{SETUP_TIMEOUT, SetupOutcome, SetupTranscript};
 
 use std::path::{Path, PathBuf};
 
-use oximux_core::{Project, Workspace};
-use oximux_git::Repository;
-use oximux_settings::{ScriptKind, SetupDecision};
-use oximux_storage::{StorageError, WorkspaceRepo};
+use trex_core::{Project, Workspace};
+use trex_git::Repository;
+use trex_settings::{ScriptKind, SetupDecision};
+use trex_storage::{StorageError, WorkspaceRepo};
 use tokio::sync::mpsc::UnboundedSender;
 
 /// One step of worktree provisioning, as it happens.
@@ -62,12 +62,12 @@ use tokio::sync::mpsc::UnboundedSender;
 /// Provisioning is the slowest part of creating a worktree and the part most
 /// likely to fail, so it is the part the user most needs to see. This is the
 /// stream a host renders as a live transcript; a host with nowhere to show it
-/// (`oximux serve`) simply passes no sink and the whole thing costs nothing.
+/// (`TREX serve`) simply passes no sink and the whole thing costs nothing.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProvisionEvent {
-    /// An `.oximuxinclude` path landed in the worktree.
+    /// An `.trexinclude` path landed in the worktree.
     IncludeCopied(PathBuf),
-    /// An `.oximuxinclude` path did not, with the reason.
+    /// An `.trexinclude` path did not, with the reason.
     IncludeSkipped(Skip),
     /// The default branch is about to be fetched and fast-forwarded. Emitted
     /// because this is the one step that can sit on the network for tens of
@@ -78,7 +78,7 @@ pub enum ProvisionEvent {
     FreshenFinished(String),
     /// The setup script will NOT run, and why. Distinct from simply not
     /// emitting `SetupStarted`: a silent skip is indistinguishable from a
-    /// project that has no setup script, and this one is a decision OxiMux made
+    /// project that has no setup script, and this one is a decision TREX made
     /// on the user's behalf that they may want to reverse with `Run setup`.
     SetupSkipped(String),
     /// The setup script is about to run. Carries the script itself, because
@@ -225,7 +225,7 @@ pub enum CreateOutcome {
 ///
 /// Between the git step and the DB insert, [`Provision`] runs two things that
 /// make the difference between a worktree that exists and one the user can work
-/// in: the `.oximuxinclude` copy, then the project's `setup` script. The order
+/// in: the `.trexinclude` copy, then the project's `setup` script. The order
 /// is fixed — setup scripts read the files the include brings.
 ///
 /// The insert deliberately happens *after* both. A row written before setup
@@ -263,7 +263,7 @@ pub async fn create_workspace_with_rollback(
     };
     // Reclaim is asked about the branch we are ABOUT to make. A retry after the
     // prefix setting changed therefore clears the directory but leaves the
-    // interrupted create's old branch (`oximux/foo` when the retry is
+    // interrupted create's old branch (`TREX/foo` when the retry is
     // `alice/foo`) dangling — the reclaim cannot know a name nothing recorded.
     // Accepted rather than guessed at: deleting a branch whose name we inferred
     // from a directory is how a reclaim destroys work it did not create.
@@ -367,7 +367,7 @@ pub async fn create_workspace_with_rollback(
     //
     // On a blocking thread because it is synchronous, recursive filesystem work
     // and the desktop calls this whole function from gpui's *foreground*
-    // executor. A project whose `.oximuxinclude` names a large directory would
+    // executor. A project whose `.trexinclude` names a large directory would
     // otherwise freeze the window for the length of the copy.
     let copied = {
         let (root, wt) = (project_root.to_path_buf(), worktree_path.to_path_buf());
@@ -377,7 +377,7 @@ pub async fn create_workspace_with_rollback(
                 // The blocking pool panicked or was shut down. The include copy
                 // never fails creation, so neither does losing it — but it is
                 // not something to pass over in silence either.
-                tracing::warn!(?err, "oximuxinclude copy did not run");
+                tracing::warn!(?err, "TREXinclude copy did not run");
                 include::CopyReport::default()
             }
         }
@@ -386,14 +386,14 @@ pub async fn create_workspace_with_rollback(
         provision.emit(ProvisionEvent::IncludeCopied(path.clone()));
     }
     for skip in &copied.skipped {
-        tracing::info!(worktree = %worktree_path.display(), skip = %skip, "oximuxinclude skip");
+        tracing::info!(worktree = %worktree_path.display(), skip = %skip, "TREXinclude skip");
         provision.emit(ProvisionEvent::IncludeSkipped(skip.clone()));
     }
 
-    // Setup: reads `.oximux/scripts.toml` from the worktree, the same source
+    // Setup: reads `.trex/scripts.toml` from the worktree, the same source
     // `run_cleanup_before_remove` uses — it is committed, so the branch's own
     // copy is the one that will actually run.
-    let scripts = oximux_settings::load_for_project(worktree_path);
+    let scripts = trex_settings::load_for_project(worktree_path);
     // The guard only has something to say when a script would otherwise have
     // run — telling the user setup was skipped on a project that has no setup
     // script is noise about a decision that changed nothing.
@@ -603,10 +603,10 @@ async fn reclaim_orphan(
 }
 
 /// Where an in-progress create leaves its mark: a file in the worktree's own
-/// gitdir (`<main>/.git/worktrees/<name>/oximux-provisioning`).
+/// gitdir (`<main>/.git/worktrees/<name>/trex-provisioning`).
 ///
 /// In the gitdir rather than the working tree because the working tree is
-/// what the setup script sees and what `.oximuxinclude` fills — a stray file
+/// what the setup script sees and what `.trexinclude` fills — a stray file
 /// there would be visible to both and to `git status`. The gitdir is private
 /// to this worktree and is removed with it, so the mark can never outlive the
 /// thing it marks. `None` when `worktree_path` is not a linked worktree —
@@ -626,7 +626,7 @@ pub fn provisioning_marker(worktree_path: &Path) -> Option<PathBuf> {
 }
 
 /// File name of the mark [`provisioning_marker`] resolves to.
-const PROVISIONING_MARK: &str = "oximux-provisioning";
+const PROVISIONING_MARK: &str = "trex-provisioning";
 
 /// Undo the git half of a create: force-remove the worktree, force-delete the
 /// branch. Best-effort — both steps are attempted even when the first fails, so
@@ -660,7 +660,7 @@ async fn rollback(repo: &Repository, worktree_path: &Path, base: &CreateBase) ->
 /// worktree removal anyway.
 const CLEANUP_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30);
 
-/// Run the project's `cleanup` script (from `.oximux/scripts.toml`) to
+/// Run the project's `cleanup` script (from `.trex/scripts.toml`) to
 /// completion at `worktree_path` BEFORE the worktree is removed, bounded by
 /// [`CLEANUP_TIMEOUT`]. Best-effort and non-blocking to deletion: a missing
 /// script, a non-zero exit, an exec failure, or a timeout are each logged and
@@ -675,14 +675,14 @@ pub async fn run_cleanup_before_remove(worktree_path: &Path) {
 /// Inner implementation with an injectable timeout so the force-escape (a hung
 /// cleanup must not block removal) can be unit-tested with a short bound.
 async fn run_cleanup_bounded(worktree_path: &Path, timeout: std::time::Duration) {
-    let scripts = oximux_settings::load_for_project(worktree_path);
+    let scripts = trex_settings::load_for_project(worktree_path);
     let Some(cleanup) = scripts.script(ScriptKind::Cleanup) else {
         return;
     };
     let cleanup = cleanup.to_string();
     let mut cmd = tokio::process::Command::new("sh");
     {
-        use oximux_no_window::NoWindow as _;
+        use trex_no_window::NoWindow as _;
         cmd.arg("-lc")
             .arg(&cleanup)
             .current_dir(worktree_path)
@@ -716,9 +716,9 @@ mod tests {
     use std::time::{Duration, Instant};
 
     fn write_cleanup(dir: &Path, body: &str) {
-        let oximux = dir.join(".oximux");
-        std::fs::create_dir_all(&oximux).unwrap();
-        std::fs::write(oximux.join("scripts.toml"), format!("cleanup = {body:?}\n")).unwrap();
+        let trex = dir.join(".trex");
+        std::fs::create_dir_all(&trex).unwrap();
+        std::fs::write(trex.join("scripts.toml"), format!("cleanup = {body:?}\n")).unwrap();
     }
 
     // The force-escape: a hung cleanup must not block beyond the timeout.
@@ -740,7 +740,7 @@ mod tests {
     #[tokio::test]
     async fn no_cleanup_script_returns_immediately() {
         let tmp = tempfile::tempdir().unwrap();
-        // No .oximux/scripts.toml → no-op, no panic, near-instant.
+        // No .trex/scripts.toml → no-op, no panic, near-instant.
         let start = Instant::now();
         run_cleanup_bounded(tmp.path(), Duration::from_secs(30)).await;
         assert!(start.elapsed() < Duration::from_secs(2));

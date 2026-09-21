@@ -1,4 +1,4 @@
-//! The v16 pairing administration: local operator only, one-time expiring
+﻿//! The v16 pairing administration: local operator only, one-time expiring
 //! tickets, and the read-only opt-down flowing into the minted enrollment.
 //! The lateral-movement property is the point of most of these: no remote
 //! device — whatever its tier — may mint, list, or erase enrollments.
@@ -7,13 +7,13 @@ use std::sync::Arc;
 
 use futures::executor::block_on;
 use futures::future::join;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{AuthStore, Dispatcher, LocalScope, registration_proof};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::RegisterReq;
-use oximux_remote_proto::pairing::PairingTicket;
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{AuthStore, Dispatcher, LocalScope, registration_proof};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::RegisterReq;
+use trex_remote_proto::pairing::PairingTicket;
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {
@@ -179,7 +179,7 @@ fn remote_devices_cannot_administer_pairing() {
     let auth = Arc::new(AuthStore::new());
     // Enroll a full-write device the legitimate way.
     let secret = [0x22; 16];
-    auth.set_pairing(oximux_remote_host::PairingSlot::new(secret, None, false));
+    auth.set_pairing(trex_remote_host::PairingSlot::new(secret, None, false));
     let dispatcher = dispatcher_over(auth.clone());
     let (client, server) = duplex_pair();
     let serve = dispatcher.serve(&server);
@@ -297,8 +297,8 @@ fn an_expired_window_redeems_nothing() {
 /// ACL predicate.
 #[test]
 fn a_read_only_enrollment_lists_but_cannot_prompt() {
-    use oximux_agents::thread::StubConnection;
-    use oximux_remote_proto::messages::SendPromptReq;
+    use trex_agents::thread::StubConnection;
+    use trex_remote_proto::messages::SendPromptReq;
 
     let auth = Arc::new(AuthStore::new());
     // Mint a read-only window as the operator would.

@@ -1,4 +1,4 @@
-//! Locate an agent CLI's binary from a GUI-launched app.
+﻿//! Locate an agent CLI's binary from a GUI-launched app.
 //!
 //! A macOS app launched from Finder does not inherit the shell's PATH, and
 //! agent CLIs typically install under a version manager (nvm/volta/bun) or a
@@ -95,7 +95,7 @@ fn which_on_path(bin: &str) -> Option<PathBuf> {
 #[cfg(unix)]
 fn login_probe_command(bin: &str) -> (String, Vec<String>) {
     (
-        oximux_shell_env::default_shell(),
+        trex_shell_env::default_shell(),
         vec!["-lc".to_string(), format!("command -v {bin}")],
     )
 }
@@ -103,7 +103,7 @@ fn login_probe_command(bin: &str) -> (String, Vec<String>) {
 #[cfg(windows)]
 fn login_probe_command(bin: &str) -> (String, Vec<String>) {
     (
-        oximux_shell_env::default_shell(),
+        trex_shell_env::default_shell(),
         vec![
             "-NoLogo".to_string(),
             "-Command".to_string(),
@@ -118,7 +118,7 @@ fn login_probe_command(bin: &str) -> (String, Vec<String>) {
 /// Ask a login shell where `bin` is — recovers installs a Finder-launched app
 /// can't see. Bounded (see [`LOGIN_SHELL_PROBE_TIMEOUT`]).
 fn login_shell_which(bin: &str) -> Option<PathBuf> {
-    use oximux_no_window::NoWindow as _;
+    use trex_no_window::NoWindow as _;
     let (shell, args) = login_probe_command(bin);
     let mut child = Command::new(shell)
         .args(args)

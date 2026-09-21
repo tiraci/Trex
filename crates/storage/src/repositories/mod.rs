@@ -1,7 +1,7 @@
-//! Typed CRUD repositories over the V001 schema. Each repo is a thin
+﻿//! Typed CRUD repositories over the V001 schema. Each repo is a thin
 //! newtype around a [`Db`] clone (cheap — `Arc<Mutex<Connection>>` inside),
 //! exposes only the methods Phase 4 consumers (steps 4–10) need, and
-//! returns domain types from `oximux-core` — callers never see row types.
+//! returns domain types from `trex-core` — callers never see row types.
 //!
 //! ## Threading
 //! Async callers must wrap repo calls in `tokio::task::spawn_blocking`;

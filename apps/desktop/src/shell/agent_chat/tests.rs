@@ -1,4 +1,4 @@
-//! View-level tests for the agent chat: extracted verbatim from the tail
+﻿//! View-level tests for the agent chat: extracted verbatim from the tail
 //! of `mod.rs` (the module was inline there) so the view file stays under
 //! its file-size ratchet budget. Same module path — `tests` is still a
 //! child of `agent_chat`, so private access and test filter names are
@@ -6,8 +6,8 @@
 
     use super::*;
     use gpui::TestAppContext;
-    use oximux_agents::thread::connection::AgentCapabilities;
-    use oximux_agents::thread::StubConnection;
+    use trex_agents::thread::connection::AgentCapabilities;
+    use trex_agents::thread::StubConnection;
     use serde_json::json;
 
     /// An optimistic feature pick overlays the backend-advertised value so the
@@ -16,7 +16,7 @@
     /// harmlessly ignored.
     #[test]
     fn apply_feature_overrides_overlays_picks() {
-        use oximux_agents::thread::{FeatureControl, FeatureKind, FeatureSelectOption};
+        use trex_agents::thread::{FeatureControl, FeatureKind, FeatureSelectOption};
         let mut features = vec![
             FeatureControl {
                 id: "fast".into(),
@@ -58,7 +58,7 @@
     /// clobbered a good seed, hiding the picker mid-draft.)
     #[test]
     fn fold_probe_result_preserves_a_good_seed() {
-        use oximux_agents::thread::ModelChoice;
+        use trex_agents::thread::ModelChoice;
         let full = ProbedCatalog {
             models: vec![ModelChoice { wire: "m".into(), label: "m".into(), description: None }],
             default_model: None,
@@ -95,7 +95,7 @@
     #[test]
     fn agent_model_count_prefers_probe_then_cache_then_roster() {
         use super::composer::AgentModelCount;
-        use oximux_agents::thread::ModelChoice;
+        use trex_agents::thread::ModelChoice;
         let m = |n: usize| ProbedCatalog {
             models: (0..n)
                 .map(|i| ModelChoice { wire: i.to_string(), label: i.to_string(), description: None })
@@ -143,7 +143,7 @@
                     input: json!({}),
                     description: "notes.txt".into(),
                     suggestions: vec![],
-                    kind: oximux_agents::thread::PermissionKind::Tool,
+                    kind: trex_agents::thread::PermissionKind::Tool,
                 });
                 assert!(
                     view.thread.pending_permission().is_some(),
@@ -295,7 +295,7 @@
                 );
                 // Every delta is applied regardless — only the paint waits.
                 let text = match view.thread.entries.last() {
-                    Some(oximux_agents::thread::ThreadEntry::Assistant(m)) => m.text.clone(),
+                    Some(trex_agents::thread::ThreadEntry::Assistant(m)) => m.text.clone(),
                     other => panic!("expected a streaming assistant entry, got {other:?}"),
                 };
                 assert_eq!(
@@ -608,7 +608,7 @@
                     .expect("the respawn must carry the posture, or the pill is decoration");
                 assert_eq!(posture.tools, pi_posture::TOOLS_READ_ONLY);
                 // And it reaches the child as real argv, not just a struct field.
-                let args = oximux_agents::thread::pi::build_args(None, &posture, None)
+                let args = trex_agents::thread::pi::build_args(None, &posture, None)
                     .expect("build argv");
                 assert!(
                     args.windows(2).any(|w| w[0] == "--tools"),
@@ -623,12 +623,12 @@
     }
 
     /// Same load-bearing property for omp, with HIGHER stakes on the miss: a
-    /// respawn spec that dropped the posture falls to OxiMux's Write default —
+    /// respawn spec that dropped the posture falls to TREX's Write default —
     /// and omp's OWN default is yolo, so the flag must both survive the spec
     /// AND always be spelled in the argv (the yolo-default guard, F2).
     #[gpui::test]
     async fn picking_an_omp_posture_reaches_the_respawn_spec(cx: &mut TestAppContext) {
-        use oximux_agents::thread::omp::posture::{self as omp_posture, OmpPosture};
+        use trex_agents::thread::omp::posture::{self as omp_posture, OmpPosture};
 
         cx.update(gpui_component::init);
         let window = cx.add_window(|window, cx| {
@@ -659,7 +659,7 @@
                 assert_eq!(posture, OmpPosture::AlwaysAsk);
                 // And it reaches the child as real argv — explicitly, because
                 // an ABSENT flag is not "the default", it is omp's yolo.
-                let args = oximux_agents::thread::omp::build_args(None, &posture, None)
+                let args = trex_agents::thread::omp::build_args(None, &posture, None)
                     .expect("build argv");
                 assert!(
                     args.windows(2)
@@ -672,7 +672,7 @@
                 view.feature_values.remove(omp_posture::FEATURE_APPROVALS);
                 assert_eq!(view.respawn_spec(Vec::new(), None).omp_posture, None);
                 let default_args =
-                    oximux_agents::thread::omp::build_args(None, &OmpPosture::default(), None)
+                    trex_agents::thread::omp::build_args(None, &OmpPosture::default(), None)
                         .expect("build argv");
                 assert!(
                     default_args
@@ -692,7 +692,7 @@
     /// descriptions and attribution — no on-disk scan of another CLI's config.
     #[gpui::test]
     async fn a_backends_own_command_metadata_reaches_the_palette(cx: &mut TestAppContext) {
-        use oximux_agents::thread::connection::SlashCommandInfo;
+        use trex_agents::thread::connection::SlashCommandInfo;
 
         cx.update(gpui_component::init);
         let stub = StubConnection::default()
@@ -857,7 +857,7 @@
                         input,
                         description: name.into(),
                         suggestions: vec![],
-                        kind: oximux_agents::thread::PermissionKind::Tool,
+                        kind: trex_agents::thread::PermissionKind::Tool,
                     });
                 }
 
@@ -922,7 +922,7 @@
 
         window
             .update(cx, |view, _window, cx| {
-                use oximux_agents::thread::{parse_questions, QuestionAnswer, QuestionAnswers};
+                use trex_agents::thread::{parse_questions, QuestionAnswer, QuestionAnswers};
                 view.thread.push_user_message("choose");
                 let input = json!({"questions":[{"question":"Tabs or spaces?","header":"Indent",
                     "options":[{"label":"Tabs","description":""},{"label":"Spaces","description":""}],
@@ -997,7 +997,7 @@
                     input: json!({}),
                     description: "x".into(),
                     suggestions: vec![],
-                    kind: oximux_agents::thread::PermissionKind::Tool,
+                    kind: trex_agents::thread::PermissionKind::Tool,
                 });
                 // First answer: allow.
                 view.resolve_permission(
@@ -1062,7 +1062,7 @@
                     input: json!({}),
                     description: "x".into(),
                     suggestions: vec![],
-                    kind: oximux_agents::thread::PermissionKind::Tool,
+                    kind: trex_agents::thread::PermissionKind::Tool,
                 });
                 assert!(view.thread.turn_active, "turn active before Stop");
 
@@ -1296,7 +1296,7 @@
             AgentChatView::with_connection_for_test(
                 // Regenerate is a rewind-gated (Claude) feature.
                 Arc::new(StubConnection::default().with_capabilities(
-                    oximux_agents::thread::AgentCapabilities { supports_rewind: true, ..Default::default() },
+                    trex_agents::thread::AgentCapabilities { supports_rewind: true, ..Default::default() },
                 )),
                 Theme::default(),
                 Density::default(),
@@ -1354,7 +1354,7 @@
             AgentChatView::with_connection_for_test(
                 // Edit-and-resend is a rewind-gated (Claude) feature.
                 Arc::new(StubConnection::default().with_capabilities(
-                    oximux_agents::thread::AgentCapabilities { supports_rewind: true, ..Default::default() },
+                    trex_agents::thread::AgentCapabilities { supports_rewind: true, ..Default::default() },
                 )),
                 Theme::default(),
                 Density::default(),
@@ -1718,7 +1718,7 @@
         cx.update(gpui_component::init);
         let window = cx.add_window(|window, cx| {
             AgentChatView::new_import_bridge(
-                PathBuf::from("/tmp/oximux-bridge-label"),
+                PathBuf::from("/tmp/trex-bridge-label"),
                 vec![ThreadEntry::Assistant(AssistantMessage {
                     text: "hi from opencode".into(),
                     thinking: String::new(),
@@ -1727,7 +1727,7 @@
                     preset_id: "opencode".into(),
                     session_id: "ses-1".into(),
                     resume_handle: "ses-1".into(),
-                    cwd: PathBuf::from("/tmp/oximux-bridge-label"),
+                    cwd: PathBuf::from("/tmp/trex-bridge-label"),
                     provider_display: "OpenCode".into(),
                 },
                 Theme::default(),
@@ -2158,7 +2158,7 @@
                 let draft = view.worktree_draft_for_composer(cx).expect("offered");
                 assert!(draft.enabled);
                 assert!(draft.slug_input.is_some(), "arming creates the slug field");
-                assert!(draft.hint.starts_with("oximux/"), "hint previews the branch: {}", draft.hint);
+                assert!(draft.hint.starts_with("TREX/"), "hint previews the branch: {}", draft.hint);
 
                 // Re-picking the SAME row must not flip it back off.
                 view.set_worktree_isolation(true, window, cx);
@@ -3004,7 +3004,7 @@ fn the_drop_overlay_paints(cx: &mut TestAppContext) {
         .update(cx, |view, _window, cx| {
             view.thread.push_user_message_with_images("question", Vec::new());
             view.on_event(
-                oximux_agents::thread::ThreadEvent::AssistantText("reply\n".repeat(40)),
+                trex_agents::thread::ThreadEvent::AssistantText("reply\n".repeat(40)),
                 cx,
             );
             view.set_drop_hint(true, &[std::path::PathBuf::from("main.rs")], cx);

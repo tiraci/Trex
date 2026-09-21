@@ -1,7 +1,7 @@
-OxiMux
-Copyright 2025-2026 nhtera
+﻿Trex
+Copyright 2025-2026 tiraci
 
-This product includes software developed as part of the OxiMux project.
+This product includes software developed as part of the Trex project.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
@@ -9,14 +9,14 @@ the License in the LICENSE file at the root of this repository, or at:
 
     http://www.apache.org/licenses/LICENSE-2.0
 
-"OxiMux" and the OxiMux logo are trademarks of the project author. The Apache
+"Trex" and the Trex logo are trademarks of the project author. The Apache
 License does not grant permission to use them (see section 6 of the License).
 
 --------------------------------------------------------------------------------
 Third-party components
 --------------------------------------------------------------------------------
 
-Binary distributions of OxiMux link against third-party Rust crates, each
+Binary distributions of Trex link against third-party Rust crates, each
 distributed under its own license. The dependency set is permissively licensed
 (predominantly MIT and Apache-2.0). Notable components requiring attribution
 under Apache License 2.0 section 4(d):

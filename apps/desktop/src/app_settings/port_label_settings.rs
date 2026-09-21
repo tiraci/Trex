@@ -1,4 +1,4 @@
-//! Persistence for the names a user gives a detected port.
+﻿//! Persistence for the names a user gives a detected port.
 //!
 //! A port number is not a name. Three `node` processes on 3000, 3001 and 9229
 //! are the API, the docs site and a debugger, and only the person who started
@@ -18,7 +18,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use oximux_storage::SettingsRepo;
+use trex_storage::SettingsRepo;
 
 /// Key prefix for every port label. Listing by prefix is how the panel loads
 /// them all in one read instead of one read per visible row.
@@ -60,7 +60,7 @@ pub fn load_labels(repo: &SettingsRepo) -> HashMap<String, String> {
         Ok(rows) => rows.into_iter().collect(),
         Err(err) => {
             tracing::warn!(
-                target: "oximux_app::port_label_settings",
+                target: "trex_app::port_label_settings",
                 "failed to read port labels: {err}"
             );
             HashMap::new()
@@ -79,7 +79,7 @@ pub fn save_label(repo: &SettingsRepo, project: &Path, port: u16, label: &str) {
     };
     if let Err(err) = result {
         tracing::warn!(
-            target: "oximux_app::port_label_settings",
+            target: "trex_app::port_label_settings",
             "failed to persist port label: {err}"
         );
     }
@@ -88,7 +88,7 @@ pub fn save_label(repo: &SettingsRepo, project: &Path, port: u16, label: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::open_memory;
+    use trex_storage::open_memory;
     use std::path::PathBuf;
 
     fn repo() -> SettingsRepo {

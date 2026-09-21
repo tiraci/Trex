@@ -1,6 +1,6 @@
-//! Renders a pairing ticket as a scannable QR image.
+﻿//! Renders a pairing ticket as a scannable QR image.
 //!
-//! The payload is the ticket's `oximux://connect?ticket=…` deep link, so scanning
+//! The payload is the ticket's `TREX://connect?ticket=…` deep link, so scanning
 //! it with the phone camera can hand off directly to the app. Encoding is done
 //! here as raw PNG bytes rather than via `qrcode`'s own image renderer, so this
 //! crate's `image` version stays the only one in the graph.
@@ -59,7 +59,7 @@ mod tests {
     /// size — `width + 2 quiet zones`, scaled.
     #[test]
     fn encodes_a_pairing_url_at_the_expected_size() {
-        let url = "oximux://connect?ticket=AAAABBBBCCCCDDDD";
+        let url = "TREX://connect?ticket=AAAABBBBCCCCDDDD";
         let scale = 4;
         let png = qr_png(url, scale).expect("encodes");
 
@@ -73,7 +73,7 @@ mod tests {
     /// find the finder patterns.
     #[test]
     fn leaves_a_white_quiet_zone_on_every_edge() {
-        let png = qr_png("oximux://connect?ticket=X", 3).expect("encodes");
+        let png = qr_png("TREX://connect?ticket=X", 3).expect("encodes");
         let img = image::load_from_memory(&png).expect("valid PNG").to_luma8();
         let (w, h) = img.dimensions();
         let margin = (QUIET_ZONE * 3) as u32;
@@ -95,7 +95,7 @@ mod tests {
     /// size assertions above but scan as nothing.
     #[test]
     fn paints_dark_modules() {
-        let png = qr_png("oximux://connect?ticket=Y", 2).expect("encodes");
+        let png = qr_png("TREX://connect?ticket=Y", 2).expect("encodes");
         let img = image::load_from_memory(&png).expect("valid PNG").to_luma8();
         let dark = img.pixels().filter(|p| p.0[0] == 0).count();
         assert!(dark > 0, "the code has dark modules");
@@ -108,7 +108,7 @@ mod tests {
     /// scans as nothing; this is what proves a phone can actually pair from it.
     #[test]
     fn the_rendered_code_decodes_back_to_the_payload() {
-        let url = "oximux://connect?ticket=k7Qm2xR9vB3nL5pT8wZ1yA4cE6gH0jK2";
+        let url = "TREX://connect?ticket=k7Qm2xR9vB3nL5pT8wZ1yA4cE6gH0jK2";
         let png = qr_png(url, 6).expect("encodes");
 
         let img = image::load_from_memory(&png).expect("valid PNG").to_luma8();
@@ -123,7 +123,7 @@ mod tests {
     /// Scale changes the pixel size without changing the module count.
     #[test]
     fn scale_multiplies_the_pixel_size_only() {
-        let url = "oximux://connect?ticket=ZZZZ";
+        let url = "TREX://connect?ticket=ZZZZ";
         let small = image::load_from_memory(&qr_png(url, 2).unwrap()).unwrap();
         let large = image::load_from_memory(&qr_png(url, 6).unwrap()).unwrap();
         assert_eq!(large.width(), small.width() * 3);

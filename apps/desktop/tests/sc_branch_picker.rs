@@ -1,4 +1,4 @@
-//! Pure-data tests for the SCM branch-picker primitive. Source lives at
+﻿//! Pure-data tests for the SCM branch-picker primitive. Source lives at
 //! `apps/desktop/src/shell/source_control/branch_picker.rs`; tests
 //! extracted here so the production module stays under the file-size
 //! warn cap (matching the `sc_dropdown_items.rs` extraction precedent).
@@ -9,7 +9,7 @@
 //! `TestAppContext` and is covered by the integration tests added when
 //! the picker is wired into the toolbar.
 
-use oximux_app::shell::source_control::branch_picker::{
+use trex_app::shell::source_control::branch_picker::{
     DisplayRow, PickerMode, PickerOutcome, build_rows, filter_branches, selectable_count,
     selectable_to_absolute, wrap_selectable,
 };
@@ -249,7 +249,7 @@ fn display_row_separator_is_not_selectable() {
 
 #[test]
 fn build_rows_caps_branches_with_more_hint() {
-    use oximux_app::shell::source_control::branch_picker::MAX_BRANCH_ROWS;
+    use trex_app::shell::source_control::branch_picker::MAX_BRANCH_ROWS;
     let cands: Vec<String> = (0..20).map(|i| format!("feature-{i:02}")).collect();
     let rows = build_rows(PickerMode::Switch, &cands, None, "");
     let branch_rows = rows
@@ -265,7 +265,7 @@ fn build_rows_caps_branches_with_more_hint() {
 
 #[test]
 fn build_rows_no_hint_at_or_under_cap() {
-    use oximux_app::shell::source_control::branch_picker::MAX_BRANCH_ROWS;
+    use trex_app::shell::source_control::branch_picker::MAX_BRANCH_ROWS;
     let cands: Vec<String> = (0..MAX_BRANCH_ROWS)
         .map(|i| format!("b-{i:02}"))
         .collect();

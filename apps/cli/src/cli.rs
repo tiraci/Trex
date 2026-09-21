@@ -1,4 +1,4 @@
-//! The clap derive tree — the single source of truth for parsing, `--help`,
+﻿//! The clap derive tree — the single source of truth for parsing, `--help`,
 //! and the `agent-context` schema dump. Nothing here touches a socket or a
 //! database: construction must stay free of side effects so `--help` and typo
 //! paths cost nothing.
@@ -18,9 +18,9 @@ pub mod exit {
     pub const DENIED: u8 = 5;
 }
 
-/// Drive a running OxiMux host from the command line.
+/// Drive a running TREX host from the command line.
 ///
-/// A host is either `oximux serve` (headless — a server, over SSH) or the
+/// A host is either `TREX serve` (headless — a server, over SSH) or the
 /// desktop app with local CLI access enabled (Settings → Remote). Async
 /// contract: sending a prompt or command is acknowledged when the host ACCEPTS
 /// it, not when the agent finishes — watch the session for completion.
@@ -28,7 +28,7 @@ pub mod exit {
 /// Exit codes: 0 ok · 1 error · 2 usage · 3 host unreachable · 4 timed out ·
 /// 5 access denied.
 #[derive(Parser, Debug)]
-#[command(name = "oximux", version, about, verbatim_doc_comment)]
+#[command(name = "TREX", version, about, verbatim_doc_comment)]
 pub struct Cli {
     /// Emit machine-readable JSON on stdout (one convention, every verb).
     /// Streaming verbs (run/send/attach/wait) emit NDJSON event lines, then a
@@ -37,12 +37,12 @@ pub struct Cli {
     pub json: bool,
 
     /// The host's runtime directory (where its control socket lives).
-    /// Defaults to this machine's OxiMux data directory. Local hosts only.
+    /// Defaults to this machine's TREX data directory. Local hosts only.
     #[arg(long, global = true, value_name = "DIR")]
     pub dir: Option<PathBuf>,
 
     /// Talk to a paired remote host instead of this machine (see
-    /// `oximux hosts ls`). Also read from $OXIMUX_HOST; a recorded default
+    /// `TREX hosts ls`). Also read from $TREX_HOST; a recorded default
     /// applies when neither is set. With no hosts paired, everything talks to
     /// this machine — no configuration needed.
     #[arg(long, global = true, value_name = "NAME")]
@@ -144,7 +144,7 @@ pub enum Command {
     /// `— resynced —` marker is printed rather than losing events silently.
     #[command(verbatim_doc_comment)]
     Attach {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// Replay retained events after this sequence number first
         /// (default: attach at the live edge).
@@ -164,7 +164,7 @@ pub enum Command {
     /// a turn parked on a permission request ends only when something decides.
     #[command(verbatim_doc_comment)]
     Send {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The prompt to send, or `-` to read it from stdin.
         prompt: String,
@@ -202,7 +202,7 @@ pub enum Command {
     /// `--stalled-after` to bound PROGRESS as well, and the two are told apart.
     #[command(verbatim_doc_comment)]
     Wait {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The state to wait for.
         #[arg(long, value_enum)]
@@ -214,19 +214,19 @@ pub enum Command {
     },
     /// Fetch a session's full transcript (paged under the hood).
     Transcript {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
     },
     /// Interrupt a session's in-flight turn. The session stays open.
     Stop {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
     },
     /// Redirect a mid-turn agent with additional guidance. Needs a backend with a
     /// mid-turn message queue; claude and codex have none and refuse it, so on those
     /// use `stop` and then `send`
     Steer {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The guidance to inject.
         text: String,
@@ -280,7 +280,7 @@ pub enum Command {
     /// Scheduled agent runs: create, list, pause, and fire them on the host.
     ///
     /// A schedule sends its prompt into a fresh session on a cadence. It fires
-    /// only while a host is running (the desktop app or `oximux serve`);
+    /// only while a host is running (the desktop app or `TREX serve`);
     /// missed occurrences are skipped forward, never replayed in a burst.
     #[command(verbatim_doc_comment)]
     Schedule {
@@ -289,7 +289,7 @@ pub enum Command {
     },
     /// Enroll this machine with a remote host from its pairing ticket.
     ///
-    /// Paste the whole `oximux://connect?ticket=…` link or the ticket alone.
+    /// Paste the whole `TREX://connect?ticket=…` link or the ticket alone.
     /// The first host you pair becomes the default, so `--host` is only needed
     /// once there is more than one.
     #[command(verbatim_doc_comment)]
@@ -340,7 +340,7 @@ pub enum Command {
         #[command(subcommand)]
         command: StateCommand,
     },
-    /// Run this machine as a headless OxiMux host.
+    /// Run this machine as a headless TREX host.
     ///
     /// Boots the same session/terminal/storage stack the desktop app hosts —
     /// minus every window — then serves the local CLI socket and the paired-
@@ -354,7 +354,7 @@ pub enum Command {
     /// must not retry (systemd: RestartPreventExitStatus=6).
     #[command(verbatim_doc_comment)]
     Serve {
-        /// The data directory (default: this machine's OxiMux data dir, shared
+        /// The data directory (default: this machine's TREX data dir, shared
         /// with the desktop app so sessions and pairings are one set).
         #[arg(long, value_name = "DIR")]
         data_dir: Option<PathBuf>,
@@ -367,7 +367,7 @@ pub enum Command {
         #[cfg(windows)]
         #[arg(long, hide = true)]
         service: bool,
-        /// Register `oximux serve` as a Windows service (requires an elevated
+        /// Register `TREX serve` as a Windows service (requires an elevated
         /// prompt and an explicit --data-dir; start it with `sc start`).
         #[cfg(windows)]
         #[arg(long, conflicts_with_all = ["service", "uninstall_service"])]
@@ -409,13 +409,13 @@ pub enum Command {
     /// swaps the CLI and the relay together — a version split between the two
     /// breaks their handshake. Contacts the release server and nothing else,
     /// so it works even when this machine's host is down. A running
-    /// `oximux serve` keeps working and is never restarted for you.
+    /// `TREX serve` keeps working and is never restarted for you.
     Update {
         /// Report what a release offers and exit without changing anything.
         #[arg(long)]
         check: bool,
     },
-    /// The agent-facing guides that teach an agent to drive OxiMux.
+    /// The agent-facing guides that teach an agent to drive TREX.
     ///
     /// Offline: the guides are built into this binary, so what `get` prints
     /// always matches the verbs this binary accepts. A guide fetched from
@@ -432,14 +432,29 @@ pub enum Command {
     /// Generated from this binary's own command tree, so it cannot describe a
     /// verb the parser does not accept. Install it where your shell looks:
     ///
-    ///   bash  oximux completions bash > /etc/bash_completion.d/oximux
-    ///   zsh   oximux completions zsh  > "${fpath[1]}/_oximux"
-    ///   fish  oximux completions fish > ~/.config/fish/completions/oximux.fish
+    ///   bash  TREX completions bash > /etc/bash_completion.d/TREX
+    ///   zsh   TREX completions zsh  > "${fpath[1]}/_TREX"
+    ///   fish  TREX completions fish > ~/.config/fish/completions/TREX.fish
     #[command(verbatim_doc_comment)]
     Completions {
         /// Which shell to emit for.
         #[arg(value_enum)]
         shell: clap_complete::Shell,
+    },
+    /// Multi-agent orchestration: fan a prompt across parallel worktrees.
+    Orchestration {
+        #[command(subcommand)]
+        command: OrchestrationCommand,
+    },
+    /// Manage API accounts, rate limits, and usage tracking.
+    Accounts {
+        #[command(subcommand)]
+        command: AccountsCommand,
+    },
+    /// Annotate diff lines with comments for agents.
+    Diff {
+        #[command(subcommand)]
+        command: DiffCommand,
     },
 }
 
@@ -459,7 +474,7 @@ pub enum WaitUntil {
 pub enum PermitCommand {
     /// List a session's pending permission requests and questions.
     Ls {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
     },
     /// Approve a pending permission request.
@@ -470,7 +485,7 @@ pub enum PermitCommand {
     /// narrow an over-broad command rather than denying and re-prompting.
     #[command(verbatim_doc_comment)]
     Allow {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The request id (from `permit ls`; default: the latest pending).
         request: Option<String>,
@@ -489,7 +504,7 @@ pub enum PermitCommand {
     },
     /// Deny a pending permission request.
     Deny {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The request id (from `permit ls`; default: the latest pending).
         request: Option<String>,
@@ -504,7 +519,7 @@ pub enum PermitCommand {
     /// option number, or free text.
     #[command(verbatim_doc_comment)]
     Answer {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The request id (from `permit ls`; default: the latest pending).
         request: Option<String>,
@@ -518,13 +533,13 @@ pub enum PermitCommand {
 pub enum ModelCommand {
     /// List the models (and modes) the session's backend offers.
     Ls {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
     },
     /// Switch the session's model. May be refused by backends that fix the
     /// model at spawn when no desktop view can respawn the child.
     Set {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The model id (from `model ls`).
         model: String,
@@ -535,7 +550,7 @@ pub enum ModelCommand {
 pub enum ModeCommand {
     /// Switch the session's permission mode (ids from `model ls`).
     Set {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The mode id (from `model ls`).
         mode: String,
@@ -546,12 +561,12 @@ pub enum ModeCommand {
 pub enum GitCommand {
     /// Working-tree status of the session's repository.
     Status {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
     },
     /// Diff one path (as listed by `git status`).
     Diff {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// Repository-relative path, as `git status` listed it.
         path: String,
@@ -564,7 +579,7 @@ pub enum GitCommand {
     },
     /// Stage paths into the index.
     Stage {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// Repository-relative paths, as `git status` listed them.
         #[arg(required = true)]
@@ -572,7 +587,7 @@ pub enum GitCommand {
     },
     /// Remove paths from the index, leaving the worktree untouched.
     Unstage {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// Repository-relative paths, as `git status` listed them.
         #[arg(required = true)]
@@ -580,7 +595,7 @@ pub enum GitCommand {
     },
     /// Commit what is already staged.
     Commit {
-        /// The session id (see `oximux ls`).
+        /// The session id (see `TREX ls`).
         session: String,
         /// The commit message.
         #[arg(short, long)]
@@ -612,7 +627,7 @@ pub enum AgentCommand {
 
 #[derive(Subcommand, Debug)]
 pub enum HooksCommand {
-    /// Report, per agent, whether OxiMux's hooks are installed and which file
+    /// Report, per agent, whether TREX's hooks are installed and which file
     /// was read to decide.
     ///
     /// Never writes. The path is printed whether or not anything was found
@@ -626,7 +641,7 @@ pub enum HooksCommand {
     },
     /// Install the hooks, merging them into whatever is already in each file.
     ///
-    /// Only into agents that are actually on this machine: OxiMux adds to an
+    /// Only into agents that are actually on this machine: TREX adds to an
     /// agent's config directory and never conjures one, so an agent you have
     /// never run is reported and skipped rather than given a dotfile.
     ///
@@ -638,13 +653,13 @@ pub enum HooksCommand {
         #[arg(long, value_name = "SLUG")]
         agent: Option<String>,
     },
-    /// Remove the hooks, leaving anything OxiMux did not write exactly where
-    /// it is — including in a file OxiMux would otherwise delete outright,
+    /// Remove the hooks, leaving anything TREX did not write exactly where
+    /// it is — including in a file TREX would otherwise delete outright,
     /// which is read first and kept if it holds someone else's hooks.
     ///
     /// A file left holding nothing at all is removed too, so `off` undoes `on`
     /// for an agent that had no hooks file to begin with. The one-time
-    /// `*.oximux-bak` copy taken before the first edit is deliberately NOT
+    /// `*.trex-bak` copy taken before the first edit is deliberately NOT
     /// removed: it is the only record of what the file looked like beforehand.
     #[command(verbatim_doc_comment)]
     Off {
@@ -674,15 +689,15 @@ pub enum SkillsCommand {
     /// Install the guides into the agents on this machine.
     ///
     /// Writes `<agent home>/skills/<topic>/SKILL.md`. Only into agents that
-    /// are actually here: OxiMux adds to an agent's own config directory and
+    /// are actually here: TREX adds to an agent's own config directory and
     /// never conjures one, so an agent you have never run is an error rather
     /// than a dotfile it did not ask for.
     ///
     /// With no --agent the targets are the agents that already keep a skills
     /// directory. Naming one installs there regardless, creating the directory.
     ///
-    /// A guide OxiMux wrote before is overwritten — that is the point, since a
-    /// stale guide is the failure this verb exists to prevent. A file OxiMux
+    /// A guide TREX wrote before is overwritten — that is the point, since a
+    /// stale guide is the failure this verb exists to prevent. A file TREX
     /// did NOT write, or a symlink, is reported and left alone.
     #[command(verbatim_doc_comment)]
     Install {
@@ -1035,5 +1050,120 @@ pub enum ScheduleCommand {
     Rm {
         /// The schedule id (from `schedule ls`).
         id: String,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum OrchestrationCommand {
+    /// Create a new orchestration run with parallel tasks.
+    Create {
+        /// The objective describing what to accomplish.
+        objective: String,
+        /// Maximum concurrent workers (default: 4).
+        #[arg(long, default_value_t = 4)]
+        max_concurrent: usize,
+        /// Task specifications (one per task to fan out).
+        #[arg(required = true)]
+        tasks: Vec<String>,
+    },
+    /// List active and completed orchestration runs.
+    Ls,
+    /// Show details of an orchestration run.
+    Show {
+        /// The run id (from `orchestration ls`).
+        id: String,
+    },
+    /// Send a heartbeat from a worker.
+    Heartbeat {
+        /// The dispatch id.
+        dispatch_id: String,
+    },
+    /// Mark a worker task as done with a result.
+    Done {
+        /// The dispatch id.
+        dispatch_id: String,
+        /// The result text.
+        result: String,
+    },
+    /// Mark a worker task as failed.
+    Fail {
+        /// The dispatch id.
+        dispatch_id: String,
+        /// The error message.
+        error: String,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum AccountsCommand {
+    /// Add a new API account.
+    Add {
+        /// The provider (claude or codex).
+        #[arg(value_enum)]
+        provider: AccountProviderArg,
+        /// Optional email for the account.
+        #[arg(long)]
+        email: Option<String>,
+        /// Optional API key.
+        #[arg(long)]
+        api_key: Option<String>,
+    },
+    /// List all configured accounts.
+    Ls,
+    /// Switch the active account.
+    Switch {
+        /// The account id (from `accounts ls`).
+        id: String,
+    },
+    /// Remove an account.
+    Rm {
+        /// The account id (from `accounts ls`).
+        id: String,
+    },
+    /// Show rate limit status for the active account.
+    RateLimit,
+    /// Show usage summary for the active account.
+    Usage,
+}
+
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AccountProviderArg {
+    Claude,
+    Codex,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum DiffCommand {
+    /// Add a comment to a diff line.
+    Comment {
+        /// The file path.
+        #[arg(long)]
+        file: String,
+        /// The line number.
+        #[arg(long)]
+        line: u32,
+        /// The side (left or right).
+        #[arg(long, default_value = "right")]
+        side: String,
+        /// The comment text.
+        text: String,
+    },
+    /// List comments for a file.
+    Ls {
+        /// The file path.
+        #[arg(long)]
+        file: Option<String>,
+    },
+    /// Format comments for agent consumption.
+    Format {
+        /// The file path.
+        #[arg(long)]
+        file: String,
+    },
+    /// Clear comments for a file or all files.
+    Clear {
+        /// The file path (clears all if omitted).
+        #[arg(long)]
+        file: Option<String>,
     },
 }

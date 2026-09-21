@@ -1,4 +1,4 @@
-//! `oximux serve` — the same binary as a headless host.
+﻿//! `TREX serve` — the same binary as a headless host.
 //!
 //! The stack is the desktop's minus every view: the remote-host dispatcher
 //! over the shared session registry, the relay daemon for surviving
@@ -26,9 +26,9 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{AuthStore, Dispatcher, HostIdentity, LocalScope, StorageDeviceStore};
-use oximux_remote_local::{LocalClaim, LocalControlListener};
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{AuthStore, Dispatcher, HostIdentity, LocalScope, StorageDeviceStore};
+use trex_remote_local::{LocalClaim, LocalControlListener};
 
 /// The identity scope the desktop uses — shared on purpose, so serve binds
 /// the same endpoint id the desktop's pairings already dial.
@@ -65,7 +65,7 @@ impl std::fmt::Display for HeldByAnotherHost {
         let who = self.holder_pid.map(|pid| format!(" (PID {pid})")).unwrap_or_default();
         write!(
             f,
-            "another OxiMux host is already serving {}{who}. Stop it first, \
+            "another TREX host is already serving {}{who}. Stop it first, \
              or use a different --data-dir.",
             self.data_dir.display()
         )
@@ -91,7 +91,7 @@ pub(crate) fn run_with_shutdown(
 ) -> u8 {
     // Before any thread exists: an inherited Claude session marker would
     // switch transcript saving off in every agent this host ever spawns.
-    for marker in oximux_shell_env::scrub_inherited_claude_session_markers() {
+    for marker in trex_shell_env::scrub_inherited_claude_session_markers() {
         eprintln!("serve: dropped inherited Claude Code session marker {marker}");
     }
     // Stdout is the readiness contract; everything human goes to stderr.
@@ -132,7 +132,7 @@ async fn serve(
     // ---- data root, hardened before anything writes into it ----
     let data_dir = match args.data_dir {
         Some(dir) => dir,
-        None => oximux_remote_local::default_runtime_dir()
+        None => trex_remote_local::default_runtime_dir()
             .context("this platform reports no local data directory; pass --data-dir")?,
     };
     // Asked before the directory is even created. This boot may be impossible
@@ -141,12 +141,12 @@ async fn serve(
     // discover it sits behind the database, the identity key and a detached
     // relay spawn. That refused ~5 s in and left a migrated 192 KB database, a
     // token and a host key behind, none of which the answer depended on.
-    oximux_remote_local::check_data_dir(&data_dir)?;
+    trex_remote_local::check_data_dir(&data_dir)?;
     std::fs::create_dir_all(&data_dir)
         .with_context(|| format!("create data dir {}", data_dir.display()))?;
     // A server is the deployment where other accounts on the box are most
     // likely to exist, so this matters more here than on the desktop.
-    oximux_owner_only::prepare_owner_only_dir(&data_dir)
+    trex_owner_only::prepare_owner_only_dir(&data_dir)
         .with_context(|| format!("restrict data dir {}", data_dir.display()))?;
 
     // ---- single holder, decided before anything else is written ----
@@ -169,11 +169,11 @@ async fn serve(
     // rebinding over its own live listener is legitimate (the desktop's
     // Settings → Remote toggle does exactly that), and on unix that is
     // indistinguishable from a second host by looking at the socket alone.
-    let _host_lock = match oximux_single_instance::try_acquire(
-        &data_dir.join(oximux_remote_local::HOST_LOCK_FILENAME),
+    let _host_lock = match trex_single_instance::try_acquire(
+        &data_dir.join(trex_remote_local::HOST_LOCK_FILENAME),
     ) {
-        Ok(oximux_single_instance::AcquireOutcome::Acquired(guard)) => guard,
-        Ok(oximux_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
+        Ok(trex_single_instance::AcquireOutcome::Acquired(guard)) => guard,
+        Ok(trex_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
             return Err(anyhow::Error::new(HeldByAnotherHost {
                 data_dir: data_dir.clone(),
                 holder_pid,
@@ -191,26 +191,26 @@ async fn serve(
     };
 
     // ---- storage (the desktop's own database and migration ladder) ----
-    let db_path = data_dir.join("oximux.db");
-    let db = oximux_storage::open(&db_path)
+    let db_path = data_dir.join("trex.db");
+    let db = trex_storage::open(&db_path)
         .with_context(|| format!("open database {}", db_path.display()))?;
     // The directory descriptor alone does not protect files inside it on
     // Windows; restrict the database and its WAL sidecars explicitly.
-    for name in ["oximux.db", "oximux.db-wal", "oximux.db-shm"] {
+    for name in ["trex.db", "trex.db-wal", "trex.db-shm"] {
         let path = data_dir.join(name);
         if path.exists()
-            && let Err(err) = oximux_owner_only::restrict_file(&path)
+            && let Err(err) = trex_owner_only::restrict_file(&path)
         {
             tracing::warn!(%err, file = %path.display(), "could not restrict database file");
         }
     }
-    let settings = oximux_storage::SettingsRepo::new(db.clone());
-    let device_repo = oximux_storage::RemoteDeviceRepo::new(db.clone());
+    let settings = trex_storage::SettingsRepo::new(db.clone());
+    let device_repo = trex_storage::RemoteDeviceRepo::new(db.clone());
 
     // ---- relay daemon (terminals that survive restarts) ----
     // Best-effort: a host without a relay serves everything except terminals.
     let relay = {
-        let supervisor = oximux_relay_supervisor::RelaySupervisor::new(
+        let supervisor = trex_relay_supervisor::RelaySupervisor::new(
             data_dir.clone(),
             data_dir.join("logs"),
         );
@@ -227,7 +227,7 @@ async fn serve(
     let identity = HostIdentity::load_or_generate(&data_dir, HOST_IDENTITY_SCOPE)
         .context("load host identity")?;
     let endpoint_secret = identity.transport_secret_bytes();
-    let endpoint_id = oximux_remote_iroh::endpoint_id_of(&endpoint_secret);
+    let endpoint_id = trex_remote_iroh::endpoint_id_of(&endpoint_secret);
     let auth = Arc::new(AuthStore::with_store(Arc::new(StorageDeviceStore::new(device_repo))));
 
     // ---- local socket, bound before anything can spawn an agent ----
@@ -236,14 +236,14 @@ async fn serve(
     // no credential to be confined by, and would fall back to the operator
     // path. Binding is also the single-host check, so failing here fails fast.
     // The accept loop starts later, once the dispatcher exists to serve it.
-    // The context asserts no cause. It used to read "(is another OxiMux host
+    // The context asserts no cause. It used to read "(is another TREX host
     // already serving here?)", which leads every reader toward a conflicting
     // process — wrong, and expensively so, for the path-too-long case, where
     // the fix is a shorter `--data-dir`. The underlying errors already say
     // which it is: "Address already in use" for a real conflict, and an
     // explicit path-length refusal for the other.
     let local_listener = Arc::new(
-        LocalControlListener::bind(&data_dir, &oximux_remote_local::generate_token())
+        LocalControlListener::bind(&data_dir, &trex_remote_local::generate_token())
             .context("bind the local control socket")?,
     );
 
@@ -278,7 +278,7 @@ async fn serve(
     // every boot and safe against the desktop having already added the same
     // path — a shared data dir means both hosts see one set of projects, and a
     // worktree either creates is the row the other lists.
-    let project_repo = oximux_storage::ProjectRepo::new(db.clone());
+    let project_repo = trex_storage::ProjectRepo::new(db.clone());
     for root in provider.roots() {
         let path = root.to_string_lossy();
         let name = root
@@ -291,9 +291,9 @@ async fn serve(
             tracing::warn!(%err, path = %path, "could not register project root; worktrees there will be refused");
         }
     }
-    let worktrees = Arc::new(oximux_worktree_ops::RepoWorktrees::new(
+    let worktrees = Arc::new(trex_worktree_ops::RepoWorktrees::new(
         project_repo,
-        oximux_storage::WorkspaceRepo::new(db.clone()),
+        trex_storage::WorkspaceRepo::new(db.clone()),
         data_dir.clone(),
     ));
 
@@ -303,15 +303,15 @@ async fn serve(
     // The loser keeps serving every schedule read and write; run-now answers
     // `Unsupported` there, naming the honest reason.
     let schedule_store =
-        oximux_agents::schedule::ScheduleStore::new(db.conn());
+        trex_agents::schedule::ScheduleStore::new(db.conn());
     let (schedule_events, _) = tokio::sync::broadcast::channel(64);
     // Held (never read) for the whole serve lifetime; dropped — releasing the
     // role — only when serve exits.
     let mut _ticker_lock = None;
     let schedule_runner = {
-        use oximux_agents::schedule::{TICK, TICKER_LOCK_FILENAME, Ticker};
-        match oximux_single_instance::try_acquire(&data_dir.join(TICKER_LOCK_FILENAME)) {
-            Ok(oximux_single_instance::AcquireOutcome::Acquired(guard)) => {
+        use trex_agents::schedule::{TICK, TICKER_LOCK_FILENAME, Ticker};
+        match trex_single_instance::try_acquire(&data_dir.join(TICKER_LOCK_FILENAME)) {
+            Ok(trex_single_instance::AcquireOutcome::Acquired(guard)) => {
                 // Held in serve()'s scope for the process lifetime.
                 _ticker_lock = Some(guard);
                 // Only the lock holder recovers: settling claims another
@@ -343,7 +343,7 @@ async fn serve(
                     Ticker::new(schedule_store.clone(), Arc::new(firer)).with_recorded_hook(
                         Arc::new(move |run| {
                             // No subscriber is normal (nobody attached).
-                            let _ = events.send(oximux_remote_host::schedule_run_to_wire(run));
+                            let _ = events.send(trex_remote_host::schedule_run_to_wire(run));
                         }),
                     ),
                 );
@@ -354,14 +354,14 @@ async fn serve(
                         tokio::time::sleep(TICK).await;
                     }
                 });
-                Some(Arc::new(oximux_remote_host::TickerRunner(ticker)))
+                Some(Arc::new(trex_remote_host::TickerRunner(ticker)))
             }
-            Ok(oximux_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
+            Ok(trex_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
                 // One line, once — this is the expected state beside a running
                 // desktop, not an error to nag about.
                 let holder = holder_pid
                     .map(|p| format!("process {p}"))
-                    .unwrap_or_else(|| "another OxiMux process".into());
+                    .unwrap_or_else(|| "another TREX process".into());
                 tracing::info!(
                     "schedule ticker: {holder} owns scheduling for this data dir; \
                      schedules will fire from there"
@@ -380,7 +380,7 @@ async fn serve(
     // whose session survived keeps running; one whose session is gone is closed
     // with a reason, so the run converges instead of waiting forever on an
     // agent that no longer exists.
-    let teams = Arc::new(oximux_agents::team::TeamStore::new(db.conn()));
+    let teams = Arc::new(trex_agents::team::TeamStore::new(db.conn()));
     {
         let settings = settings.clone();
         let exists = move |sid: &str| {
@@ -394,7 +394,7 @@ async fn serve(
             Err(err) => tracing::warn!(%err, "team-run recovery failed"),
         }
     }
-    let coord = Arc::new(oximux_agents::coord::CoordStore::new(db.conn()));
+    let coord = Arc::new(trex_agents::coord::CoordStore::new(db.conn()));
 
     let mut dispatcher = Dispatcher::new(registry.clone(), auth.clone())
         .with_launcher(launcher)
@@ -411,7 +411,7 @@ async fn serve(
     }
     if let Some(relay) = relay {
         dispatcher =
-            dispatcher.with_terminals(Arc::new(oximux_relay_terminals::RelayTerminals::new(relay)));
+            dispatcher.with_terminals(Arc::new(trex_relay_terminals::RelayTerminals::new(relay)));
     }
     // No transcriber and no rewinder: both of those RPCs answer `Unsupported`
     // (or their documented refusal) rather than pretending.
@@ -428,15 +428,15 @@ async fn serve(
     // tickets name the right endpoint even while the bind is in flight. The
     // boot secret seeds no pairing slot, so it redeems nothing; `pair-new`
     // opens real windows at runtime.
-    let host: Arc<tokio::sync::Mutex<Option<oximux_remote_iroh::HostHandle>>> =
+    let host: Arc<tokio::sync::Mutex<Option<trex_remote_iroh::HostHandle>>> =
         Arc::new(tokio::sync::Mutex::new(None));
     {
         let dispatcher = dispatcher.clone();
         let host = host.clone();
         tokio::spawn(async move {
-            match oximux_remote_iroh::start_host(
+            match trex_remote_iroh::start_host(
                 dispatcher,
-                oximux_remote_host::mint_pairing_secret(),
+                trex_remote_host::mint_pairing_secret(),
                 Some(endpoint_secret),
             )
             .await
@@ -464,9 +464,9 @@ async fn serve(
     println!(
         "{}",
         serde_json::json!({
-            "type": "oximux_serve_ready",
+            "type": "trex_serve_ready",
             "schemaVersion": 1,
-            "protocolVersion": oximux_remote_proto::proto::PROTOCOL_VERSION,
+            "protocolVersion": trex_remote_proto::proto::PROTOCOL_VERSION,
             "dataDir": data_dir.to_string_lossy(),
             "endpointId": endpoint_hex,
         })

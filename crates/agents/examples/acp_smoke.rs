@@ -1,18 +1,18 @@
-//! Throwaway live smoke test for the ACP (Gemini) connection (not shipped).
+﻿//! Throwaway live smoke test for the ACP (Gemini) connection (not shipped).
 //!
 //! Spawns `gemini --experimental-acp`, sends one prompt, and prints every decoded
 //! `ThreadEvent` until the turn ends (or a timeout). Proves the Phase-1 lifecycle
 //! round-trip against a real agent.
 //!
-//! Run: `cargo run -p oximux-agents --example acp_smoke`
+//! Run: `cargo run -p trex-agents --example acp_smoke`
 
 use std::sync::mpsc::RecvTimeoutError;
 use std::time::{Duration, Instant};
 
-use oximux_agents::thread::acp::AcpConnection;
-use oximux_agents::thread::connection::AgentConnection;
-use oximux_agents::thread::event::ThreadEvent;
-use oximux_agents::thread::tool_call::PermissionDecision;
+use trex_agents::thread::acp::AcpConnection;
+use trex_agents::thread::connection::AgentConnection;
+use trex_agents::thread::event::ThreadEvent;
+use trex_agents::thread::tool_call::PermissionDecision;
 
 fn main() {
     let cwd = std::env::current_dir().expect("cwd");

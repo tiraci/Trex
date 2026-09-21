@@ -1,4 +1,4 @@
-//! Automations page — rendered when the Automations pane tab is active.
+﻿//! Automations page — rendered when the Automations pane tab is active.
 //!
 //! A first-class view of the same [`ScheduleStore`] the ticker fires and the
 //! Schedules settings pane edits. Nothing new is stored here: the subsystem
@@ -15,7 +15,7 @@
 //! form with a folder picker, and a second copy of it would be a second thing
 //! to keep correct, not a second thing to use.
 //!
-//! **The banner is load-bearing.** A scheduled run fires only while an OxiMux
+//! **The banner is load-bearing.** A scheduled run fires only while an TREX
 //! host is running; nothing here wakes a sleeping machine or relaunches a quit
 //! app. A page that lists armed automations without saying so has told the
 //! user something false, so the banner leads — same rule the settings pane
@@ -32,8 +32,8 @@ use gpui::{
     ParentElement, Render, ScrollHandle, StatefulInteractiveElement as _, Styled, WeakEntity,
     Window, div, prelude::FluentBuilder as _, px,
 };
-use oximux_agents::schedule::{Schedule, ScheduleRun, ScheduleStore, describe};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::schedule::{Schedule, ScheduleRun, ScheduleStore, describe};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::settings_modal::controls::{toggle_switch, value_chip};
 use crate::workspace_root::WorkspaceRoot;
@@ -213,7 +213,7 @@ impl Focusable for AutomationsView {
 
 impl Render for AutomationsView {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = self.typography.clone();
@@ -482,7 +482,7 @@ fn constraint_banner(theme: Theme, density: Density, typography: &Typography) ->
         .text_size(px(typography.t_sub_label))
         .text_color(theme.fg_muted)
         .child(
-            "Automations fire only while OxiMux is running. Quitting the app — or letting the \
+            "Automations fire only while TREX is running. Quitting the app — or letting the \
              machine sleep — skips the runs that fall in the gap.",
         )
         .into_any_element()

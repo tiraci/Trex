@@ -1,4 +1,4 @@
-//! Per-project `ProjectPanes` construction + restore + persistence
+﻿//! Per-project `ProjectPanes` construction + restore + persistence
 //! helpers. Replaces the legacy `workspace_tabs_factory` after the
 //! pane-groups cutover (phase 5 / step 6).
 //!
@@ -17,10 +17,10 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use gpui::{AppContext, Context, Entity, SharedString, WeakEntity, Window};
-use oximux_agents::{AgentRuntime, AgentSessionConfig, CliRuntime};
-use oximux_core::AgentAdapter;
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::{PaneBufferRepo, SettingsRepo};
+use trex_agents::{AgentRuntime, AgentSessionConfig, CliRuntime};
+use trex_core::AgentAdapter;
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::{PaneBufferRepo, SettingsRepo};
 
 use crate::notifier::Notifier;
 use crate::persisted_terminals::{
@@ -181,7 +181,7 @@ fn rank_in(order: &[usize], idx: usize) -> usize {
 fn restore_chat_entries(
     snap: &PersistedTabs,
     session_id: Option<&str>,
-) -> Vec<oximux_agents::thread::ThreadEntry> {
+) -> Vec<trex_agents::thread::ThreadEntry> {
     session_id
         .and_then(|sid| snap.chat_transcripts.iter().find(|t| t.session_id == sid))
         .map(|t| t.entries.clone())
@@ -203,7 +203,7 @@ fn restore_chat_slash_commands(snap: &PersistedTabs, session_id: Option<&str>) -
 fn restore_chat_session_meta(
     snap: &PersistedTabs,
     session_id: Option<&str>,
-) -> oximux_agents::thread::SessionMeta {
+) -> trex_agents::thread::SessionMeta {
     session_id
         .and_then(|sid| snap.chat_transcripts.iter().find(|t| t.session_id == sid))
         .map(|t| t.session_meta.clone())
@@ -279,11 +279,11 @@ fn restore_chat_posture(
 fn restore_chat_backend(
     snap: &PersistedTabs,
     session_id: Option<&str>,
-    launch: Option<&oximux_settings::AgentLaunchSettings>,
-) -> oximux_agents::thread::ChatBackend {
+    launch: Option<&trex_settings::AgentLaunchSettings>,
+) -> trex_agents::thread::ChatBackend {
     session_id
         .and_then(|sid| snap.chat_transcripts.iter().find(|t| t.session_id == sid))
-        .map(|t| oximux_agents::thread::ChatBackend {
+        .map(|t| trex_agents::thread::ChatBackend {
             transport: t.provider,
             acp_command: t.acp_command.clone(),
             acp_args: t.acp_args.clone(),
@@ -410,7 +410,7 @@ pub(crate) fn build_project_panes(
                     // Seed the page memory before the tab opens — the PDF
                     // loader reads it when the document lands.
                     if let Some(page) = pdf_page {
-                        oximux_editor::pdf_preview::remember_pdf_page(cx, &path_buf, *page);
+                        trex_editor::pdf_preview::remember_pdf_page(cx, &path_buf, *page);
                     }
                     p.open_or_activate_editor_tab(path_buf, window, cx);
                     p.place_restored_last_tab(None, meta, cx);
@@ -452,7 +452,7 @@ pub(crate) fn build_project_panes(
                             let backend = restore_chat_backend(
                                 &snap,
                                 session_id.as_deref(),
-                                cx.try_global::<oximux_settings::AgentLaunchSettings>(),
+                                cx.try_global::<trex_settings::AgentLaunchSettings>(),
                             );
                             let resume_id = restore_chat_resume_id(&snap, session_id.as_deref());
                             let posture = restore_chat_posture(&snap, session_id.as_deref());
@@ -608,7 +608,7 @@ fn restore_multi_group(
                     }
                     panes_entity.update(cx, |p, cx| {
                         if let Some(page) = pdf_page {
-                            oximux_editor::pdf_preview::remember_pdf_page(cx, &path_buf, *page);
+                            trex_editor::pdf_preview::remember_pdf_page(cx, &path_buf, *page);
                         }
                         p.open_editor_in_group_restore(group_id, path_buf, window, cx);
                         p.place_restored_last_tab(Some(group_id), meta, cx);
@@ -640,7 +640,7 @@ fn restore_multi_group(
                             let backend = restore_chat_backend(
                                 &snap,
                                 session_id.as_deref(),
-                                cx.try_global::<oximux_settings::AgentLaunchSettings>(),
+                                cx.try_global::<trex_settings::AgentLaunchSettings>(),
                             );
                             let resume_id = restore_chat_resume_id(&snap, session_id.as_deref());
                             let posture = restore_chat_posture(&snap, session_id.as_deref());
@@ -771,7 +771,7 @@ fn restore_agent_tab(
     // endpoint/account rather than silently falling back to `default`.
     let profile = persisted.profile.clone();
     let (extra_args, env) = cx
-        .try_global::<oximux_settings::AgentLaunchSettings>()
+        .try_global::<trex_settings::AgentLaunchSettings>()
         .map(|d| {
             (
                 d.args_for_in(adapter_id, profile.as_deref()),
@@ -790,7 +790,7 @@ fn restore_agent_tab(
         cols: DEFAULT_AGENT_COLS,
         rows: DEFAULT_AGENT_ROWS,
         custom_command: None,
-        resumption: oximux_core::SessionResumption::None,
+        resumption: trex_core::SessionResumption::None,
     };
     let persisted_clone = persisted.clone();
     cx.spawn_in(window, async move |root, cx| {
@@ -1114,7 +1114,7 @@ fn build_multi_sub_pane_tree(
             // re-attach (relay PTY survived: same session, still live) vs
             // cold spawn per leaf and delivers the session via
             // `adopt_live_session`. The fresh-spawn path carries the leaf's
-            // OXIMUX_* env via the `PendingAttach` entry.
+            // trex_* env via the `PendingAttach` entry.
             let slot = (tab_ordinal, sub_pane_ordinal as u32, ti as u32);
             let relay_hint = raw_relay_hint(pane_relay_ids, slot.0, slot.1, slot.2);
             let Some((backend, session_id)) = spawn_pending_placeholder_grid() else {
@@ -1842,7 +1842,7 @@ mod tests {
         // A path that no longer exists → fall back to the project cwd
         // rather than spawning a shell into a stale directory.
         assert_eq!(
-            resolve_cwd(Some("/no/such/dir/oximux-xyz-123"), project),
+            resolve_cwd(Some("/no/such/dir/trex-xyz-123"), project),
             project.to_path_buf()
         );
         // No captured cwd → project cwd.
@@ -1995,7 +1995,7 @@ mod tests {
     // never reach the live-tree build: the loader rejects it, preserves
     // the raw payload aside, and reports `Corrupt` so the caller falls
     // back to the default layout with a toast. The preserve dir is
-    // redirected via OXIMUX_CORRUPT_LAYOUTS_DIR so test artifacts never
+    // redirected via trex_CORRUPT_LAYOUTS_DIR so test artifacts never
     // land in the real data dir.
 
     /// Serializes loader tests: they share the process-global preserve-dir
@@ -2010,22 +2010,22 @@ mod tests {
 
     fn loader_fixture(raw: &str) -> (LoadedTabs, std::path::PathBuf) {
         let preserve_dir = std::env::temp_dir().join(format!(
-            "oximux-loader-test-{}-{}",
+            "trex-loader-test-{}-{}",
             std::process::id(),
             raw.len()
         ));
         let _ = std::fs::remove_dir_all(&preserve_dir);
         // SAFETY: test-only; LOADER_ENV_LOCK (held by every caller for
         // the full test body) serializes all access to this variable.
-        unsafe { std::env::set_var("OXIMUX_CORRUPT_LAYOUTS_DIR", &preserve_dir) };
-        let db = oximux_storage::open_memory().expect("memory db");
+        unsafe { std::env::set_var("TREX_CORRUPT_LAYOUTS_DIR", &preserve_dir) };
+        let db = trex_storage::open_memory().expect("memory db");
         let repo = SettingsRepo::new(db);
         repo.set(&settings_key("proj", "main"), raw).expect("seed");
         let out = load_persisted_tabs(&repo, "proj", "main");
         // Clear immediately — the preserve happened (or didn't) inside the
         // load above, and a stale var must not leak into any later test
         // that doesn't hold the lock.
-        unsafe { std::env::remove_var("OXIMUX_CORRUPT_LAYOUTS_DIR") };
+        unsafe { std::env::remove_var("TREX_CORRUPT_LAYOUTS_DIR") };
         (out, preserve_dir)
     }
 
@@ -2087,7 +2087,7 @@ mod tests {
 
     #[test]
     fn loader_reports_absent_when_nothing_persisted() {
-        let db = oximux_storage::open_memory().expect("memory db");
+        let db = trex_storage::open_memory().expect("memory db");
         let repo = SettingsRepo::new(db);
         assert!(matches!(
             load_persisted_tabs(&repo, "proj", "main"),
@@ -2105,9 +2105,9 @@ mod tests {
         // key no longer steal each other's writes — but they cost nothing and
         // keep the fixture self-describing.
         use crate::persisted_chat::{chat_settings_key, PersistedChatTranscript};
-        use oximux_agents::thread::{AssistantMessage, ThreadEntry};
+        use trex_agents::thread::{AssistantMessage, ThreadEntry};
 
-        let db = oximux_storage::open_memory().expect("memory db");
+        let db = trex_storage::open_memory().expect("memory db");
         let repo = SettingsRepo::new(db);
         let sid = "sess-chat-roundtrip";
         let transcript = PersistedChatTranscript {
@@ -2123,7 +2123,7 @@ mod tests {
             ],
             slash_commands: vec!["compact".into()],
             thinking_level: Default::default(),
-            provider: oximux_agents::thread::Transport::StreamJson,
+            provider: trex_agents::thread::Transport::StreamJson,
             adapter_id: None,
             launch_profile: None,
             acp_command: None,
@@ -2189,7 +2189,7 @@ mod tests {
         // `session_catalog::a_saved_session_serves_its_history_from_disk` came
         // to fail about one run in three, but only under the full suite.
         use crate::persisted_chat::{chat_settings_key, PersistedChatTranscript};
-        use oximux_agents::thread::ThreadEntry;
+        use trex_agents::thread::ThreadEntry;
 
         let sid = "sess-two-stores";
         let snap = PersistedTabs {
@@ -2216,7 +2216,7 @@ mod tests {
                 slash_commands: vec![],
                 session_meta: Default::default(),
                 thinking_level: Default::default(),
-                provider: oximux_agents::thread::Transport::StreamJson,
+                provider: trex_agents::thread::Transport::StreamJson,
                 adapter_id: None,
                 launch_profile: None,
                 acp_command: None,
@@ -2232,8 +2232,8 @@ mod tests {
         };
 
         // Byte-identical writes, same keys, two unrelated databases.
-        let first = SettingsRepo::new(oximux_storage::open_memory().expect("memory db"));
-        let second = SettingsRepo::new(oximux_storage::open_memory().expect("memory db"));
+        let first = SettingsRepo::new(trex_storage::open_memory().expect("memory db"));
+        let second = SettingsRepo::new(trex_storage::open_memory().expect("memory db"));
         save_persisted_tabs(&first, "proj-two-stores", "main", &snap);
         save_persisted_tabs(&second, "proj-two-stores", "main", &snap);
 
@@ -2265,7 +2265,7 @@ mod tests {
             entries: vec![],
             slash_commands: vec![],
             thinking_level: Default::default(),
-            provider: oximux_agents::thread::Transport::StreamJson,
+            provider: trex_agents::thread::Transport::StreamJson,
             adapter_id: None,
             launch_profile: None,
             acp_command: None,
@@ -2291,7 +2291,7 @@ mod tests {
         assert_eq!(restore_chat_resume_id(&snap, Some(orphan)), None);
         assert_eq!(
             restore_chat_backend(&snap, Some(orphan), None),
-            oximux_agents::thread::ChatBackend::default()
+            trex_agents::thread::ChatBackend::default()
         );
         // No pointer at all (a bound chat that never minted a session) → None.
         assert_eq!(restore_chat_resume_id(&snap, None), None);

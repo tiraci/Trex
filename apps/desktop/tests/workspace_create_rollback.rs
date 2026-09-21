@@ -1,21 +1,21 @@
-//! Integration test for the workspace create-with-rollback flow.
+﻿//! Integration test for the workspace create-with-rollback flow.
 //!
 //! Sets up a real git repo + an in-memory storage DB, pre-inserts a
 //! workspace with the slug we are about to derive (forcing a UNIQUE
 //! conflict), runs the orchestration, and asserts the rollback removed
-//! the freshly-created worktree directory and `oximux/<slug>` branch.
+//! the freshly-created worktree directory and `TREX/<slug>` branch.
 
 use std::path::Path;
 use std::process::Command;
 
-use oximux_app::shell::workspace::configured_locator::ConfiguredLocator;
-use oximux_app::shell::workspace_ops::{
+use trex_app::shell::workspace::configured_locator::ConfiguredLocator;
+use trex_app::shell::workspace_ops::{
     CreateBase, CreateOutcome, LocateError, Provision, WorktreeLocator,
     create_workspace_with_rollback, provisioning_marker,
 };
-use oximux_core::Project;
-use oximux_git::Repository;
-use oximux_storage::{ProjectRepo, WorkspaceRepo, open_memory};
+use trex_core::Project;
+use trex_git::Repository;
+use trex_storage::{ProjectRepo, WorkspaceRepo, open_memory};
 
 fn run_git(cwd: &Path, args: &[&str]) {
     let status = Command::new("git")
@@ -42,11 +42,11 @@ fn init_repo(cwd: &Path) {
 
 /// The branch these tests expect: the shipped prefix, spelled once.
 ///
-/// The tests assert on `oximux/<slug>` throughout — they are about the
+/// The tests assert on `TREX/<slug>` throughout — they are about the
 /// rollback ladder, not about naming — so they pin the shipped prefix rather
 /// than resolving settings that no headless test has.
 fn branch_of(slug: &str) -> String {
-    format!("{}/{slug}", oximux_settings::git::DEFAULT_PREFIX)
+    format!("{}/{slug}", trex_settings::git::DEFAULT_PREFIX)
 }
 
 /// The locator every pre-existing test in this file means: one that mints
@@ -54,7 +54,7 @@ fn branch_of(slug: &str) -> String {
 ///
 /// Rather than a host-derived locator with the paths rewritten to match, so
 /// that a test which deliberately targets a path *nobody minted* (the sibling
-/// `oximux-wt-mine` below) keeps saying so in its own text.
+/// `trex-wt-mine` below) keeps saying so in its own text.
 #[derive(Debug)]
 struct TestLocator(std::path::PathBuf);
 
@@ -104,7 +104,7 @@ async fn rollback_on_insert_conflict_removes_worktree_and_branch() {
     // orchestration tries to insert after the git step.
     let slug = "fix-login";
     workspace_repo
-        .insert(&project.id, "Pre-existing", slug, "oximux/fix-login", "/dummy", true)
+        .insert(&project.id, "Pre-existing", slug, "TREX/fix-login", "/dummy", true)
         .expect("pre-insert");
 
     let worktree_path = tmp.path().join("worktrees").join(slug);
@@ -137,12 +137,12 @@ async fn rollback_on_insert_conflict_removes_worktree_and_branch() {
         worktree_path.display()
     );
 
-    // 2. `oximux/<slug>` branch absent from `git branch`.
+    // 2. `TREX/<slug>` branch absent from `git branch`.
     let repo = Repository::open(project_root).await.expect("open");
     let branches = repo.list_branches().await.expect("list branches");
     let branch_names: Vec<&str> = branches.iter().map(|b| b.name.as_str()).collect();
     assert!(
-        !branch_names.contains(&"oximux/fix-login"),
+        !branch_names.contains(&"TREX/fix-login"),
         "branch should be deleted; got: {branch_names:?}"
     );
 }
@@ -182,7 +182,7 @@ async fn create_workspace_happy_path_inserts_row_and_keeps_worktree() {
     };
 
     assert_eq!(workspace.slug, slug);
-    assert_eq!(workspace.branch, "oximux/new-feat");
+    assert_eq!(workspace.branch, "TREX/new-feat");
     assert!(worktree_path.exists(), "worktree dir should exist on disk");
 
     // The row is enumerable by the sidebar's `list_for_project` gather — this
@@ -200,18 +200,18 @@ async fn create_workspace_happy_path_inserts_row_and_keeps_worktree() {
     let repo = Repository::open(project_root).await.expect("open");
     let branches = repo.list_branches().await.expect("list");
     assert!(
-        branches.iter().any(|b| b.name == "oximux/new-feat"),
+        branches.iter().any(|b| b.name == "TREX/new-feat"),
         "branch should be present"
     );
 }
 
-/// Commit a `.oximux/scripts.toml` so the *worktree* carries it — the file is
+/// Commit a `.trex/scripts.toml` so the *worktree* carries it — the file is
 /// committed by design, which is why a fresh worktree of the branch has it.
 fn commit_scripts(cwd: &Path, body: &str) {
-    let dir = cwd.join(".oximux");
-    std::fs::create_dir_all(&dir).expect("mkdir .oximux");
+    let dir = cwd.join(".trex");
+    std::fs::create_dir_all(&dir).expect("mkdir .trex");
     std::fs::write(dir.join("scripts.toml"), body).expect("write scripts.toml");
-    run_git(cwd, &["add", ".oximux/scripts.toml"]);
+    run_git(cwd, &["add", ".trex/scripts.toml"]);
     run_git(cwd, &["commit", "-m", "scripts"]);
 }
 
@@ -278,7 +278,7 @@ async fn a_failing_setup_script_rolls_back_worktree_branch_and_row() {
     let branches = repo.list_branches().await.expect("list branches");
     let names: Vec<&str> = branches.iter().map(|b| b.name.as_str()).collect();
     assert!(
-        !names.contains(&"oximux/bad-setup"),
+        !names.contains(&"TREX/bad-setup"),
         "branch should be deleted; got: {names:?}"
     );
     let rows = workspace_repo
@@ -343,9 +343,9 @@ async fn included_files_are_present_before_the_setup_script_runs() {
         "auto_setup = true\nsetup = \"test -f .env && cat .env\"\n",
     );
     // Untracked on purpose — this is precisely the file a worktree does not
-    // inherit from git, and the reason `.oximuxinclude` exists.
+    // inherit from git, and the reason `.TREXinclude` exists.
     std::fs::write(project_root.join(".env"), "TOKEN=local\n").expect("write .env");
-    std::fs::write(project_root.join(".oximuxinclude"), ".env\n").expect("write include");
+    std::fs::write(project_root.join(".TREXinclude"), ".env\n").expect("write include");
 
     let db = open_memory().expect("open memory");
     let project_repo = ProjectRepo::new(db.clone());
@@ -387,7 +387,7 @@ async fn an_include_pattern_matching_nothing_does_not_fail_creation() {
     let tmp = tempfile::tempdir().expect("tempdir");
     let project_root = tmp.path();
     init_repo(project_root);
-    std::fs::write(project_root.join(".oximuxinclude"), "never-existed.env\n")
+    std::fs::write(project_root.join(".TREXinclude"), "never-existed.env\n")
         .expect("write include");
 
     let db = open_memory().expect("open memory");
@@ -571,7 +571,7 @@ async fn a_caller_that_did_not_opt_in_never_has_its_path_reclaimed() {
 
     // A directory the user owns, at a sibling path, that no row knows about.
     let slug = "mine";
-    let worktree_path = tmp.path().join("oximux-wt-mine");
+    let worktree_path = tmp.path().join("trex-wt-mine");
     std::fs::create_dir_all(&worktree_path).expect("mkdir");
     std::fs::write(worktree_path.join("notes.txt"), "not yours\n").expect("write");
 
@@ -625,7 +625,7 @@ fn repo_with_a_marker_script_and_a_side_branch(root: &Path) {
     run_git(root, &["checkout", "-q", "main"]);
 }
 
-fn seed_project(root: &Path) -> (WorkspaceRepo, oximux_core::Project) {
+fn seed_project(root: &Path) -> (WorkspaceRepo, trex_core::Project) {
     let db = open_memory().expect("open memory");
     let project_repo = ProjectRepo::new(db.clone());
     let workspace_repo = WorkspaceRepo::new(db);
@@ -726,7 +726,7 @@ async fn an_explicit_run_setup_overrides_the_unreviewed_base_guard() {
         None,
         &workspace_repo,
         &Provision {
-            setup: oximux_settings::SetupDecision::Run,
+            setup: trex_settings::SetupDecision::Run,
             ..Provision::default()
         },
     )
@@ -761,14 +761,14 @@ async fn the_skip_reason_reaches_the_provisioning_transcript() {
         &test_locator(tmp.path()),
         None,
         &workspace_repo,
-        &Provision::new(oximux_settings::SetupDecision::Inherit, tx),
+        &Provision::new(trex_settings::SetupDecision::Inherit, tx),
     )
     .await;
     assert!(matches!(outcome, CreateOutcome::Created(_)), "{outcome:?}");
 
     let mut reason = None;
     while let Ok(event) = rx.try_recv() {
-        if let oximux_app::shell::workspace_ops::ProvisionEvent::SetupSkipped(text) = event {
+        if let trex_app::shell::workspace_ops::ProvisionEvent::SetupSkipped(text) = event {
             reason = Some(text);
         }
     }
@@ -783,7 +783,7 @@ async fn the_skip_reason_reaches_the_provisioning_transcript() {
     );
 }
 
-/// An adopted branch is the row's branch. No `oximux/`-prefixed branch is
+/// An adopted branch is the row's branch. No `TREX/`-prefixed branch is
 /// minted, because the user named the branch and we did not.
 #[tokio::test]
 async fn an_adopted_branch_becomes_the_rows_branch_with_no_prefix_applied() {
@@ -814,7 +814,7 @@ async fn an_adopted_branch_becomes_the_rows_branch_with_no_prefix_applied() {
     let repo = Repository::open(project_root).await.expect("open");
     let branches = repo.list_branches().await.expect("branches");
     assert!(
-        !branches.iter().any(|b| b.name.starts_with("oximux/")),
+        !branches.iter().any(|b| b.name.starts_with("TREX/")),
         "adopting a branch minted one anyway: {branches:?}"
     );
 }
@@ -936,7 +936,7 @@ async fn an_unattended_create_does_not_inherit_a_feature_branch_head() {
 ///
 /// `git worktree add` DWIMs such a name into `--track -b <name>`, overriding an
 /// explicit `-b`, so an unguarded create landed the worktree on `main`, never
-/// made `oximux/<slug>`, and inserted a row naming a branch that did not exist.
+/// made `TREX/<slug>`, and inserted a row naming a branch that did not exist.
 ///
 /// The create path must still produce a working worktree on the branch it
 /// promised: an unresolvable default degrades to HEAD rather than failing, per
@@ -1025,7 +1025,7 @@ async fn the_row_records_whether_the_branch_was_minted_or_adopted() {
     repo_with_a_marker_script_and_a_side_branch(project_root);
     let (workspace_repo, project) = seed_project(project_root);
 
-    // Adopted: `side` existed before OxiMux ever saw it.
+    // Adopted: `side` existed before TREX ever saw it.
     let adopted = match create_workspace_with_rollback(
         &project,
         "Adopted",
@@ -1103,7 +1103,7 @@ async fn adopting_a_branch_contained_in_the_default_still_runs_setup() {
     repo_with_a_marker_script_and_a_side_branch(project_root);
     // Move `main` on by one, then point `behind` at the commit before it: an
     // ancestor of `main`, unlike `side`, and — critically — one that already
-    // carries `.oximux/scripts.toml`, or there would be no setup script to run
+    // carries `.trex/scripts.toml`, or there would be no setup script to run
     // and the assertion below would pass for the wrong reason.
     let scripts_commit = {
         let out = Command::new("git")
@@ -1131,7 +1131,7 @@ async fn adopting_a_branch_contained_in_the_default_still_runs_setup() {
         &test_locator(tmp.path()),
         None,
         &workspace_repo,
-        &Provision::new(oximux_settings::SetupDecision::Inherit, tx),
+        &Provision::new(trex_settings::SetupDecision::Inherit, tx),
     )
     .await;
     assert!(matches!(outcome, CreateOutcome::Created(_)), "{outcome:?}");
@@ -1143,7 +1143,7 @@ async fn adopting_a_branch_contained_in_the_default_still_runs_setup() {
     );
     // And nothing claimed the repository has no default branch.
     while let Ok(event) = rx.try_recv() {
-        if let oximux_app::shell::workspace_ops::ProvisionEvent::SetupSkipped(text) = event {
+        if let trex_app::shell::workspace_ops::ProvisionEvent::SetupSkipped(text) = event {
             panic!("setup was skipped for a reviewed base: {text}");
         }
     }
@@ -1235,7 +1235,7 @@ async fn a_directory_a_person_made_under_the_configured_root_is_never_reclaimed(
     let (workspace_repo, project) = seed_project(&project_root);
     let locator = configured(tmp.path(), std::slice::from_ref(&project));
 
-    // The user's own folder, beside where OxiMux would put `feat`.
+    // The user's own folder, beside where TREX would put `feat`.
     let slug = "feat";
     let minted = locator.locate(&project, slug).expect("locate");
     let users_own = minted.parent().expect("project dir").join("my-notes");

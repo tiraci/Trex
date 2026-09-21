@@ -1,4 +1,4 @@
-use std::path::Path;
+﻿use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
@@ -7,7 +7,7 @@ use dashmap::DashMap;
 use interprocess::local_socket::tokio::prelude::*;
 use interprocess::local_socket::tokio::{RecvHalf, SendHalf, Stream};
 use interprocess::local_socket::{GenericFilePath, GenericNamespaced, ToFsName, ToNsName};
-use oximux_relay_proto::{
+use trex_relay_proto::{
     Endpoint, Frame, Hello, HelloProof, NONCE_LEN, Nonce, Notification, PROTOCOL_VERSION, Request,
     Response, client_proof, endpoint_for, proofs_match, server_proof,
 };
@@ -29,7 +29,7 @@ pub enum ClientError {
     Codec(#[from] CodecError),
     #[error("daemon error ({code:?}): {message}")]
     Daemon {
-        code: oximux_relay_proto::ErrCode,
+        code: trex_relay_proto::ErrCode,
         message: String,
     },
     #[error("unexpected response: {0}")]
@@ -139,7 +139,7 @@ impl RelayClient {
         // --- Handshake (must complete before the reader task starts
         //     consuming response frames) ----------------------------
         // The token is never sent. Each side proves it holds it by MACing both
-        // nonces; see `oximux_relay_proto::auth` for what that buys and why the
+        // nonces; see `trex_relay_proto::auth` for what that buys and why the
         // daemon goes first.
         let client_id = Uuid::new_v4().to_string();
         let mut client_nonce: Nonce = [0u8; NONCE_LEN];

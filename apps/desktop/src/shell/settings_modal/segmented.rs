@@ -1,4 +1,4 @@
-//! Inline segmented picker for the settings panes — a connected row of
+﻿//! Inline segmented picker for the settings panes — a connected row of
 //! options where the active one is raised. Replaces the cycling value-chip
 //! for small closed enums (bell style, AI mode, agent) so every choice is
 //! visible at once. Each segment carries its own apply-and-persist handler.
@@ -7,7 +7,7 @@ use gpui::{
     AnyElement, Context, InteractiveElement, IntoElement, MouseButton, ParentElement, SharedString,
     Styled, Window, div, prelude::FluentBuilder, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 

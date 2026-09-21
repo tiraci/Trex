@@ -1,4 +1,4 @@
-//! Fetching release bytes, and the seam that lets the pipeline be tested
+﻿//! Fetching release bytes, and the seam that lets the pipeline be tested
 //! without a network.
 //!
 //! Everything the updater reads goes through [`Fetcher`], so the ordering the
@@ -14,13 +14,13 @@ use super::ReleaseError;
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const READ_TIMEOUT: Duration = Duration::from_secs(60);
 /// GitHub rejects requests without one.
-const USER_AGENT: &str = "oximux-updater";
+const USER_AGENT: &str = "trex-updater";
 
 /// Where release assets live. `latest/download/…` is GitHub's redirect to the
 /// most recent **published** release, which is why a draft release — what the
 /// workflow creates before notes are curated — is invisible to the updater
 /// until someone publishes it.
-const RELEASE_LATEST: &str = "https://github.com/nhtera/OxiMux/releases/latest/download";
+const RELEASE_LATEST: &str = "https://github.com/tiraci/Trex/releases/latest/download";
 
 pub trait Fetcher {
     /// Read at most `ceiling` bytes from `url`, or fail. A response larger
@@ -96,7 +96,7 @@ fn host_allowed(host: &str) -> bool {
 /// contains no way to repoint its own trust chain.
 fn latest_base() -> String {
     #[cfg(debug_assertions)]
-    if let Ok(base) = std::env::var("OXIMUX_UPDATE_BASE_URL") {
+    if let Ok(base) = std::env::var("TREX_UPDATE_BASE_URL") {
         return base.trim_end_matches('/').to_string();
     }
     RELEASE_LATEST.to_string()
@@ -144,14 +144,14 @@ mod tests {
     #[test]
     fn asset_urls_are_pinned_to_the_signed_tag() {
         // Guard against a stray override from the surrounding environment.
-        if std::env::var_os("OXIMUX_UPDATE_BASE_URL").is_some() {
+        if std::env::var_os("TREX_UPDATE_BASE_URL").is_some() {
             return;
         }
-        let url = asset_url("v0.2.0", "oximux-0.2.0-aarch64-apple-darwin.tar.gz");
+        let url = asset_url("v0.2.0", "trex-0.2.0-aarch64-apple-darwin.tar.gz");
         assert_eq!(
             url,
-            "https://github.com/nhtera/OxiMux/releases/download/v0.2.0/\
-             oximux-0.2.0-aarch64-apple-darwin.tar.gz"
+            "https://github.com/tiraci/Trex/releases/download/v0.2.0/\
+             trex-0.2.0-aarch64-apple-darwin.tar.gz"
         );
         assert!(manifest_url().ends_with("/latest/download/manifest.json"));
         assert_eq!(signature_url(), format!("{}.minisig", manifest_url()));

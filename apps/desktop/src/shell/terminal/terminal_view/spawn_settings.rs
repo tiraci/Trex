@@ -1,4 +1,4 @@
-//! Process-wide mirrors of the spawn-time terminal settings.
+﻿//! Process-wide mirrors of the spawn-time terminal settings.
 //!
 //! The PTY spawn helpers are `cx`-less free functions — they run from the
 //! restore reconcile on a background executor, and from `Drop`-adjacent wake
@@ -12,8 +12,8 @@
 
 use std::path::PathBuf;
 
-use oximux_pty::SpawnConfig;
-use oximux_shell_env::ResolvedShell;
+use trex_pty::SpawnConfig;
+use trex_shell_env::ResolvedShell;
 
 /// Process-wide mirror of `TerminalSettings::scrollback_lines`. The PTY spawn
 /// helpers are `cx`-less free functions, so they read scrollback here instead
@@ -125,17 +125,17 @@ mod shell_override_tests {
     #[test]
     fn a_shell_override_reaches_the_spawn_config() {
         let _serial = crate::platform::serialize_input_state();
-        let resolved = oximux_pty::SpawnConfig::default().shell;
+        let resolved = trex_pty::SpawnConfig::default().shell;
 
         set_spawn_shell(String::new());
         let auto = shell_spawn_config(std::path::PathBuf::from("."), Vec::new(), 80, 24);
         assert_eq!(auto.shell, resolved, "no override should leave the resolver's pick");
 
-        set_spawn_shell("/nonexistent/oximux-test-shell".to_string());
+        set_spawn_shell("/nonexistent/trex-test-shell".to_string());
         let overridden = shell_spawn_config(std::path::PathBuf::from("."), Vec::new(), 80, 24);
         // A path no resolver could return, so the assert cannot pass by
         // coincidence with whatever $SHELL happens to be.
-        assert_eq!(overridden.shell, "/nonexistent/oximux-test-shell");
+        assert_eq!(overridden.shell, "/nonexistent/trex-test-shell");
 
         // Restore so a later test in this process isn't spawning it.
         set_spawn_shell(String::new());
@@ -152,16 +152,16 @@ mod shell_override_tests {
     fn git_bash_choice_spawns_a_working_pane() {
         use std::time::{Duration, Instant};
 
-        use oximux_pty::backend::TerminalBackend;
-        use oximux_pty::events::TerminalEvent;
-        use oximux_pty::portable_pty_backend::PortablePtyBackend;
+        use trex_pty::backend::TerminalBackend;
+        use trex_pty::events::TerminalEvent;
+        use trex_pty::portable_pty_backend::PortablePtyBackend;
 
         let _serial = crate::platform::serialize_input_state();
 
         // Resolve exactly as the settings loader's `apply` does.
-        let resolved = oximux_shell_env::resolve_windows_shell(
-            oximux_shell_env::WindowsShell::GitBash,
-            oximux_shell_env::WindowsPowerShell::Auto,
+        let resolved = trex_shell_env::resolve_windows_shell(
+            trex_shell_env::WindowsShell::GitBash,
+            trex_shell_env::WindowsPowerShell::Auto,
         );
         let is_git_bash = std::path::Path::new(&resolved.program)
             .file_name()
@@ -204,7 +204,7 @@ mod shell_override_tests {
                 }
             }
             if !typed && t0.elapsed() > Duration::from_millis(1500) {
-                let _ = backend.write(id, b"echo OXIMUXLIVE_$((6*7))\r\n");
+                let _ = backend.write(id, b"echo TREXLIVE_$((6*7))\r\n");
                 typed = true;
             }
             if let Ok(snap) = backend.snapshot(id) {
@@ -212,7 +212,7 @@ mod shell_override_tests {
                     let s: String = row.iter().map(|c| c.ch).collect();
                     // The command line echoes the literal `$((6*7))`; only the
                     // expanded output proves the shell actually ran it.
-                    s.contains("OXIMUXLIVE_42")
+                    s.contains("TREXLIVE_42")
                 });
             }
             std::thread::sleep(Duration::from_millis(25));

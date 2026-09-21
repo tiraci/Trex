@@ -1,14 +1,14 @@
-//! The status extension OxiMux writes into Pi's extensions directory.
+﻿//! The status extension TREX writes into Pi's extensions directory.
 //!
 //! Pi has no hooks file. Its extension point is an in-process TypeScript API —
 //! `pi.on("agent_end", …)` — so the only way to learn what a Pi agent said is
-//! to hand Pi a program that tells us. That program is this one: OxiMux renders
+//! to hand Pi a program that tells us. That program is this one: TREX renders
 //! it at install time with the absolute path of its own binary baked in, writes
 //! it into the directory Pi discovers extensions from, and Pi loads it on every
 //! subsequent start.
 //!
 //! Everything downstream is unchanged. The extension shells out to the same
-//! `oximux agent-status` CLI every hooks-file agent runs and hands it JSON on
+//! `TREX agent-status` CLI every hooks-file agent runs and hands it JSON on
 //! stdin, so from the relay onward a Pi row is indistinguishable from a Claude
 //! one. It composes that JSON in Claude's key names for the same reason — one
 //! reader, not a Pi-shaped special case.
@@ -38,7 +38,7 @@ use std::path::Path;
 /// the file IS the install. The name is distinctive enough that
 /// [`crate::agent_hook_dialects::Install::Extension`] can delete it outright
 /// on uninstall without inspecting the contents: no other tool writes it.
-pub(crate) const EXTENSION_FILE: &str = "extensions/oximux-agent-status.ts";
+pub(crate) const EXTENSION_FILE: &str = "extensions/trex-agent-status.ts";
 
 /// Where the omp extension goes, relative to omp's configuration directory.
 ///
@@ -49,9 +49,9 @@ pub(crate) const EXTENSION_FILE: &str = "extensions/oximux-agent-status.ts";
 /// Distinct names keep each dialect's install/uninstall its own even when the
 /// homes collide (each runtime then loads both files; the format slug keeps
 /// the reports apart).
-pub(crate) const OMP_EXTENSION_FILE: &str = "extensions/oximux-agent-status-omp.ts";
+pub(crate) const OMP_EXTENSION_FILE: &str = "extensions/trex-agent-status-omp.ts";
 
-/// Render the Pi extension, calling back into the `oximux` binary at
+/// Render the Pi extension, calling back into the `TREX` binary at
 /// `binary_path`.
 ///
 /// The path is embedded in a single-quoted shell argument, so an embedded
@@ -75,21 +75,21 @@ pub(crate) fn omp_source(binary_path: &Path) -> String {
 fn source_for(binary_path: &Path, name: &str, slug: &str) -> String {
     let quoted = binary_path.display().to_string().replace('\'', "'\\''");
     format!(
-        r#"// Managed by OxiMux. Written on start; edits are overwritten.
+        r#"// Managed by TREX. Written on start; edits are overwritten.
 //
-// Reports this {name} agent's lifecycle to the OxiMux pane it is running in, so
+// Reports this {name} agent's lifecycle to the TREX pane it is running in, so
 // the pane's row can show what the agent is doing and what it last said.
-// Outside an OxiMux pane this file does nothing at all.
+// Outside an TREX pane this file does nothing at all.
 
 import {{ spawn }} from "node:child_process";
 
-const OXIMUX_BINARY = '{quoted}';
+const trex_BINARY = '{quoted}';
 
 export default function (pi: any) {{
   // The pane id the relay injects into every PTY it spawns. Without it there
   // is nothing to report to, and this extension is a complete no-op — which is
-  // the case for every `{slug}` the user runs outside OxiMux.
-  if (!process.env.OXIMUX_PTY_ID) return;
+  // the case for every `{slug}` the user runs outside TREX.
+  if (!process.env.trex_PTY_ID) return;
 
   // The agent's most recent reply, held from the message that carried it until
   // the turn actually ends. {name} emits the two separately and in that order.
@@ -106,7 +106,7 @@ export default function (pi: any) {{
     if (signature === lastReport) return;
     lastReport = signature;
     try {{
-      const child = spawn(OXIMUX_BINARY, ["agent-status", "--state", state, "--format", "{slug}"], {{
+      const child = spawn(trex_BINARY, ["agent-status", "--state", state, "--format", "{slug}"], {{
         stdio: ["pipe", "ignore", "ignore"],
         detached: true,
       }});
@@ -185,13 +185,13 @@ mod tests {
     use super::*;
 
     fn rendered() -> String {
-        source(Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux"))
+        source(Path::new("/Applications/trex.app/Contents/MacOS/TREX"))
     }
 
     #[test]
     fn the_extension_calls_back_into_our_binary_with_the_pi_reader() {
         let src = rendered();
-        assert!(src.contains("/Applications/OxiMux.app/Contents/MacOS/oximux"));
+        assert!(src.contains("/Applications/trex.app/Contents/MacOS/TREX"));
         assert!(src.contains(r#""agent-status", "--state", state, "--format", "pi""#));
     }
 
@@ -201,11 +201,11 @@ mod tests {
         // reader and must not carry Pi's name anywhere — a leaked "Pi" would
         // mean an identity substitution was missed and the next divergence
         // between the two would edit one render thinking it edited both.
-        let src = omp_source(Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux"));
+        let src = omp_source(Path::new("/Applications/trex.app/Contents/MacOS/TREX"));
         assert!(src.contains(r#""agent-status", "--state", state, "--format", "omp""#));
         assert!(!src.contains("Pi"), "Pi identity leaked into the omp render");
         // The inertness guard is identity-independent and must survive.
-        assert!(src.contains("if (!process.env.OXIMUX_PTY_ID) return;"));
+        assert!(src.contains("if (!process.env.trex_PTY_ID) return;"));
         // And the Pi render stays free of omp's identity in return. (A bare
         // "omp" substring probe would trip on the word "complete", so the
         // reader selection — the one identity a wrong render would act on —
@@ -221,8 +221,8 @@ mod tests {
         // The path is embedded in a single-quoted JS string literal, so an
         // unescaped quote would end the literal and everything after it would
         // be parsed as code.
-        let src = source(Path::new("/Users/O'X/oximux"));
-        assert!(src.contains(r"/Users/O'\''X/oximux"), "unescaped quote in {src:?}");
+        let src = source(Path::new("/Users/O'X/TREX"));
+        assert!(src.contains(r"/Users/O'\''X/TREX"), "unescaped quote in {src:?}");
     }
 
     #[test]
@@ -258,11 +258,11 @@ mod tests {
     }
 
     #[test]
-    fn the_extension_is_inert_outside_an_oximux_pane() {
+    fn the_extension_is_inert_outside_an_trex_pane() {
         // A user's own `pi` must not spawn anything. The guard is the first
         // statement in the extension body, before any subscription.
         let src = rendered();
-        let guard = src.find("if (!process.env.OXIMUX_PTY_ID) return;").expect("the guard");
+        let guard = src.find("if (!process.env.trex_PTY_ID) return;").expect("the guard");
         let first_subscription = src.find("pi.on(").expect("a subscription");
         assert!(guard < first_subscription, "the guard must precede every subscription");
     }

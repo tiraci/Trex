@@ -1,4 +1,4 @@
-//! Nav rows at the top of the left rail — Tasks / Automations / Agents / Search.
+﻿//! Nav rows at the top of the left rail — Tasks / Automations / Agents / Search.
 //!
 //! Two of these open a PANE tab rather than a rail body (Tasks, Automations):
 //! both are pages that need width, and the rail is 250px. Agents is a rail
@@ -9,7 +9,7 @@ use gpui::{
     App, Entity, Hsla, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement,
     Styled, Window, div, prelude::FluentBuilder as _, px, svg,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::left_rail::LeftRail;
 

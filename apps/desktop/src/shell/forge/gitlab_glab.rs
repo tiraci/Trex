@@ -1,5 +1,5 @@
-//! `glab`-CLI implementation of [`ForgeProvider`](super::ForgeProvider), backed
-//! by the wrappers in `oximux_git::glab`.
+﻿//! `glab`-CLI implementation of [`ForgeProvider`](super::ForgeProvider), backed
+//! by the wrappers in `trex_git::glab`.
 //!
 //! GitLab's merge-request surface mapped onto the same forge contract as
 //! [`GithubForge`](super::GithubForge): create/merge/list/state route through
@@ -15,8 +15,8 @@
 
 use std::path::Path;
 
-use oximux_git::Result;
-use oximux_git::glab;
+use trex_git::Result;
+use trex_git::glab;
 
 use super::{CheckRun, CreatePrOptions, ForgeItem, ForgeListFilter, ForgeProvider, MergeMethod};
 
@@ -34,7 +34,7 @@ impl ForgeProvider for GitlabForge {
         glab::has_open_mr(cwd).await
     }
 
-    async fn pr_state(&self, cwd: &Path) -> oximux_core::PrState {
+    async fn pr_state(&self, cwd: &Path) -> trex_core::PrState {
         glab::mr_state(cwd).await
     }
 

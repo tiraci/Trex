@@ -1,4 +1,4 @@
-//! The team-run RPC handlers — open a multi-role fan-out, settle a role, read
+﻿//! The team-run RPC handlers — open a multi-role fan-out, settle a role, read
 //! a run's board.
 //!
 //! Opening a run starts several sessions at once, so it carries
@@ -8,12 +8,12 @@
 //! of the run it belongs to, because a team where the members cannot see each
 //! other is not a team.
 
-use oximux_agents::team::{NewTeamRole, TeamRole, TeamRoleStatus, TeamRun};
-use oximux_remote_proto::messages::{
+use trex_agents::team::{NewTeamRole, TeamRole, TeamRoleStatus, TeamRun};
+use trex_remote_proto::messages::{
     TeamReportReq, TeamRoleStatusWire, TeamRoleV2Wire, TeamRoleWire, TeamRunCreateReq,
     TeamRunCreateV2Req, TeamRunV2Wire, TeamRunWire,
 };
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;
@@ -129,10 +129,10 @@ impl Dispatcher {
         if req.roles.is_empty() {
             return Err(RpcError::BadRequest("a run needs at least one role".into()));
         }
-        if req.roles.len() > oximux_agents::team::MAX_ROLES {
+        if req.roles.len() > trex_agents::team::MAX_ROLES {
             return Err(RpcError::BadRequest(format!(
                 "a run may have at most {} roles",
-                oximux_agents::team::MAX_ROLES
+                trex_agents::team::MAX_ROLES
             )));
         }
         // Duplicate role names would collide on the table's (run, name) key, so
@@ -355,7 +355,7 @@ impl Dispatcher {
         // was" is the behaviour this path has always had. Choosing a base for
         // it is a decision with an owner, and that owner is not this call site.
         worktrees
-            .create(project, &slug, &oximux_remote_proto::messages::CreateBaseWire::Default)
+            .create(project, &slug, &trex_remote_proto::messages::CreateBaseWire::Default)
             .await
             .map(|row| row.path)
             .map_err(|_| "the role's worktree could not be created".to_string())

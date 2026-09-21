@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 impl ProjectPanes {
 
@@ -25,7 +25,7 @@ impl ProjectPanes {
     /// tabs) — clicking an SCM row always opens in the focused group.
     pub fn open_or_activate_diff_tab(
         &mut self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         path: PathBuf,
         staged: bool,
         untracked: bool,
@@ -50,7 +50,7 @@ impl ProjectPanes {
     pub fn open_or_activate_tasks_tab_in_active_group(
         &mut self,
         weak_root: WeakEntity<crate::workspace_root::WorkspaceRoot>,
-        projects: Vec<oximux_core::Project>,
+        projects: Vec<trex_core::Project>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -75,7 +75,7 @@ impl ProjectPanes {
     pub fn open_or_activate_automations_tab_in_active_group(
         &mut self,
         weak_root: WeakEntity<crate::workspace_root::WorkspaceRoot>,
-        store: oximux_agents::schedule::ScheduleStore,
+        store: trex_agents::schedule::ScheduleStore,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -112,7 +112,7 @@ impl ProjectPanes {
         &mut self,
         cwd: PathBuf,
         model: Option<String>,
-        backend: oximux_agents::thread::ChatBackend,
+        backend: trex_agents::thread::ChatBackend,
         initial_prompt: Option<String>,
         window: &mut Window,
         cx: &mut Context<Self>,
@@ -164,7 +164,7 @@ impl ProjectPanes {
         session_id: &str,
         path: Option<&str>,
         cwd: PathBuf,
-        adapter: oximux_core::AgentAdapter,
+        adapter: trex_core::AgentAdapter,
         preset_id: Option<&str>,
         window: &mut Window,
         cx: &mut Context<Self>,
@@ -216,7 +216,7 @@ impl ProjectPanes {
     /// commit-detail multi-file views.
     pub fn open_or_activate_commit_tab(
         &mut self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         sha: String,
         short_oid: String,
         subject: String,
@@ -241,7 +241,7 @@ impl ProjectPanes {
     /// Branch" section, deduped by path.
     pub fn open_or_activate_branch_diff_tab(
         &mut self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         base: String,
         head: String,
         path: PathBuf,
@@ -266,8 +266,8 @@ impl ProjectPanes {
     /// scope's title.
     pub fn open_or_activate_combined_diff_tab(
         &mut self,
-        repo: oximux_git::Repository,
-        scope: oximux_core::CombinedDiffScope,
+        repo: trex_git::Repository,
+        scope: trex_core::CombinedDiffScope,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> Option<usize> {
@@ -1066,11 +1066,11 @@ impl ProjectPanes {
         group_id: PaneGroupId,
         cwd: PathBuf,
         model: Option<String>,
-        backend: oximux_agents::thread::ChatBackend,
+        backend: trex_agents::thread::ChatBackend,
         session_id: Option<String>,
-        entries: Vec<oximux_agents::thread::ThreadEntry>,
+        entries: Vec<trex_agents::thread::ThreadEntry>,
         slash_commands: Vec<String>,
-        session_meta: oximux_agents::thread::SessionMeta,
+        session_meta: trex_agents::thread::SessionMeta,
         thinking_level: crate::shell::agent_chat::ThinkingLevel,
         posture: crate::shell::agent_chat::RestoredPosture,
         pending_retry: Option<crate::persisted_chat::PersistedRetry>,

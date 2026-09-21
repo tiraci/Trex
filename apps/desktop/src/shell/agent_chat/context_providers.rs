@@ -1,10 +1,10 @@
-//! Context providers for the chat composer's `@` menu: the app-layer glue that
+﻿//! Context providers for the chat composer's `@` menu: the app-layer glue that
 //! turns "the user picked `@diff`/`@terminal`/`@clipboard`" into a captured
 //! [`ContextChip`].
 //!
 //! Split of concerns:
 //! - The pure, transport-agnostic chip model + serializer lives in the agents
-//!   crate ([`oximux_agents::thread::context_chip`]).
+//!   crate ([`trex_agents::thread::context_chip`]).
 //! - The *sources* offered in the `@` menu ([`ContextSource`]) and the *capture
 //!   requests* they emit ([`ContextRequest`]) live here, along with the pure
 //!   cap/combine helpers that shape captured bytes into a chip.
@@ -16,8 +16,8 @@
 //! Keeping the caps + combiners pure makes the truncation semantics unit-testable
 //! without a running terminal, git repo, or clipboard.
 
-use oximux_agents::thread::{ContextChip, ContextKind};
-use oximux_pty::TerminalSessionId;
+use trex_agents::thread::{ContextChip, ContextKind};
+use trex_pty::TerminalSessionId;
 
 /// Last N lines of a terminal's scrollback attached by `@terminal` (a live
 /// selection overrides this — see `TerminalView::capture_agent_context`).
@@ -133,15 +133,15 @@ pub fn cap_tail_bytes(text: &str, max_bytes: usize) -> (String, bool) {
 /// common for a one-line bug report — from serializing as an empty
 /// `<context>` block that tells the model nothing.
 pub fn forge_chip(
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u64,
     title: &str,
     author: &str,
     body: &str,
 ) -> ContextChip {
     let chip_kind = match kind {
-        oximux_core::ForgeRefKind::Issue => ContextKind::Issue,
-        oximux_core::ForgeRefKind::Pull => ContextKind::Pull,
+        trex_core::ForgeRefKind::Issue => ContextKind::Issue,
+        trex_core::ForgeRefKind::Pull => ContextKind::Pull,
     };
     let source = format!("#{number} {}", title.trim());
     let (body, truncated) = cap_head_bytes(body.trim(), FORGE_MAX_BYTES);
@@ -257,11 +257,11 @@ pub fn cap_head_bytes(text: &str, max_bytes: usize) -> (String, bool) {
 mod tests {
     use super::*;
 
-    use oximux_core::ForgeRefKind;
+    use trex_core::ForgeRefKind;
 
     #[test]
     fn forge_chip_labels_with_the_number_and_title() {
-        let c = forge_chip(ForgeRefKind::Issue, 42, "Parser drops a token", "nhtera", "repro:\n1. x");
+        let c = forge_chip(ForgeRefKind::Issue, 42, "Parser drops a token", "tiraci", "repro:\n1. x");
         assert_eq!(c.kind, ContextKind::Issue);
         assert_eq!(c.source.as_deref(), Some("#42 Parser drops a token"));
         assert!(!c.truncated);
@@ -270,7 +270,7 @@ mod tests {
 
     #[test]
     fn forge_chip_maps_a_pull_request_to_its_own_kind() {
-        let c = forge_chip(ForgeRefKind::Pull, 7, "Add the menu", "nhtera", "body");
+        let c = forge_chip(ForgeRefKind::Pull, 7, "Add the menu", "tiraci", "body");
         assert_eq!(c.kind, ContextKind::Pull);
     }
 
@@ -279,8 +279,8 @@ mod tests {
     /// says nothing.
     #[test]
     fn a_body_less_item_still_carries_content() {
-        let c = forge_chip(ForgeRefKind::Issue, 1, "Crash on open", "nhtera", "   ");
-        assert!(c.content.contains("opened by @nhtera"));
+        let c = forge_chip(ForgeRefKind::Issue, 1, "Crash on open", "tiraci", "   ");
+        assert!(c.content.contains("opened by @tiraci"));
         assert!(c.content.contains("(no description)"));
     }
 

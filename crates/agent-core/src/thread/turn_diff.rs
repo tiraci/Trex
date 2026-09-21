@@ -1,4 +1,4 @@
-//! Per-file change stats for the turn-end "N files changed" card.
+﻿//! Per-file change stats for the turn-end "N files changed" card.
 //!
 //! Two sources, because the backends differ in what they report:
 //!
@@ -31,7 +31,7 @@ pub struct TurnFileChange {
 ///
 /// Walks LINE BY LINE, starting a new file only on a line that BEGINS with
 /// `diff --git ` — the same line-anchored rule the sibling parser in
-/// `oximux_git::parse_unified_diff` uses. Splitting on the substring anywhere
+/// `trex_git::parse_unified_diff` uses. Splitting on the substring anywhere
 /// would let a diff that merely CONTAINS the text (a `+diff --git a/x b/x` line
 /// in an edited README, or in this repo's own plan docs) fabricate a phantom
 /// file and inflate the card's count.

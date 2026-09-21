@@ -1,4 +1,4 @@
-//! omp chat backend — drives `omp --mode rpc-ui` as a subprocess.
+﻿//! omp chat backend — drives `omp --mode rpc-ui` as a subprocess.
 //!
 //! omp is a Pi fork that kept Pi's event taxonomy and NDJSON envelope but
 //! renamed/extended the command layer, added a versioned handshake with
@@ -78,7 +78,7 @@ const CONTROL_TIMEOUT: Duration = Duration::from_secs(5);
 /// this is the constant; connect asserts omp still declares the same.
 const MAX_REASSEMBLED_BYTES: u64 = 64 * 1024 * 1024;
 
-/// The subagent-event depth OxiMux subscribes to — lifecycle only (cards fold
+/// The subagent-event depth TREX subscribes to — lifecycle only (cards fold
 /// into existing tool rendering; full per-subagent streams are out of scope,
 /// recorded in the plan's validation log).
 const SUBAGENT_SUBSCRIPTION_LEVEL: &str = "lifecycle";
@@ -89,7 +89,7 @@ pub struct OmpRpcConnection {
     child: Arc<Mutex<Child>>,
     /// Windows stand-in for the process group (same rationale as Pi's).
     #[cfg(windows)]
-    job: Option<Arc<oximux_job_object::JobObject>>,
+    job: Option<Arc<trex_job_object::JobObject>>,
     /// Live session facts; `set_model`/`set_thinking_level` mutate in-session.
     state: Arc<Mutex<Option<SessionState>>>,
     /// omp's catalog, pre-filtered to providers with credentials.
@@ -339,7 +339,7 @@ impl OmpRpcConnection {
         let pending_approvals: Arc<Mutex<HashSet<String>>> = Arc::new(Mutex::new(HashSet::new()));
 
         #[cfg(windows)]
-        let job = match oximux_job_object::JobObject::adopt(&child) {
+        let job = match trex_job_object::JobObject::adopt(&child) {
             Ok(job) => Some(Arc::new(job)),
             Err(e) => {
                 tracing::warn!(?e, "could not put omp in a job object");
@@ -424,7 +424,7 @@ impl OmpRpcConnection {
                                 tracing::debug!(req = %v, "omp widget update (ignored)");
                             }
                             // Any other dialog (freeform input, non-approval
-                            // select, confirm, editor): OxiMux has no surface
+                            // select, confirm, editor): TREX has no surface
                             // for it, and an unanswered dialog blocks the turn
                             // FOREVER (no timeout — probe 01). Cancel it, and
                             // say so — deny-by-default, visibly.
@@ -434,7 +434,7 @@ impl OmpRpcConnection {
                                     .and_then(Value::as_str)
                                     .unwrap_or_default()
                                     .to_string();
-                                tracing::warn!(method = ?other, "omp dialog OxiMux cannot render; cancelling");
+                                tracing::warn!(method = ?other, "omp dialog TREX cannot render; cancelling");
                                 if !id.is_empty() {
                                     let _ = rpc.send_ui_response(&ExtensionUiResponse {
                                         id,
@@ -445,7 +445,7 @@ impl OmpRpcConnection {
                                 let what = other.unwrap_or("unknown");
                                 if tx
                                     .send(ThreadEvent::Error(format!(
-                                        "omp asked for input OxiMux can't render ({what} dialog) — cancelled it so the turn can continue"
+                                        "omp asked for input TREX can't render ({what} dialog) — cancelled it so the turn can continue"
                                     )))
                                     .is_err()
                                 {
@@ -959,7 +959,7 @@ mod tests {
         use std::sync::atomic::{AtomicUsize, Ordering};
         static SEQ: AtomicUsize = AtomicUsize::new(0);
         let path = std::env::temp_dir().join(format!(
-            "oximux-fake-omp-{}-{}.sh",
+            "trex-fake-omp-{}-{}.sh",
             std::process::id(),
             SEQ.fetch_add(1, Ordering::Relaxed)
         ));
@@ -1180,7 +1180,7 @@ printf '{"type":"extension_ui_request","id":"d1","method":"input","title":"Type 
         if !real.exists() {
             return None;
         }
-        let root = std::env::temp_dir().join(format!("oximux-omp-home-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("trex-omp-home-{}", std::process::id()));
         let agent = root.join("agent");
         std::fs::create_dir_all(&agent).ok()?;
         let guard = Scratch(root);
@@ -1230,7 +1230,7 @@ printf '{"type":"extension_ui_request","id":"d1","method":"input","title":"Type 
     /// omp: under `always-ask`, a bash write must surface an approval, Deny
     /// must block the effect ON DISK, and the turn must still end cleanly.
     /// Spends a few provider tokens (one cheap turn).
-    /// Run: `cargo test -p oximux-agents omp::tests::live_omp_handshake -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents omp::tests::live_omp_handshake -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `omp`, its signed-in agent.db, and spends provider tokens"]
     fn live_omp_handshake_turn_and_deny_blocks_the_disk() {
@@ -1282,7 +1282,7 @@ printf '{"type":"extension_ui_request","id":"d1","method":"input","title":"Type 
     /// Cross-process resume against the real omp: teach a codeword, tear the
     /// process down, respawn with `--resume <full id>` and prove the new
     /// process remembers. Spends a few provider tokens (two cheap turns).
-    /// Run: `cargo test -p oximux-agents omp::tests::live_omp_resume -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents omp::tests::live_omp_resume -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `omp`, its signed-in agent.db, and spends provider tokens"]
     fn live_omp_resume_by_full_id_recalls_the_codeword() {

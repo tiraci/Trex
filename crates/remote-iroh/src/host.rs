@@ -1,4 +1,4 @@
-//! The host accept loop: bind is done by [`bind_host`](crate::bind_host); this
+﻿//! The host accept loop: bind is done by [`bind_host`](crate::bind_host); this
 //! drives the bound endpoint, serving every inbound connection through the
 //! transport-agnostic [`Dispatcher`] until asked to stop.
 //!
@@ -10,8 +10,8 @@ use std::future::Future;
 use std::sync::Arc;
 
 use iroh::Endpoint;
-use oximux_remote_host::Dispatcher;
-use oximux_remote_proto::PairingTicket;
+use trex_remote_host::Dispatcher;
+use trex_remote_proto::PairingTicket;
 use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
 
@@ -100,13 +100,13 @@ impl Drop for HostHandle {
 /// Bind a host endpoint, wait until it is dialable, and start serving `dispatcher`
 /// on it — returning a [`HostHandle`] whose [`ticket`](HostHandle::ticket) reaches
 /// this host. `secret` is the one-time handshake secret the ticket carries; it
-/// MUST match the [`PairingSlot`](oximux_remote_host::PairingSlot) the dispatcher's
+/// MUST match the [`PairingSlot`](trex_remote_host::PairingSlot) the dispatcher's
 /// auth store was seeded with. `endpoint_secret` fixes the host's endpoint id so a
 /// paired device can reconnect after a restart (see [`bind_host`]). Bind is
 /// deferred to call time (never at boot) so it only pays its cost when remote
 /// access is actually turned on.
 ///
-/// [`PairingSlot`]: oximux_remote_host::PairingSlot
+/// [`PairingSlot`]: trex_remote_host::PairingSlot
 pub async fn start_host(
     dispatcher: Arc<Dispatcher>,
     secret: [u8; 16],

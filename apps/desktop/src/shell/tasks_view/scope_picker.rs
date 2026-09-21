@@ -1,4 +1,4 @@
-//! Project-scope picker for the Tasks toolbar.
+﻿//! Project-scope picker for the Tasks toolbar.
 //!
 //! A dropdown — "All projects" plus one row per known project — that drives
 //! [`TasksView::set_scope`], turning the page from a single-repo view into a
@@ -13,7 +13,7 @@ use gpui_component::button::{Button, ButtonVariants};
 // chevron alone, leaving the label — most of the control's width — dead to
 // clicks. `dropdown_caret(true)` keeps the chevron look on a single trigger.
 use gpui_component::menu::{DropdownMenu as _, PopupMenuItem};
-use oximux_core::Project;
+use trex_core::Project;
 
 use crate::shell::tasks_view::{TaskScope, TasksView};
 

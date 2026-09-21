@@ -1,4 +1,4 @@
-//! High-level thread events — the decoded, transport-agnostic vocabulary the
+﻿//! High-level thread events — the decoded, transport-agnostic vocabulary the
 //! `ChatThread` state machine and the UI consume.
 //!
 //! The stream-json decoder (Claude) and a future ACP decoder both normalize
@@ -85,7 +85,7 @@ pub enum AuthMethodKind {
     Agent,
     /// The user sets environment variables the agent reads, then re-authenticates.
     /// Instructions-only: the card lists the variable names (+ optional docs
-    /// `link`) and a Retry pill; OxiMux never stores the secret values.
+    /// `link`) and a Retry pill; TREX never stores the secret values.
     EnvVar { vars: Vec<String>, link: Option<String> },
     /// The client runs the agent binary with `args` (and extra `env`) in an
     /// embedded terminal so the user logs in via a TUI; on exit the session is
@@ -93,7 +93,7 @@ pub enum AuthMethodKind {
     Terminal { args: Vec<String>, env: Vec<(String, String)> },
     /// The agent hands back an OAuth URL the client opens in a browser (Codex's
     /// merged ChatGPT sign-in: `account/login/start` → `authUrl`). Clicking the
-    /// pill calls `AgentConnection::begin_browser_login` (in `oximux-agents`),
+    /// pill calls `AgentConnection::begin_browser_login` (in `trex-agents`),
     /// which returns the URL to open; a later `account/login/completed` resolves
     /// the card via [`ThreadEvent::AuthOutcome`]. No `args`/`env`: the agent runs
     /// its own callback server, the client only opens the URL.
@@ -169,7 +169,7 @@ pub struct RateLimitInfo {
     ///
     /// The wire reports `resetsAt` in unix **seconds** — the CLI derives its own
     /// `retry-after` header as `resetsAt - now_seconds`. The decoder converts on
-    /// the way in so every reset time inside OxiMux is milliseconds, matching
+    /// the way in so every reset time inside TREX is milliseconds, matching
     /// [`crate::thread::event`]'s neighbours and `UsageWindow::resets_at_ms`.
     /// Getting this wrong does not fail loudly — it schedules a retry either
     /// immediately or tens of thousands of years out.
@@ -442,7 +442,7 @@ pub enum ThreadEvent {
     },
     /// The agent produced a browser sign-in URL to open (Codex `account/login/
     /// start` → `authUrl`). Emitted asynchronously by the worker after a
-    /// `begin_browser_login` (on `AgentConnection`, in `oximux-agents`)
+    /// `begin_browser_login` (on `AgentConnection`, in `trex-agents`)
     /// request (so the click that triggers it never blocks the UI on the RPC).
     /// The app opens it in the system browser; the flow resolves later via
     /// [`ThreadEvent::AuthOutcome`]. Ephemeral, view-owned — the fold ignores it.

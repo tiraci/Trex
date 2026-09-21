@@ -1,4 +1,4 @@
-//! Renaming a workspace: the branch, the directory and the row, or none of them.
+﻿//! Renaming a workspace: the branch, the directory and the row, or none of them.
 //!
 //! A rename is the second operation in this crate that mutates three things
 //! which must agree, and it follows the same shape as
@@ -18,9 +18,9 @@
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-use oximux_core::Workspace;
-use oximux_git::{Repository, validate_branch_name, validate_slug};
-use oximux_storage::WorkspaceRepo;
+use trex_core::Workspace;
+use trex_git::{Repository, validate_branch_name, validate_slug};
+use trex_storage::WorkspaceRepo;
 
 use crate::branch_name;
 use crate::paths::{path_is_within, paths_equal};
@@ -440,15 +440,15 @@ mod tests {
     /// the result is something git will accept.
     #[test]
     fn a_normal_row_renames_within_its_own_prefix() {
-        for branch in ["oximux/fix-lgoin", "nhtera/fix-lgoin", "fix-lgoin"] {
+        for branch in ["TREX/fix-lgoin", "tiraci/fix-lgoin", "fix-lgoin"] {
             let renamed =
                 branch_name::branch_name(branch_name::split_prefix(branch), "fix-login");
             assert!(validate_branch_name(&renamed).is_ok(), "{branch:?} → {renamed:?}");
             assert!(renamed.ends_with("fix-login"), "{renamed:?}");
         }
         assert_eq!(
-            branch_name::branch_name(branch_name::split_prefix("nhtera/fix-lgoin"), "fix-login"),
-            "nhtera/fix-login"
+            branch_name::branch_name(branch_name::split_prefix("tiraci/fix-lgoin"), "fix-login"),
+            "tiraci/fix-login"
         );
     }
 
@@ -457,44 +457,44 @@ mod tests {
         // Every refusal message must say what is in the way — a user's next
         // question after "can't rename" is always "because of what?".
         let pushed = RenameRefusal::Pushed {
-            upstream: "origin/oximux/feat".to_string(),
+            upstream: "origin/TREX/feat".to_string(),
         };
-        assert!(pushed.message("oximux/feat").contains("origin/oximux/feat"));
+        assert!(pushed.message("TREX/feat").contains("origin/TREX/feat"));
 
         let in_use = RenameRefusal::InUse {
             holders: vec![PathBuf::from("/wt/feat")],
         };
-        assert!(in_use.message("oximux/feat").contains("/wt/feat"));
+        assert!(in_use.message("TREX/feat").contains("/wt/feat"));
 
         let branch = RenameRefusal::BranchExists {
-            branch: "oximux/taken".to_string(),
+            branch: "TREX/taken".to_string(),
         };
-        assert!(branch.message("oximux/feat").contains("oximux/taken"));
+        assert!(branch.message("TREX/feat").contains("TREX/taken"));
 
         let path = RenameRefusal::PathExists {
             path: PathBuf::from("/wt/taken"),
         };
-        assert!(path.message("oximux/feat").contains("/wt/taken"));
+        assert!(path.message("TREX/feat").contains("/wt/taken"));
 
         let slug = RenameRefusal::InvalidSlug {
             reason: "slug is empty".to_string(),
         };
-        assert!(slug.message("oximux/feat").contains("slug is empty"));
+        assert!(slug.message("TREX/feat").contains("slug is empty"));
 
         // Git's own text is quoted rather than paraphrased.
         let moved = RenameRefusal::MoveRefused {
             error: "fatal: cannot move a locked working tree".to_string(),
         };
-        assert!(moved.message("oximux/feat").contains("locked working tree"));
+        assert!(moved.message("TREX/feat").contains("locked working tree"));
     }
 
     #[test]
     fn a_pushed_refusal_names_the_branch_being_renamed() {
         let refusal = RenameRefusal::Pushed {
-            upstream: "origin/oximux/fix-lgoin".to_string(),
+            upstream: "origin/TREX/fix-lgoin".to_string(),
         };
-        let msg = refusal.message("oximux/fix-lgoin");
-        assert!(msg.contains("oximux/fix-lgoin"));
+        let msg = refusal.message("TREX/fix-lgoin");
+        assert!(msg.contains("TREX/fix-lgoin"));
         assert!(msg.contains("pull request"), "explains the consequence");
     }
 

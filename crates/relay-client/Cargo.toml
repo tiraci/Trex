@@ -1,5 +1,5 @@
-[package]
-name = "oximux-relay-client"
+﻿[package]
+name = "trex-relay-client"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,8 +8,8 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-oximux-pty = { workspace = true }
-oximux-relay-proto = { workspace = true }
+trex-pty = { workspace = true }
+trex-relay-proto = { workspace = true }
 anyhow = { workspace = true }
 dashmap = { workspace = true }
 interprocess = { workspace = true }
@@ -22,6 +22,6 @@ tracing = { workspace = true }
 uuid = { workspace = true }
 
 [dev-dependencies]
-oximux-shell-env = { workspace = true, features = ["test-support"] }
-oximux-relay = { workspace = true }
+trex-shell-env = { workspace = true, features = ["test-support"] }
+trex-relay = { workspace = true }
 tempfile = "3"

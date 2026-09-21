@@ -1,4 +1,4 @@
-//! One issue/PR table row + column-width constants shared with the header.
+﻿//! One issue/PR table row + column-width constants shared with the header.
 //!
 //! Data is pre-fetched into [`ForgeItem`]s before the `uniform_list` closure
 //! builds these rows, so nothing here touches the network or does per-frame
@@ -18,8 +18,8 @@ use gpui::{
     AnyElement, App, Hsla, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
     ParentElement, Styled, WeakEntity, Window, div, px,
 };
-use oximux_core::{AgentAdapter, Project};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{AgentAdapter, Project};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::forge::ForgeItem;
 use crate::shell::open_url::open_url;
@@ -92,8 +92,8 @@ pub(super) fn state_pill(
 }
 
 /// The workspace name seeded from an issue/PR. `create_workspace_async` derives
-/// the slug + `oximux/<slug>` branch from this, so it carries the number for a
-/// recognizable branch like `oximux/issue-42-fix-crash`. The title is trimmed
+/// the slug + `TREX/<slug>` branch from this, so it carries the number for a
+/// recognizable branch like `TREX/issue-42-fix-crash`. The title is trimmed
 /// to a short lead (see [`short_issue_title`]) so a sentence-length issue title
 /// doesn't yield an unwieldy branch + delete-confirm slug.
 pub(super) fn workspace_name_for(kind: TaskKind, item: &ForgeItem) -> String {
@@ -431,7 +431,7 @@ pub(super) fn create_action(
                         Some(linked_issue.clone()),
                         // No setup picker on a task row — the project's
                         // `auto_setup` decides, same as before this existed.
-                        oximux_settings::SetupDecision::Inherit,
+                        trex_settings::SetupDecision::Inherit,
                         // No base picker on a task row either: a new branch off
                         // the project's default branch, which is what this path
                         // meant all along and did not previously get.

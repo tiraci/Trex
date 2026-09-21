@@ -1,8 +1,8 @@
-//! The half of the appearance settings that needs a text system: which font
+﻿//! The half of the appearance settings that needs a text system: which font
 //! families this machine actually has, and whether the ones a person picked are
 //! among them.
 //!
-//! [`oximux_settings::fonts`] holds the choice and resolves it to a family
+//! [`trex_settings::fonts`] holds the choice and resolves it to a family
 //! name. It deliberately stops there — gpui looks a family up verbatim and does
 //! not fall back to anything a person chose, so a name that is not installed
 //! has to be caught *before* it reaches `Typography`, and only
@@ -21,7 +21,7 @@
 use std::sync::OnceLock;
 
 use gpui::{App, Font, FontFeatures, FontStyle, FontWeight, px};
-use oximux_settings::FontChoice;
+use trex_settings::FontChoice;
 
 /// Every font family the machine offers, sorted for a picker.
 ///
@@ -119,7 +119,7 @@ pub fn is_monospaced(cx: &App, family: &str) -> bool {
 
 /// The face choices in force.
 pub fn active(cx: &App) -> FontChoice {
-    oximux_settings::fonts::active(cx).clone()
+    trex_settings::fonts::active(cx).clone()
 }
 
 /// Adopt `next`, repaint everything, and persist.
@@ -141,7 +141,7 @@ pub fn set(cx: &mut App, next: FontChoice) {
     crate::appearance_settings::bridge_component_theme(cx);
     cx.refresh_windows();
     let appearance = crate::appearance_settings::active(cx);
-    if let Err(err) = crate::appearance_settings::save(&appearance, oximux_settings::fonts::active(cx))
+    if let Err(err) = crate::appearance_settings::save(&appearance, trex_settings::fonts::active(cx))
     {
         tracing::warn!(%err, "could not persist appearance.toml");
     }

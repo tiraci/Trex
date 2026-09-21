@@ -1,5 +1,5 @@
-[package]
-name = "oximux-relay"
+﻿[package]
+name = "trex-relay"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,19 +8,19 @@ publish.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "oximux-relay"
+name = "trex-relay"
 path = "src/main.rs"
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-oximux-proc-cwd = { workspace = true }
-oximux-relay-proto = { workspace = true }
+trex-proc-cwd = { workspace = true }
+trex-relay-proto = { workspace = true }
 # Restricting the pid file, and — on Windows — building the named pipe's
 # owner-only DACL from the same definition the token and key files use.
-oximux-owner-only = { workspace = true }
-oximux-shell-env = { workspace = true }
+trex-owner-only = { workspace = true }
+trex-shell-env = { workspace = true }
 anyhow = { workspace = true }
 dashmap = { workspace = true }
 interprocess = { workspace = true }
@@ -48,13 +48,13 @@ nix = { version = "0.25", features = ["signal", "user"] }
 # closed terminal takes its whole process tree with it.
 [target.'cfg(windows)'.dependencies]
 widestring = "1"
-oximux-job-object = { workspace = true }
+trex-job-object = { workspace = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tracing-oslog = { workspace = true }
 
 [dev-dependencies]
-oximux-shell-env = { workspace = true, features = ["test-support"] }
+trex-shell-env = { workspace = true, features = ["test-support"] }
 tempfile = "3"
 # Integration tests run the daemon in-process, so its own tracing is the only
 # window into why a pass decided what it decided. Without a subscriber those

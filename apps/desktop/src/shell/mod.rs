@@ -1,4 +1,4 @@
-//! Shell views — visual scaffolding only in Phase 0.
+﻿//! Shell views — visual scaffolding only in Phase 0.
 //!
 //! Each child module is one zone of the cockpit. They take a `Theme + Density
 //! + Typography` and return an `impl IntoElement` (RenderOnce). No state.
@@ -48,7 +48,7 @@ pub mod openable_text_file;
 
 // Re-exports — keep every existing `crate::shell::<name>` module path stable
 // after folding loose modules into concern folders. Consumers (including
-// external integration tests via `oximux_app::shell::<name>`) resolve unchanged.
+// external integration tests via `trex_app::shell::<name>`) resolve unchanged.
 pub use agent_ui::{
     agent_presentation, agent_process_scan, agent_session_persistence, agent_status_badge,
     agent_status_task, agent_tab_label, ambient_agent_scan, ambient_state, session_live_store,
@@ -68,9 +68,9 @@ pub use workspace::{
     workspace_ops,
 };
 
-// `confirm_dialog` is a generic, app-agnostic widget now living in oximux-ui.
+// `confirm_dialog` is a generic, app-agnostic widget now living in trex-ui.
 // Re-exported here so existing `crate::shell::confirm_dialog::…` paths resolve.
-pub use oximux_ui::confirm_dialog;
+pub use trex_ui::confirm_dialog;
 
 // Terminal surface — clustered into shell/terminal/ for traversal. Re-exported
 // here so existing `crate::shell::<name>::…` paths keep resolving unchanged.

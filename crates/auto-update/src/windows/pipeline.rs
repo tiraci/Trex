@@ -1,4 +1,4 @@
-//! One background check, start to finish: ask the release feed, prove what
+﻿//! One background check, start to finish: ask the release feed, prove what
 //! comes back, and leave a verified payload staged beside the install.
 //!
 //! The run ends at [`UpdateStatus::Ready`] — files on disk, install directory
@@ -22,7 +22,7 @@ use crate::{CheckTrigger, UpdateError, UpdateStatus, UpdaterConfig};
 /// The triple whose app payload in a release manifest belongs to this build.
 /// Set by `build.rs`; the cross-compile-correct answer, where anything derived
 /// from the host would name the wrong asset.
-pub const TARGET: &str = env!("OXIMUX_TARGET");
+pub const TARGET: &str = env!("TREX_TARGET");
 
 /// The minisign key release manifests are verified against, or `None` when this
 /// build has none.
@@ -31,7 +31,7 @@ pub const TARGET: &str = env!("OXIMUX_TARGET");
 /// trust root is to refuse, never to fall back to trusting a checksum that came
 /// from the same place as the artifact it describes.
 pub fn release_public_key() -> Option<&'static str> {
-    let key = env!("OXIMUX_RELEASE_PUBKEY");
+    let key = env!("TREX_RELEASE_PUBKEY");
     (key != "UNSET" && !key.is_empty()).then_some(key)
 }
 
@@ -155,8 +155,8 @@ fn stage(bytes: &[u8], staged: &Path, version: &str) -> Result<(), UpdateError> 
 /// links out instead.
 fn manifest_notes(manifest: &Manifest) -> String {
     format!(
-        "OxiMux {} is ready to install.\n\nRelease notes: \
-         https://github.com/nhtera/OxiMux/releases/tag/{}",
+        "TREX {} is ready to install.\n\nRelease notes: \
+         https://github.com/tiraci/Trex/releases/tag/{}",
         manifest.version,
         manifest.tag()
     )

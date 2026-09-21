@@ -1,8 +1,8 @@
-//! Adopting an untracked worktree, and the reverse.
+﻿//! Adopting an untracked worktree, and the reverse.
 //!
 //! Adoption is a database act and nothing else: a `workspaces` row pointing at
 //! the directory and branch that already exist. **Nothing on disk is
-//! modified** — no move, no branch rename, no `.oximuxinclude` copy, no setup
+//! modified** — no move, no branch rename, no `.TREXinclude` copy, no setup
 //! script — because those exist to prepare a directory this app created, and
 //! running them against one somebody else set up could overwrite their files.
 //! The no-writes property is a test, not a convention (see below), and
@@ -12,15 +12,15 @@
 //! Adopted rows stay **un-vetted** until the user says otherwise (see
 //! `WorkspaceRepo::is_unvetted`): the row menu withholds the script actions,
 //! `Delete` skips the cleanup script, and `Review scripts…` opens the file the
-//! marker is about. Same family as the unreviewed-ref boundary: OxiMux does
+//! marker is about. Same family as the unreviewed-ref boundary: TREX does
 //! not run code the user has not looked at, on the user's behalf, by default.
 
 use std::path::Path;
 
 use gpui::{Context, Window};
-use oximux_core::{Project, Workspace};
-use oximux_git::derive_slug;
-use oximux_storage::{StorageError, WorkspaceRepo};
+use trex_core::{Project, Workspace};
+use trex_git::derive_slug;
+use trex_storage::{StorageError, WorkspaceRepo};
 
 use crate::shell::confirm_dialog::{ConfirmCallback, ConfirmPrompt};
 use crate::shell::toast::ToastKind;
@@ -29,7 +29,7 @@ use crate::shell::workspace::discovery::UntrackedWorktree;
 use crate::workspace_root::WorkspaceRoot;
 
 /// The relative path every adopted worktree's scripts live at.
-pub(crate) const SCRIPTS_FILE: &str = ".oximux/scripts.toml";
+pub(crate) const SCRIPTS_FILE: &str = ".trex/scripts.toml";
 
 /// The name and slug an adopted row gets: the branch when there is one (it
 /// is what the user called the work), else the directory's name; the slug is
@@ -150,7 +150,7 @@ impl WorkspaceRoot {
         let prompt = ConfirmPrompt {
             title: "Stop tracking workspace".into(),
             body: format!(
-                "Removes \u{201c}{}\u{201d} from OxiMux only. The worktree at {} stays on disk, \
+                "Removes \u{201c}{}\u{201d} from TREX only. The worktree at {} stays on disk, \
                  untouched, and will show up again under Untracked.",
                 workspace.name, workspace.worktree_path
             )
@@ -189,7 +189,7 @@ impl WorkspaceRoot {
         cx.notify();
     }
 
-    /// `Review scripts…`: open the adopted worktree's `.oximux/scripts.toml`
+    /// `Review scripts…`: open the adopted worktree's `.trex/scripts.toml`
     /// in an editor tab of the row's OWN project, so the user can read what
     /// the withheld actions would run. A worktree with no such file has
     /// nothing to review, and says so.
@@ -265,7 +265,7 @@ impl WorkspaceRoot {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::{ProjectRepo, open_memory};
+    use trex_storage::{ProjectRepo, open_memory};
     use std::path::PathBuf;
 
     fn untracked(project_id: &str, path: &Path, branch: Option<&str>) -> UntrackedWorktree {
@@ -298,7 +298,7 @@ mod tests {
     /// Every file under the directory, with size and modification time — the
     /// shape a write of any kind would change. Directories count by presence
     /// only: NTFS updates a directory's own mtime lazily after a write inside
-    /// it, so the `.oximux` entry's stamp can move between two snapshots with
+    /// it, so the `.trex` entry's stamp can move between two snapshots with
     /// nothing having been written in between (seen on Windows CI). A file
     /// created, removed, or rewritten still changes the list.
     fn snapshot(dir: &Path) -> Vec<(PathBuf, u64, std::time::SystemTime)> {
@@ -326,8 +326,8 @@ mod tests {
     fn adoption_writes_nothing_to_the_directory() {
         let tmp = tempfile::tempdir().unwrap();
         let wt = tmp.path().join("someone-elses-worktree");
-        std::fs::create_dir_all(wt.join(".oximux")).unwrap();
-        std::fs::write(wt.join(".oximux").join("scripts.toml"), "setup = \"rm -rf /\"\n").unwrap();
+        std::fs::create_dir_all(wt.join(".trex")).unwrap();
+        std::fs::write(wt.join(".trex").join("scripts.toml"), "setup = \"rm -rf /\"\n").unwrap();
         std::fs::write(wt.join("theirs.txt"), "do not touch\n").unwrap();
         let before = snapshot(&wt);
 

@@ -1,4 +1,4 @@
-//! The sidebar's DB-backed data, gathered in one background pass.
+﻿//! The sidebar's DB-backed data, gathered in one background pass.
 //!
 //! Lifted out of `workspace_ops.rs`, which sits at the 3000-LOC hard cap
 //! `xtask file-size-lint` enforces. Everything here runs on the background
@@ -8,8 +8,8 @@
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
-use oximux_core::{AgentSession, Project, Workspace};
-use oximux_storage::{AgentSessionRepo, ProjectRepo, WorkspaceRepo};
+use trex_core::{AgentSession, Project, Workspace};
+use trex_storage::{AgentSessionRepo, ProjectRepo, WorkspaceRepo};
 
 use crate::shell::left_rail::LatestStatusMap;
 
@@ -44,7 +44,7 @@ pub(crate) fn workspaces_with_primary_for(repo: &WorkspaceRepo, project: &Projec
             Workspace {
                 id: format!("primary:{}", project.id),
                 project_id: project.id.clone(),
-                // Not a branch OxiMux minted: a synthesized row or a
+                // Not a branch TREX minted: a synthesized row or a
                 // fixture. `false` is the reading that never deletes.
                 branch_minted: false,
                 name,

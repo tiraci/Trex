@@ -1,4 +1,4 @@
-//! Filesystem watch for the file explorer: the signal that says a directory
+﻿//! Filesystem watch for the file explorer: the signal that says a directory
 //! the panel is showing changed on disk.
 //!
 //! Before this, `FileExplorer` had exactly two refresh triggers — regaining
@@ -82,7 +82,7 @@ pub fn spawn_watcher(
         Ok(d) => d,
         Err(err) => {
             tracing::warn!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 %err,
                 "could not create the explorer watcher; live refresh off"
             );
@@ -91,7 +91,7 @@ pub fn spawn_watcher(
     };
     if let Err(err) = debouncer.watch(root, RecursiveMode::Recursive) {
         tracing::warn!(
-            target: "oximux_app::file_explorer",
+            target: "trex_app::file_explorer",
             root = %root.display(),
             %err,
             "explorer watch failed; live refresh off"
@@ -296,7 +296,7 @@ mod tests {
     #[test]
     fn build_output_and_git_internals_touch_nothing() {
         let paths = [
-            "/r/target/debug/oximux",
+            "/r/target/debug/TREX",
             "/r/target",
             "/r/.git/index",
             "/r/node_modules/react/index.js",

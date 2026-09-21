@@ -1,4 +1,4 @@
-//! Restore-side session lifecycle: dormant boot + transcript save gating.
+﻿//! Restore-side session lifecycle: dormant boot + transcript save gating.
 //!
 //! Two halves of the same contract — a restored chat costs nothing until it
 //! is looked at, and an unchanged chat costs nothing when it is saved:
@@ -12,7 +12,7 @@
 //!   chat's transcript; long sessions run to tens of MB of JSON, so
 //!   [`AgentChatView::transcript_snapshot_for_save`] returns the body only
 //!   when the chat changed since the last committed save. "Changed" is
-//!   [`ChatThread::revision`](oximux_agents::thread::ChatThread::revision)
+//!   [`ChatThread::revision`](trex_agents::thread::ChatThread::revision)
 //!   (bumped inside every thread mutator — one chokepoint, not N call
 //!   sites) plus a small view-side mark for blob fields the thread doesn't
 //!   own. The dirty state clears in [`AgentChatView::commit_transcript_save`]
@@ -21,8 +21,8 @@
 use std::collections::HashMap;
 
 use gpui::Context;
-use oximux_agents::thread::pi::posture::{self as pi_posture, PiPosture};
-use oximux_agents::thread::FeatureValue;
+use trex_agents::thread::pi::posture::{self as pi_posture, PiPosture};
+use trex_agents::thread::FeatureValue;
 
 use super::AgentChatView;
 use crate::persisted_chat::{PersistedChatTranscript, PersistedChoices};
@@ -59,7 +59,7 @@ pub struct RestoredPosture {
     /// Pi's tool allowlist + context-file choice.
     pub pi: Option<PiPosture>,
     /// omp's approval mode (`--approval-mode`).
-    pub omp: Option<oximux_agents::thread::omp::posture::OmpPosture>,
+    pub omp: Option<trex_agents::thread::omp::posture::OmpPosture>,
     /// Claude's fast-mode toggle. `None` = never touched.
     pub claude_fast_mode: Option<bool>,
 }
@@ -89,13 +89,13 @@ pub(super) fn seed_posture_feature_values(
     // mode on the restore's respawn.
     if let Some(omp) = posture.omp {
         map.insert(
-            oximux_agents::thread::omp::posture::FEATURE_APPROVALS.to_string(),
+            trex_agents::thread::omp::posture::FEATURE_APPROVALS.to_string(),
             FeatureValue::Choice(omp.wire().to_string()),
         );
     }
     if let Some(on) = posture.claude_fast_mode {
         map.insert(
-            oximux_agents::thread::FEATURE_FAST_MODE.to_string(),
+            trex_agents::thread::FEATURE_FAST_MODE.to_string(),
             FeatureValue::Bool(on),
         );
     }
@@ -247,10 +247,10 @@ mod tests {
     use std::sync::Arc;
 
     use gpui::TestAppContext;
-    use oximux_agents::thread::{
+    use trex_agents::thread::{
         ChatBackend, SessionMeta, StubConnection, ThreadEntry, ThreadEvent, Transport,
     };
-    use oximux_settings::{Density, Theme, Typography};
+    use trex_settings::{Density, Theme, Typography};
 
     use super::super::{AgentChatView, RestoredPosture, ThinkingLevel};
 

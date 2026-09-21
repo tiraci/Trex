@@ -1,4 +1,4 @@
-// End-to-end: boot the relay in-process, drive it from a raw local-socket
+﻿// End-to-end: boot the relay in-process, drive it from a raw local-socket
 // client, and verify the survival/replay contract that is the entire reason
 // this daemon exists.
 //
@@ -12,10 +12,10 @@ use std::time::Duration;
 use interprocess::local_socket::tokio::Stream;
 use interprocess::local_socket::tokio::prelude::*;
 use interprocess::local_socket::{GenericFilePath, GenericNamespaced, ToFsName, ToNsName};
-use oximux_shell_env::test_support::{echo_program, echo_two_vars, lines, test_cwd, test_shell};
-use oximux_relay::codec::{read_frame, write_frame};
-use oximux_relay::{ServerConfig, run_server};
-use oximux_relay_proto::{
+use trex_shell_env::test_support::{echo_program, echo_two_vars, lines, test_cwd, test_shell};
+use trex_relay::codec::{read_frame, write_frame};
+use trex_relay::{ServerConfig, run_server};
+use trex_relay_proto::{
     Endpoint, Frame, Hello, HelloProof, NONCE_LEN, Notification, PROTOCOL_VERSION, Request,
     Response, client_proof, endpoint_for, proofs_match, server_proof,
 };
@@ -67,7 +67,7 @@ fn init_daemon_tracing() {
     static ONCE: Once = Once::new();
     ONCE.call_once(|| {
         let filter = tracing_subscriber::EnvFilter::try_from_default_env()
-            .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("oximux_relay=debug"));
+            .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("trex_relay=debug"));
         let _ = tracing_subscriber::fmt()
             .with_env_filter(filter)
             .with_writer(std::io::stderr)
@@ -482,7 +482,7 @@ async fn attach_replays_buffered_output_then_streams_live() {
 
 #[tokio::test]
 async fn notify_fans_out_attention_to_subscribers() {
-    // `oximux notify` → Request::Notify → the daemon fans a
+    // `TREX notify` → Request::Notify → the daemon fans a
     // Notification::Attention to every subscriber of that PTY. The
     // spawning session is auto-attached, so client A is a subscriber.
     let relay = boot_relay().await;
@@ -553,7 +553,7 @@ async fn notify_fans_out_attention_to_subscribers() {
 
 #[tokio::test]
 async fn agent_status_fans_out_osc_output_to_subscribers() {
-    // `oximux agent-status` → Request::AgentStatus → the daemon wraps the
+    // `TREX agent-status` → Request::AgentStatus → the daemon wraps the
     // opaque payload as an OSC-9999 sequence and fans it out on the PTY's
     // existing Output channel, where the app's scanner decodes it. The
     // spawning session is auto-attached, so client A is a subscriber.
@@ -660,7 +660,7 @@ async fn bad_token_rejected_with_auth_failed() {
         Frame::Response {
             response:
                 Response::Err {
-                    code: oximux_relay_proto::ErrCode::AuthFailed,
+                    code: trex_relay_proto::ErrCode::AuthFailed,
                     ..
                 },
             ..
@@ -739,7 +739,7 @@ async fn version_mismatch_is_rejected() {
         Frame::Response {
             response:
                 Response::Err {
-                    code: oximux_relay_proto::ErrCode::VersionMismatch,
+                    code: trex_relay_proto::ErrCode::VersionMismatch,
                     ..
                 },
             ..
@@ -811,7 +811,7 @@ async fn shutdown_refused_while_ptys_alive() {
     let resp = req(&mut s, &mut buf, 3, Request::Shutdown).await;
     match resp {
         Response::Err {
-            code: oximux_relay_proto::ErrCode::Internal,
+            code: trex_relay_proto::ErrCode::Internal,
             ..
         } => {}
         other => panic!("expected Internal err refusing shutdown, got {other:?}"),
@@ -974,7 +974,7 @@ async fn multi_attach_min_size_and_detach_grows_back() {
         other => panic!("spawn: {other:?}"),
     };
 
-    let effective = |descs: Vec<oximux_relay_proto::PtyDescriptor>| -> (u16, u16) {
+    let effective = |descs: Vec<trex_relay_proto::PtyDescriptor>| -> (u16, u16) {
         let d = descs
             .into_iter()
             .find(|d| d.pty_id == pty_id)
@@ -1095,7 +1095,7 @@ async fn unclean_disconnect_releases_attachment_and_grows_back() {
         other => panic!("spawn: {other:?}"),
     };
 
-    let effective = |descs: Vec<oximux_relay_proto::PtyDescriptor>| -> (u16, u16) {
+    let effective = |descs: Vec<trex_relay_proto::PtyDescriptor>| -> (u16, u16) {
         let d = descs
             .into_iter()
             .find(|d| d.pty_id == pty_id)
@@ -1415,8 +1415,8 @@ async fn spawn_env_reaches_child_process() {
             shell: Some(test_shell()),
             args: Vec::new(),
             env: vec![
-                ("OXIMUX_WORKSPACE_ID".into(), "WS_ENV_MARKER_42".into()),
-                ("OXIMUX_SURFACE_ID".into(), "SURF_ENV_MARKER_7".into()),
+                ("TREX_WORKSPACE_ID".into(), "WS_ENV_MARKER_42".into()),
+                ("TREX_SURFACE_ID".into(), "SURF_ENV_MARKER_7".into()),
             ],
         },
     )
@@ -1433,7 +1433,7 @@ async fn spawn_env_reaches_child_process() {
         Request::Write {
             pty_id: pty_id.clone(),
             bytes: lines(&[
-                &echo_two_vars("OXIMUX_WORKSPACE_ID", "OXIMUX_SURFACE_ID"),
+                &echo_two_vars("TREX_WORKSPACE_ID", "TREX_SURFACE_ID"),
                 "exit",
             ]),
         },
@@ -1627,7 +1627,7 @@ async fn replay_of_an_unknown_pty_is_an_error() {
         matches!(
             resp,
             Response::Err {
-                code: oximux_relay_proto::ErrCode::PtyNotFound,
+                code: trex_relay_proto::ErrCode::PtyNotFound,
                 ..
             }
         ),

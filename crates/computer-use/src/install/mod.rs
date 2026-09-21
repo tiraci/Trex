@@ -1,4 +1,4 @@
-//! One-click driver install: download → gate → crash-safe swap.
+﻿//! One-click driver install: download → gate → crash-safe swap.
 //!
 //! One pipeline, every platform. The steps that differ — which archive, how to
 //! unpack it, what the gate is, how placement swaps — live in [`platform`],
@@ -135,7 +135,7 @@ pub enum InstallError {
     /// Named for what it means rather than for one platform's payload: the
     /// macOS archive is missing `CuaDriver.app`, the Windows one is missing
     /// `cua-driver.exe`, and a message naming a `.app` inside a `.zip` reads as
-    /// a bug in OxiMux rather than as a broken download.
+    /// a bug in TREX rather than as a broken download.
     #[error("the release archive did not contain the driver ({listing})")]
     ArchiveIncomplete { listing: String },
 
@@ -336,7 +336,7 @@ mod tests {
     /// The anchor a test passes when the install never reaches the gate.
     #[cfg(windows)]
     fn test_anchor() -> Anchor {
-        crate::trust::TrustStore::at(std::env::temp_dir().join("oximux-unreached-pins.json"))
+        crate::trust::TrustStore::at(std::env::temp_dir().join("trex-unreached-pins.json"))
     }
 
     #[cfg(not(windows))]

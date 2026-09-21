@@ -1,6 +1,6 @@
-//! Terminal color → GPUI `Hsla` resolver.
+﻿//! Terminal color → GPUI `Hsla` resolver.
 //!
-//! Sits between `oximux_pty::CellColor` and the charcoal theme. The 16 named
+//! Sits between `trex_pty::CellColor` and the charcoal theme. The 16 named
 //! colors are picked to read well on the `BG_BASE` charcoal canvas — neither
 //! the loud VGA palette nor a desaturated theme like Solarized. Indexed
 //! colors 16..=255 follow xterm: 16..=231 is a 6×6×6 RGB cube, 232..=255 is
@@ -12,8 +12,8 @@
 //! needs to know about either palette.
 
 use gpui::{Hsla, rgb};
-use oximux_pty::{CellColor, NamedColor16};
-use oximux_settings::Theme;
+use trex_pty::{CellColor, NamedColor16};
+use trex_settings::Theme;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ColorRole {

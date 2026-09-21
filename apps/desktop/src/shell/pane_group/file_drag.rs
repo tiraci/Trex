@@ -1,4 +1,4 @@
-//! Drag plumbing for file rows dragged out of the Files-tab sidebar.
+﻿//! Drag plumbing for file rows dragged out of the Files-tab sidebar.
 //!
 //! Mirrors `tab_drag.rs` but carries a filesystem path instead of a
 //! `(group, tab)` reference. The sidebar row's `.on_drag` hands a
@@ -9,7 +9,7 @@
 
 use std::path::PathBuf;
 
-use oximux_settings::Density;
+use trex_settings::Density;
 
 use gpui::{
     Context, IntoElement, ParentElement, Render, SharedString, Styled, Window, div, px, rgb,
@@ -48,9 +48,9 @@ impl Render for FilePathDragPreview {
         // Resolved per drag rather than cached -- see `TabDragPreview`. The
         // measures are the tab chip's so a file dragged toward the strip
         // previews at the size of the chip it would become.
-        let appearance = oximux_settings::appearance::active(cx);
+        let appearance = trex_settings::appearance::active(cx);
         let density = Density::for_appearance(appearance);
-        let typography = oximux_settings::appearance::typography(cx);
+        let typography = trex_settings::appearance::typography(cx);
         div()
             .flex()
             .items_center()

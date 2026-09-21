@@ -1,6 +1,6 @@
-//! Scope-enum behavior: defaults to `All`, only `All` shows the graph.
+﻿//! Scope-enum behavior: defaults to `All`, only `All` shows the graph.
 
-use oximux_app::shell::source_control::scope::SourceControlScope;
+use trex_app::shell::source_control::scope::SourceControlScope;
 
 #[test]
 fn default_is_all() {

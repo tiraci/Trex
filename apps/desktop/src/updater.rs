@@ -1,4 +1,4 @@
-//! App-side wiring for the auto-updater: the shared status global, the
+﻿//! App-side wiring for the auto-updater: the shared status global, the
 //! periodic check, and the quit-time swap.
 //!
 //! # Why the swap waits for quit
@@ -13,7 +13,7 @@
 //! swap happens on the way out.
 //!
 //! Windows has a second, blunter reason: it refuses to overwrite a mapped
-//! image at all, so `oximux.exe` and every DLL beside it simply cannot be
+//! image at all, so `TREX.exe` and every DLL beside it simply cannot be
 //! replaced while this process holds them.
 //!
 //! The user is never restarted. Ignoring the pill costs nothing: the next
@@ -24,7 +24,7 @@
 //! macOS swaps a `.app` bundle verified against a codesign pin; Windows swaps a
 //! directory of files verified against a minisign-signed manifest. Everything
 //! *here* — one status global, one 6-hour ticker, one quit hook — is the same
-//! on both, and reads that way because [`oximux_auto_update`] presents the
+//! on both, and reads that way because [`trex_auto_update`] presents the
 //! three verbs that differ behind one signature each. A platform branch in this
 //! file would be a branch in the wiring, which is not where the platforms
 //! actually differ.
@@ -35,9 +35,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use gpui::{App, AsyncApp, Global};
-use oximux_auto_update::staging::SwapOutcome;
-use oximux_auto_update::{CheckTrigger, UpdateStatus, UpdaterConfig, Version};
-use oximux_settings::AutoUpdateSettings;
+use trex_auto_update::staging::SwapOutcome;
+use trex_auto_update::{CheckTrigger, UpdateStatus, UpdaterConfig, Version};
+use trex_settings::AutoUpdateSettings;
 
 const MANIFEST_FILE: &str = "pending-update.json";
 /// Sentinel written across the quit-time swap. Present at boot means the swap
@@ -78,7 +78,7 @@ impl UpdaterState {
     pub fn relaunch_target(&self) -> Option<PathBuf> {
         self.config
             .as_ref()
-            .map(|c| oximux_auto_update::relaunch_target(&c.app))
+            .map(|c| trex_auto_update::relaunch_target(&c.app))
     }
 }
 
@@ -104,11 +104,11 @@ fn current_version() -> Version {
 
 /// Resolve what this install is. Runs a write probe (and, on macOS, a
 /// `codesign` subprocess), so it must not run on the GPUI thread.
-fn build_config() -> Result<UpdaterConfig, oximux_auto_update::UnsupportedReason> {
-    use oximux_auto_update::UnsupportedReason;
+fn build_config() -> Result<UpdaterConfig, trex_auto_update::UnsupportedReason> {
+    use trex_auto_update::UnsupportedReason;
 
     let exe = std::env::current_exe().map_err(|_| UnsupportedReason::NotABundle)?;
-    let app = oximux_auto_update::eligibility(&exe)?;
+    let app = trex_auto_update::eligibility(&exe)?;
     let (Some(cache_dir), Some(manifest_path)) = (cache_dir(), manifest_path()) else {
         return Err(UnsupportedReason::RootNotWritable);
     };
@@ -162,7 +162,7 @@ pub fn install(cx: &mut App) {
         let interrupted = cx
             .background_executor()
             .spawn(async move {
-                oximux_auto_update::boot_housekeeping(&sweep, sentinel_path().as_deref())
+                trex_auto_update::boot_housekeeping(&sweep, sentinel_path().as_deref())
             })
             .await;
         if let Some(status) = interrupted {
@@ -251,7 +251,7 @@ async fn run_check(config: UpdaterConfig, trigger: CheckTrigger, cx: &mut AsyncA
         .spawn({
             let config = config.clone();
             let cancel = cancel.clone();
-            async move { oximux_auto_update::spawn_check(config, trigger, cancel) }
+            async move { trex_auto_update::spawn_check(config, trigger, cancel) }
         })
         .await;
 
@@ -323,7 +323,7 @@ pub fn apply_pending_at_quit(cx: &mut App, from_signal: bool) -> bool {
     else {
         return false;
     };
-    oximux_auto_update::apply_pending_update(&config, sentinel_path().as_deref())
+    trex_auto_update::apply_pending_update(&config, sentinel_path().as_deref())
         == SwapOutcome::Applied
 }
 

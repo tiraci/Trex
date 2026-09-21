@@ -1,7 +1,7 @@
-//! Presence of an agent CLI in a *plain* terminal, read from its process tree.
+﻿//! Presence of an agent CLI in a *plain* terminal, read from its process tree.
 //!
 //! The other two ambient signals are things an agent says. The OSC-9999
-//! sideband exists only where OxiMux installed hooks, which is Claude Code
+//! sideband exists only where TREX installed hooks, which is Claude Code
 //! alone; the window title has to be written by the CLI, and several — Codex
 //! among them — leave it alone unless the user opts in. Both are also
 //! *events*, so they say nothing about an agent sitting idle at its prompt.
@@ -60,7 +60,7 @@ impl AgentProcessScan {
         let root = self
             .root
             .or_else(resolve_root)
-            .filter(|&pid| oximux_proc_tree::process(pid).is_some());
+            .filter(|&pid| trex_proc_tree::process(pid).is_some());
         self.root = root;
         self.label = root.and_then(detect);
     }
@@ -97,12 +97,12 @@ impl AgentProcessScan {
 /// Not looking must not be able to masquerade as nothing to look at.
 fn detect(root: u32) -> Option<&'static str> {
     // `descendants` walks breadth-first, so the first match is the shallowest.
-    oximux_proc_tree::process(root)
+    trex_proc_tree::process(root)
         .into_iter()
-        .chain(oximux_proc_tree::descendants(root))
+        .chain(trex_proc_tree::descendants(root))
         .find_map(|proc| {
-            let argv = oximux_proc_tree::argv_of_pid(proc.pid);
-            oximux_agents::agent_label_for_process(&proc.name, argv.as_deref())
+            let argv = trex_proc_tree::argv_of_pid(proc.pid);
+            trex_agents::agent_label_for_process(&proc.name, argv.as_deref())
         })
 }
 

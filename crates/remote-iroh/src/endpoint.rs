@@ -1,4 +1,4 @@
-//! Binding iroh endpoints and accepting inbound connections for the host side.
+﻿//! Binding iroh endpoints and accepting inbound connections for the host side.
 //!
 //! Thin wrappers over the iroh 1.0 endpoint builder that pin our ALPN and hand
 //! back a framed [`IrohTransport`] per accepted connection — the dispatcher then
@@ -8,7 +8,7 @@ use iroh::endpoint::presets;
 use iroh::Endpoint;
 
 use crate::transport::IrohTransport;
-use crate::OXIMUX_ALPN;
+use crate::TREX_ALPN;
 
 /// Bind a **client** endpoint (n0 relays + pkarr discovery, no ALPN needed to
 /// dial). Reuse the returned endpoint across reconnects via [`IrohConnector`].
@@ -26,7 +26,7 @@ pub async fn bind_client() -> anyhow::Result<Endpoint> {
 /// a re-scan of the pairing code on every restart. `None` (tests) keeps the
 /// throwaway-identity behavior.
 pub async fn bind_host(secret: Option<[u8; 32]>) -> anyhow::Result<Endpoint> {
-    let mut builder = Endpoint::builder(presets::N0).alpns(vec![OXIMUX_ALPN.to_vec()]);
+    let mut builder = Endpoint::builder(presets::N0).alpns(vec![TREX_ALPN.to_vec()]);
     if let Some(secret) = secret {
         builder = builder.secret_key(iroh::SecretKey::from_bytes(&secret));
     }

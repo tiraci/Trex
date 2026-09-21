@@ -1,4 +1,4 @@
-//! `UsageProbe` — blocking sampler producing one [`ProviderUsage`] per
+﻿//! `UsageProbe` — blocking sampler producing one [`ProviderUsage`] per
 //! configured account.
 //!
 //! Each provider publishes its usage somewhere different, so each is a
@@ -238,7 +238,7 @@ impl SourceSlot {
     }
 }
 
-/// The shipped sampler: every provider OxiMux knows how to read, in a stable
+/// The shipped sampler: every provider TREX knows how to read, in a stable
 /// display order.
 pub struct SessionLogUsageProbe {
     slots: Vec<SourceSlot>,

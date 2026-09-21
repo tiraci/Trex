@@ -1,4 +1,4 @@
-//! Workspace window factory — constructs, options, registers, and opens new
+﻿//! Workspace window factory — constructs, options, registers, and opens new
 //! workspace windows.
 //!
 //! Separated from `main.rs` so the cross-window tear-off path in
@@ -33,7 +33,7 @@ pub fn workspace_window_options(cx: &mut App, cascade: usize) -> WindowOptions {
         window_bounds: Some(WindowBounds::Windowed(bounds)),
         window_min_size: Some(size(px(720.0), px(480.0))),
         titlebar: Some(TitlebarOptions {
-            title: Some("OxiMux".into()),
+            title: Some("TREX".into()),
             appears_transparent: true,
             traffic_light_position: Some(point(px(12.), px(8.))),
         }),

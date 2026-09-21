@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 #
 # Fetch a pinned, checksum-verified ripgrep binary for bundling into
-# OxiMux.app. The packaged app spawns `rg` for the search panel and Quick
+# trex.app. The packaged app spawns `rg` for the search panel and Quick
 # Open; bundling it means a fresh machine needs no manual install.
 #
 # ripgrep is MIT/Unlicense dual-licensed — redistribution inside the app
@@ -10,8 +10,8 @@
 # Output: target/bundle-tools/rg (+ rg.version stamp)
 #
 # Usage:
-#   ./scripts/fetch-ripgrep.sh                 # arch(es) from OXIMUX_RG_ARCHS or host
-#   OXIMUX_RG_ARCHS="aarch64 x86_64" ./scripts/fetch-ripgrep.sh   # universal (lipo)
+#   ./scripts/fetch-ripgrep.sh                 # arch(es) from TREX_RG_ARCHS or host
+#   TREX_RG_ARCHS="aarch64 x86_64" ./scripts/fetch-ripgrep.sh   # universal (lipo)
 #
 # The app is built native-arch (plain `cargo build`), so the default is the
 # host arch only. Pass both archs solely for a universal app build.
@@ -42,11 +42,11 @@ host_arch() {
     esac
 }
 
-ARCHS="${OXIMUX_RG_ARCHS:-$(host_arch)}"
+ARCHS="${TREX_RG_ARCHS:-$(host_arch)}"
 if [[ -z "${ARCHS// /}" ]]; then
     # An explicitly-empty override would otherwise reach lipo with a zero-length
     # array, which macOS bash 3.2 rejects under `set -u`.
-    echo "error: OXIMUX_RG_ARCHS is set but empty" >&2
+    echo "error: TREX_RG_ARCHS is set but empty" >&2
     exit 2
 fi
 WANT="ripgrep ${RG_VERSION} [${ARCHS}]"
@@ -57,7 +57,7 @@ if [[ -x "$OUT_BIN" && -f "$STAMP" && "$(cat "$STAMP")" == "$WANT" ]]; then
 fi
 
 mkdir -p "$OUT_DIR"
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/oximux-rg.XXXXXX")"
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/trex-rg.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
 EXTRACTED=()

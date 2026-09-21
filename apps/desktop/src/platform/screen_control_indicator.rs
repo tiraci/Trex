@@ -1,8 +1,8 @@
-//! The menu-bar dot that appears while an agent can drive the screen.
+﻿//! The menu-bar dot that appears while an agent can drive the screen.
 //!
 //! # Why the menu bar and not a panel in the window
 //!
-//! The one moment this indicator has to work is the moment OxiMux is *not* what
+//! The one moment this indicator has to work is the moment TREX is *not* what
 //! the user is looking at — an agent driving Safari means Safari is frontmost.
 //! Anything drawn inside our own window is invisible exactly then, which makes
 //! it an indicator for the case that did not need one.
@@ -24,7 +24,7 @@
 //! second, slower path to the same thing that only works when the user can find
 //! the mouse.
 
-use oximux_computer_use::Driving;
+use trex_computer_use::Driving;
 
 /// The line that has to survive being the only thing the user reads.
 const STOP_HINT: &str = "Press Esc to stop";
@@ -62,7 +62,7 @@ impl EscapeState {
         match self {
             EscapeState::Armed => STOP_HINT,
             EscapeState::NotPermitted => {
-                "Esc cannot stop this — allow OxiMux under Privacy & Security › Input Monitoring"
+                "Esc cannot stop this — allow TREX under Privacy & Security › Input Monitoring"
             }
             // Names the cause rather than a fix, because the fix depends on who
             // is holding it: closing a password field, or locking and
@@ -215,7 +215,7 @@ mod imp {
 /// # Why the tray and not a window of our own
 ///
 /// Same argument as the menu bar. The moment this has to work is the moment
-/// OxiMux is not what the user is looking at, so anything drawn in our own
+/// TREX is not what the user is looking at, so anything drawn in our own
 /// window is invisible exactly then. The notification area is the surface
 /// Windows itself uses for background-activity signals, and it survives another
 /// app being maximised.
@@ -407,7 +407,7 @@ pub use imp::ScreenControlIndicator;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_computer_use::DrivingSession;
+    use trex_computer_use::DrivingSession;
 
     fn driving(sessions: &[(&str, &[&str])]) -> Driving {
         Driving {

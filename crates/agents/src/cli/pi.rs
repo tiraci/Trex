@@ -1,4 +1,4 @@
-//! Pi adapter (`pi` CLI).
+﻿//! Pi adapter (`pi` CLI).
 //!
 //! Spawns the `pi` interactive TUI in a PTY. This is the *terminal* face of pi;
 //! its structured-chat face is `pi --mode rpc`, which lives in
@@ -104,7 +104,7 @@ impl CliAgentAdapter for PiAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::{AgentAdapter, SessionResumption};
+    use trex_core::{AgentAdapter, SessionResumption};
 
     fn cfg() -> AgentSessionConfig {
         AgentSessionConfig {

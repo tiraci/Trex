@@ -1,11 +1,11 @@
-import * as Device from 'expo-device';
+﻿import * as Device from 'expo-device';
 import {
   ConnState_Tags,
   MobileClient,
   type ConnState,
   type ProjectSummary,
   type SessionSummary,
-} from 'oximux-core';
+} from 'trex-core';
 import { create } from 'zustand';
 
 import { toArrayBuffer } from './base64';

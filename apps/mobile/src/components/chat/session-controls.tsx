@@ -1,5 +1,5 @@
-import { ChevronDown, Shield, Sparkles } from 'lucide-react-native';
-import type { Choice } from 'oximux-core';
+﻿import { ChevronDown, Shield, Sparkles } from 'lucide-react-native';
+import type { Choice } from 'trex-core';
 import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 

@@ -1,13 +1,13 @@
-//! Throwaway spike probe for the Claude Code `stream-json` headless transport.
+﻿//! Throwaway spike probe for the Claude Code `stream-json` headless transport.
 //!
 //! Drives a real `claude` subprocess in the persistent streaming mode used by the
 //! future Agent Chat UI, and prints what a parser must handle: the event vocabulary,
 //! streaming deltas, tool calls, and the interactive permission control-protocol.
 //!
 //! This is NOT shipped code — it is a reference harness captured during Phase 1 of
-//! plans/260701-0314-oximux-agent-chat-ui-claude. Run against a THROWAWAY repo:
+//! plans/260701-0314-trex-agent-chat-ui-claude. Run against a THROWAWAY repo:
 //!
-//!   cargo run -p oximux-agents --example stream_json_probe -- /tmp/scratch-repo \
+//!   cargo run -p trex-agents --example stream_json_probe -- /tmp/scratch-repo \
 //!       "Use the Edit tool to change 'a' to 'b' in notes.txt, then confirm."
 //!
 //! Uses std::process (no tokio feature coupling) so it compiles regardless of the

@@ -1,10 +1,10 @@
-//! Per-shell context environment.
+﻿//! Per-shell context environment.
 //!
 //! Every terminal child gets a small set of identity variables so agents
 //! and scripts running inside a pane can tell *where* they are: which
 //! workspace, which split surface, which terminal tab, and how to reach
-//! the daemon socket. These complement `OXIMUX_PTY_ID` (injected at the
-//! daemon spawn site) — together they let a tool like `oximux notify`
+//! the daemon socket. These complement `trex_PTY_ID` (injected at the
+//! daemon spawn site) — together they let a tool like `TREX notify`
 //! address the exact pane it runs in.
 //!
 //! The ids are minted by the app at spawn time and threaded through
@@ -17,7 +17,7 @@ use std::sync::OnceLock;
 use uuid::Uuid;
 
 /// Daemon socket path, captured once at boot when the relay supervisor
-/// comes up. Injected as `OXIMUX_SOCKET_PATH` so external tools can dial
+/// comes up. Injected as `trex_SOCKET_PATH` so external tools can dial
 /// the daemon without rediscovering the well-known path. Unset when the
 /// relay never started (in-process fallback) — the var is then omitted.
 static RELAY_SOCKET_PATH: OnceLock<String> = OnceLock::new();
@@ -83,26 +83,26 @@ impl SurfaceIds {
         }
     }
 
-    /// The `OXIMUX_*` env pairs for this triple (+ socket path when set).
+    /// The `trex_*` env pairs for this triple (+ socket path when set).
     pub fn env(&self) -> Vec<(String, String)> {
         context_env(&self.workspace_id, &self.surface_id, &self.tab_id)
     }
 }
 
-/// Build the `OXIMUX_*` context env pairs for a terminal child.
+/// Build the `trex_*` context env pairs for a terminal child.
 ///
 /// `workspace_id` is the project root path; `surface_id` names the split
-/// pane; `tab_id` names the individual terminal. `OXIMUX_SOCKET_PATH` is
-/// appended when the relay is up. `OXIMUX_PTY_ID` is NOT set here — the
+/// pane; `tab_id` names the individual terminal. `trex_SOCKET_PATH` is
+/// appended when the relay is up. `trex_PTY_ID` is NOT set here — the
 /// daemon injects it at the spawn site since only the daemon mints it.
 pub fn context_env(workspace_id: &str, surface_id: &str, tab_id: &str) -> Vec<(String, String)> {
     let mut env = vec![
-        ("OXIMUX_WORKSPACE_ID".to_string(), workspace_id.to_string()),
-        ("OXIMUX_SURFACE_ID".to_string(), surface_id.to_string()),
-        ("OXIMUX_TAB_ID".to_string(), tab_id.to_string()),
+        ("TREX_WORKSPACE_ID".to_string(), workspace_id.to_string()),
+        ("TREX_SURFACE_ID".to_string(), surface_id.to_string()),
+        ("TREX_TAB_ID".to_string(), tab_id.to_string()),
     ];
     if let Some(socket) = relay_socket_path() {
-        env.push(("OXIMUX_SOCKET_PATH".to_string(), socket.to_string()));
+        env.push(("TREX_SOCKET_PATH".to_string(), socket.to_string()));
     }
     env
 }
@@ -114,9 +114,9 @@ mod tests {
     #[test]
     fn context_env_carries_the_three_ids() {
         let env = context_env("/p/root", "surf-1", "tab-1");
-        assert!(env.contains(&("OXIMUX_WORKSPACE_ID".into(), "/p/root".into())));
-        assert!(env.contains(&("OXIMUX_SURFACE_ID".into(), "surf-1".into())));
-        assert!(env.contains(&("OXIMUX_TAB_ID".into(), "tab-1".into())));
+        assert!(env.contains(&("TREX_WORKSPACE_ID".into(), "/p/root".into())));
+        assert!(env.contains(&("TREX_SURFACE_ID".into(), "surf-1".into())));
+        assert!(env.contains(&("TREX_TAB_ID".into(), "tab-1".into())));
     }
 
     #[test]
@@ -124,9 +124,9 @@ mod tests {
         // OnceLock is process-global; set it (idempotent) then assert the
         // pair shows up. Other tests in this binary may have set it first,
         // so only assert presence of SOME socket value, not a specific one.
-        set_relay_socket_path("/tmp/oximux-test.sock");
+        set_relay_socket_path("/tmp/trex-test.sock");
         let env = context_env("/w", "s", "t");
-        assert!(env.iter().any(|(k, _)| k == "OXIMUX_SOCKET_PATH"));
+        assert!(env.iter().any(|(k, _)| k == "TREX_SOCKET_PATH"));
     }
 
     #[test]

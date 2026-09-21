@@ -1,4 +1,4 @@
-//! When a schedule fires next.
+﻿//! When a schedule fires next.
 //!
 //! **Presets first, cron as the escape hatch.** The three preset variants came
 //! first and stay first: schedules are created on a phone, where `0 9 * * 1-5`
@@ -185,7 +185,7 @@ impl Recurrence {
     /// That divergence is **accepted, not overlooked**. Someone writing a cron
     /// expression is asking for cron's semantics, and cron's answer to a
     /// skipped hour is the one every other cron implementation gives; making
-    /// OxiMux the exception would surprise the people most likely to use this
+    /// TREX the exception would surprise the people most likely to use this
     /// variant. It costs one early fire, once a year, on one date.
     ///
     /// **Not pinned by a test, deliberately — do not add one.** Asserting this

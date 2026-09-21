@@ -1,4 +1,4 @@
-//! ConfirmDialog — reusable confirm modal.
+﻿//! ConfirmDialog — reusable confirm modal.
 //!
 //! One shape: title, body, a Cancel button and a destructive Confirm button
 //! that fires on the first click. Destructive weight is carried by the copy
@@ -20,7 +20,7 @@ use gpui_component::{
     Disableable, Sizable,
     button::{Button, ButtonVariants},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 use std::rc::Rc;
 
 /// Boxed callback fired when the user resolves the dialog — confirm, the
@@ -190,7 +190,7 @@ impl Focusable for ConfirmDialog {
 
 impl Render for ConfirmDialog {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = &self.typography;

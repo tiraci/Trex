@@ -1,4 +1,4 @@
-//! The chat's "Add issue or pull request" picker: a modal list of the repo's
+﻿//! The chat's "Add issue or pull request" picker: a modal list of the repo's
 //! open issues and pull requests, opened from the composer's attach menu, whose
 //! chosen item lands as a `@issue` / `@pull-request` context chip.
 //!
@@ -24,7 +24,7 @@ use gpui::{
     StatefulInteractiveElement, Styled, Window,
 };
 use gpui_component::input::{Input, InputEvent, InputState, MoveDown, MoveUp};
-use oximux_core::ForgeRefKind;
+use trex_core::ForgeRefKind;
 
 use crate::shell::forge::{Forge, ForgeKind, ForgeListFilter, ForgeProvider as _, ItemDetail};
 
@@ -582,7 +582,7 @@ mod tests {
     }
 
     fn row(kind: ForgeRefKind, number: u64, title: &str) -> ForgeRow {
-        ForgeRow { kind, number, title: title.to_string(), author: "nhtera".into() }
+        ForgeRow { kind, number, title: title.to_string(), author: "tiraci".into() }
     }
 
     fn sample() -> Vec<ForgeRow> {

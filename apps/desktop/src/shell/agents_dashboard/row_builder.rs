@@ -1,4 +1,4 @@
-//! Row assembly for the agents dashboard.
+﻿//! Row assembly for the agents dashboard.
 //!
 //! `build_agent_rows` turns the rail's per-session `WorkspaceAgentList` into a
 //! sorted `Vec<AgentRow>` (one row per agent session), reusing the rail's
@@ -8,7 +8,7 @@
 
 use std::collections::HashMap;
 
-use oximux_core::{Project, Workspace};
+use trex_core::{Project, Workspace};
 
 use crate::shell::agent_presentation::adapter_icon_path;
 use crate::shell::agents_dashboard::model::{AgentRow, sort_agent_rows};
@@ -93,7 +93,7 @@ pub fn build_agent_rows(
 mod tests {
     use super::*;
     use crate::shell::left_rail::{RailAgentRow, RailAgentTarget};
-    use oximux_core::{AgentSnapshot, AgentStatus, SidebandDetail};
+    use trex_core::{AgentSnapshot, AgentStatus, SidebandDetail};
     use tokio::sync::watch;
 
     // Fixed clock: 4 days after every fixture's `started_at` default.
@@ -115,12 +115,12 @@ mod tests {
         Workspace {
             id: id.to_string(),
             project_id: project_id.to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: format!("ws-{id}"),
             slug: id.to_string(),
-            branch: format!("oximux/{id}"),
+            branch: format!("TREX/{id}"),
             worktree_path: format!("/tmp/{project_id}/{id}"),
             status: "active".to_string(),
             created_at: "2026-06-01T00:00:00Z".to_string(),
@@ -208,7 +208,7 @@ mod tests {
         let wa = list(vec![("a", vec![rail("s1", "a", "claude-code", AgentStatus::Idle)])]);
         let rows = build_agent_rows(&wa, &projects, &wbp, NOW);
         assert_eq!(rows[0].project_name, "MyProject");
-        assert_eq!(rows[0].workspace.branch, "oximux/a");
+        assert_eq!(rows[0].workspace.branch, "TREX/a");
         // No prompt captured → primary falls back to the adapter label.
         assert!(rows[0].primary.is_none());
         assert_eq!(rows[0].label, "Claude Code");

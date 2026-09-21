@@ -1,4 +1,4 @@
-//! "Committed on Branch" support — the files a branch has changed in its
+﻿//! "Committed on Branch" support — the files a branch has changed in its
 //! own (typically unpushed) commits, relative to where it diverged from
 //! its base.
 //!
@@ -18,7 +18,7 @@ use crate::numstat::diff_numstat_range;
 use crate::process::GitCmd;
 use crate::repository::Repository;
 use crate::error::Result;
-use oximux_core::{BranchCommittedFile, BranchRange, DiffStatus};
+use trex_core::{BranchCommittedFile, BranchRange, DiffStatus};
 #[cfg(unix)]
 use std::ffi::OsStr;
 #[cfg(unix)]

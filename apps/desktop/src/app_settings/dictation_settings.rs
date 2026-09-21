@@ -1,4 +1,4 @@
-//! App-side loader + live-reload watcher for [`DictationSettings`].
+﻿//! App-side loader + live-reload watcher for [`DictationSettings`].
 //!
 //! Reads `dictation.toml` from the app data dir on boot (default if absent),
 //! installs it as a GPUI global, and reloads on edit via the same debounced
@@ -16,7 +16,7 @@ use notify_debouncer_full::{
     DebounceEventResult, Debouncer, FileIdMap, new_debouncer,
     notify::{RecommendedWatcher, RecursiveMode},
 };
-use oximux_settings::DictationSettings;
+use trex_settings::DictationSettings;
 use tokio::sync::mpsc;
 
 const DEBOUNCE_MS: u64 = 250;

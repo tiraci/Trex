@@ -1,5 +1,5 @@
-[package]
-name = "oximux-cli"
+﻿[package]
+name = "trex-cli"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -7,27 +7,27 @@ license.workspace = true
 publish.workspace = true
 rust-version.workspace = true
 
-# The scriptable client of a running OxiMux host — desktop app today,
-# `oximux serve` later — over the owner-only local control socket, and (in a
+# The scriptable client of a running TREX host — desktop app today,
+# `TREX serve` later — over the owner-only local control socket, and (in a
 # later phase) any paired host over iroh.
 #
-# The cargo target is `oximux-cli` because `apps/desktop` already owns the bin
-# name `oximux`, and two packages producing one bin name make
+# The cargo target is `trex-cli` because `apps/desktop` already owns the bin
+# name `TREX`, and two packages producing one bin name make
 # `cargo build --workspace` overwrite whichever built second. The command
-# users type is still `oximux`: the installer places this binary on PATH under
+# users type is still `TREX`: the installer places this binary on PATH under
 # that name.
 
 [[bin]]
-name = "oximux-cli"
+name = "trex-cli"
 path = "src/main.rs"
 
 [dependencies]
-oximux-remote-local = { workspace = true }
-oximux-remote-proto = { workspace = true }
+trex-remote-local = { workspace = true }
+trex-remote-proto = { workspace = true }
 # The client half of remote control: `ClientSigner` (the enrollment identity)
 # and the `Connector` seam the iroh dial implements. The session/demux layer
 # above it is the phone's; every CLI verb drives one framed transport directly.
-oximux-remote-session = { workspace = true }
+trex-remote-session = { workspace = true }
 # Where the CLI keeps its own hosts file and per-host client keys — client-side
 # state, so deliberately not under any one host's data directory.
 dirs = { workspace = true }
@@ -35,41 +35,41 @@ rand = { workspace = true }
 sha2 = { workspace = true }
 # The ThreadEvent/ThreadEntry vocabulary the renderer folds — gpui-free by
 # construction (it is what remote-proto itself carries).
-oximux-agent-core = { workspace = true }
-# `oximux serve`: the same dispatcher/registry/relay/storage stack the desktop
+trex-agent-core = { workspace = true }
+# `TREX serve`: the same dispatcher/registry/relay/storage stack the desktop
 # hosts, minus every view. All gpui-free (asserted by the dep-tree test).
-oximux-remote-host = { workspace = true }
-oximux-agents = { workspace = true }
-oximux-storage = { workspace = true }
-# The worktree lifecycle, shared with the desktop so `oximux worktree create`
+trex-remote-host = { workspace = true }
+trex-agents = { workspace = true }
+trex-storage = { workspace = true }
+# The worktree lifecycle, shared with the desktop so `TREX worktree create`
 # on a headless host produces the row the sidebar lists.
-oximux-worktree-ops = { workspace = true }
+trex-worktree-ops = { workspace = true }
 # The domain vocabulary `worktree set --phase` validates against. Already in
 # the tree beneath storage; named here so the CLI and the host that refuses a
 # bad phase are reading the same list rather than two copies of it.
-oximux-core = { workspace = true }
+trex-core = { workspace = true }
 # The status-hook dialect table, installer and readback, shared with the
-# desktop so `oximux agent hooks` writes the same entries the app's toggle
+# desktop so `TREX agent hooks` writes the same entries the app's toggle
 # does — and so `agent-status` reads every agent's payload one way, not two.
-oximux-agent-hooks = { workspace = true }
+trex-agent-hooks = { workspace = true }
 # The data-dir role lock: serve contends for the schedule ticker exactly as
 # the desktop does, so one process per data dir fires schedules.
-oximux-single-instance = { workspace = true }
+trex-single-instance = { workspace = true }
 # The ticker's clock (fire instants are host-local wall time).
 chrono = { workspace = true }
-oximux-owner-only = { workspace = true }
-oximux-shell-env = { workspace = true }
+trex-owner-only = { workspace = true }
+trex-shell-env = { workspace = true }
 toml = { workspace = true }
-oximux-relay-supervisor = { workspace = true }
-oximux-relay-terminals = { workspace = true }
-oximux-relay-client = { workspace = true }
+trex-relay-supervisor = { workspace = true }
+trex-relay-terminals = { workspace = true }
+trex-relay-client = { workspace = true }
 # `agent-status`: the hook an agent CLI runs sends one `AgentStatus` request to
 # the relay, which frames it as OSC-9999 on that pane's output stream.
-oximux-relay-proto = { workspace = true }
+trex-relay-proto = { workspace = true }
 # `host` explicitly: the workspace declaration is default-features = false so
 # the mobile core can't inherit the accept loop; serve is exactly the consumer
 # that wants it.
-oximux-remote-iroh = { workspace = true, features = ["host"] }
+trex-remote-iroh = { workspace = true, features = ["host"] }
 clap = { workspace = true }
 clap_complete = { workspace = true }
 crossterm = { workspace = true }
@@ -78,6 +78,10 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 # `--output-schema`'s validator.
 jsonschema = { workspace = true }
+# Orchestration, accounts, diff annotation
+trex-orchestration = { workspace = true }
+trex-accounts = { workspace = true }
+trex-diff-annotate = { workspace = true }
 # Self-update. `minisign-verify` is the trust root: a zero-dependency verifier
 # for the maintainer signature over the release manifest, checked before any
 # checksum in that manifest is believed.
@@ -89,7 +93,7 @@ url = { workspace = true }
 # One definition of "is this an upgrade", shared with the desktop updater so
 # the two cannot drift on what counts as a downgrade. `Version` is the only
 # thing taken from it — if that grows, extract the type instead.
-oximux-auto-update = { workspace = true }
+trex-auto-update = { workspace = true }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 futures = { workspace = true }
@@ -102,18 +106,18 @@ qrcode = { workspace = true }
 # to be told one.
 uuid = { workspace = true }
 
-# The SCM service wrapper: `oximux serve --install-service` registers a real
+# The SCM service wrapper: `TREX serve --install-service` registers a real
 # Windows service whose STOP maps onto serve's drain, and the job object is
 # what guarantees agent children die with a hard-killed service.
 # The additive self-update gate: a Developer ID-signed installation may only
 # be replaced by a binary from the same team. Pointless off macOS, so it is
 # not carried there.
 [target.'cfg(target_os = "macos")'.dependencies]
-oximux-macos-trust = { workspace = true }
+trex-macos-trust = { workspace = true }
 
 [target.'cfg(windows)'.dependencies]
 windows-service = "0.8"
-oximux-job-object = { workspace = true }
+trex-job-object = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
@@ -122,7 +126,7 @@ tempfile = { workspace = true }
 # wire format `minisign -S` writes (prehashed Blake2b-512, plus the second
 # signature over the trusted comment) from the other side. It lives beside the
 # verifier it exercises, and is a feature so a shipped binary never carries it.
-oximux-auto-update = { workspace = true, features = ["testkit"] }
+trex-auto-update = { workspace = true, features = ["testkit"] }
 
 # The agent-spawn suite's Windows arm resolves Git-for-Windows' `sh` to run the
 # fake-agent fixture; unix reaches the same script through a shebang and needs
@@ -132,7 +136,7 @@ which = { workspace = true }
 
 # The recovery suite needs SIGTERM specifically — `Child::kill` is SIGKILL, and
 # the drain contract only runs on the polite signal. Same crate and feature
-# `oximux-pty` already uses for its own SIGTERM step, rather than adding a
+# `trex-pty` already uses for its own SIGTERM step, rather than adding a
 # second way to send one signal.
 [target.'cfg(unix)'.dev-dependencies]
 nix = { version = "0.25", features = ["signal"] }

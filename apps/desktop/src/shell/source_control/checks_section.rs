@@ -1,4 +1,4 @@
-//! Interactive CI-checks section for the Source Control panel.
+﻿//! Interactive CI-checks section for the Source Control panel.
 //!
 //! Promotes the compact one-line CI summary into a per-check list: each check
 //! shows its status glyph + name + short blurb, a failing check expands to a
@@ -16,7 +16,7 @@ use gpui::{
     AnyElement, InteractiveElement, IntoElement, MouseButton, ParentElement, StatefulInteractiveElement,
     Styled, WeakEntity, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SourceControlPanel;
 use super::ci_status::CheckSummary;

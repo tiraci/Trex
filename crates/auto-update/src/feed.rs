@@ -1,4 +1,4 @@
-//! The release feed: GitHub's `releases/latest` for this repo.
+﻿//! The release feed: GitHub's `releases/latest` for this repo.
 //!
 //! `latest` (not the release list) is deliberate: the endpoint excludes
 //! drafts and prereleases server-side, which matches the release workflow —
@@ -14,7 +14,7 @@ use crate::UpdateError;
 /// tag that disagrees with the workspace version, and uploads exactly this
 /// filename). Anything else in the release is ignored.
 fn expected_asset_name(version: Version) -> String {
-    format!("OxiMux-{version}-macos-arm64.dmg")
+    format!("trex-{version}-macos-arm64.dmg")
 }
 
 /// A release worth acting on: the parsed tag and its one pinned asset.
@@ -85,7 +85,7 @@ mod tests {
               "body": "## What's new\n- things",
               "assets": [
                 {{"name": "checksums.txt", "browser_download_url": "https://example.com/c", "size": 100}},
-                {{"name": "{asset_name}", "browser_download_url": "https://github.com/nhtera/OxiMux/releases/download/{tag}/{asset_name}", "size": 52428800}}
+                {{"name": "{asset_name}", "browser_download_url": "https://github.com/tiraci/Trex/releases/download/{tag}/{asset_name}", "size": 52428800}}
               ]
             }}"###
         )
@@ -94,25 +94,25 @@ mod tests {
     #[test]
     fn picks_the_exactly_named_dmg_for_the_tag() {
         let release =
-            parse_latest(&feed("v0.2.0", "OxiMux-0.2.0-macos-arm64.dmg")).expect("parses");
+            parse_latest(&feed("v0.2.0", "trex-0.2.0-macos-arm64.dmg")).expect("parses");
         assert_eq!(release.version, Version::new(0, 2, 0));
         assert_eq!(release.asset_size, 52_428_800);
         assert!(release.notes.contains("What's new"));
-        assert!(release.asset_url.ends_with("OxiMux-0.2.0-macos-arm64.dmg"));
+        assert!(release.asset_url.ends_with("trex-0.2.0-macos-arm64.dmg"));
     }
 
     #[test]
     fn a_tag_asset_name_mismatch_is_rejected() {
         // The rollback defense: a fabricated high tag pointing at an old
         // build's asset fails the exact-name pin before any download.
-        let err = parse_latest(&feed("v9.9.9", "OxiMux-0.1.0-macos-arm64.dmg"))
+        let err = parse_latest(&feed("v9.9.9", "trex-0.1.0-macos-arm64.dmg"))
             .expect_err("must reject");
         assert!(matches!(err, UpdateError::MissingAsset { .. }), "got {err:?}");
     }
 
     #[test]
     fn a_non_version_tag_is_rejected() {
-        let err = parse_latest(&feed("nightly", "OxiMux-nightly-macos-arm64.dmg"))
+        let err = parse_latest(&feed("nightly", "trex-nightly-macos-arm64.dmg"))
             .expect_err("must reject");
         assert!(matches!(err, UpdateError::Feed { .. }), "got {err:?}");
     }
@@ -120,7 +120,7 @@ mod tests {
     #[test]
     fn missing_notes_default_to_empty() {
         let body = r#"{"tag_name": "v0.2.0", "assets": [
-            {"name": "OxiMux-0.2.0-macos-arm64.dmg", "browser_download_url": "u", "size": 1}
+            {"name": "trex-0.2.0-macos-arm64.dmg", "browser_download_url": "u", "size": 1}
         ]}"#;
         assert_eq!(parse_latest(body).expect("parses").notes, "");
     }

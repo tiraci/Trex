@@ -1,4 +1,4 @@
-//! Prompt composer bar — an elevated multi-line draft input docked under the
+﻿//! Prompt composer bar — an elevated multi-line draft input docked under the
 //! active agent pane, with `@file` autocomplete and draft-before-send.
 //!
 //! Submodules:
@@ -29,7 +29,7 @@ use gpui_component::input::{
     Enter as InputEnter, Escape as InputEscape, InputEvent, MoveDown, MoveUp, Textarea,
     TextareaState,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 use mention_parser::pending_mention;
@@ -272,7 +272,7 @@ impl Focusable for ComposerBar {
 
 impl Render for ComposerBar {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = &self.typography;

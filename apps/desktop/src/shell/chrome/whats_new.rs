@@ -1,4 +1,4 @@
-//! "What's New" popover — release notes for the staged update.
+﻿//! "What's New" popover — release notes for the staged update.
 //!
 //! Opens from the title-bar Update pill (see `top_bar::update_pill`). Shows
 //! the staged release's notes (the GitHub release body, rendered as
@@ -15,7 +15,7 @@ use gpui::{
     StatefulInteractiveElement, Styled, Window, div, px,
 };
 use gpui_component::text::TextView;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{RestartToUpdate, ToggleWhatsNew};
 

@@ -1,4 +1,4 @@
-//! Branch operations on `Repository`: `list_branches`, `create_branch`,
+﻿//! Branch operations on `Repository`: `list_branches`, `create_branch`,
 //! `switch_branch`, `delete_branch`. Local-only.
 //!
 //! Remote-tracking ref enumeration (`origin/main`, etc.) lives next to
@@ -8,7 +8,7 @@
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;
 use crate::repository::Repository;
-use oximux_core::BranchInfo;
+use trex_core::BranchInfo;
 use std::path::Path;
 
 /// Field separator for `git branch --format`. Picked because the tab character
@@ -171,7 +171,7 @@ impl Repository {
     /// comparison all want.
     ///
     /// A caller that needs something it can *check out* must resolve the name
-    /// first; `oximux_worktree_ops::resolvable_default` is that resolution, and
+    /// first; `trex_worktree_ops::resolvable_default` is that resolution, and
     /// it tries the remote-tracking spelling before giving up. An earlier
     /// attempt to verify `refs/heads/<name>` here instead was worse: it turned
     /// "the default is main, held at origin/main" into `None`, and the create

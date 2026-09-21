@@ -1,4 +1,4 @@
-//! Phase 01 unit tests — row action wiring + conflict pin ordering.
+﻿//! Phase 01 unit tests — row action wiring + conflict pin ordering.
 //!
 //! Covers the NEW behavior added on top of `partition_files`:
 //!   - conflict rows are pinned to the top of the Unstaged section
@@ -9,8 +9,8 @@
 //! Hover-action visibility itself is a GPUI render concern; the wiring is
 //! covered by the smoke test that exists in `git_panel_smoke.rs`.
 
-use oximux_app::shell::git_panel::changed_files::partition_files;
-use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+use trex_app::shell::git_panel::changed_files::partition_files;
+use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 use std::path::PathBuf;
 
 fn fs(path: &str, index: IndexStatus, worktree: WorktreeStatus) -> FileStatus {

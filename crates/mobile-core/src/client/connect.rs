@@ -1,4 +1,4 @@
-//! Wiring the pure-Rust [`maintain_connection`] driver into the FFI client: it
+﻿//! Wiring the pure-Rust [`maintain_connection`] driver into the FFI client: it
 //! ties the injected [`Connector`], the reconnect policy, and the demux pump into
 //! one self-healing loop. The driver owns the connection lifecycle — pairing on
 //! the first dial, reconnecting on every drop — and reports each transition here
@@ -10,7 +10,7 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use futures::channel::oneshot;
-use oximux_remote_session::{
+use trex_remote_session::{
     Bootstrap, ClientSigner, ConnState as RsConnState, Connector, RemoteSession, Sleeper,
     maintain_connection,
 };

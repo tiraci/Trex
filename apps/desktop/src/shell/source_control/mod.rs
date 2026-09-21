@@ -1,4 +1,4 @@
-//! Source Control tab body — replaces the bare `GitPanel + DiffView` mount
+﻿//! Source Control tab body — replaces the bare `GitPanel + DiffView` mount
 //! inside `RightSidebar`. Composes:
 //!
 //! ```text
@@ -46,7 +46,7 @@ pub mod tree;
 // Re-export so external callers (notably the integration tests at
 // `apps/desktop/tests/sc_base_ref_persistence.rs` and
 // `apps/desktop/tests/sc_commit_draft_persistence.rs`) keep resolving
-// against `oximux_app::shell::source_control::{symbol}` rather than
+// against `trex_app::shell::source_control::{symbol}` rather than
 // reaching into the deeper `settings_persistence` path.
 pub use settings_persistence::{load_initial_commit_draft, merge_base_ref_into_settings};
 
@@ -58,10 +58,10 @@ use gpui::{
     Render, Styled, Subscription, Window, div, px,
 };
 use gpui_component::input::{InputEvent, InputState};
-use oximux_core::GitState;
-use oximux_git::{PollState, Repository};
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::WorktreeSettingsRepo;
+use trex_core::GitState;
+use trex_git::{PollState, Repository};
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::WorktreeSettingsRepo;
 use tokio::sync::watch;
 
 use std::rc::Rc;
@@ -99,7 +99,7 @@ pub struct PanelConfig {
     /// production path always supplies it. Phase 13 reads
     /// `scm_graph_height` from here on mount and persists it on every
     /// keyboard-resize tick.
-    pub settings_repo: Option<oximux_storage::SettingsRepo>,
+    pub settings_repo: Option<trex_storage::SettingsRepo>,
     /// Host callback to open a file in the main pane. Drives the
     /// "Open all in editor" button on the ConflictSummaryCard. `None`
     /// in test wiring → the button stays disabled with a "wiring
@@ -197,7 +197,7 @@ pub struct SourceControlPanel {
     /// recomputation would burn the fs cost on every keystroke /
     /// scope-tab click / unrelated cx.notify, violating phase-08's
     /// non-functional req that detection runs once per poll tick.
-    current_op: Option<oximux_core::GitOperation>,
+    current_op: Option<trex_core::GitOperation>,
 
     /// Per-worktree persistence layer; cloned for upserts after the user
     /// picks a base ref. `None` when the panel runs without a settings
@@ -290,7 +290,7 @@ impl SourceControlPanel {
             _ => None,
         };
         // Detect any in-progress git op at mount time so the banner
-        // shows immediately if the user opens OxiMux mid-rebase
+        // shows immediately if the user opens TREX mid-rebase
         // rather than waiting for the first poll tick.
         let initial_op = repo.current_operation();
         let observer = Self::start_state_observer(state_rx, repo.clone(), cx);
@@ -330,7 +330,7 @@ impl SourceControlPanel {
             // `git_state` is `None` and we leave the snapshot
             // empty — sparkles stays disabled until the first tick.
             if let Some(ref s) = git_state {
-                let staged: Vec<oximux_core::FileStatus> = s
+                let staged: Vec<trex_core::FileStatus> = s
                     .files
                     .iter()
                     .filter(|f| f.is_staged())
@@ -555,14 +555,14 @@ impl SourceControlPanel {
     pub fn open_all_conflicts(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let Some(on_open) = self.on_open_file.clone() else {
             tracing::warn!(
-                target: "oximux_app::source_control",
+                target: "trex_app::source_control",
                 "open_all_conflicts: no on_open_file callback wired; click ignored",
             );
             return;
         };
         let repo = self.repo.clone();
         let workdir = repo.workdir().to_path_buf();
-        let (tx, rx) = tokio::sync::oneshot::channel::<oximux_git::Result<Vec<std::path::PathBuf>>>();
+        let (tx, rx) = tokio::sync::oneshot::channel::<trex_git::Result<Vec<std::path::PathBuf>>>();
         match tokio::runtime::Handle::try_current() {
             Ok(handle) => {
                 handle.spawn(async move {
@@ -571,7 +571,7 @@ impl SourceControlPanel {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::source_control",
+                    target: "trex_app::source_control",
                     "open_all_conflicts: no tokio runtime entered; skipping",
                 );
                 return;
@@ -585,7 +585,7 @@ impl SourceControlPanel {
                 Ok(p) => p,
                 Err(err) => {
                     tracing::warn!(
-                        target: "oximux_app::source_control",
+                        target: "trex_app::source_control",
                         error = %err,
                         "list_conflicting_paths failed; open-all-conflicts skipped",
                     );
@@ -679,7 +679,7 @@ impl SourceControlPanel {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::source_control",
+                    target: "trex_app::source_control",
                     "fix_failing_checks: no tokio runtime entered; skipping",
                 );
                 return;
@@ -803,10 +803,10 @@ impl SourceControlPanel {
                                 Some(draft) => Some(draft),
                                 // Agent unavailable/failed — fall back so the
                                 // button still fills something useful.
-                                None => oximux_git::pr_context::draft_from_commits(&workdir).await,
+                                None => trex_git::pr_context::draft_from_commits(&workdir).await,
                             }
                         }
-                        None => oximux_git::pr_context::draft_from_commits(&workdir).await,
+                        None => trex_git::pr_context::draft_from_commits(&workdir).await,
                     };
                     let _ = tx.send(result);
                 });
@@ -881,7 +881,7 @@ impl SourceControlPanel {
                             // git on click. Equality-guarded inside
                             // the setter so identical snapshots
                             // don't fire spurious notifies.
-                            let staged: Vec<oximux_core::FileStatus> = s
+                            let staged: Vec<trex_core::FileStatus> = s
                                 .files
                                 .iter()
                                 .filter(|f| f.is_staged())
@@ -969,8 +969,8 @@ impl SourceControlPanel {
             .git_state
             .as_ref()
             .map(|s| {
-                use oximux_core::IndexStatus;
-                use oximux_core::WorktreeStatus;
+                use trex_core::IndexStatus;
+                use trex_core::WorktreeStatus;
                 let mut staged = 0usize;
                 let mut unstaged = false;
                 let mut partial = false;
@@ -1185,7 +1185,7 @@ impl SourceControlPanel {
     /// filter in `build_primary_inputs` so the button stages exactly what the
     /// resolver counted.
     fn unstaged_paths(&self) -> Vec<std::path::PathBuf> {
-        use oximux_core::{IndexStatus, WorktreeStatus};
+        use trex_core::{IndexStatus, WorktreeStatus};
         self.git_state
             .as_ref()
             .map(|s| {
@@ -1206,7 +1206,7 @@ impl SourceControlPanel {
 
 impl Render for SourceControlPanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let style = self.style();
         let action = self.resolve_primary(cx);
@@ -1224,7 +1224,7 @@ impl Render for SourceControlPanel {
             .git_state
             .as_ref()
             .map(|s| {
-                use oximux_core::{IndexStatus, WorktreeStatus};
+                use trex_core::{IndexStatus, WorktreeStatus};
                 s.files
                     .iter()
                     .filter(|f| {
@@ -1461,7 +1461,7 @@ async fn refresh_force_push_with_lease(
         Ok(status) => status.behind_is_patch_equivalent,
         Err(err) => {
             tracing::warn!(
-                target: "oximux_app::source_control",
+                target: "trex_app::source_control",
                 error = %err,
                 "lease_status query failed; falling back to non-force-push label"
             );
@@ -1500,7 +1500,7 @@ async fn refresh_pr_status(
     // state; `has_open_pr` and `pr_merged` both derive from it.
     let pr_state = match &forge {
         Some(f) => f.pr_state(&workdir).await,
-        None => oximux_core::PrState::None,
+        None => trex_core::PrState::None,
     };
     let has_pr = pr_state.is_open();
     let pr_merged = pr_state.is_merged();

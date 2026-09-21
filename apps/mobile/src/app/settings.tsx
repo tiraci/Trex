@@ -1,4 +1,4 @@
-import Constants from 'expo-constants';
+﻿import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
@@ -107,14 +107,14 @@ export default function SettingsScreen() {
 
           {phase === 'unreachable' ? (
             <ThemedText type="small" themeColor="textMuted">
-              The desktop is not answering. Check that OxiMux is running and that
+              The desktop is not answering. Check that TREX is running and that
               Remote access is on in its settings.
             </ThemedText>
           ) : null}
 
           {Constants.expoConfig?.version ? (
             <ThemedText type="small" themeColor="textMuted" style={styles.version}>
-              OxiMux {Constants.expoConfig.version}
+              TREX {Constants.expoConfig.version}
             </ThemedText>
           ) : null}
         </ScrollView>

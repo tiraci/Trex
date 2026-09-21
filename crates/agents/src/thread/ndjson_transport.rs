@@ -1,4 +1,4 @@
-//! Untyped newline-JSON RPC client core, shared by the Pi-family transports.
+﻿//! Untyped newline-JSON RPC client core, shared by the Pi-family transports.
 //!
 //! pi and omp speak the same envelope over a subprocess's stdio: LF-delimited
 //! JSON lines where a `{type:"response", id, command, success, …}` frame
@@ -74,7 +74,7 @@ impl NdjsonRpcClient {
         name: &'static str,
         mut preprocess: Option<Preprocess>,
     ) -> Result<(NdjsonRpcClient, Receiver<Value>, Child)> {
-        use oximux_no_window::NoWindow as _;
+        use trex_no_window::NoWindow as _;
         cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).no_window();
         #[cfg(unix)]
         {

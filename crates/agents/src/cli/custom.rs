@@ -1,4 +1,4 @@
-//! Custom-command adapter.
+﻿//! Custom-command adapter.
 //!
 //! The escape hatch for any CLI agent that doesn't ship a first-class
 //! adapter. The user supplies `program + args` in the launch dialog; the
@@ -68,7 +68,7 @@ impl CliAgentAdapter for CustomCommandAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::AgentAdapter;
+    use trex_core::AgentAdapter;
     use std::path::PathBuf;
 
     fn cfg_with(custom: Option<(String, Vec<String>)>) -> AgentSessionConfig {
@@ -83,7 +83,7 @@ mod tests {
             cols: 80,
             rows: 24,
             custom_command: custom,
-            resumption: oximux_core::SessionResumption::None,
+            resumption: trex_core::SessionResumption::None,
         }
     }
 

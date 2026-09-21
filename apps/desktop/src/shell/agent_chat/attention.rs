@@ -1,11 +1,11 @@
-//! Which thread events are worth interrupting the user for.
+﻿//! Which thread events are worth interrupting the user for.
 //!
 //! A pure classifier, deliberately separate from the view: it decides only
 //! *what kind* of attention an event deserves. The host applies the focus,
 //! visibility and per-kind gates before anything actually surfaces, so nothing
 //! here needs to know whether the window is frontmost.
 
-use oximux_agents::thread::ThreadEvent;
+use trex_agents::thread::ThreadEvent;
 
 use super::bubble;
 use crate::notifier::NotificationKind;
@@ -113,7 +113,7 @@ mod tests {
                 &ThreadEvent::PermissionRequested {
                     request_id: "r".into(), tool_use_id: None, tool_name: "Bash".into(),
                     input: json!({}), description: String::new(), suggestions: vec![],
-                    kind: oximux_agents::thread::PermissionKind::Tool,
+                    kind: trex_agents::thread::PermissionKind::Tool,
                 },
                 false,
                 false,

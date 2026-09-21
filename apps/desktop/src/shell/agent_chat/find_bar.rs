@@ -1,4 +1,4 @@
-//! In-transcript find: a small bar over the top of the chat scroll that
+﻿//! In-transcript find: a small bar over the top of the chat scroll that
 //! searches message + tool text and steps between matching entries.
 //!
 //! Distinct from the terminal scrollback search (`terminal_search_state`), which
@@ -14,7 +14,7 @@ use gpui::{
     MouseButton, ParentElement, SharedString, StatefulInteractiveElement, Styled, Subscription,
 };
 use gpui_component::input::{Input, InputEvent, InputState};
-use oximux_agents::thread::ThreadEntry;
+use trex_agents::thread::ThreadEntry;
 
 use super::markdown_render::FindMark;
 use super::{bubble, AgentChatView};
@@ -271,7 +271,7 @@ impl AgentChatView {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::thread::{AssistantMessage, ToolCall};
+    use trex_agents::thread::{AssistantMessage, ToolCall};
     use serde_json::json;
 
     fn user(text: &str) -> ThreadEntry {

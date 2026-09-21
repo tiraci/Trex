@@ -1,8 +1,8 @@
-//! End-to-end smoke test for AI commit-message generation.
+﻿//! End-to-end smoke test for AI commit-message generation.
 //!
 //! Spawns the configured agent CLI against the current worktree's
 //! staged diff, prints the generated message. Mirrors what the
-//! sparkles button does at runtime in the OxiMux GUI, but without
+//! sparkles button does at runtime in the TREX GUI, but without
 //! the GUI — useful for verifying the agent dispatch works before
 //! launching the full app.
 //!
@@ -10,23 +10,23 @@
 //!
 //! ```bash
 //! # Heuristic mode (no agent CLI required):
-//! cargo run -p oximux-agents --example commit_message_demo -- \
+//! cargo run -p trex-agents --example commit_message_demo -- \
 //!     --mode heuristic
 //!
 //! # Claude:
-//! cargo run -p oximux-agents --example commit_message_demo -- \
+//! cargo run -p trex-agents --example commit_message_demo -- \
 //!     --mode agent --agent claude --model sonnet
 //!
 //! # Codex:
-//! cargo run -p oximux-agents --example commit_message_demo -- \
+//! cargo run -p trex-agents --example commit_message_demo -- \
 //!     --mode agent --agent codex --model gpt-5.5
 //!
 //! # Custom CLI (anything else):
-//! cargo run -p oximux-agents --example commit_message_demo -- \
+//! cargo run -p trex-agents --example commit_message_demo -- \
 //!     --mode agent --agent custom --custom-command "ollama run llama3"
 //!
 //! # Against a different worktree:
-//! cargo run -p oximux-agents --example commit_message_demo -- \
+//! cargo run -p trex-agents --example commit_message_demo -- \
 //!     --mode agent --agent claude --workdir /path/to/repo
 //! ```
 //!
@@ -38,10 +38,10 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use oximux_agents::commit_message::{
+use trex_agents::commit_message::{
     self, AgentConfig, AgentId, Mode, StagedContext,
 };
-use oximux_core::IndexStatus;
+use trex_core::IndexStatus;
 
 struct Args {
     mode: String,
@@ -154,7 +154,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let context = if needs_context {
         println!("→ fetching staged diff from `{}`...", args.workdir.display());
-        match oximux_git::staged_context::fetch(&args.workdir).await? {
+        match trex_git::staged_context::fetch(&args.workdir).await? {
             Some(ctx) => {
                 println!(
                     "  branch={}  summary_bytes={}  patch_bytes={}",
@@ -188,7 +188,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Step 2: for heuristic mode we also need a FileStatus list.
     // Reuse the git crate's status poller to fetch it.
     let staged_files = if matches!(mode, Mode::Heuristic) {
-        let repo = oximux_git::Repository::open(args.workdir.clone()).await?;
+        let repo = trex_git::Repository::open(args.workdir.clone()).await?;
         let state = repo.status().await?;
         state
             .files

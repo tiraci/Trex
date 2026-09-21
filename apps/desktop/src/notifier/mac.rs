@@ -1,4 +1,4 @@
-//! macOS desktop-notification dispatch via `UNUserNotificationCenter`.
+﻿//! macOS desktop-notification dispatch via `UNUserNotificationCenter`.
 //!
 //! One process-global delegate handles click routing and foreground
 //! presentation; per-window `MacNotifier` instances share it through a
@@ -127,7 +127,7 @@ static DELEGATE: OnceLock<DelegateHolder> = OnceLock::new();
 
 define_class!(
     #[unsafe(super(NSObject))]
-    #[name = "OxiMuxNotificationDelegate"]
+    #[name = "TREXNotificationDelegate"]
     struct NotificationDelegate;
 
     unsafe impl NSObjectProtocol for NotificationDelegate {}
@@ -220,7 +220,7 @@ fn setup_center_once() {
                 UNAVAILABLE.store(true, Ordering::Relaxed);
                 tracing::warn!(
                     "notification authorization denied; suppressing dispatch \
-                     (System Settings → Notifications → OxiMux)"
+                     (System Settings → Notifications → TREX)"
                 );
             }
         })

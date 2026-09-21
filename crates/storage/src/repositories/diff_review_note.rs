@@ -1,4 +1,4 @@
-//! `DiffReviewNoteRepo` — persisted per-line diff review notes.
+﻿//! `DiffReviewNoteRepo` — persisted per-line diff review notes.
 //!
 //! Notes are anchored to a `(repo, diff_ref, path, side, line)` coordinate
 //! (UNIQUE), so `upsert` edits in place when a line is re-annotated. A diff
@@ -11,7 +11,7 @@
 //! note through [`DiffReviewNoteRepo::reanchor`] rather than leaving it
 //! pointing at code its author never saw.
 
-use oximux_core::{DiffReviewNote, NoteSide};
+use trex_core::{DiffReviewNote, NoteSide};
 use rusqlite::{Row, params};
 
 use crate::db::Db;

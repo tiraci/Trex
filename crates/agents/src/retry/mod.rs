@@ -1,4 +1,4 @@
-//! Automatic retry of a turn that failed on a provider limit.
+﻿//! Automatic retry of a turn that failed on a provider limit.
 //!
 //! Split so the part that is easy to get wrong is testable without a clock:
 //! [`classify`] turns typed wire signals into a [`RetryClass`], and
@@ -13,7 +13,7 @@
 //! 1. `Recurrence` has no one-shot variant and enforces a five-minute floor at
 //!    construction — a retry is a single fire, often sooner than that.
 //! 2. A `Schedule` is a user-visible row with a name and an enabled flag,
-//!    listed by the Schedules UI and `oximux schedule ls`, and carried on the
+//!    listed by the Schedules UI and `TREX schedule ls`, and carried on the
 //!    remote wire as `RecurrenceWire`. Internal retries do not belong there,
 //!    and the wire type is frozen.
 //! 3. The ticker runs under a single per-data-dir role lock, so it fires in

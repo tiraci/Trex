@@ -1,4 +1,4 @@
-//! The headless host spawning a **real agent process**, and what that process
+﻿//! The headless host spawning a **real agent process**, and what that process
 //! is handed.
 //!
 //! Every other suite here stubs the launcher: `cli_e2e` registers a
@@ -41,8 +41,8 @@ use common::{
 /// its own session and no other. Four separate claims, each of which has to hold
 /// for agent CLI access to be safe to leave on by default:
 ///
-/// 1. the child is handed `OXIMUX_SESSION_ID` — it knows which credential it holds;
-/// 2. the child is handed `OXIMUX_SESSION_TOKEN` — it can prove it;
+/// 1. the child is handed `trex_SESSION_ID` — it knows which credential it holds;
+/// 2. the child is handed `trex_SESSION_TOKEN` — it can prove it;
 /// 3. `ls` from inside sees exactly one session, its own — the opaque spawn
 ///    handle really was re-pointed at a registered session;
 /// 4. a session-less full-host verb is **denied** — the confinement is a wall,
@@ -85,12 +85,12 @@ fn a_spawned_agent_is_confined_to_the_session_it_announced() {
     assert_eq!(
         await_report(&report, "session_id", Duration::from_secs(30)).as_deref(),
         Some("present"),
-        "the spawned agent was not handed OXIMUX_SESSION_ID",
+        "the spawned agent was not handed trex_SESSION_ID",
     );
     assert_eq!(
         report_value(&report, "session_token").as_deref(),
         Some("present"),
-        "the spawned agent was not handed OXIMUX_SESSION_TOKEN",
+        "the spawned agent was not handed trex_SESSION_TOKEN",
     );
 
     // 3: the probe ran, and `ls` succeeded — so the opaque spawn handle really

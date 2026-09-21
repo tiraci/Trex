@@ -1,7 +1,7 @@
-//! `Transport` — the runtime tag for which backend a chat connection speaks.
+﻿//! `Transport` — the runtime tag for which backend a chat connection speaks.
 //!
 //! Kept in the pure, gpui-free `thread` core (deliberately NOT in
-//! `oximux-settings`, which pulls in `gpui` and would pollute this core). It
+//! `trex-settings`, which pulls in `gpui` and would pollute this core). It
 //! doubles as the persisted `provider` tag on a saved transcript and drives the
 //! connection factory ([`super::connect`], added in a later phase). The
 //! settings crate has its own TOML-facing `Transport`; the app crate (which

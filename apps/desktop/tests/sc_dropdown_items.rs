@@ -1,13 +1,13 @@
-//! Integration tests for `dropdown_items::resolve`.
+﻿//! Integration tests for `dropdown_items::resolve`.
 //!
 //! Lifted out of `dropdown_items.rs` so that source file stays under the
 //! 800-LOC fail cap. Resolver is pure-data, so this file does not need a
 //! TestAppContext.
 
-use oximux_app::shell::source_control::dropdown_items::{
+use trex_app::shell::source_control::dropdown_items::{
     DropdownActionKind, DropdownEntry, DropdownInputs, resolve,
 };
-use oximux_app::shell::source_control::primary_action::{PrimaryActionInputs, UpstreamStatus};
+use trex_app::shell::source_control::primary_action::{PrimaryActionInputs, UpstreamStatus};
 
 // --- helpers ----------------------------------------------------------------
 

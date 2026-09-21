@@ -1,4 +1,4 @@
-//! Which agent may drive which process.
+﻿//! Which agent may drive which process.
 //!
 //! A grant binds a pid to one agent session. It is the only thing standing
 //! between two agents driving each other's builds — or an agent driving the
@@ -14,7 +14,7 @@
 //!
 //! # Why a file rather than a mutex
 //!
-//! Enforcement runs in two processes: OxiMux itself, and the short-lived
+//! Enforcement runs in two processes: TREX itself, and the short-lived
 //! `PreToolUse` hook the agent's CLI spawns per tool call. Both must see the
 //! same grants, and the cross-drive guard must compare a request against *every
 //! other* chat's grants — which a per-process table structurally cannot do once
@@ -746,7 +746,7 @@ mod tests {
 
     #[test]
     fn a_released_pid_can_be_claimed_by_the_next_agent() {
-        // Teardown has to actually free the pid, or a long-lived OxiMux would
+        // Teardown has to actually free the pid, or a long-lived TREX would
         // accumulate grants that refuse everyone.
         let (_dir, table) = table();
         let (a, b) = (agent("a"), agent("b"));
@@ -790,7 +790,7 @@ mod tests {
 
     #[test]
     fn a_grant_written_by_one_handle_is_seen_by_another() {
-        // The property the whole file store exists for: OxiMux records a grant,
+        // The property the whole file store exists for: TREX records a grant,
         // and the hook process — a separate `GrantTable` over the same path —
         // must see it. An in-process table cannot express this.
         let (dir, app) = table();
@@ -849,7 +849,7 @@ mod tests {
         let path = dir.path().join(GRANTS_FILE_NAME);
         std::fs::write(
             &path,
-            r#"{"4242":{"owner":"oximux-chat-1","executable":"/bin/sleep"}}"#,
+            r#"{"4242":{"owner":"trex-chat-1","executable":"/bin/sleep"}}"#,
         )
         .expect("seed a store from a previous run");
         std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o444)).expect("chmod");
@@ -885,7 +885,7 @@ mod tests {
         let path = dir.path().join(GRANTS_FILE_NAME);
         std::fs::write(
             &path,
-            r#"{"4242":{"owner":"oximux-chat-1","executable":"C:\\Windows\\System32\\cmd.exe"}}"#,
+            r#"{"4242":{"owner":"trex-chat-1","executable":"C:\\Windows\\System32\\cmd.exe"}}"#,
         )
         .expect("seed a store from a previous run");
 

@@ -1,4 +1,4 @@
-//! `oximux` — the scriptable client of a running OxiMux host.
+﻿//! `TREX` — the scriptable client of a running TREX host.
 //!
 //! Offline verbs (`version`, `agent-context`, every `--help`/typo path) never
 //! touch the socket: the client is constructed lazily, only when a verb needs
@@ -25,7 +25,7 @@ use cli::{
     TermCommand, WorktreeCommand,
 };
 use client::Client;
-use oximux_remote_proto::proto::{CREATE_WORKTREE_BASE_MIN_VERSION, SCHEDULE_CRON_MIN_VERSION, TEAM_PER_ROLE_MIN_VERSION};
+use trex_remote_proto::proto::{CREATE_WORKTREE_BASE_MIN_VERSION, SCHEDULE_CRON_MIN_VERSION, TEAM_PER_ROLE_MIN_VERSION};
 use output::render;
 
 /// Leaf verbs that erase something. A typo is never nudged toward one of
@@ -85,7 +85,7 @@ fn tighten_destructive_suggestions(mut err: clap::Error) -> clap::Error {
 
 fn main() -> std::process::ExitCode {
     // Before clap, and before anything else: the verb an installed agent hook
-    // runs. Its flags come from a file OxiMux wrote and may include one this
+    // runs. Its flags come from a file TREX wrote and may include one this
     // binary has never heard of, which must be ignored rather than answered
     // with clap's usage error — a hook must never fail the agent's turn. See
     // the module.
@@ -114,7 +114,7 @@ fn main() -> std::process::ExitCode {
         // Only names this CLI installed: the directory is usually
         // `~/.local/bin`, shared with every other tool on the machine, and a
         // `.old-` file belonging to one of them is not ours to delete.
-        update::swap::sweep_backups(dir, |name| name.starts_with("oximux"));
+        update::swap::sweep_backups(dir, |name| name.starts_with("TREX"));
     }
 
     let code = match &args.command {
@@ -128,7 +128,7 @@ fn main() -> std::process::ExitCode {
         Command::Update { check } => render(args.json, commands::update::run(*check)),
         // Offline, and deliberately NOT wrapped in the `--json` envelope: the
         // output is a shell script destined for a file, and a JSON wrapper
-        // would make `oximux completions zsh > _oximux` write something no
+        // would make `TREX completions zsh > _TREX` write something no
         // shell can source.
         Command::Completions { shell } => {
             use clap::CommandFactory as _;
@@ -136,13 +136,13 @@ fn main() -> std::process::ExitCode {
             let mut cmd = Cli::command();
             // Into a buffer, not straight to stdout: `clap_complete` PANICS if
             // its writer errors, and the writer errors the moment a reader goes
-            // away — so `oximux completions zsh | head` printed a Rust panic and
+            // away — so `TREX completions zsh | head` printed a Rust panic and
             // a backtrace note. Piping a 150 KB script into a pager or `head` is
             // an ordinary thing to do while checking it.
             let mut script = Vec::new();
-            // `oximux`, not the cargo target name `oximux-cli` — the completion
+            // `TREX`, not the cargo target name `trex-cli` — the completion
             // has to match what users actually type.
-            clap_complete::generate(*shell, &mut cmd, "oximux", &mut script);
+            clap_complete::generate(*shell, &mut cmd, "TREX", &mut script);
             match std::io::stdout().write_all(&script) {
                 Ok(()) => cli::exit::OK,
                 // A closed pipe is the reader's choice, not this command's
@@ -182,6 +182,49 @@ fn main() -> std::process::ExitCode {
                 cli::SkillsCommand::Ls => commands::skills::list(),
                 cli::SkillsCommand::Get { topic, full } => commands::skills::get(topic, *full),
                 cli::SkillsCommand::Install { agent } => commands::skills::install(agent.as_deref()),
+            };
+            render(args.json, outcome)
+        }
+        Command::Orchestration { command } => {
+            let outcome = match command {
+                cli::OrchestrationCommand::Create { objective, max_concurrent, tasks } => {
+                    commands::orchestration::create(objective, *max_concurrent, tasks.clone())
+                }
+                cli::OrchestrationCommand::Ls => commands::orchestration::ls(),
+                cli::OrchestrationCommand::Show { id } => commands::orchestration::show(id),
+                cli::OrchestrationCommand::Heartbeat { dispatch_id } => {
+                    commands::orchestration::heartbeat(dispatch_id)
+                }
+                cli::OrchestrationCommand::Done { dispatch_id, result } => {
+                    commands::orchestration::done(dispatch_id, result)
+                }
+                cli::OrchestrationCommand::Fail { dispatch_id, error } => {
+                    commands::orchestration::fail(dispatch_id, error)
+                }
+            };
+            render(args.json, outcome)
+        }
+        Command::Accounts { command } => {
+            let outcome = match command {
+                cli::AccountsCommand::Add { provider, email, api_key } => {
+                    commands::accounts::add(*provider, email, api_key)
+                }
+                cli::AccountsCommand::Ls => commands::accounts::ls(),
+                cli::AccountsCommand::Switch { id } => commands::accounts::switch(id),
+                cli::AccountsCommand::Rm { id } => commands::accounts::rm(id),
+                cli::AccountsCommand::RateLimit => commands::accounts::rate_limit(),
+                cli::AccountsCommand::Usage => commands::accounts::usage(),
+            };
+            render(args.json, outcome)
+        }
+        Command::Diff { command } => {
+            let outcome = match command {
+                cli::DiffCommand::Comment { file, line, side, text } => {
+                    commands::diff::comment(file, *line, side, text)
+                }
+                cli::DiffCommand::Ls { file } => commands::diff::ls(file),
+                cli::DiffCommand::Format { file } => commands::diff::format(file),
+                cli::DiffCommand::Clear { file } => commands::diff::clear(file),
             };
             render(args.json, outcome)
         }
@@ -319,7 +362,7 @@ fn precheck(command: &mut Command, json_mode: bool) -> Result<(), output::Failur
         )
         .with_steps([
             "drop --json to attach interactively".into(),
-            "for machine-readable terminal state, use `oximux --json term ls`".into(),
+            "for machine-readable terminal state, use `TREX --json term ls`".into(),
         ]));
     }
     // A malformed `--input` is a mistake in the argv, so it must be caught
@@ -642,6 +685,9 @@ fn host_verb(mut args: Cli) -> u8 {
                 | Command::Update { .. }
                 | Command::AgentContext
                 | Command::Skills { .. }
+                | Command::Orchestration { .. }
+                | Command::Accounts { .. }
+                | Command::Diff { .. }
                 | Command::Agent { .. }
                 | Command::Completions { .. }
                 | Command::Serve { .. }
@@ -672,21 +718,21 @@ mod tests {
             // v19 sits above its own family: only `state watch` sends the
             // cursor request, and gating the whole family would strand a v18
             // host's perfectly serviceable get/set/delete.
-            (vec!["oximux", "state", "watch"], Some(19)),
-            (vec!["oximux", "state", "set", "k", "1"], Some(18)),
-            (vec!["oximux", "state", "delete", "k"], Some(18)),
-            (vec!["oximux", "heartbeat", "ls"], Some(18)),
-            (vec!["oximux", "team", "ls"], Some(18)),
-            (vec!["oximux", "state", "get", "k"], Some(18)),
-            (vec!["oximux", "schedule", "run-once", "sch-1"], Some(17)),
-            (vec!["oximux", "worktree", "ls"], Some(16)),
-            (vec!["oximux", "transcript", "s1"], Some(16)),
-            (vec!["oximux", "pair-ls"], Some(16)),
+            (vec!["TREX", "state", "watch"], Some(19)),
+            (vec!["TREX", "state", "set", "k", "1"], Some(18)),
+            (vec!["TREX", "state", "delete", "k"], Some(18)),
+            (vec!["TREX", "heartbeat", "ls"], Some(18)),
+            (vec!["TREX", "team", "ls"], Some(18)),
+            (vec!["TREX", "state", "get", "k"], Some(18)),
+            (vec!["TREX", "schedule", "run-once", "sch-1"], Some(17)),
+            (vec!["TREX", "worktree", "ls"], Some(16)),
+            (vec!["TREX", "transcript", "s1"], Some(16)),
+            (vec!["TREX", "pair-ls"], Some(16)),
             // The long-standing surface every host has spoken since v1–v12.
-            (vec!["oximux", "ls"], None),
-            (vec!["oximux", "status"], None),
-            (vec!["oximux", "send", "s1", "hi"], None),
-            (vec!["oximux", "schedule", "ls"], None),
+            (vec!["TREX", "ls"], None),
+            (vec!["TREX", "status"], None),
+            (vec!["TREX", "send", "s1", "hi"], None),
+            (vec!["TREX", "schedule", "ls"], None),
         ] {
             let needed = required_version(&command_of(&argv)).map(|(v, _)| v);
             assert_eq!(needed, expected, "{argv:?}");
@@ -704,14 +750,14 @@ mod tests {
     #[test]
     fn run_carries_the_permission_mode_through_to_its_args() {
         let Command::Run { mode, model, .. } =
-            command_of(&["oximux", "run", "hi", "--mode", "acceptEdits"])
+            command_of(&["TREX", "run", "hi", "--mode", "acceptEdits"])
         else {
             panic!("`run` parses");
         };
         assert_eq!(mode.as_deref(), Some("acceptEdits"));
         assert_eq!(model, None, "--mode must not be confused with --model");
 
-        let Command::Run { mode, .. } = command_of(&["oximux", "run", "hi"]) else {
+        let Command::Run { mode, .. } = command_of(&["TREX", "run", "hi"]) else {
             panic!("`run` parses");
         };
         assert_eq!(mode, None, "no --mode means the backend default, not a guess");
@@ -727,14 +773,14 @@ mod tests {
     #[test]
     fn turn_timeout_reaches_both_verbs_and_is_refused_where_no_turn_is_awaited() {
         let Command::Run { turn_timeout, .. } =
-            command_of(&["oximux", "run", "hi", "--turn-timeout", "30"])
+            command_of(&["TREX", "run", "hi", "--turn-timeout", "30"])
         else {
             panic!("`run` parses");
         };
         assert_eq!(turn_timeout, Some(30));
 
         let Command::Send { turn_timeout, .. } =
-            command_of(&["oximux", "send", "s1", "hi", "--turn-timeout", "30"])
+            command_of(&["TREX", "send", "s1", "hi", "--turn-timeout", "30"])
         else {
             panic!("`send` parses");
         };
@@ -742,14 +788,14 @@ mod tests {
 
         // Absent by default: the stream stays unbounded unless asked, so an
         // interactive `run` behind a thinking agent is not cut off.
-        let Command::Run { turn_timeout, .. } = command_of(&["oximux", "run", "hi"]) else {
+        let Command::Run { turn_timeout, .. } = command_of(&["TREX", "run", "hi"]) else {
             panic!("`run` parses");
         };
         assert_eq!(turn_timeout, None);
 
         for argv in [
-            ["oximux", "run", "hi", "--bg", "--turn-timeout", "30"].as_slice(),
-            ["oximux", "send", "s1", "hi", "--no-wait", "--turn-timeout", "30"].as_slice(),
+            ["TREX", "run", "hi", "--bg", "--turn-timeout", "30"].as_slice(),
+            ["TREX", "send", "s1", "hi", "--no-wait", "--turn-timeout", "30"].as_slice(),
         ] {
             assert!(
                 Cli::try_parse_from(argv).is_err(),
@@ -768,17 +814,17 @@ mod tests {
     /// a machine that happens to have a host up.
     #[test]
     fn json_with_term_attach_is_a_usage_error_before_any_connection() {
-        let mut command = command_of(&["oximux", "term", "attach", "pty-1"]);
+        let mut command = command_of(&["TREX", "term", "attach", "pty-1"]);
         let failure = precheck(&mut command, true).expect_err("refused under --json");
         assert_eq!(failure.exit, cli::exit::USAGE);
         assert_eq!(failure.code, "unsupported-in-json");
         assert!(!failure.next_steps.is_empty(), "and says what to do instead");
 
         // Without --json it is an ordinary interactive attach.
-        let mut command = command_of(&["oximux", "term", "attach", "pty-1"]);
+        let mut command = command_of(&["TREX", "term", "attach", "pty-1"]);
         assert!(precheck(&mut command, false).is_ok());
         // And the guard is scoped to attach — `term ls` is machine-readable.
-        let mut command = command_of(&["oximux", "term", "ls"]);
+        let mut command = command_of(&["TREX", "term", "ls"]);
         assert!(precheck(&mut command, true).is_ok(), "`term ls` must still serve --json");
     }
 
@@ -792,7 +838,7 @@ mod tests {
     fn a_malformed_permit_input_is_a_usage_error_before_any_connection() {
         for bad in ["not json", "[\"a\"]", "42"] {
             let mut command =
-                command_of(&["oximux", "permit", "allow", "s1", "--input", bad]);
+                command_of(&["TREX", "permit", "allow", "s1", "--input", bad]);
             let failure = precheck(&mut command, false).expect_err(bad);
             assert_eq!(failure.exit, cli::exit::USAGE, "{bad}");
             assert_eq!(failure.code, "bad-input", "{bad}");
@@ -800,10 +846,10 @@ mod tests {
 
         // A well-formed object passes through to the host, as does no flag.
         let mut command = command_of(&[
-            "oximux", "permit", "allow", "s1", "--input", "{\"command\":\"ls\"}",
+            "TREX", "permit", "allow", "s1", "--input", "{\"command\":\"ls\"}",
         ]);
         assert!(precheck(&mut command, false).is_ok());
-        let mut command = command_of(&["oximux", "permit", "allow", "s1"]);
+        let mut command = command_of(&["TREX", "permit", "allow", "s1"]);
         assert!(precheck(&mut command, false).is_ok());
     }
 
@@ -814,12 +860,12 @@ mod tests {
     /// resolution step now sitting in front of it.
     #[test]
     fn precheck_leaves_an_ordinary_prompt_alone() {
-        let mut command = command_of(&["oximux", "run", "do the thing"]);
+        let mut command = command_of(&["TREX", "run", "do the thing"]);
         precheck(&mut command, false).expect("ok");
         let Command::Run { prompt, .. } = &command else { panic!("run") };
         assert_eq!(prompt, "do the thing");
 
-        let mut command = command_of(&["oximux", "send", "s1", "do the thing"]);
+        let mut command = command_of(&["TREX", "send", "s1", "do the thing"]);
         precheck(&mut command, false).expect("ok");
         let Command::Send { prompt, .. } = &command else { panic!("send") };
         assert_eq!(prompt, "do the thing");
@@ -835,24 +881,24 @@ mod tests {
     /// thing refused; everything else falls back to the v18 verbs.
     #[test]
     fn only_a_per_role_run_gates_the_team_family() {
-        let plain = ["oximux", "team", "run", "--name", "s", "--role", "a=go"];
+        let plain = ["TREX", "team", "run", "--name", "s", "--role", "a=go"];
         assert_eq!(
             required_version(&command_of(&plain)).map(|(v, _)| v),
             Some(18),
             "a run naming no per-role agent is the v18 request"
         );
         assert_eq!(
-            required_version(&command_of(&["oximux", "team", "status", "--run", "r"]))
+            required_version(&command_of(&["TREX", "team", "status", "--run", "r"]))
                 .map(|(v, _)| v),
             Some(18),
             "and reading a board never needs the newer verb"
         );
 
         let with_agent =
-            ["oximux", "team", "run", "--name", "s", "--role", "a=go", "--role-agent", "a=claude"];
+            ["TREX", "team", "run", "--name", "s", "--role", "a=go", "--role-agent", "a=claude"];
         assert_eq!(required_version(&command_of(&with_agent)).map(|(v, _)| v), Some(22));
         let with_model =
-            ["oximux", "team", "run", "--name", "s", "--role", "a=go", "--role-model", "a=opus"];
+            ["TREX", "team", "run", "--name", "s", "--role", "a=go", "--role-model", "a=opus"];
         assert_eq!(required_version(&command_of(&with_model)).map(|(v, _)| v), Some(22));
     }
 
@@ -866,14 +912,14 @@ mod tests {
     /// that: a later broad `Command::Schedule { .. } => Some(17)` inserted
     /// above it would silently ungate `--cron`, and the only other thing that
     /// would notice is the skew suite, which skips itself unless
-    /// `OXIMUX_SKEW_CLI` is set.
+    /// `TREX_SKEW_CLI` is set.
     #[test]
     fn only_run_once_and_cron_gate_the_schedule_family() {
         let v = |args: &[&str]| required_version(&command_of(args)).map(|(v, _)| v);
 
-        assert!(v(&["oximux", "schedule", "ls"]).is_none());
-        assert!(v(&["oximux", "schedule", "rm", "s"]).is_none());
-        assert_eq!(v(&["oximux", "schedule", "run-once", "s"]), Some(17));
+        assert!(v(&["TREX", "schedule", "ls"]).is_none());
+        assert!(v(&["TREX", "schedule", "rm", "s"]).is_none());
+        assert_eq!(v(&["TREX", "schedule", "run-once", "s"]), Some(17));
 
         // Every preset cadence still speaks v10 — this is the half that keeps
         // an existing user working against an existing host.
@@ -882,7 +928,7 @@ mod tests {
             vec!["--daily", "09:00"],
             vec!["--weekly", "mon 09:00"],
         ] {
-            let mut args = vec!["oximux", "schedule", "create", "p", "--name", "n"];
+            let mut args = vec!["TREX", "schedule", "create", "p", "--name", "n"];
             args.extend(cadence.iter().copied());
             assert!(
                 v(&args).is_none(),
@@ -892,7 +938,7 @@ mod tests {
 
         // ...and only `--cron` asks for v23.
         assert_eq!(
-            v(&["oximux", "schedule", "create", "p", "--name", "n", "--cron", "0 9 * * 1-5"]),
+            v(&["TREX", "schedule", "create", "p", "--name", "n", "--cron", "0 9 * * 1-5"]),
             Some(23)
         );
     }
@@ -902,7 +948,7 @@ mod tests {
     /// edit away ("delet") plainly meant it and keeps the tip.
     #[test]
     fn a_loose_typo_is_not_nudged_toward_a_destructive_verb() {
-        let err = Cli::try_parse_from(["oximux", "state", "dele"]).unwrap_err();
+        let err = Cli::try_parse_from(["TREX", "state", "dele"]).unwrap_err();
         let msg = tighten_destructive_suggestions(err).to_string();
         assert!(
             !msg.contains("delete"),
@@ -910,7 +956,7 @@ mod tests {
         );
         assert!(!msg.contains("tip:"), "an emptied tip renders as no tip at all, got:\n{msg}");
 
-        let err = Cli::try_parse_from(["oximux", "state", "delet"]).unwrap_err();
+        let err = Cli::try_parse_from(["TREX", "state", "delet"]).unwrap_err();
         let msg = tighten_destructive_suggestions(err).to_string();
         assert!(msg.contains("delete"), "one edit away keeps the tip, got:\n{msg}");
     }
@@ -920,11 +966,11 @@ mod tests {
     /// untouched.
     #[test]
     fn non_destructive_suggestions_keep_claps_own_rule() {
-        let err = Cli::try_parse_from(["oximux", "state", "watc"]).unwrap_err();
+        let err = Cli::try_parse_from(["TREX", "state", "watc"]).unwrap_err();
         let msg = tighten_destructive_suggestions(err).to_string();
         assert!(msg.contains("watch"), "harmless tips stay loose, got:\n{msg}");
 
-        let err = Cli::try_parse_from(["oximux", "run"]).unwrap_err();
+        let err = Cli::try_parse_from(["TREX", "run"]).unwrap_err();
         let before = err.to_string();
         assert_eq!(tighten_destructive_suggestions(err).to_string(), before);
     }

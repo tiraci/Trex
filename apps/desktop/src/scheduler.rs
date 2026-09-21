@@ -1,8 +1,8 @@
-//! The desktop's half of scheduled agent runs: its firer, its keep-awake
+﻿//! The desktop's half of scheduled agent runs: its firer, its keep-awake
 //! reconcile, and the boot shell that decides whether this process ticks.
 //!
 //! The engine — due-selection, the double-launch guards, the durable claim,
-//! run recording — is [`oximux_agents::schedule::Ticker`], shared with the
+//! run recording — is [`trex_agents::schedule::Ticker`], shared with the
 //! headless host. What is desktop-specific rides here:
 //!
 //! - **Firing opens a tab.** The fire crosses to the GPUI thread over the same
@@ -25,12 +25,12 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
-use oximux_agents::schedule::{
+use trex_agents::schedule::{
     FireOutcome, Schedule, ScheduleFirer, ScheduleStore, ScheduleTarget, TICK,
     TICKER_LOCK_FILENAME, Ticker,
 };
-use oximux_remote_host::LaunchError;
-use oximux_remote_proto::messages::ScheduleRunWire;
+use trex_remote_host::LaunchError;
+use trex_remote_proto::messages::ScheduleRunWire;
 
 use crate::agent_awake::{AgentAwake, AwakeHold};
 use crate::remote_control::launch_bridge::BridgeLauncher;
@@ -42,7 +42,7 @@ pub struct DesktopFirer {
     store: ScheduleStore,
     /// Live sessions, for the heartbeat arm: waking an already-open session is
     /// a prompt into its registry handle, not a tab to open.
-    registry: Arc<oximux_agents::session_registry::SessionRegistry>,
+    registry: Arc<trex_agents::session_registry::SessionRegistry>,
     /// Injected rather than reached for via [`crate::agent_awake::global`] so the
     /// reconcile logic can be tested against a mock backend instead of real power
     /// management.
@@ -57,7 +57,7 @@ impl DesktopFirer {
         launcher: BridgeLauncher,
         store: ScheduleStore,
         awake_source: Arc<AgentAwake>,
-        registry: Arc<oximux_agents::session_registry::SessionRegistry>,
+        registry: Arc<trex_agents::session_registry::SessionRegistry>,
     ) -> Self {
         Self { launcher, store, registry, awake_source, awake: Mutex::new(None) }
     }
@@ -108,7 +108,7 @@ impl ScheduleFirer for DesktopFirer {
             // the chat view renders the prompt through its remote-prompt sink
             // exactly as it does for one sent from the phone.
             ScheduleTarget::ExistingSession(session_id) => {
-                return oximux_agents::schedule::nudge_existing_session(
+                return trex_agents::schedule::nudge_existing_session(
                     &self.registry,
                     schedule,
                     session_id,
@@ -154,14 +154,14 @@ impl ScheduleFirer for DesktopFirer {
 /// unguarded ticker *without* recovery would leave a crashed boot's `'running'`
 /// claims unsettled forever, wedging those schedules (always due, always
 /// "already ran"). So a lock error declines loudly, exactly like losing the
-/// contest — the same posture `oximux serve` takes.
+/// contest — the same posture `TREX serve` takes.
 ///
 /// Ticks before the first sleep so a schedule that came due while the app was
 /// closed fires at boot rather than one [`TICK`] later.
 pub fn install(
     store: ScheduleStore,
     launcher: BridgeLauncher,
-    registry: Arc<oximux_agents::session_registry::SessionRegistry>,
+    registry: Arc<trex_agents::session_registry::SessionRegistry>,
     data_dir: Option<std::path::PathBuf>,
     run_events: tokio::sync::broadcast::Sender<ScheduleRunWire>,
     session_exists: impl Fn(&str) -> bool,
@@ -173,15 +173,15 @@ pub fn install(
         tracing::warn!("schedule ticker: no data dir; schedules will not fire from this process");
         return None;
     };
-    let lock = match oximux_single_instance::try_acquire(&dir.join(TICKER_LOCK_FILENAME)) {
-        Ok(oximux_single_instance::AcquireOutcome::Acquired(guard)) => guard,
-        Ok(oximux_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
+    let lock = match trex_single_instance::try_acquire(&dir.join(TICKER_LOCK_FILENAME)) {
+        Ok(trex_single_instance::AcquireOutcome::Acquired(guard)) => guard,
+        Ok(trex_single_instance::AcquireOutcome::AlreadyRunning { holder_pid }) => {
             // One line, once — a repeating warning would train users to
             // ignore it, and this is the *expected* state on a machine
             // running both hosts.
             let holder = holder_pid
                 .map(|p| format!("process {p}"))
-                .unwrap_or_else(|| "another OxiMux process".into());
+                .unwrap_or_else(|| "another TREX process".into());
             tracing::info!(
                 "schedule ticker: {holder} owns scheduling for this data dir; \
                  schedules will fire from there"
@@ -225,7 +225,7 @@ pub fn install(
     let ticker = Arc::new(Ticker::new(store, Arc::new(firer)).with_recorded_hook(Arc::new(
         move |run| {
             // No subscriber is normal (remote off, no CLI attached).
-            let _ = run_events.send(oximux_remote_host::schedule_run_to_wire(run));
+            let _ = run_events.send(trex_remote_host::schedule_run_to_wire(run));
         },
     )));
 
@@ -269,7 +269,7 @@ fn launch_error_detail(err: &LaunchError) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::schedule::{NewSchedule, Recurrence};
+    use trex_agents::schedule::{NewSchedule, Recurrence};
 
     use crate::agent_awake::SleepAssertionBackend;
 
@@ -291,15 +291,15 @@ mod tests {
     /// can count how many assertions were ever created. The bridge's receiver
     /// is dropped — these tests never fire.
     fn firer() -> (DesktopFirer, Arc<MockBackend>, Arc<AgentAwake>) {
-        firer_with_registry(Arc::new(oximux_agents::session_registry::SessionRegistry::new()))
+        firer_with_registry(Arc::new(trex_agents::session_registry::SessionRegistry::new()))
     }
 
     /// The same firer over a caller-supplied registry, so a heartbeat test can
     /// put a live session in it first.
     fn firer_with_registry(
-        registry: Arc<oximux_agents::session_registry::SessionRegistry>,
+        registry: Arc<trex_agents::session_registry::SessionRegistry>,
     ) -> (DesktopFirer, Arc<MockBackend>, Arc<AgentAwake>) {
-        let db = oximux_storage::db::open_memory().expect("open in-memory db");
+        let db = trex_storage::db::open_memory().expect("open in-memory db");
         let backend = Arc::new(MockBackend::default());
         let awake = Arc::new(AgentAwake::with_backend(backend.clone(), true));
         let store = ScheduleStore::new(db.conn());
@@ -391,10 +391,10 @@ mod tests {
     /// is never touched. That the fire succeeds at all is the proof.
     #[tokio::test]
     async fn a_heartbeat_wakes_the_live_session_instead_of_spawning() {
-        let registry = Arc::new(oximux_agents::session_registry::SessionRegistry::new());
+        let registry = Arc::new(trex_agents::session_registry::SessionRegistry::new());
         registry.register(
             "sess-1".into(),
-            Arc::new(oximux_agents::thread::StubConnection::default()),
+            Arc::new(trex_agents::thread::StubConnection::default()),
         );
         let (firer, _backend, _awake) = firer_with_registry(registry);
         let made = firer.store.create(a_schedule("morning"), Local::now()).expect("create");

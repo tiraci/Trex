@@ -1,4 +1,4 @@
-//! Process-wide persistence for ambient-agent readings, keyed by relay PTY id.
+﻿//! Process-wide persistence for ambient-agent readings, keyed by relay PTY id.
 //!
 //! An ambient agent (a hand-typed `claude`/`codex`/… in a plain terminal) is
 //! detected purely at runtime from the OSC-9999 sideband the global hooks emit.
@@ -22,8 +22,8 @@
 use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use oximux_core::{AgentStatus, SidebandDetail};
-use oximux_storage::SettingsRepo;
+use trex_core::{AgentStatus, SidebandDetail};
+use trex_storage::SettingsRepo;
 use serde::{Deserialize, Serialize};
 
 /// Mirrors `ambient_agent_scan::SIDEBAND_TTL` (30 min): a persisted reading
@@ -89,7 +89,7 @@ fn persist_with(
     status: &AgentStatus,
     detail: &SidebandDetail,
     now_ms: u64,
-) -> Result<(), oximux_storage::StorageError> {
+) -> Result<(), trex_storage::StorageError> {
     let rec = Persisted {
         status: status.clone(),
         detail: detail.clone(),
@@ -121,7 +121,7 @@ fn load_with(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::open_memory;
+    use trex_storage::open_memory;
 
     fn repo() -> SettingsRepo {
         SettingsRepo::new(open_memory().expect("memory db"))

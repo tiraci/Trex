@@ -1,4 +1,4 @@
-//! The manual-fire seam behind [`Request::RunScheduleNow`], plus the shared
+﻿//! The manual-fire seam behind [`Request::RunScheduleNow`], plus the shared
 //! store-row → wire conversion every schedule surface uses.
 //!
 //! Like [`SessionLauncher`](crate::SessionLauncher), the real work lives above
@@ -7,8 +7,8 @@
 //! The dispatcher checks *authorization*; the runner reports whether the fire
 //! could happen and how it went.
 
-use oximux_agents::schedule::{RunOutcome, ScheduleRun, Ticker, ticker::RunNowError as TickerError};
-use oximux_remote_proto::messages::{RunOutcomeWire, ScheduleRunWire};
+use trex_agents::schedule::{RunOutcome, ScheduleRun, Ticker, ticker::RunNowError as TickerError};
+use trex_remote_proto::messages::{RunOutcomeWire, ScheduleRunWire};
 
 /// Why a manual fire was refused (as opposed to firing and failing, which the
 /// reply's run row reports). Curated: no host paths, no store error text.

@@ -1,6 +1,6 @@
-//! `oximux status` — is a host there, and what is it running?
+﻿//! `TREX status` — is a host there, and what is it running?
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::client::{Client, rpc_failure, unexpected_reply};

@@ -1,4 +1,4 @@
-//! RenameTabDialog — small modal that lets the user override a tab's
+﻿//! RenameTabDialog — small modal that lets the user override a tab's
 //! visible title. Pre-fills with the tab's current visible title; Save
 //! commits the override via the host callback (the host calls
 //! `PaneGroup::set_tab_title(tab_idx, Some(new))`). Reset clears the
@@ -18,7 +18,7 @@ use gpui_component::{
     button::{Button, ButtonVariants},
     input::{Input, InputState},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 use std::rc::Rc;
@@ -131,7 +131,7 @@ impl Focusable for RenameTabDialog {
 
 impl Render for RenameTabDialog {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = &self.typography;

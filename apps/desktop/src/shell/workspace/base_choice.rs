@@ -1,11 +1,11 @@
-//! What the create dialog's **From** control means, as data.
+﻿//! What the create dialog's **From** control means, as data.
 //!
 //! Split from the dialog for the reason `workspace_list_render` is split from
 //! its painter: the interesting part is a decision — which of three
 //! [`CreateBase`] shapes a user's two dropdowns add up to — and a decision is
 //! testable where a GPUI render is not.
 
-use oximux_worktree_ops::CreateBase;
+use trex_worktree_ops::CreateBase;
 
 /// Which of the two creation modes the segmented control is on.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -91,8 +91,8 @@ mod tests {
     fn a_new_branch_defers_the_default_to_the_create_path() {
         let choice = BaseChoice::default();
         assert_eq!(
-            choice.resolve("oximux/x".into()),
-            Some(CreateBase::new_branch("oximux/x")),
+            choice.resolve("TREX/x".into()),
+            Some(CreateBase::new_branch("TREX/x")),
             "the default branch is resolved with git at create time, not here"
         );
     }
@@ -104,8 +104,8 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(
-            choice.resolve("oximux/x".into()),
-            Some(CreateBase::new_branch_from("oximux/x", "release/1.4"))
+            choice.resolve("TREX/x".into()),
+            Some(CreateBase::new_branch_from("TREX/x", "release/1.4"))
         );
     }
 
@@ -119,7 +119,7 @@ mod tests {
             from: Some("release/1.4".into()),
         };
         assert_eq!(
-            choice.resolve("oximux/x".into()),
+            choice.resolve("TREX/x".into()),
             Some(CreateBase::existing("feature/api/retry"))
         );
     }
@@ -131,7 +131,7 @@ mod tests {
             ..Default::default()
         };
         assert!(!choice.is_complete());
-        assert_eq!(choice.resolve("oximux/x".into()), None);
+        assert_eq!(choice.resolve("TREX/x".into()), None);
         assert!(BaseChoice::default().is_complete());
     }
 

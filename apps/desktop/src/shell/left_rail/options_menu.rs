@@ -1,4 +1,4 @@
-//! Display-options dropdown for the "Projects" header — group-by, sort, card
+﻿//! Display-options dropdown for the "Projects" header — group-by, sort, card
 //! layout, and collapse-all, consolidated behind the header's options icon.
 //!
 //! Mirrors the `dashboard_status_menu` contract: a full-window occluding
@@ -13,7 +13,7 @@ use gpui::{
     Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement, Render,
     Styled, WeakEntity, Window, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::left_rail::LeftRail;
 use crate::shell::left_rail::workspace_list_render::{WorkspaceGroupMode, WorkspaceSortMode};
@@ -153,7 +153,7 @@ fn section_label(text: &'static str, theme: Theme, typography: &Typography) -> i
 
 impl Render for WorkspaceOptionsMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let Some((state, x, y)) = self.open_for else {
             return div().into_any_element();
         };

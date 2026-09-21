@@ -1,4 +1,4 @@
-//! Integration tests for `Repository::diff_combined` — the merged
+﻿//! Integration tests for `Repository::diff_combined` — the merged
 //! multi-file working-tree diff with parallel group tags.
 //!
 //! Each test builds a real repo under a `TempDir` with a known mix of
@@ -10,8 +10,8 @@
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_core::{CombinedDiffScope, FileGroup};
-use oximux_git::Repository;
+use trex_core::{CombinedDiffScope, FileGroup};
+use trex_git::Repository;
 use std::path::PathBuf;
 use tempfile::TempDir;
 

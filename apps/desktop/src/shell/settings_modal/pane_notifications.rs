@@ -1,4 +1,4 @@
-//! Notifications pane — master switch, per-source + per-kind banner
+﻿//! Notifications pane — master switch, per-source + per-kind banner
 //! toggles, sound, focus gate, agent-awake, and a test button that posts
 //! through the real OS pipeline. Toggles flip the shared
 //! [`AgentNotifySettings`] atomics (effective immediately) and persist
@@ -7,7 +7,7 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use gpui::{AnyElement, IntoElement, ParentElement, Styled, div, px};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 use super::controls::{toggle_switch, value_chip};
@@ -24,7 +24,7 @@ type NotifySelect = fn(&AgentNotifySettings) -> &AtomicBool;
 const NOTIFY_ROWS: [(&str, &str, &str, NotifySelect); 10] = [
     (
         "Enable notifications",
-        "Master switch for every desktop banner OxiMux posts.",
+        "Master switch for every desktop banner TREX posts.",
         keys::ENABLED,
         |s| &s.enabled,
     ),
@@ -72,7 +72,7 @@ const NOTIFY_ROWS: [(&str, &str, &str, NotifySelect); 10] = [
     ),
     (
         "Only when unfocused",
-        "Suppress notifications while the OxiMux window is focused.",
+        "Suppress notifications while the TREX window is focused.",
         keys::ONLY_WHEN_UNFOCUSED,
         |s| &s.only_when_unfocused,
     ),
@@ -206,7 +206,7 @@ fn send_test_notification(
         NotifierAvailability::PermissionDenied => toast(
             cx,
             ToastKind::Error,
-            "Notifications are denied — allow OxiMux in System Settings → Notifications",
+            "Notifications are denied — allow TREX in System Settings → Notifications",
         ),
     }
 }
@@ -220,7 +220,7 @@ fn availability_hint(availability: NotifierAvailability) -> &'static str {
             "Running unbundled — banners are disabled. Build the .app with scripts/bundle-macos.sh."
         }
         NotifierAvailability::PermissionDenied => {
-            "Notification permission denied. Allow OxiMux in System Settings → Notifications."
+            "Notification permission denied. Allow TREX in System Settings → Notifications."
         }
     }
 }

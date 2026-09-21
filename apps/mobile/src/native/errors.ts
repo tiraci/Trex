@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Render an error from the Rust core as something a human can act on.
  *
  * The generated `MobileError` variants are tagged-enum classes that also extend
@@ -49,8 +49,8 @@ export function describePairingError(error: unknown): string {
   if (raw.includes('unauthorized') || raw.includes('pairing failed')) {
     return 'Your desktop refused this code. It may have expired or already been used — open Settings → Remote there and tap "Pair a device" for a fresh one.';
   }
-  if (raw.includes('badticket') || raw.includes('invalid') || raw.includes('not an oximux')) {
-    return "That isn't a valid OxiMux pairing link.";
+  if (raw.includes('badticket') || raw.includes('invalid') || raw.includes('not an TREX')) {
+    return "That isn't a valid TREX pairing link.";
   }
   if (raw.includes('timed out') || raw.includes('timeout')) {
     return "Couldn't reach your Mac in time. Check it's awake and on a network, then try again.";

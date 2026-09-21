@@ -1,4 +1,4 @@
-//! GPUI element construction for the diff viewer.
+﻿//! GPUI element construction for the diff viewer.
 //!
 //! Sibling to `render.rs`. The data plan lives in `render.rs`
 //! (`FilePlan`, `HunkPlan`, `LinePlan`, `build_render_plan`); this file
@@ -72,8 +72,8 @@ use gpui::{
 };
 use gpui_component::input::{Input, InputEvent, InputState};
 use gpui_component::{Icon, Sizable as _};
-use oximux_core::{DiffLineKind, FileGroup, NoteSide};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{DiffLineKind, FileGroup, NoteSide};
+use trex_settings::{Density, Theme, Typography};
 
 /// Decoded image previews keyed by file display path — the async-fetched
 /// before/after blobs the image rows display. Threaded into
@@ -384,7 +384,7 @@ pub fn overview_ruler(
 /// Runs once per (diff, fold, expanded) change — NOT per frame.
 ///
 /// `regions_per_file[i]` are the stageable change regions for `plan[i]`
-/// (from `oximux_core::change_regions`). Because diffs are fetched with
+/// (from `trex_core::change_regions`). Because diffs are fetched with
 /// full-file context, the staging card (Stage/Unstage/Discard) anchors at
 /// the FIRST changed line of EACH region rather than once per file —
 /// restoring `git add -p` granularity over a whole-file view. The card's
@@ -400,7 +400,7 @@ pub fn overview_ruler(
 /// sliver solid.
 pub fn prepare(
     plan: &[FilePlan],
-    regions_per_file: &[Vec<oximux_core::ChangeRegion>],
+    regions_per_file: &[Vec<trex_core::ChangeRegion>],
     collapsed: &std::collections::HashSet<usize>,
     expanded_folds: &std::collections::HashSet<FoldId>,
     staged_per_file: &[bool],
@@ -411,7 +411,7 @@ pub fn prepare(
 
     let mut rows = Vec::new();
     for (file_idx, fp) in plan.iter().enumerate() {
-        let regions: &[oximux_core::ChangeRegion] = regions_per_file
+        let regions: &[trex_core::ChangeRegion] = regions_per_file
             .get(file_idx)
             .map(Vec::as_slice)
             .unwrap_or(&[]);
@@ -773,7 +773,7 @@ fn gutter_digits_for(plan: &[FilePlan]) -> usize {
 /// anchor so Stage/Unstage/Discard works unchanged.
 pub fn prepare_split(
     plan: &[FilePlan],
-    regions_per_file: &[Vec<oximux_core::ChangeRegion>],
+    regions_per_file: &[Vec<trex_core::ChangeRegion>],
     collapsed: &std::collections::HashSet<usize>,
     expanded_folds: &std::collections::HashSet<FoldId>,
     staged_per_file: &[bool],
@@ -783,7 +783,7 @@ pub fn prepare_split(
     let gutter_digits = gutter_digits_for(plan);
     let mut rows = Vec::new();
     for (file_idx, fp) in plan.iter().enumerate() {
-        let regions: &[oximux_core::ChangeRegion] = regions_per_file
+        let regions: &[trex_core::ChangeRegion] = regions_per_file
             .get(file_idx)
             .map(Vec::as_slice)
             .unwrap_or(&[]);

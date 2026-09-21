@@ -1,4 +1,4 @@
-//! Toolbar rendering for the Source Control panel: scope tabs, branch
+﻿//! Toolbar rendering for the Source Control panel: scope tabs, branch
 //! summary row (prefix counts + clickable branch chip + Push/Pull pills
 //! + the right-anchored panel-actions cluster), and the filter input row.
 //!
@@ -66,7 +66,7 @@ impl SourceControlPanel {
             .git_state
             .as_ref()
             .map(|s| {
-                use oximux_core::{IndexStatus, WorktreeStatus};
+                use trex_core::{IndexStatus, WorktreeStatus};
                 s.files
                     .iter()
                     .filter(|f| {
@@ -144,7 +144,7 @@ impl SourceControlPanel {
     }
 
     pub(super) fn render_branch_toolbar(&self, cx: &mut Context<Self>) -> impl IntoElement {
-        use oximux_core::ViewMode;
+        use trex_core::ViewMode;
         let view_mode = self.git_panel.read(cx).view_mode();
         let (view_mode_icon, view_mode_tooltip) = match view_mode {
             ViewMode::Flat => ("icons/list-tree.svg", "Switch to tree view"),

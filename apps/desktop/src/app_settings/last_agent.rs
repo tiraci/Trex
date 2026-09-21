@@ -1,4 +1,4 @@
-//! The create dialog's Agent default: the last agent the user chose.
+﻿//! The create dialog's Agent default: the last agent the user chose.
 //!
 //! A UX preference in the global `SettingsRepo` key/value store, following
 //! `scm_layout_settings`'s reasoning — it belongs to the person at this
@@ -10,8 +10,8 @@
 //! → `Skip`. `Skip` as a *fallback* is right; `Skip` as the *default* is what
 //! made "open a project, create a workspace, start an agent" three steps.
 
-use oximux_core::AgentAdapter;
-use oximux_storage::SettingsRepo;
+use trex_core::AgentAdapter;
+use trex_storage::SettingsRepo;
 
 /// Settings key holding the adapter id of the last agent chosen in the
 /// create dialog, or [`SKIP`] when the user chose no agent.
@@ -98,14 +98,14 @@ pub fn resolve_default(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::open_memory;
+    use trex_storage::open_memory;
 
     /// The registry is the oracle: every built-in adapter, in its order,
     /// with the id the launch picker and `agent_launch.toml` use. A roster
     /// change that forgets this module fails here.
     #[test]
     fn the_roster_and_its_ids_match_the_adapter_registry() {
-        let registry = oximux_agents::registry::AdapterRegistry::with_builtin_adapters();
+        let registry = trex_agents::registry::AdapterRegistry::with_builtin_adapters();
         let entries = registry.entries_without_detection();
         let kinds: Vec<AgentAdapter> = entries.iter().map(|e| e.adapter_enum).collect();
         assert_eq!(DIALOG_ORDER, kinds.as_slice());

@@ -1,15 +1,15 @@
-//! App-side loader and writer for `appearance.toml` — the palette, the density
+﻿//! App-side loader and writer for `appearance.toml` — the palette, the density
 //! preset, the whole-UI zoom, and the two font families.
 //!
 //! The first three are the [`Appearance`] global; the faces are a
 //! [`FontChoice`] beside it, because they cannot live in a `Copy` stamp (see
-//! [`oximux_settings::fonts`]). This module owns the file both are written to;
+//! [`trex_settings::fonts`]). This module owns the file both are written to;
 //! `font_settings` owns the half that needs a text system to validate.
 //!
 //! Startup reads `appearance.toml` from the app data dir (seeding a default so
 //! the file is there to look at), sanitizes it, and installs it as a GPUI
 //! global. Every view then resolves its own tokens from that global on render
-//! — see [`oximux_settings::appearance::sync`] for why the refresh is a pull
+//! — see [`trex_settings::appearance::sync`] for why the refresh is a pull
 //! rather than a push.
 //!
 //! # No file watch, unlike `terminal.toml`
@@ -25,7 +25,7 @@
 use std::path::PathBuf;
 
 use gpui::App;
-use oximux_settings::{Appearance, FontChoice};
+use trex_settings::{Appearance, FontChoice};
 
 fn settings_path() -> Option<PathBuf> {
     crate::app_paths::data_dir().map(|d| d.join(Appearance::FILE_NAME))
@@ -36,7 +36,7 @@ fn settings_path() -> Option<PathBuf> {
 ///
 /// One file, two readers: the font names cannot live in the `Copy` stamp the
 /// token scales compare on, so they parse separately out of the same text. Each
-/// half ignores the keys it does not own — see [`oximux_settings::fonts`].
+/// half ignores the keys it does not own — see [`trex_settings::fonts`].
 fn load() -> (Appearance, FontChoice) {
     let Some(path) = settings_path() else {
         return (Appearance::default(), FontChoice::default());
@@ -88,7 +88,7 @@ fn seed_default_if_absent() {
     {
         return;
     }
-    let body = oximux_settings::appearance::to_toml_string(
+    let body = trex_settings::appearance::to_toml_string(
         &Appearance::default(),
         &FontChoice::default(),
     );
@@ -137,17 +137,17 @@ pub fn install(cx: &mut App) {
 /// its palette at startup and has no reason to ask again. New panes, and
 /// anything that re-queries, follow immediately.
 fn publish_terminal_polarity(appearance: Appearance) {
-    oximux_pty::set_background_polarity(if appearance.theme.is_light() {
-        oximux_pty::BackgroundPolarity::Light
+    trex_pty::set_background_polarity(if appearance.theme.is_light() {
+        trex_pty::BackgroundPolarity::Light
     } else {
-        oximux_pty::BackgroundPolarity::Dark
+        trex_pty::BackgroundPolarity::Dark
     });
 }
 
 /// The appearance in force. Falls back to the shipped default when the global
 /// was never installed, so headless tests and early startup stay total.
 pub fn active(cx: &App) -> Appearance {
-    oximux_settings::appearance::active(cx)
+    trex_settings::appearance::active(cx)
 }
 
 /// Adopt `next`, repaint everything, and persist.
@@ -168,7 +168,7 @@ pub fn set(cx: &mut App, next: Appearance) {
     bridge_component_theme(cx);
     publish_terminal_polarity(next);
     cx.refresh_windows();
-    if let Err(err) = save(&next, oximux_settings::fonts::active(cx)) {
+    if let Err(err) = save(&next, trex_settings::fonts::active(cx)) {
         tracing::warn!(%err, "could not persist appearance.toml");
     }
 }
@@ -182,7 +182,7 @@ pub fn set(cx: &mut App, next: Appearance) {
 /// break is invisible until someone who set a preset presses zoom-reset and
 /// watches their preset go with it.
 mod step {
-    use oximux_settings::{Appearance, DensityPreset, ThemeChoice, UiScale, UsageDetail};
+    use trex_settings::{Appearance, DensityPreset, ThemeChoice, UiScale, UsageDetail};
 
     pub(super) fn zoom_in(current: Appearance) -> Appearance {
         Appearance {
@@ -240,19 +240,19 @@ pub fn zoom_reset(cx: &mut App) {
 }
 
 /// Switch density preset, leaving the palette and the zoom alone.
-pub fn set_density(cx: &mut App, density: oximux_settings::DensityPreset) {
+pub fn set_density(cx: &mut App, density: trex_settings::DensityPreset) {
     let next = step::density(active(cx), density);
     set(cx, next);
 }
 
 /// Switch palette, leaving the density and the zoom alone.
-pub fn set_theme(cx: &mut App, theme: oximux_settings::ThemeChoice) {
+pub fn set_theme(cx: &mut App, theme: trex_settings::ThemeChoice) {
     let next = step::theme(active(cx), theme);
     set(cx, next);
 }
 
 /// Switch how much the usage meter spells out, leaving the rest alone.
-pub fn set_usage_detail(cx: &mut App, usage_detail: oximux_settings::UsageDetail) {
+pub fn set_usage_detail(cx: &mut App, usage_detail: trex_settings::UsageDetail) {
     let next = step::usage_detail(active(cx), usage_detail);
     set(cx, next);
 }
@@ -283,11 +283,11 @@ pub fn bridge_component_theme(cx: &mut App) {
         return;
     }
     let appearance = active(cx);
-    let palette = oximux_settings::Theme::for_appearance(appearance);
-    let density = oximux_settings::Density::for_appearance(appearance);
+    let palette = trex_settings::Theme::for_appearance(appearance);
+    let density = trex_settings::Density::for_appearance(appearance);
     // Resolved before `global_mut` takes the mutable borrow.
     let (ui_face, mono_face) = {
-        let fonts = oximux_settings::fonts::active(cx);
+        let fonts = trex_settings::fonts::active(cx);
         (
             fonts.resolved_ui().to_string(),
             fonts.resolved_mono().to_string(),
@@ -345,7 +345,7 @@ pub fn save(appearance: &Appearance, fonts: &FontChoice) -> std::io::Result<()> 
     }
     std::fs::write(
         &path,
-        oximux_settings::appearance::to_toml_string(appearance, fonts),
+        trex_settings::appearance::to_toml_string(appearance, fonts),
     )
 }
 
@@ -353,7 +353,7 @@ pub fn save(appearance: &Appearance, fonts: &FontChoice) -> std::io::Result<()> 
 mod tests {
     use super::*;
     use gpui::TestAppContext;
-    use oximux_settings::{
+    use trex_settings::{
         Density, DensityPreset, FontChoice, Theme, ThemeChoice, Typography, UiScale, UsageDetail,
     };
 
@@ -408,7 +408,7 @@ mod tests {
 
     /// The pull: a view holding tokens from before a change picks up the new
     /// ones on its next render. This is what stands in for the push we do not
-    /// do — see `oximux_settings::appearance::sync`.
+    /// do — see `trex_settings::appearance::sync`.
     #[gpui::test]
     fn a_stale_snapshot_is_refreshed_by_the_pull(cx: &mut TestAppContext) {
         cx.update(|cx| {
@@ -422,7 +422,7 @@ mod tests {
                 scale: UiScale::from_percent(120),
                 ..Appearance::default()
             });
-            oximux_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
+            trex_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
 
             assert_eq!(density.h_row, Density::comfortable().h_row * 1.2);
             assert_eq!(typography.t_body_sm, Typography::cockpit().t_body_sm * 1.2);
@@ -448,7 +448,7 @@ mod tests {
                 ui: None,
                 mono: Some("Cascadia Code".into()),
             });
-            oximux_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
+            trex_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
 
             assert_eq!(typography.family_mono.as_ref(), "Cascadia Code");
             assert_eq!(
@@ -473,7 +473,7 @@ mod tests {
             });
 
             cx.set_global(FontChoice::default());
-            oximux_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
+            trex_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
 
             assert_eq!(
                 typography.family_mono,
@@ -494,7 +494,7 @@ mod tests {
             let mut typography = Typography::cockpit();
             let before = typography.mono_fallbacks.as_ptr();
 
-            oximux_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
+            trex_settings::appearance::sync(&mut theme, &mut density, &mut typography, cx);
 
             assert_eq!(density.h_row, Density::cockpit().h_row);
             assert_eq!(

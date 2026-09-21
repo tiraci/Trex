@@ -1,4 +1,4 @@
-//! Async directory-load operations for `FileExplorer`.
+﻿//! Async directory-load operations for `FileExplorer`.
 //!
 //! Extracted from `mod.rs` to keep that file under the 300-LOC hard limit.
 //! All functions take `&mut FileExplorer` (via the methods on the entity).
@@ -11,7 +11,7 @@ use gpui::{Context, Task};
 use std::collections::HashMap;
 use std::path::Path;
 use notify_debouncer_full::DebounceEventResult;
-use oximux_git::PollState;
+use trex_git::PollState;
 use std::path::PathBuf;
 
 /// Maximum retained in-flight load tasks. When exceeded, the oldest is
@@ -79,7 +79,7 @@ impl FileExplorer {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::file_explorer",
+                    target: "trex_app::file_explorer",
                     "no tokio runtime; dir load skipped"
                 );
                 cx.spawn(async move |_, _| {})
@@ -171,7 +171,7 @@ impl FileExplorer {
             Err(errors) => {
                 for err in errors {
                     tracing::warn!(
-                        target: "oximux_app::file_explorer",
+                        target: "trex_app::file_explorer",
                         %err,
                         "explorer watch error"
                     );
@@ -215,7 +215,7 @@ impl FileExplorer {
         }
         if !reloaded.is_empty() {
             tracing::debug!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 dirs = ?reloaded,
                 "watch fired; re-reading open directories"
             );

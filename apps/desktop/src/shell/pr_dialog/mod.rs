@@ -1,4 +1,4 @@
-//! PrCreateDialog — compose a pull request before creating it.
+﻿//! PrCreateDialog — compose a pull request before creating it.
 //!
 //! Replaces the bare commit-derived `gh pr create --fill` with an editable
 //! surface: a title field, a multi-line body, a draft toggle, and a
@@ -20,7 +20,7 @@ use gpui_component::{
     button::{Button, ButtonVariants},
     input::{Input, InputState, Textarea, TextareaState},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -177,7 +177,7 @@ impl Focusable for PrCreateDialog {
 
 impl Render for PrCreateDialog {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = &self.typography;

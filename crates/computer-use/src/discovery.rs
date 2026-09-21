@@ -1,6 +1,6 @@
-//! Locating the `cua-driver` executable.
+﻿//! Locating the `cua-driver` executable.
 //!
-//! OxiMux does not *ship* the driver. It can install one (see
+//! TREX does not *ship* the driver. It can install one (see
 //! [`crate::install`]), and the user may install their own; either way the
 //! result is the same layout, because the installer writes where upstream's
 //! does. On macOS that is a notarized `CuaDriver.app` plus a symlink on `PATH`;
@@ -17,7 +17,7 @@ use crate::Error;
 
 /// Overrides the search entirely. Exists for tests and for a developer running
 /// a locally built driver; not surfaced in settings.
-pub const PATH_OVERRIDE_ENV: &str = "OXIMUX_CUA_DRIVER";
+pub const PATH_OVERRIDE_ENV: &str = "TREX_CUA_DRIVER";
 
 /// Executable path inside the installed app bundle.
 #[cfg(not(windows))]
@@ -57,7 +57,7 @@ pub fn locate() -> Result<PathBuf, Error> {
     }
 
     // The known install location, checked before `PATH` for the same reason the
-    // bundle is: it is where OxiMux's own installer places, so it is the path
+    // bundle is: it is where TREX's own installer places, so it is the path
     // whose contents this crate can reason about.
     #[cfg(windows)]
     if let Some(bin) = windows_bin_dir() {

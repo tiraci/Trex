@@ -1,11 +1,11 @@
-//! Apps an agent may never drive, whatever the user approves.
+﻿//! Apps an agent may never drive, whatever the user approves.
 //!
 //! The grant model asks "may *this chat* drive *this process*". Some processes
 //! are not a question of which chat: a click into a password manager can reveal
 //! every credential the user owns, and a consent card cannot honestly cover it —
 //! someone approving "a click" is not approving that.
 //!
-//! OxiMux needs this more than a focus-stealing implementation does. When input
+//! TREX needs this more than a focus-stealing implementation does. When input
 //! is delivered by fronting the window, the user watches it happen; the whole
 //! point of background delivery is that they do not have to look, which means
 //! they also would not see this.
@@ -19,19 +19,19 @@
 //! Windows integrity levels enforce something this list only asks for. UIPI
 //! stops a process from sending input to any window owned by a
 //! higher-integrity process, in the kernel, with no list to maintain: an
-//! unelevated OxiMux **cannot** inject into an elevated app, whatever the user
+//! unelevated TREX **cannot** inject into an elevated app, whatever the user
 //! approves and whatever this table says. The driver surfaces the attempt as a
 //! structured `background_uipi_blocked` refusal rather than as a silent
 //! no-op — an honest failure, and a rare case of the platform doing this
 //! module's job properly.
 //!
 //! It also means [`crate::proc::executable_of_pid`] returning `None` for an
-//! elevated target is the *correct* answer rather than a limitation: OxiMux
+//! elevated target is the *correct* answer rather than a limitation: TREX
 //! could not drive that process anyway. Recorded because both look like bugs
 //! to fix, and fixing either would be removing a guarantee.
 //!
 //! Note what it does *not* cover. Almost everything this list names — password
-//! managers, browsers, editors — runs at the same integrity level as OxiMux,
+//! managers, browsers, editors — runs at the same integrity level as TREX,
 //! so UIPI has no opinion about them. It raises the floor under elevated
 //! processes only, and that is why the table is still the thing doing the work.
 
@@ -40,7 +40,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{LazyLock, Mutex};
 
 // Read only by `classify_identifier`, which is macOS-only: Windows catches a
-// second OxiMux by executable name in `classify_executable` instead.
+// second TREX by executable name in `classify_executable` instead.
 #[cfg(not(windows))]
 use crate::HOST_BUNDLE_ID;
 
@@ -99,10 +99,10 @@ const WINDOWS_BLOCKED_EXECUTABLES: &[&str] = &[
 
 /// Why a target is off-limits. Carried rather than collapsed to a bool so the
 /// refusal the agent reads says something true — "targeted a password manager"
-/// is actively misleading when the target was OxiMux itself.
+/// is actively misleading when the target was TREX itself.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Blocked {
-    /// OxiMux. An agent driving us can answer its own consent cards.
+    /// TREX. An agent driving us can answer its own consent cards.
     Host,
     /// A password manager or the keychain.
     Credentials,
@@ -118,7 +118,7 @@ impl Blocked {
     /// "`click` targeted {this}. Agents are never allowed to drive it."
     pub fn reason(self) -> &'static str {
         match self {
-            Blocked::Host => "OxiMux itself, which would let an agent approve its own actions",
+            Blocked::Host => "TREX itself, which would let an agent approve its own actions",
             Blocked::Credentials => {
                 "a password manager or keychain, where one click can expose every credential you have"
             }
@@ -143,7 +143,7 @@ static MEMO: LazyLock<Mutex<HashMap<PathBuf, Option<Blocked>>>> = LazyLock::new(
 
 /// Why the program at `executable` may never be driven, or `None` if it may.
 ///
-/// `host` is the OxiMux binary this check is being made on behalf of; see
+/// `host` is the TREX binary this check is being made on behalf of; see
 /// [`is_host`] for why it has to be passed in rather than assumed.
 ///
 /// Unreadable identity counts as **not** blocked. That is the deliberate choice:
@@ -165,7 +165,7 @@ pub fn blocked_reason(executable: &Path, host: Option<&Path>) -> Option<Blocked>
     // Windows has no bundle id, and `bundle_identifier` shells out to
     // `codesign`, which does not exist there. Left as-is this would resolve
     // every target to `None` — meaning *nothing* is refused on Windows except
-    // OxiMux itself, silently, with the whole table above still compiling.
+    // TREX itself, silently, with the whole table above still compiling.
     #[cfg(windows)]
     let verdict = classify_executable(executable);
     #[cfg(not(windows))]
@@ -186,9 +186,9 @@ pub fn is_blocked(executable: &Path, host: Option<&Path>) -> bool {
 
 /// The verdict for a bundle id alone.
 ///
-/// OxiMux is checked here as well as by [`is_host`] because the two catch
+/// TREX is checked here as well as by [`is_host`] because the two catch
 /// different things: `is_host` catches the binary we are serving, this catches a
-/// *second* copy of OxiMux the user is also running.
+/// *second* copy of TREX the user is also running.
 #[cfg(not(windows))]
 fn classify_identifier(identifier: &str) -> Option<Blocked> {
     if identifier.eq_ignore_ascii_case(HOST_BUNDLE_ID) {
@@ -218,21 +218,21 @@ fn classify_identifier(identifier: &str) -> Option<Blocked> {
 /// cause, and a password manager that also happened to match a category should
 /// still be reported as credentials.
 ///
-/// A second copy of OxiMux is caught here by executable name, where macOS
+/// A second copy of TREX is caught here by executable name, where macOS
 /// catches it by bundle id — weaker, but [`is_host`] already covers the copy
 /// that matters, which is the one being served.
 #[cfg(windows)]
 fn classify_executable(executable: &Path) -> Option<Blocked> {
     let name = executable.file_name().and_then(|name| name.to_str())?;
 
-    // A *second* copy of OxiMux — a different process, so `is_host` says
+    // A *second* copy of TREX — a different process, so `is_host` says
     // nothing about it. On macOS the bundle id catches this; here the
     // executable name is all there is, which is weak but not nothing, and the
     // alternative is that the case goes entirely unhandled on this platform.
     //
-    // `oximux.exe` is the `[[bin]]` name in `apps/desktop/Cargo.toml`. Two
+    // `TREX.exe` is the `[[bin]]` name in `apps/desktop/Cargo.toml`. Two
     // spellings of one string, and only one of them is Rust.
-    if name.eq_ignore_ascii_case("oximux.exe") {
+    if name.eq_ignore_ascii_case("TREX.exe") {
         return Some(Blocked::Host);
     }
 
@@ -262,7 +262,7 @@ fn is_blocked_identifier(identifier: &str) -> bool {
         .any(|blocked| blocked.eq_ignore_ascii_case(identifier))
 }
 
-/// Is `executable` the OxiMux this check is being made on behalf of?
+/// Is `executable` the TREX this check is being made on behalf of?
 ///
 /// The bundle-id entry covers the shipped app, but a developer build runs from
 /// `target/debug/` with an ad-hoc signature and no identifier at all — which is
@@ -272,7 +272,7 @@ fn is_blocked_identifier(identifier: &str) -> bool {
 /// **`current_exe()` alone is not enough**, and it is worth being exact about
 /// why: enforcement lives in a `PreToolUse` hook, which is a *separate binary*
 /// spawned per tool call. In that process `current_exe()` is the gate, not
-/// OxiMux, so the developer build above would fall through every check here and
+/// TREX, so the developer build above would fall through every check here and
 /// be driveable. So the gate is told which binary it is protecting, and both
 /// candidates are compared — `current_exe()` still covers the in-process caller
 /// and the tests, where nothing is passed.
@@ -419,14 +419,14 @@ mod tests {
     }
 
     #[test]
-    fn oximux_may_not_be_driven_by_its_own_agents() {
+    fn trex_may_not_be_driven_by_its_own_agents() {
         // The consent model rests on the user answering the card. An agent that
         // can click our window answers it for them.
         let me = std::env::current_exe().expect("test binary path");
         assert!(is_host(&me, None), "the running binary must recognise itself");
         assert_eq!(blocked_reason(&me, None), Some(Blocked::Host));
 
-        // And a second copy of OxiMux — a different process, so `is_host` says
+        // And a second copy of TREX — a different process, so `is_host` says
         // nothing about it — is refused on identity alone. The identity that
         // carries that differs per platform: a bundle id on macOS, and on
         // Windows only the executable name, which is the weaker claim the
@@ -435,7 +435,7 @@ mod tests {
         assert_eq!(classify_identifier(HOST_BUNDLE_ID), Some(Blocked::Host));
         #[cfg(windows)]
         assert_eq!(
-            classify_executable(Path::new(r"C:\Program Files\OxiMux\oximux.exe")),
+            classify_executable(Path::new(r"C:\Program Files\TREX\TREX.exe")),
             Some(Blocked::Host)
         );
     }
@@ -444,7 +444,7 @@ mod tests {
     fn a_declared_host_is_recognised_from_a_process_that_is_not_it() {
         // The case that matters in production and that `current_exe()` alone
         // gets wrong: the gate is its own binary, so unless it is told which
-        // one OxiMux is, a development build — ad-hoc signed, no bundle id —
+        // one TREX is, a development build — ad-hoc signed, no bundle id —
         // reads as an ordinary app and becomes driveable.
         // Any real, unremarkable system binary that is not this test process.
         let elsewhere = Path::new(crate::fixtures::some_executable());
@@ -560,7 +560,7 @@ mod tests {
                 assert_ne!(a.reason(), b.reason(), "{a:?} vs {b:?}");
             }
         }
-        assert!(Blocked::Host.reason().contains("OxiMux"));
+        assert!(Blocked::Host.reason().contains("TREX"));
 
         // And the classifier really does produce one of them, per platform.
         #[cfg(not(windows))]
@@ -577,7 +577,7 @@ mod tests {
 
     #[test]
     fn host_matching_sees_through_a_relative_spelling() {
-        // Canonicalization, not string equality: `target/debug/../debug/oximux`
+        // Canonicalization, not string equality: `target/debug/../debug/TREX`
         // is the same program and must not read as a different one.
         let me = std::env::current_exe().expect("test binary path");
         let parent = me.parent().expect("a parent dir");

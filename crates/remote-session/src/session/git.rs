@@ -1,4 +1,4 @@
-//! The client half of the git RPCs: working-tree status, per-path diffs, and the
+﻿//! The client half of the git RPCs: working-tree status, per-path diffs, and the
 //! staging/commit writes.
 //!
 //! Paths cross the wire **repository-relative**, exactly as a
@@ -6,8 +6,8 @@
 //! can be handed straight back here. The host re-contains every one against the
 //! repository regardless, so nothing a client sends can reach outside it.
 
-use oximux_remote_proto::messages::{FileDiffWire, GitStatusWire};
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::messages::{FileDiffWire, GitStatusWire};
+use trex_remote_proto::proto::{Request, Response};
 
 use super::{RemoteSession, Result};
 use crate::error::SessionError;

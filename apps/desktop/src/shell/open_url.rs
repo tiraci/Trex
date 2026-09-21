@@ -1,4 +1,4 @@
-//! Open a URL in the user's default browser.
+﻿//! Open a URL in the user's default browser.
 //!
 //! Delegates to [`gpui::App::open_url`] — the platform layer already knows how
 //! to launch a browser everywhere (NSWorkspace on macOS, ShellExecute on
@@ -14,7 +14,7 @@ pub(crate) fn open_url(url: &str, cx: &gpui::App) {
         return;
     }
     if !url.starts_with("https://") {
-        tracing::warn!(target: "oximux_app", url, "open_url: blocked non-https scheme");
+        tracing::warn!(target: "trex_app", url, "open_url: blocked non-https scheme");
         return;
     }
     cx.open_url(url);

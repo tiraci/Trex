@@ -1,6 +1,6 @@
-//! ProjectRepo integration tests — in-memory DB, fresh per test.
+﻿//! ProjectRepo integration tests — in-memory DB, fresh per test.
 
-use oximux_storage::{ProjectRepo, WorkspaceRepo, open_memory};
+use trex_storage::{ProjectRepo, WorkspaceRepo, open_memory};
 
 fn repo() -> (ProjectRepo, WorkspaceRepo) {
     let db = open_memory().expect("open memory");
@@ -68,7 +68,7 @@ fn project_delete_cascades_to_workspaces() {
     let (projects, workspaces) = repo();
     let p = projects.insert("A", "/a", "main").expect("project");
     workspaces
-        .insert(&p.id, "feat", "feat", "oximux/feat", "/wt/feat", true)
+        .insert(&p.id, "feat", "feat", "TREX/feat", "/wt/feat", true)
         .expect("workspace");
     projects.delete(&p.id).expect("delete project");
     let remaining = workspaces.list_for_project(&p.id).expect("list");
@@ -108,7 +108,7 @@ fn project_root_path_unique_conflict() {
     projects.insert("A", "/same", "main").expect("first");
     let err = projects.insert("B", "/same", "main").expect_err("conflict");
     match err {
-        oximux_storage::StorageError::Conflict { table, constraint } => {
+        trex_storage::StorageError::Conflict { table, constraint } => {
             assert_eq!(table, "projects");
             assert_eq!(constraint, "root_path");
         }

@@ -1,9 +1,9 @@
-//! Process-wide cache of the last-known model catalog per dynamic-model agent.
+﻿//! Process-wide cache of the last-known model catalog per dynamic-model agent.
 //!
 //! Codex and ACP agents (OpenCode, Cursor, Amp) don't declare a static model
 //! list — their real catalog is only known after the backend spawns and
 //! completes its handshake. The *New Agent* draft fetches it with a throwaway
-//! "catalog probe" ([`oximux_agents::thread::probe_catalog`]) that cold-starts
+//! "catalog probe" ([`trex_agents::thread::probe_catalog`]) that cold-starts
 //! the backend just to read the models, then throws the process away. That cold
 //! start is cheap for Codex (a Rust binary, ~0.1s) but slow for a Node ACP agent
 //! like OpenCode (~5s: interpreter start + plugin load + a 50-model session/new).
@@ -26,8 +26,8 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
 
 use gpui::Global;
-use oximux_agents::thread::ProbedCatalog;
-use oximux_storage::SettingsRepo;
+use trex_agents::thread::ProbedCatalog;
+use trex_storage::SettingsRepo;
 
 /// Settings key under which the persisted `entries` map is stored as JSON. The
 /// `_v1` suffix lets a future `ProbedCatalog`/`ModelChoice` shape change orphan
@@ -108,8 +108,8 @@ impl CatalogCache {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::thread::ModelChoice;
-    use oximux_storage::{SettingsRepo, open_memory};
+    use trex_agents::thread::ModelChoice;
+    use trex_storage::{SettingsRepo, open_memory};
 
     fn sample(wire: &str) -> ProbedCatalog {
         ProbedCatalog {

@@ -1,4 +1,4 @@
-import { useClient } from '@/native/client';
+﻿import { useClient } from '@/native/client';
 
 /**
  * Forgetting a desktop has to reach the desktop, or its paired-devices list goes
@@ -7,7 +7,7 @@ import { useClient } from '@/native/client';
  *
  * `mock`-prefixed names because a `jest.mock` factory is hoisted above them and
  * may only reference out-of-scope bindings starting with that prefix. The native
- * core is stubbed because importing it for real pulls in the `OximuxCore`
+ * core is stubbed because importing it for real pulls in the `TREXCore`
  * TurboModule, which does not exist under Node.
  */
 const mockCalls: string[] = [];
@@ -16,7 +16,7 @@ const mockClearHost = jest.fn(() => {
   return Promise.resolve();
 });
 
-jest.mock('oximux-core', () => ({
+jest.mock('trex-core', () => ({
   ConnState_Tags: {
     Connecting: 'Connecting',
     Connected: 'Connected',

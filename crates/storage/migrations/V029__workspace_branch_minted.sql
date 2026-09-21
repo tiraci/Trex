@@ -1,4 +1,4 @@
--- V029: record whether OxiMux MINTED this worktree's branch or ADOPTED one
+﻿-- V029: record whether TREX MINTED this worktree's branch or ADOPTED one
 -- that already existed.
 --
 -- Until now the answer was structural: a worktree's branch was always
@@ -14,7 +14,7 @@
 --
 -- `DEFAULT 1` is correct for every existing row, not merely convenient:
 -- adopting a branch is new in this migration's own release, so every worktree
--- that predates it was necessarily minted by OxiMux. Existing behaviour is
+-- that predates it was necessarily minted by TREX. Existing behaviour is
 -- preserved exactly.
 --
 -- INTEGER rather than BOOLEAN because SQLite has no boolean type; NOT NULL

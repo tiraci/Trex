@@ -1,4 +1,4 @@
-//! Integration tests for `freshen_default_branch` — real `git` binary in a
+﻿//! Integration tests for `freshen_default_branch` — real `git` binary in a
 //! tempdir, same style as `workspace_merge.rs`.
 //!
 //! The interesting property is not that the fast-forward works; it is that
@@ -11,8 +11,8 @@
 use std::path::Path;
 use std::process::Command;
 
-use oximux_git::Repository;
-use oximux_worktree_ops::freshen::{Freshened, SkipReason, freshen_default_branch};
+use trex_git::Repository;
+use trex_worktree_ops::freshen::{Freshened, SkipReason, freshen_default_branch};
 
 fn run_git(cwd: &Path, args: &[&str]) {
     let status = Command::new("git")
@@ -142,7 +142,7 @@ async fn a_worktree_created_after_a_freshen_starts_from_the_fresh_commit() {
     freshen_default_branch(&repo, "main").await;
 
     let wt = tmp.path().join("wt");
-    repo.add_worktree(&wt, "oximux/feat").await.expect("add worktree");
+    repo.add_worktree(&wt, "TREX/feat").await.expect("add worktree");
 
     assert_eq!(sha(&wt, "HEAD"), fresh, "the worktree was cut from the stale commit");
     assert_eq!(std::fs::read_to_string(wt.join("a.txt")).expect("read"), "v2\n");
@@ -163,7 +163,7 @@ async fn a_freshen_does_not_reach_a_worktree_cut_while_head_is_elsewhere() {
 
     assert_eq!(sha(&clone, "main"), sha(&upstream, "main"), "the ref should still move");
     let wt = tmp.path().join("wt");
-    repo.add_worktree(&wt, "oximux/feat").await.expect("add worktree");
+    repo.add_worktree(&wt, "TREX/feat").await.expect("add worktree");
     assert_eq!(
         sha(&wt, "HEAD"),
         head_before,

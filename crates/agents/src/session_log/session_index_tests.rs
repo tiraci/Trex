@@ -1,4 +1,4 @@
-//! Unit tests for [`super`] (the session index). Split out via `#[path]`
+﻿//! Unit tests for [`super`] (the session index). Split out via `#[path]`
 //! to keep `session_index.rs` under the file-size cap.
 
     use super::*;
@@ -308,8 +308,8 @@
     #[test]
     fn sanitize_project_path_matches_claude_slug() {
         assert_eq!(
-            sanitize_project_path("/Users/x/Code/projects/OxiMux"),
-            "-Users-x-Code-projects-OxiMux"
+            sanitize_project_path("/Users/x/Code/projects/TREX"),
+            "-Users-x-Code-projects-TREX"
         );
         // Every non-alphanumeric byte → '-' (spaces, dots, colons included).
         assert_eq!(sanitize_project_path("/a/My App.v2"), "-a-My-App-v2");

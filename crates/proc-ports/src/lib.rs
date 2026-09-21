@@ -1,4 +1,4 @@
-//! Which local TCP ports a given set of processes is listening on.
+﻿//! Which local TCP ports a given set of processes is listening on.
 //!
 //! A dev server announces itself by printing a URL, and then that line scrolls
 //! away. The socket does not scroll away: it exists for exactly as long as the
@@ -8,8 +8,8 @@
 //! server that prints nothing, and a server that printed a URL it is not
 //! actually reachable at.
 //!
-//! Sibling of [`oximux-proc-tree`](../../proc-tree) and
-//! [`oximux-proc-cwd`](../../proc-cwd), and its own crate for the same reason
+//! Sibling of [`trex-proc-tree`](../../proc-tree) and
+//! [`trex-proc-cwd`](../../proc-cwd), and its own crate for the same reason
 //! both of those are: dependency-light kernel introspection whose consumers
 //! share nothing else with each other.
 //!

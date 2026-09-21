@@ -1,10 +1,10 @@
-//! Integration tests for worktree operations on `Repository`: `add_worktree`,
+﻿//! Integration tests for worktree operations on `Repository`: `add_worktree`,
 //! `list_worktrees`, `remove_worktree`. Tempdir + real `git` binary on PATH.
 
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_git::{GitError, Repository};
+use trex_git::{GitError, Repository};
 
 #[tokio::test]
 async fn list_worktrees_main_only() {
@@ -37,13 +37,13 @@ async fn add_worktree_creates_dir_and_branch() {
     let wt_path = wt_root.path().join("feat-x");
 
     let repo = Repository::open(p).await.unwrap();
-    let info = repo.add_worktree(&wt_path, "oximux/feat-x").await.unwrap();
+    let info = repo.add_worktree(&wt_path, "TREX/feat-x").await.unwrap();
     assert!(wt_path.exists());
     assert!(!info.is_main);
-    assert_eq!(info.branch.as_deref(), Some("oximux/feat-x"));
+    assert_eq!(info.branch.as_deref(), Some("TREX/feat-x"));
 
     let bs = repo.list_branches().await.unwrap();
-    assert!(bs.iter().any(|b| b.name == "oximux/feat-x"));
+    assert!(bs.iter().any(|b| b.name == "TREX/feat-x"));
 }
 
 #[tokio::test]
@@ -59,12 +59,12 @@ async fn add_worktree_appears_in_list() {
     let wt_path = wt_root.path().join("wt");
 
     let repo = Repository::open(p).await.unwrap();
-    repo.add_worktree(&wt_path, "oximux/wt-slug").await.unwrap();
+    repo.add_worktree(&wt_path, "TREX/wt-slug").await.unwrap();
 
     let ws = repo.list_worktrees().await.unwrap();
     assert_eq!(ws.len(), 2);
     let linked = ws.iter().find(|w| !w.is_main).unwrap();
-    assert_eq!(linked.branch.as_deref(), Some("oximux/wt-slug"));
+    assert_eq!(linked.branch.as_deref(), Some("TREX/wt-slug"));
 }
 
 #[tokio::test]
@@ -80,7 +80,7 @@ async fn remove_worktree_clean() {
     let wt_path = wt_root.path().join("wt");
 
     let repo = Repository::open(p).await.unwrap();
-    repo.add_worktree(&wt_path, "oximux/remove-clean").await.unwrap();
+    repo.add_worktree(&wt_path, "TREX/remove-clean").await.unwrap();
     repo.remove_worktree(&wt_path, false).await.unwrap();
 
     let ws = repo.list_worktrees().await.unwrap();
@@ -101,7 +101,7 @@ async fn remove_worktree_dirty_without_force_errors() {
     let wt_path = wt_root.path().join("wt");
 
     let repo = Repository::open(p).await.unwrap();
-    repo.add_worktree(&wt_path, "oximux/dirty-no-force").await.unwrap();
+    repo.add_worktree(&wt_path, "TREX/dirty-no-force").await.unwrap();
     // Dirty the worktree (modify the checked-out copy of a.txt).
     write(&wt_path.join("a.txt"), "modified\n");
 
@@ -123,7 +123,7 @@ async fn remove_worktree_dirty_with_force_succeeds() {
     let wt_path = wt_root.path().join("wt");
 
     let repo = Repository::open(p).await.unwrap();
-    repo.add_worktree(&wt_path, "oximux/dirty-force").await.unwrap();
+    repo.add_worktree(&wt_path, "TREX/dirty-force").await.unwrap();
     write(&wt_path.join("a.txt"), "modified\n");
 
     repo.remove_worktree(&wt_path, true).await.unwrap();
@@ -160,7 +160,7 @@ async fn add_worktree_path_already_exists_errors() {
     write(&wt_path.join("blocker"), "exists\n");
 
     let repo = Repository::open(p).await.unwrap();
-    let err = repo.add_worktree(&wt_path, "oximux/exists").await.unwrap_err();
+    let err = repo.add_worktree(&wt_path, "TREX/exists").await.unwrap_err();
     assert!(matches!(err, GitError::NonZero { .. }), "got {err:?}");
 }
 
@@ -181,7 +181,7 @@ async fn add_worktree_rejects_an_unusable_branch_name_before_the_git_call() {
     let wt_path = wt_root.path().join("wt");
 
     let repo = Repository::open(p).await.unwrap();
-    for bad in ["a/b/c", "oximux/feat^1", "oximux/../escape", "/feat", "oximux/"] {
+    for bad in ["a/b/c", "TREX/feat^1", "TREX/../escape", "/feat", "TREX/"] {
         let err = repo.add_worktree(&wt_path, bad).await.unwrap_err();
         assert!(matches!(err, GitError::InvalidInput { .. }), "{bad:?} got {err:?}");
         // Defense-in-depth: validation runs before any side effect.
@@ -189,9 +189,9 @@ async fn add_worktree_rejects_an_unusable_branch_name_before_the_git_call() {
     }
 
     // ...and the one that used to be rejected is now the ordinary case.
-    repo.add_worktree(&wt_path, "nhtera/bar").await.expect("one prefix segment is legal");
+    repo.add_worktree(&wt_path, "tiraci/bar").await.expect("one prefix segment is legal");
     let listed = repo.list_worktrees().await.unwrap();
-    assert!(listed.iter().any(|w| w.branch.as_deref() == Some("nhtera/bar")));
+    assert!(listed.iter().any(|w| w.branch.as_deref() == Some("tiraci/bar")));
 }
 
 #[tokio::test]
@@ -203,14 +203,14 @@ async fn add_worktree_existing_branch_errors() {
     run_git(p, &["add", "a.txt"]);
     run_git(p, &["commit", "-m", "init"]);
     // Pre-create the branch — `worktree add -b` will refuse.
-    run_git(p, &["branch", "oximux/already-here"]);
+    run_git(p, &["branch", "TREX/already-here"]);
 
     let wt_root = tempfile::tempdir().unwrap();
     let wt_path = wt_root.path().join("wt");
 
     let repo = Repository::open(p).await.unwrap();
     let err = repo
-        .add_worktree(&wt_path, "oximux/already-here")
+        .add_worktree(&wt_path, "TREX/already-here")
         .await
         .unwrap_err();
     assert!(matches!(err, GitError::NonZero { .. }), "got {err:?}");
@@ -230,11 +230,11 @@ async fn a_linked_worktree_resolves_back_to_its_main_repository() {
     run_git(p, &["commit", "-m", "init"]);
 
     let wt_root = tempfile::tempdir().unwrap();
-    let wt_path = wt_root.path().join("oximux-wt-feat-x");
+    let wt_path = wt_root.path().join("trex-wt-feat-x");
     let repo = Repository::open(p).await.unwrap();
-    repo.add_worktree(&wt_path, "oximux/feat-x").await.unwrap();
+    repo.add_worktree(&wt_path, "TREX/feat-x").await.unwrap();
 
-    let main = oximux_git::main_worktree_of(&wt_path).expect("a linked worktree resolves");
+    let main = trex_git::main_worktree_of(&wt_path).expect("a linked worktree resolves");
     assert_eq!(main, p.canonicalize().unwrap());
 
     // The worktree is a *sibling* of the repo, not a child — which is why
@@ -253,16 +253,16 @@ async fn a_primary_worktree_is_not_a_linked_one() {
     run_git(p, &["add", "a.txt"]);
     run_git(p, &["commit", "-m", "init"]);
 
-    assert_eq!(oximux_git::main_worktree_of(p), None);
+    assert_eq!(trex_git::main_worktree_of(p), None);
 }
 
 #[tokio::test]
 async fn a_directory_that_is_not_a_repository_resolves_to_nothing() {
     // Fails closed: an uncertain answer withholds the capability.
     let tmp = tempfile::tempdir().unwrap();
-    assert_eq!(oximux_git::main_worktree_of(tmp.path()), None);
+    assert_eq!(trex_git::main_worktree_of(tmp.path()), None);
     assert_eq!(
-        oximux_git::main_worktree_of(std::path::Path::new("/definitely/not/here")),
+        trex_git::main_worktree_of(std::path::Path::new("/definitely/not/here")),
         None
     );
 }
@@ -286,7 +286,7 @@ async fn repo_with_worktree(
     let wt_root = tempfile::tempdir().unwrap();
     let wt_path = wt_root.path().join(slug);
     let repo = Repository::open(p).await.unwrap();
-    repo.add_worktree(&wt_path, &format!("oximux/{slug}")).await.unwrap();
+    repo.add_worktree(&wt_path, &format!("TREX/{slug}")).await.unwrap();
     (tmp, wt_root, wt_path)
 }
 
@@ -312,7 +312,7 @@ async fn move_worktree_relocates_the_directory_and_git_agrees() {
         std::fs::canonicalize(&moved.path).unwrap(),
         std::fs::canonicalize(&to).unwrap(),
     );
-    assert_eq!(moved.branch.as_deref(), Some("oximux/fix-lgoin"));
+    assert_eq!(moved.branch.as_deref(), Some("TREX/fix-lgoin"));
 }
 
 #[tokio::test]
@@ -349,7 +349,7 @@ async fn rename_branch_renames_and_is_reversible() {
     let (tmp, _wt_root, _wt) = repo_with_worktree("fix-lgoin").await;
     let repo = Repository::open(tmp.path()).await.unwrap();
 
-    repo.rename_branch("oximux/fix-lgoin", "oximux/fix-login")
+    repo.rename_branch("TREX/fix-lgoin", "TREX/fix-login")
         .await
         .unwrap();
     let names: Vec<String> = repo
@@ -359,14 +359,14 @@ async fn rename_branch_renames_and_is_reversible() {
         .into_iter()
         .map(|b| b.name)
         .collect();
-    assert!(names.iter().any(|n| n == "oximux/fix-login"));
+    assert!(names.iter().any(|n| n == "TREX/fix-login"));
     assert!(
-        !names.iter().any(|n| n == "oximux/fix-lgoin"),
+        !names.iter().any(|n| n == "TREX/fix-lgoin"),
         "old name must be gone, not aliased"
     );
 
     // Reversibility is what lets a rollback walk this step back.
-    repo.rename_branch("oximux/fix-login", "oximux/fix-lgoin")
+    repo.rename_branch("TREX/fix-login", "TREX/fix-lgoin")
         .await
         .unwrap();
     let names: Vec<String> = repo
@@ -376,17 +376,17 @@ async fn rename_branch_renames_and_is_reversible() {
         .into_iter()
         .map(|b| b.name)
         .collect();
-    assert!(names.iter().any(|n| n == "oximux/fix-lgoin"));
+    assert!(names.iter().any(|n| n == "TREX/fix-lgoin"));
 }
 
 #[tokio::test]
 async fn rename_branch_refuses_to_overwrite_an_existing_branch() {
     let (tmp, _wt_root, _wt) = repo_with_worktree("feat-a").await;
     let repo = Repository::open(tmp.path()).await.unwrap();
-    repo.create_branch("oximux/feat-b", None).await.unwrap();
+    repo.create_branch("TREX/feat-b", None).await.unwrap();
 
     let err = repo
-        .rename_branch("oximux/feat-a", "oximux/feat-b")
+        .rename_branch("TREX/feat-a", "TREX/feat-b")
         .await
         .unwrap_err();
     assert!(matches!(err, GitError::NonZero { .. }), "got {err:?}");
@@ -398,8 +398,8 @@ async fn rename_branch_refuses_to_overwrite_an_existing_branch() {
         .into_iter()
         .map(|b| b.name)
         .collect();
-    assert!(names.iter().any(|n| n == "oximux/feat-a"));
-    assert!(names.iter().any(|n| n == "oximux/feat-b"));
+    assert!(names.iter().any(|n| n == "TREX/feat-a"));
+    assert!(names.iter().any(|n| n == "TREX/feat-b"));
 }
 
 #[tokio::test]
@@ -408,7 +408,7 @@ async fn upstream_of_is_none_for_a_local_only_branch() {
     let repo = Repository::open(tmp.path()).await.unwrap();
     // No upstream configured is a normal answer, not an error — this is the
     // only state in which renaming the branch is safe.
-    assert_eq!(repo.upstream_of("oximux/feat-a").await.unwrap(), None);
+    assert_eq!(repo.upstream_of("TREX/feat-a").await.unwrap(), None);
 }
 
 #[tokio::test]
@@ -423,12 +423,12 @@ async fn upstream_of_names_the_remote_ref_once_the_branch_is_pushed() {
         p,
         &["remote", "add", "origin", &remote.path().to_string_lossy()],
     );
-    run_git(p, &["push", "-q", "-u", "origin", "oximux/feat-a"]);
+    run_git(p, &["push", "-q", "-u", "origin", "TREX/feat-a"]);
 
     let repo = Repository::open(p).await.unwrap();
     assert_eq!(
-        repo.upstream_of("oximux/feat-a").await.unwrap().as_deref(),
-        Some("origin/oximux/feat-a"),
+        repo.upstream_of("TREX/feat-a").await.unwrap().as_deref(),
+        Some("origin/TREX/feat-a"),
     );
 }
 
@@ -551,19 +551,19 @@ async fn add_worktree_from_bases_the_new_branch_on_the_named_ref() {
 
     let repo = Repository::open(p).await.unwrap();
     let info = repo
-        .add_worktree_from(&wt_path, "oximux/feat-x", "side")
+        .add_worktree_from(&wt_path, "TREX/feat-x", "side")
         .await
         .unwrap();
-    assert_eq!(info.branch.as_deref(), Some("oximux/feat-x"));
+    assert_eq!(info.branch.as_deref(), Some("TREX/feat-x"));
 
     // The new branch's tip IS the first commit — it was cut from `side`, not
     // from the main checkout's HEAD two commits along.
-    let tip = git_out(p, &["rev-parse", "oximux/feat-x"]);
+    let tip = git_out(p, &["rev-parse", "TREX/feat-x"]);
     assert_eq!(tip, first, "worktree did not branch from `side`");
 
     // And the merge-base with HEAD is that same commit, which is the property
     // a reviewer actually reads: the work starts where the user asked.
-    let base = git_out(p, &["merge-base", "oximux/feat-x", "main"]);
+    let base = git_out(p, &["merge-base", "TREX/feat-x", "main"]);
     assert_eq!(base, first);
 }
 
@@ -583,11 +583,11 @@ async fn add_worktree_from_defaults_are_unaffected_by_a_feature_branch_head() {
     let wt_root = tempfile::tempdir().unwrap();
     let wt_path = wt_root.path().join("feat-y");
     let repo = Repository::open(p).await.unwrap();
-    repo.add_worktree_from(&wt_path, "oximux/feat-y", "side")
+    repo.add_worktree_from(&wt_path, "TREX/feat-y", "side")
         .await
         .unwrap();
 
-    let tip = git_out(p, &["rev-parse", "oximux/feat-y"]);
+    let tip = git_out(p, &["rev-parse", "TREX/feat-y"]);
     assert_eq!(tip, first, "new worktree inherited the wip HEAD");
 }
 
@@ -604,11 +604,11 @@ async fn add_worktree_existing_checks_out_without_creating_a_prefixed_branch() {
     let info = repo.add_worktree_existing(&wt_path, "side").await.unwrap();
     assert_eq!(info.branch.as_deref(), Some("side"));
 
-    // No `oximux/`-prefixed branch was minted anywhere: the worktree adopted
+    // No `TREX/`-prefixed branch was minted anywhere: the worktree adopted
     // the branch under the name it already had.
     let branches = repo.list_branches().await.unwrap();
     assert!(
-        !branches.iter().any(|b| b.name.starts_with("oximux/")),
+        !branches.iter().any(|b| b.name.starts_with("TREX/")),
         "existing-branch mode minted a prefixed branch: {branches:?}"
     );
 }
@@ -673,7 +673,7 @@ async fn base_ref_arguments_shaped_like_flags_are_refused_before_git_runs() {
         // input in the failure message.
         let wt_path = wt_root.path().join(format!("wt-{i}"));
         let err = repo
-            .add_worktree_from(&wt_path, "oximux/probe", bad)
+            .add_worktree_from(&wt_path, "TREX/probe", bad)
             .await
             .unwrap_err();
         assert!(
@@ -725,7 +725,7 @@ async fn add_worktree_from_rejects_a_ref_that_does_not_resolve() {
     // an unresolvable-looking name as a remote-tracking branch (see the
     // regression tests below).
     let err = repo
-        .add_worktree_from(&wt_root.path().join("nope"), "oximux/nope", "no-such-ref")
+        .add_worktree_from(&wt_root.path().join("nope"), "TREX/nope", "no-such-ref")
         .await
         .unwrap_err();
     assert!(
@@ -769,7 +769,7 @@ fn repo_whose_default_is_remote_only(root: &std::path::Path) -> std::path::PathB
 /// **The regression.** `git worktree add -b <new> -- <path> <start>` DWIMs a
 /// start point that names no local branch but exactly one remote-tracking
 /// branch into `--track -b <that name>` — and the DWIM **beats the explicit
-/// `-b`**. Before the SHA resolution this created `main`, left `oximux/feat`
+/// `-b`**. Before the SHA resolution this created `main`, left `TREX/feat`
 /// non-existent, and reported success, so the `workspaces` row named a branch
 /// that was never made.
 ///
@@ -788,7 +788,7 @@ async fn a_remote_only_start_point_cannot_hijack_the_branch_name() {
 
     let repo = Repository::open(&work).await.unwrap();
     let err = repo
-        .add_worktree_from(&wt_path, "oximux/feat", "main")
+        .add_worktree_from(&wt_path, "TREX/feat", "main")
         .await
         .unwrap_err();
     assert!(
@@ -800,7 +800,7 @@ async fn a_remote_only_start_point_cannot_hijack_the_branch_name() {
     assert!(!wt_path.exists());
     let branches = repo.list_branches().await.unwrap();
     assert!(
-        !branches.iter().any(|b| b.name == "main" || b.name == "oximux/feat"),
+        !branches.iter().any(|b| b.name == "main" || b.name == "TREX/feat"),
         "a branch was created behind our back: {branches:?}"
     );
 }
@@ -817,12 +817,12 @@ async fn the_remote_tracking_form_bases_correctly_and_keeps_our_branch_name() {
 
     let repo = Repository::open(&work).await.unwrap();
     let info = repo
-        .add_worktree_from(&wt_path, "oximux/feat", "origin/main")
+        .add_worktree_from(&wt_path, "TREX/feat", "origin/main")
         .await
         .unwrap();
-    assert_eq!(info.branch.as_deref(), Some("oximux/feat"));
+    assert_eq!(info.branch.as_deref(), Some("TREX/feat"));
     assert_eq!(
-        git_out(&work, &["rev-parse", "oximux/feat"]),
+        git_out(&work, &["rev-parse", "TREX/feat"]),
         git_out(&work, &["rev-parse", "origin/main"])
     );
     let branches = repo.list_branches().await.unwrap();
@@ -875,11 +875,11 @@ async fn adopting_refuses_a_tag() {
 
     // `--from` is the documented way to do what the user probably meant, and
     // it still works on the same tag.
-    repo.add_worktree_from(&wt_path, "oximux/from-tag", "v1.0")
+    repo.add_worktree_from(&wt_path, "TREX/from-tag", "v1.0")
         .await
         .expect("--from accepts a tag");
     assert_eq!(
-        git_out(p, &["rev-parse", "oximux/from-tag"]),
+        git_out(p, &["rev-parse", "TREX/from-tag"]),
         git_out(p, &["rev-parse", "v1.0^{commit}"])
     );
 }
@@ -928,7 +928,7 @@ async fn a_worktree_added_anywhere_is_listed_from_the_main_repository() {
     std::fs::create_dir_all(far.parent().unwrap()).unwrap();
     run_git(p, &["worktree", "add", "-b", "topic", far.to_str().unwrap()]);
 
-    let ws = oximux_git::list_worktrees_at(p).await.unwrap();
+    let ws = trex_git::list_worktrees_at(p).await.unwrap();
     assert_eq!(ws.len(), 2);
     let linked = ws.iter().find(|w| !w.is_main).expect("the linked worktree");
     assert_eq!(linked.branch.as_deref(), Some("topic"));

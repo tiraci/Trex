@@ -1,9 +1,9 @@
-//! Terminal settings pane — edits the `TerminalSettings` working copy.
+﻿//! Terminal settings pane — edits the `TerminalSettings` working copy.
 //! Every control applies immediately: it mutates the copy and writes
 //! `terminal.toml`; the live-reload watcher re-applies to open panes.
 
 use gpui::{AnyElement, IntoElement, ParentElement, Styled, div, px};
-use oximux_settings::{BellStyle, Density, Theme, Typography, WindowsPowerShell, WindowsShell};
+use trex_settings::{BellStyle, Density, Theme, Typography, WindowsPowerShell, WindowsShell};
 
 use super::SettingsModal;
 use super::controls::{stepper, toggle_switch};

@@ -1,7 +1,7 @@
-# OxiMux — System Architecture
+﻿# TREX — System Architecture
 
 **Updated**: 2026-08-05  
-**Phase**: 5 + multiplexer enhancements + UI/UX batch (settings modal, Quick Open, lifecycle scripts, Create PR + CI, floating PiP terminal, markdown preview) shipped; external-CLI auto-provisioning (bundled ripgrep + one-click verified `cua-driver` install) shipped; desktop auto-update shipped; `oximux` CLI + `oximux serve` (headless host) shipped
+**Phase**: 5 + multiplexer enhancements + UI/UX batch (settings modal, Quick Open, lifecycle scripts, Create PR + CI, floating PiP terminal, markdown preview) shipped; external-CLI auto-provisioning (bundled ripgrep + one-click verified `cua-driver` install) shipped; desktop auto-update shipped; `TREX` CLI + `TREX serve` (headless host) shipped
 
 ---
 
@@ -27,7 +27,7 @@
 │    SettingsModal  — Cmd+,  / left-rail cog           │
 │    FloatingTerminal — Cmd+Shift+T (PiP, draggable)  │
 ├─────────────────────────────────────────────────────┤
-│  Shared widget layer  (crates/ui — oximux-ui)       │
+│  Shared widget layer  (crates/ui — trex-ui)       │
 │  FloatingSurface overlay chrome, button variants,   │
 │  ConfirmDialog. App-agnostic; app depends on ui,    │
 │  ui never on app. Host re-exports as crate::ui.     │
@@ -46,7 +46,7 @@
 │                  postcard envelope, HostEvent,       │
 │                  PairingTicket, Transport (WIP)      │
 │  crates/settings — terminal.toml, commit_message_ai.toml,│
-│                    ProjectScripts (.oximux/scripts.toml)  │
+│                    ProjectScripts (.trex/scripts.toml)  │
 │  crates/core   — shared domain types (no deps)      │
 ├─────────────────────────────────────────────────────┤
 │  Async runtime                                      │
@@ -66,57 +66,57 @@ backend crates (`core`/`git`/`agents`/`pty`/…); GPUI views live in
 
 | Crate dir | Package | Entry | Purpose |
 |---|---|---|---|
-| `core` | `oximux-core` | `src/lib.rs` | shared domain types, no deps |
-| `pty` | `oximux-pty` | `src/lib.rs` | `TerminalBackend` + `PortablePtyBackend` |
-| `proc-cwd` | `oximux-proc-cwd` | `src/lib.rs` | resolve a process's working dir |
-| `proc-tree` | `oximux-proc-tree` | `src/lib.rs` | walk a process's descendants and read their argument vectors — how a plain terminal is known to be running an agent CLI (see *Ambient agent detection*). Sibling of `proc-cwd` for the same reason: dependency-light kernel introspection (`proc_listpids` + `KERN_PROCARGS2` on macOS, `/proc` on Linux, a Toolhelp snapshot on Windows) whose consumers share nothing else |
-| `owner-only` | `oximux-owner-only` | `src/lib.rs` | restrict a file or directory to the account that created it — `0600`/`0700` on unix, a stated *protected* DACL on Windows; shared by the desktop app, relay daemon, and remote host so the SID lookup exists once |
-| `no-window` | `oximux-no-window` | `src/lib.rs` | `CREATE_NO_WINDOW` for every child spawned on Windows, so a console-subsystem child (git, rg, an agent CLI's node) doesn't flash an empty console; a no-op applied unconditionally on every other platform |
-| `job-object` | `oximux-job-object` | `src/lib.rs` | Windows-only child-tree kill via a Job Object (`KILL_ON_JOB_CLOSE`) — terminating or crash-losing the host reaps every descendant, the tree semantics a unix process-group signal already gives for free; compiles to nothing off Windows |
-| `single-instance` | `oximux-single-instance` | `src/lib.rs` | non-blocking advisory file lock (`flock` / `LockFileEx` via `fd-lock`) deciding which process owns a per-data-directory role — extracted from the desktop's GUI singleton guard so `oximux serve` contends for the same roles (GUI singleton, schedule ticker) with identical semantics |
-| `shell-env` | `oximux-shell-env` | `src/lib.rs` | the default shell to spawn a new terminal with, and what its environment needs — shared by `oximux-pty`'s in-process backend and the relay daemon so the rule exists once, not twice out of sync |
-| `computer-use` | `oximux-computer-use` | `src/lib.rs` | `cua-driver` discovery/verify, permission gate, MCP declaration, one-click installer (`install/`) — never starts/supervises the daemon |
-| `macos-trust` | `oximux-macos-trust` | `src/lib.rs` | shared codesign/spctl verification + crash-safe `renamex_np` bundle swap, extracted from `computer-use` so it and `auto-update` don't fork their own copies |
-| `auto-update` | `oximux-auto-update` | `src/lib.rs` | desktop app self-update: GitHub release feed, download/mount/stage/verify pipeline, `UpdateStatus` state machine — swap is staged only, never live |
-| `git` | `oximux-git` | `src/lib.rs` | `Repository`, `StatusPoller`, git ops, `GhCmd` |
-| `agent-core` | `oximux-agent-core` | `src/lib.rs` | portable `ThreadEvent` vocabulary + stream-json decoder + `ChatThread` fold (serde/serde_json/tracing only, no pty/rusqlite/ACP/gpui/tokio — mobile-portable); re-exported by `agents` under `crate::thread::*` |
-| `agents` | `oximux-agents` | `src/lib.rs` | `AgentRuntime` trait, `CliRuntime`, `StatusMachine`; `SessionRegistry` (gpui-free session event bus + command surface, built for Remote Control, not yet wired into the view) |
-| `remote-proto` | `oximux-remote-proto` | `src/lib.rs` | transport-free Remote Control wire vocabulary — postcard RPC envelope, `HostEvent` stream frame, `PairingTicket` codec, `Transport` trait seam; `remote-host`, `remote-session`, `remote-iroh`, and the `oximux` CLI all speak it |
-| `remote-local` | `oximux-remote-local` | `src/lib.rs` | the same-machine control transport: the owner-only unix socket / named pipe the `oximux` CLI uses to reach a host (desktop app or `oximux serve`), behind `remote-proto`'s `Transport` seam — both the listener a host binds and the dial the CLI makes live here |
-| `remote-host` | `oximux-remote-host` | `src/lib.rs` | the remote-control host core: transport-agnostic RPC dispatcher, two-key pairing/auth handshake + ACL, host identity; serves `agents`' `SessionRegistry` over `remote-proto`. Used by both hosts (`apps/desktop` and `apps/cli`'s `serve`) — never ships to mobile |
-| `remote-session` | `oximux-remote-session` | `src/lib.rs` | the client-side remote-control session (the phone's Rust core) — pure Rust, no FFI, unit-testable over the in-memory loopback against the real `remote-host` dispatcher; `mobile-core` wraps it |
-| `remote-iroh` | `oximux-remote-iroh` | `src/lib.rs` | the production iroh P2P (QUIC) `Transport`/`Connector` impls beneath `remote-session` and `remote-host`; its `host` feature — off by default in this workspace alias, opted into by both hosts (`apps/desktop` and `apps/cli`) — adds the accept loop, so the mobile core never links the PTY-spawning code |
-| `mobile-core` | `oximux-mobile-core` | `src/lib.rs` | uniffi binding wrapping `remote-session` + `remote-iroh` into a typed async + streamed-callback surface for the React Native app; builds `cdylib` (Android) / `staticlib` (iOS) alongside a normal `lib` |
-| `editor` | `oximux-editor` | `src/lib.rs` | gpui-component editor wrapper + LSP glue |
-| `dictation` | `oximux-dictation` | `src/lib.rs` | offline voice dictation: cpal mic capture → 16kHz resample → sherpa-onnx decode (Whisper for Vietnamese, Parakeet for English); channel-based `DictationController`, no GPUI dependency |
-| `storage` | `oximux-storage` | `src/lib.rs` | SQLite + migration ladder + CI guard |
-| `settings` | `oximux-settings` | `src/lib.rs` | theme tokens, density, typography, TOML config |
-| `relay-proto` | `oximux-relay-proto` | `src/lib.rs` | wire protocol shared by daemon + client |
-| `relay` | `oximux-relay` | `src/lib.rs` + `src/main.rs` | out-of-process PTY relay daemon |
-| `relay-client` | `oximux-relay-client` | `src/lib.rs` | in-app client for the relay daemon |
-| `relay-supervisor` | `oximux-relay-supervisor` | `src/lib.rs` | ensures an `oximux-relay` daemon is alive and hands back a connected `RelayClient` — extracted from the desktop app so `oximux serve` supervises the same daemon with identical detach recipes and version-mismatch handling |
-| `relay-terminals` | `oximux-relay-terminals` | `src/lib.rs` | `remote-host`'s `TerminalSource` seam implemented over the relay daemon — extracted from the desktop so `oximux serve` exposes the same terminals the same way, gap semantics included |
-| `ui` | `oximux-ui` | `src/lib.rs` | app-agnostic widgets (`FloatingSurface`, buttons, `ConfirmDialog`); re-exported as `crate::ui` |
+| `core` | `trex-core` | `src/lib.rs` | shared domain types, no deps |
+| `pty` | `trex-pty` | `src/lib.rs` | `TerminalBackend` + `PortablePtyBackend` |
+| `proc-cwd` | `trex-proc-cwd` | `src/lib.rs` | resolve a process's working dir |
+| `proc-tree` | `trex-proc-tree` | `src/lib.rs` | walk a process's descendants and read their argument vectors — how a plain terminal is known to be running an agent CLI (see *Ambient agent detection*). Sibling of `proc-cwd` for the same reason: dependency-light kernel introspection (`proc_listpids` + `KERN_PROCARGS2` on macOS, `/proc` on Linux, a Toolhelp snapshot on Windows) whose consumers share nothing else |
+| `owner-only` | `trex-owner-only` | `src/lib.rs` | restrict a file or directory to the account that created it — `0600`/`0700` on unix, a stated *protected* DACL on Windows; shared by the desktop app, relay daemon, and remote host so the SID lookup exists once |
+| `no-window` | `trex-no-window` | `src/lib.rs` | `CREATE_NO_WINDOW` for every child spawned on Windows, so a console-subsystem child (git, rg, an agent CLI's node) doesn't flash an empty console; a no-op applied unconditionally on every other platform |
+| `job-object` | `trex-job-object` | `src/lib.rs` | Windows-only child-tree kill via a Job Object (`KILL_ON_JOB_CLOSE`) — terminating or crash-losing the host reaps every descendant, the tree semantics a unix process-group signal already gives for free; compiles to nothing off Windows |
+| `single-instance` | `trex-single-instance` | `src/lib.rs` | non-blocking advisory file lock (`flock` / `LockFileEx` via `fd-lock`) deciding which process owns a per-data-directory role — extracted from the desktop's GUI singleton guard so `TREX serve` contends for the same roles (GUI singleton, schedule ticker) with identical semantics |
+| `shell-env` | `trex-shell-env` | `src/lib.rs` | the default shell to spawn a new terminal with, and what its environment needs — shared by `trex-pty`'s in-process backend and the relay daemon so the rule exists once, not twice out of sync |
+| `computer-use` | `trex-computer-use` | `src/lib.rs` | `cua-driver` discovery/verify, permission gate, MCP declaration, one-click installer (`install/`) — never starts/supervises the daemon |
+| `macos-trust` | `trex-macos-trust` | `src/lib.rs` | shared codesign/spctl verification + crash-safe `renamex_np` bundle swap, extracted from `computer-use` so it and `auto-update` don't fork their own copies |
+| `auto-update` | `trex-auto-update` | `src/lib.rs` | desktop app self-update: GitHub release feed, download/mount/stage/verify pipeline, `UpdateStatus` state machine — swap is staged only, never live |
+| `git` | `trex-git` | `src/lib.rs` | `Repository`, `StatusPoller`, git ops, `GhCmd` |
+| `agent-core` | `trex-agent-core` | `src/lib.rs` | portable `ThreadEvent` vocabulary + stream-json decoder + `ChatThread` fold (serde/serde_json/tracing only, no pty/rusqlite/ACP/gpui/tokio — mobile-portable); re-exported by `agents` under `crate::thread::*` |
+| `agents` | `trex-agents` | `src/lib.rs` | `AgentRuntime` trait, `CliRuntime`, `StatusMachine`; `SessionRegistry` (gpui-free session event bus + command surface, built for Remote Control, not yet wired into the view) |
+| `remote-proto` | `trex-remote-proto` | `src/lib.rs` | transport-free Remote Control wire vocabulary — postcard RPC envelope, `HostEvent` stream frame, `PairingTicket` codec, `Transport` trait seam; `remote-host`, `remote-session`, `remote-iroh`, and the `TREX` CLI all speak it |
+| `remote-local` | `trex-remote-local` | `src/lib.rs` | the same-machine control transport: the owner-only unix socket / named pipe the `TREX` CLI uses to reach a host (desktop app or `TREX serve`), behind `remote-proto`'s `Transport` seam — both the listener a host binds and the dial the CLI makes live here |
+| `remote-host` | `trex-remote-host` | `src/lib.rs` | the remote-control host core: transport-agnostic RPC dispatcher, two-key pairing/auth handshake + ACL, host identity; serves `agents`' `SessionRegistry` over `remote-proto`. Used by both hosts (`apps/desktop` and `apps/cli`'s `serve`) — never ships to mobile |
+| `remote-session` | `trex-remote-session` | `src/lib.rs` | the client-side remote-control session (the phone's Rust core) — pure Rust, no FFI, unit-testable over the in-memory loopback against the real `remote-host` dispatcher; `mobile-core` wraps it |
+| `remote-iroh` | `trex-remote-iroh` | `src/lib.rs` | the production iroh P2P (QUIC) `Transport`/`Connector` impls beneath `remote-session` and `remote-host`; its `host` feature — off by default in this workspace alias, opted into by both hosts (`apps/desktop` and `apps/cli`) — adds the accept loop, so the mobile core never links the PTY-spawning code |
+| `mobile-core` | `trex-mobile-core` | `src/lib.rs` | uniffi binding wrapping `remote-session` + `remote-iroh` into a typed async + streamed-callback surface for the React Native app; builds `cdylib` (Android) / `staticlib` (iOS) alongside a normal `lib` |
+| `editor` | `trex-editor` | `src/lib.rs` | gpui-component editor wrapper + LSP glue |
+| `dictation` | `trex-dictation` | `src/lib.rs` | offline voice dictation: cpal mic capture → 16kHz resample → sherpa-onnx decode (Whisper for Vietnamese, Parakeet for English); channel-based `DictationController`, no GPUI dependency |
+| `storage` | `trex-storage` | `src/lib.rs` | SQLite + migration ladder + CI guard |
+| `settings` | `trex-settings` | `src/lib.rs` | theme tokens, density, typography, TOML config |
+| `relay-proto` | `trex-relay-proto` | `src/lib.rs` | wire protocol shared by daemon + client |
+| `relay` | `trex-relay` | `src/lib.rs` + `src/main.rs` | out-of-process PTY relay daemon |
+| `relay-client` | `trex-relay-client` | `src/lib.rs` | in-app client for the relay daemon |
+| `relay-supervisor` | `trex-relay-supervisor` | `src/lib.rs` | ensures an `trex-relay` daemon is alive and hands back a connected `RelayClient` — extracted from the desktop app so `TREX serve` supervises the same daemon with identical detach recipes and version-mismatch handling |
+| `relay-terminals` | `trex-relay-terminals` | `src/lib.rs` | `remote-host`'s `TerminalSource` seam implemented over the relay daemon — extracted from the desktop so `TREX serve` exposes the same terminals the same way, gap semantics included |
+| `ui` | `trex-ui` | `src/lib.rs` | app-agnostic widgets (`FloatingSurface`, buttons, `ConfirmDialog`); re-exported as `crate::ui` |
 | `xtask/` | `xtask` | `src/main.rs` | repo lint orchestrator (`file-size-lint` etc.) |
 
 ### Apps (`apps/<dir>/` → package → bin → purpose)
 
 | App dir | Package | Cargo bin | Installed as | Purpose |
 |---|---|---|---|---|
-| `desktop` | `oximux-app` | `oximux` | `oximux` | GPUI cockpit; all views (the 73%-LOC crate) |
-| `cli` | `oximux-cli` | `oximux-cli` | `oximux` | scriptable client of a running host (desktop app or `oximux serve`) — every verb, plus `oximux serve` itself and self-update |
+| `desktop` | `trex-app` | `TREX` | `TREX` | GPUI cockpit; all views (the 73%-LOC crate) |
+| `cli` | `trex-cli` | `trex-cli` | `TREX` | scriptable client of a running host (desktop app or `TREX serve`) — every verb, plus `TREX serve` itself and self-update |
 
 The cargo bin target and the installed command name differ for `apps/cli`
-deliberately: `apps/desktop` already owns the bin name `oximux`, and two
+deliberately: `apps/desktop` already owns the bin name `TREX`, and two
 packages producing one bin name would make `cargo build --workspace`
 overwrite whichever built second. The installer still places `apps/cli`'s
-binary on `PATH` under the name users actually type, `oximux`.
+binary on `PATH` under the name users actually type, `TREX`.
 
-### `oximux serve` topology (headless host)
+### `TREX serve` topology (headless host)
 
 `apps/cli/src/serve/` runs the same `Dispatcher` / `SessionRegistry` /
 storage / relay stack the desktop app hosts, minus every view. It binds two
-listeners: the owner-only local control socket (`remote-local`) the `oximux`
+listeners: the owner-only local control socket (`remote-local`) the `TREX`
 CLI dials, and the iroh endpoint (`remote-iroh`) paired devices reach.
 
 Stdout carries exactly one line, the readiness JSON, and nothing else — all
@@ -134,7 +134,7 @@ confining it to its own conversation instead of the operator's full scope.
 | `workspace_root/` | `WorkspaceRoot` — one per window; owns panes + sidebar (`mod`/`ops`/`render`) |
 | `project_panes_factory.rs` | manifest save/load, pane-buffer load, attach-reconcile |
 | `actions.rs` / `state.rs` / `left_rail_layout.rs` | GPUI actions, app state, rail layout |
-| `agent_glue/` | app-side agent wiring (bridges `oximux-agents` ↔ views) |
+| `agent_glue/` | app-side agent wiring (bridges `trex-agents` ↔ views) |
 | `app_settings/` | in-app settings store + persistence |
 | `keymap_registry/` | keybinding registration |
 | `loaders/` | startup data loaders |
@@ -318,15 +318,15 @@ An agent the user launched by typing `claude`/`codex`/… into an ordinary termi
 
 | Signal | Answers | Covers | Lives for |
 |---|---|---|---|
-| Process tree (`oximux-proc-tree` → `agents::agent_process`) | *which* CLI is running, and *that* one is | every CLI | as long as the process |
-| OSC-9999 sideband (`ambient_agent_scan`) | what it is doing, in detail | only CLIs OxiMux installs hooks for (Claude Code) | one event, 30-min TTL |
+| Process tree (`trex-proc-tree` → `agents::agent_process`) | *which* CLI is running, and *that* one is | every CLI | as long as the process |
+| OSC-9999 sideband (`ambient_agent_scan`) | what it is doing, in detail | only CLIs TREX installs hooks for (Claude Code) | one event, 30-min TTL |
 | OSC 0/2 title (`agents::agent_title`) | what it is doing, coarsely | only CLIs that write a title — several do not by default | one event |
 
 **Presence is the process, never the output.** `PaneGroup::ambient_agents` treats a live agent process as the row's existence and lets the other two refine its status; an agent that has reported nothing is `Idle`, which is the common case (a CLI waiting at its prompt emits no hook, and most write no title). `TerminalView::poll_agent_process` runs the walk ahead of `tick`'s no-output early return — an idle agent produces no events, so a check downstream of that return could never see one arrive or leave — and `cx.notify()`s on change, which is what carries the row into the rail (rebuilt from the top of the workspace render).
 
 **Identity is `argv[0]`, never the executable name.** Two measurements forced this. The kernel names a process for the binary it *resolved*, so a CLI installed as a symlink is named for the link's target — Claude Code's points at a file named for its version, which matches nothing. And the executable name was observed reporting an agent's name for a process whose arguments showed it was a search tool. `argv[0]` keeps the invoked path, and carries a script CLI's identity through its interpreter (`node …/gemini`). The executable name is the fallback only where arguments cannot be read (Windows, where the symlink convention does not apply either).
 
-**What an agent SAID needs the agent's own hooks.** Presence and coarse activity come from the process and the title, but only the agent can report its reply — which is why a Codex row read `Codex · Idle` where a Claude row carried the actual answer. Codex has the same kind of lifecycle hooks as Claude, in `$CODEX_HOME/hooks.json`, in the same `{matcher?, hooks:[{type, command}]}` shape, delivering event JSON on stdin — so `oximux agent-status` serves both and only the field names differ (`crate::codex_status_hooks`, selected with `--format codex`).
+**What an agent SAID needs the agent's own hooks.** Presence and coarse activity come from the process and the title, but only the agent can report its reply — which is why a Codex row read `Codex · Idle` where a Claude row carried the actual answer. Codex has the same kind of lifecycle hooks as Claude, in `$CODEX_HOME/hooks.json`, in the same `{matcher?, hooks:[{type, command}]}` shape, delivering event JSON on stdin — so `TREX agent-status` serves both and only the field names differ (`crate::codex_status_hooks`, selected with `--format codex`).
 
 Two constraints shape that install, both learned the hard way:
 * Codex's `notify` config is deliberately **not** used. It is a single program rather than a list, so writing it would replace whatever the user already has there; `hooks.json` is a separate file with per-event arrays that ours can merge into.
@@ -397,7 +397,7 @@ apps/desktop/src/main.rs
   --editor-spike flag
     └── run_editor_spike()
           tokio Handle check (self-aborts with clear message if no reactor in scope)
-          cx.open_window("OxiMux — Editor Spike")
+          cx.open_window("TREX — Editor Spike")
             └── EditorView::new(file_path, cx)       crates/editor
                   gpui-component Input (code_editor("rust") mode)
                   attach_lsp("rust-analyzer", "rust", workspace_root, cx)
@@ -505,7 +505,7 @@ gpui-component's undo/redo calls `replace_text_in_range_silent` which bypasses `
 - `doc_version` is a plain `i32` (GPUI main-thread only; no atomic needed); strictly monotonic across normal edits + undo/redo.
 - `didChange` uses full-sync (entire buffer text, `range: None`) per LSP §3.17.2; 0ms debounce.
 - LSP calls are no-ops when `lsp_client` is `None` (editor-without-LSP degraded path preserved).
-- `SaveFile` action declared in `oximux-editor` (not `oximux-app::actions`) to break the `oximux-app → oximux-editor → oximux-app` circular crate dependency.
+- `SaveFile` action declared in `trex-editor` (not `trex-app::actions`) to break the `trex-app → trex-editor → trex-app` circular crate dependency.
 
 ---
 
@@ -543,11 +543,11 @@ FileTree (GPUI entity)
 
 ### Step 4 — file tree UI (FileTreeView)
 
-`FileTreeView` lives in `oximux-app/shell/file_tree_view.rs` and subscribes to `Entity<FileTree>` (from `oximux-editor`) via `cx.subscribe_in` registered before the first `expand()` call so no `Loaded` event can be missed.
+`FileTreeView` lives in `trex-app/shell/file_tree_view.rs` and subscribes to `Entity<FileTree>` (from `trex-editor`) via `cx.subscribe_in` registered before the first `expand()` call so no `Loaded` event can be missed.
 
 **Lazy expand pattern:**
 ```
-dir click → tree.expand(id)           oximux-editor entity
+dir click → tree.expand(id)           trex-editor entity
   immediately: RowKind::Placeholder    italic "…" sentinel shown
   Loaded(id) event fires later
     → rebuild_rows() swaps sentinel for real children
@@ -695,7 +695,7 @@ The replacement shell spawns at the checkpoint's recorded cols/rows (initial dim
 
 Two further resilience layers (same hardening pass): **daemon respawn retries** — `respawn_relay_after_death` rides out transient spawn failures with bounded exponential backoff (5 attempts, 500 ms → 8 s cap; version mismatch still exits immediately since another build's daemon may own the socket) — and a **15 s layout autosave** on each `WorkspaceRoot` that captures all projects' layouts plus relay ids (cached handshake session id, zero wire RPCs), bounding what an app crash can lose of mid-session tabs/splits to one tick. Idle ticks cost nothing: `save_persisted_tabs` skips byte-identical JSON via a content-hash gate recorded only after a successful write.
 
-Each checkpoint also refreshes `meta.cwd` with the shell child's **live working directory**, resolved kernel-side from the child pid (`oximux-proc-cwd`, the shared `proc_pidinfo`/`PROC_PIDVNODEPATHINFO` resolver also used for split-pane cwd inheritance) — no OSC 7 cooperation from the shell required. The cold-spawn path revives the replacement shell at that recovered cwd (validated to still exist; falls back to the persisted layout cwd), so a crash puts the user back in the directory they were actually in.
+Each checkpoint also refreshes `meta.cwd` with the shell child's **live working directory**, resolved kernel-side from the child pid (`trex-proc-cwd`, the shared `proc_pidinfo`/`PROC_PIDVNODEPATHINFO` resolver also used for split-pane cwd inheritance) — no OSC 7 cooperation from the shell required. The cold-spawn path revives the replacement shell at that recovered cwd (validated to still exist; falls back to the persisted layout cwd), so a crash puts the user back in the directory they were actually in.
 
 The same meta carries the shell child's **OS pid** (seeded at spawn). Because the daemon and its children run on the same host as the app, `TerminalView::os_pid` falls back to reading it for daemon-backed sessions — giving splits from relay panes (and layout-snapshot cwd capture) the same kernel-true cwd inheritance as in-process panes, again with zero wire-protocol involvement.
 
@@ -705,15 +705,15 @@ This path is distinct from routine restore, which stays replay-free (the no-grid
 
 ## Shell context env — SurfaceIds (mux-P4)
 
-Every spawned terminal receives an `OXIMUX_*` env block minted at spawn time:
+Every spawned terminal receives an `TREX_*` env block minted at spawn time:
 
 | Variable | Value |
 |---|---|
-| `OXIMUX_WORKSPACE_ID` | project root path |
-| `OXIMUX_SURFACE_ID` | UUID minted per pane leaf |
-| `OXIMUX_TAB_ID` | UUID minted per tab within leaf |
-| `OXIMUX_SOCKET_PATH` | relay Unix socket path |
-| `OXIMUX_PTY_ID` | injected by relay daemon at fork |
+| `TREX_WORKSPACE_ID` | project root path |
+| `TREX_SURFACE_ID` | UUID minted per pane leaf |
+| `TREX_TAB_ID` | UUID minted per tab within leaf |
+| `TREX_SOCKET_PATH` | relay Unix socket path |
+| `TREX_PTY_ID` | injected by relay daemon at fork |
 
 `SurfaceIds` (`shell/context_env.rs`) builds the env list. Ids persist in the per-pane layout blob (serde-default) and are re-injected on dormant respawn. Agent CLI PTYs excluded until a follow-on.
 
@@ -763,9 +763,9 @@ on_drop
 
 Separate from the raw-PTY terminal runtime above, the **chat** view runs a structured conversation model (`crates/agents/src/thread/`). Three provider adapters each decode their own wire protocol into one transport-agnostic vocabulary — `ThreadEvent` (`event.rs`) — which `ChatThread::apply` (`state.rs`) folds into a `Vec<ThreadEntry>` the view renders. Each adapter satisfies the `AgentConnection` trait (`connection.rs`); the factory in `connect.rs` picks one. The view never learns which backend produced an event.
 
-**Agent-core split (2026-07-18):** the pure fold + `ThreadEvent` vocabulary + stream-json decoder now live in `crates/agent-core` (`oximux-agent-core`) — serde/serde_json/tracing only, no pty/rusqlite/ACP/gpui/tokio — so the same fold can cross-compile for a mobile Rust core; `oximux-agents` re-exports the modules under their original `crate::thread::*` paths. Groundwork for this: `crates/agents/src/session_registry.rs` adds a process-wide, gpui-free `SessionRegistry` (event bus + off-thread command surface, keyed by `session_id`) that a future remote/network layer can subscribe to and command without a `gpui::Context`; it is built but not yet wired into the view. It required `AgentConnection` to gain a `Sync` supertrait, and the agent-chat view now holds its connection as `Arc<dyn AgentConnection>` (was `Box`) so the registry can share the same connection object the view drives — pure ownership change, no behavior change. This is Phase 1-2 groundwork for the Remote Control feature (control OxiMux from a phone over Iroh P2P; plan at `plans/260717-2037-oximux-remote-control/`) — no remote transport exists yet.
+**Agent-core split (2026-07-18):** the pure fold + `ThreadEvent` vocabulary + stream-json decoder now live in `crates/agent-core` (`trex-agent-core`) — serde/serde_json/tracing only, no pty/rusqlite/ACP/gpui/tokio — so the same fold can cross-compile for a mobile Rust core; `trex-agents` re-exports the modules under their original `crate::thread::*` paths. Groundwork for this: `crates/agents/src/session_registry.rs` adds a process-wide, gpui-free `SessionRegistry` (event bus + off-thread command surface, keyed by `session_id`) that a future remote/network layer can subscribe to and command without a `gpui::Context`; it is built but not yet wired into the view. It required `AgentConnection` to gain a `Sync` supertrait, and the agent-chat view now holds its connection as `Arc<dyn AgentConnection>` (was `Box`) so the registry can share the same connection object the view drives — pure ownership change, no behavior change. This is Phase 1-2 groundwork for the Remote Control feature (control TREX from a phone over Iroh P2P; plan at `plans/260717-2037-trex-remote-control/`) — no remote transport exists yet.
 
-**Wire vocabulary (`crates/remote-proto`, `oximux-remote-proto`, 2026-07-18):** the transport-free RPC surface shared by the future desktop host and the phone's Rust core — an append-only postcard `Request`/`Response` envelope (`PROTOCOL_VERSION = 1` at this writing; v23 as of 2026-09-04 — the pin test in `remote-proto/src/proto/tests.rs` names each version's wire change, and events the peer's declared version predates are downgraded to a `Notice` in the same seq rather than skipped), the `HostEvent` stream frame, a `PairingTicket` codec (`oximux://connect?ticket=` deep link, base64url-encoded postcard, `handshake_secret` redacted in `Debug`), and a transport-agnostic `Transport` trait (framed bidirectional seam; iroh will be one impl, an in-memory loopback drives tests today). `async-trait` is the crate's only async dependency — no tokio, no gpui — so it stays mobile-portable. postcard is non-self-describing and can't deserialize `serde_json::Value`, but `ThreadEvent` and `PermissionDecision` carry `Value` fields (and are already on the persisted-JSON path), so rather than fork a shadow event type those payloads ride the wire as a `serde_json` string nested inside the postcard envelope (`HostEvent.event_json`, `ResolvePermissionReq.decision_json`) — no on-disk format change. This required additive `Serialize`/`Deserialize` derives on the reachable agent-core event types (`ThreadEvent`, `TurnUsage`, `AuthMethodInfo`, `AuthMethodKind`, `PlanEntryLite`, `PermissionDecision`). No host, client, or transport impl consumed this crate at this writing; today `remote-host` (both hosts), `remote-session` (mobile core), `remote-iroh`, and the `oximux` CLI all speak it — see the crate table above.
+**Wire vocabulary (`crates/remote-proto`, `trex-remote-proto`, 2026-07-18):** the transport-free RPC surface shared by the future desktop host and the phone's Rust core — an append-only postcard `Request`/`Response` envelope (`PROTOCOL_VERSION = 1` at this writing; v23 as of 2026-09-04 — the pin test in `remote-proto/src/proto/tests.rs` names each version's wire change, and events the peer's declared version predates are downgraded to a `Notice` in the same seq rather than skipped), the `HostEvent` stream frame, a `PairingTicket` codec (`TREX://connect?ticket=` deep link, base64url-encoded postcard, `handshake_secret` redacted in `Debug`), and a transport-agnostic `Transport` trait (framed bidirectional seam; iroh will be one impl, an in-memory loopback drives tests today). `async-trait` is the crate's only async dependency — no tokio, no gpui — so it stays mobile-portable. postcard is non-self-describing and can't deserialize `serde_json::Value`, but `ThreadEvent` and `PermissionDecision` carry `Value` fields (and are already on the persisted-JSON path), so rather than fork a shadow event type those payloads ride the wire as a `serde_json` string nested inside the postcard envelope (`HostEvent.event_json`, `ResolvePermissionReq.decision_json`) — no on-disk format change. This required additive `Serialize`/`Deserialize` derives on the reachable agent-core event types (`ThreadEvent`, `TurnUsage`, `AuthMethodInfo`, `AuthMethodKind`, `PlanEntryLite`, `PermissionDecision`). No host, client, or transport impl consumed this crate at this writing; today `remote-host` (both hosts), `remote-session` (mobile core), `remote-iroh`, and the `TREX` CLI all speak it — see the crate table above.
 
 - **Claude** — hand-parsed `stream-json` (`stream_json.rs`); no official Rust SDK, so the taxonomy is tracked manually. Native surface (AskUserQuestion, effort/modes, background tasks) kept — not wrapped as ACP.
 - **Codex** — `codex app-server` JSON-RPC v2 (`codex/`); shapes verified via `generate-json-schema`.
@@ -808,7 +808,7 @@ Separate from the raw-PTY terminal runtime above, the **chat** view runs a struc
 
 **View-level chat features** (provider-agnostic, not adapter rows): **attention notifications** — a turn finishing / erroring / needing a permission while the app is unfocused posts a macOS `UNUserNotificationCenter` banner + dock-badge (`notifier/`), coalesced per-tab and cleared on focus; individually toggleable in Settings → Notifications. **Tool-payload fullscreen sheet** — a `⤢` on any tool card with a substantial payload (a diff, or a result over 600 chars) opens a full-height overlay (`agent_chat/tool_sheet.rs`) showing the whole payload: a large diff virtualized via `uniform_list` (fixed `h_row` rows), or a long shell/read/fetch body via the shared inline renderer with its row/char caps lifted (a `full: bool` size-mode threaded through `tool_bodies.rs`), with a Copy button and Esc / backdrop / ✕ dismiss. The sheet reads its tool call live by id each render, so a still-running tool grows in place.
 
-The `ThreadEvent` seam is the normalization point: e.g. Claude `compact_boundary`, Codex `thread/compacted`, and the import path all emit `CompactBoundary`; Claude `TodoWrite`, Codex `turn/plan/updated`, and ACP `Plan` all emit `PlanUpdated`; Claude and ACP tool-result images both emit `ToolResultImages`. Tool cards likewise normalize through one classifier: `ToolDetail::classify` (`tool_detail.rs`) maps a Claude name, a Codex renamed name, or an ACP `ToolKind` into a single archetype (`Shell`/`Read`/`Edit`/`Search`/`Fetch`/…) the renderer switches on, so an ACP `Execute` renders the same shell card as a Claude `Bash` instead of a generic key:value fallback. ACP threads its kind to the card via a follow-up `ToolKind` event (Claude/Codex classify by name, leaving `ToolCall.kind` unset). ACP embedded terminals invert the crate boundary: the domain-layer `terminal/*` handlers delegate to an app-installed `AcpTerminalHost` that owns the real PTY (relay/in-process) and the inline `TerminalView`. The round-2 correctness pass (`plans/260710-2327-acp-round2-correctness-ux/`) closed the remaining client-side gaps: turn stop-reasons now surface as error banners; a Stop mid-permission drains the parked responder so the agent gets a `Cancelled` outcome (no wedge); attached images ride the prompt when the agent advertises `prompt_capabilities.image`; a restored tab resumes via `session/load` (with a `replaying` gate that drops the agent's history replay since OxiMux repaints its own persisted blob) and falls back to a fresh session with a visible notice when the agent lacks `loadSession`; a logged-out agent (`AuthRequired`/-32000) renders an auth-method card (Agent pill / Terminal inline login / EnvVar secret form) whose `authenticate` retries the session; and permission requests surface the agent's extra allow-kind options as pills. The `agent-client-protocol` dep enables the `unstable_auth_methods` feature for the env-var/terminal `AuthMethod` variants (schema 1.4.0 gates them). The Agent/Terminal methods authenticate on the same connection; the **EnvVar** method takes masked secret values in the card and **respawns** the agent with them in its environment (via `spawn_with_env` → `AcpAgent::from_args`, so the credentials ride the child's env, not argv, and never reach the persisted transcript), then auto-authenticates the seeded method — the only sign-in that works when the credential is delivered by environment. Deferred: a usage footer.
+The `ThreadEvent` seam is the normalization point: e.g. Claude `compact_boundary`, Codex `thread/compacted`, and the import path all emit `CompactBoundary`; Claude `TodoWrite`, Codex `turn/plan/updated`, and ACP `Plan` all emit `PlanUpdated`; Claude and ACP tool-result images both emit `ToolResultImages`. Tool cards likewise normalize through one classifier: `ToolDetail::classify` (`tool_detail.rs`) maps a Claude name, a Codex renamed name, or an ACP `ToolKind` into a single archetype (`Shell`/`Read`/`Edit`/`Search`/`Fetch`/…) the renderer switches on, so an ACP `Execute` renders the same shell card as a Claude `Bash` instead of a generic key:value fallback. ACP threads its kind to the card via a follow-up `ToolKind` event (Claude/Codex classify by name, leaving `ToolCall.kind` unset). ACP embedded terminals invert the crate boundary: the domain-layer `terminal/*` handlers delegate to an app-installed `AcpTerminalHost` that owns the real PTY (relay/in-process) and the inline `TerminalView`. The round-2 correctness pass (`plans/260710-2327-acp-round2-correctness-ux/`) closed the remaining client-side gaps: turn stop-reasons now surface as error banners; a Stop mid-permission drains the parked responder so the agent gets a `Cancelled` outcome (no wedge); attached images ride the prompt when the agent advertises `prompt_capabilities.image`; a restored tab resumes via `session/load` (with a `replaying` gate that drops the agent's history replay since TREX repaints its own persisted blob) and falls back to a fresh session with a visible notice when the agent lacks `loadSession`; a logged-out agent (`AuthRequired`/-32000) renders an auth-method card (Agent pill / Terminal inline login / EnvVar secret form) whose `authenticate` retries the session; and permission requests surface the agent's extra allow-kind options as pills. The `agent-client-protocol` dep enables the `unstable_auth_methods` feature for the env-var/terminal `AuthMethod` variants (schema 1.4.0 gates them). The Agent/Terminal methods authenticate on the same connection; the **EnvVar** method takes masked secret values in the card and **respawns** the agent with them in its environment (via `spawn_with_env` → `AcpAgent::from_args`, so the credentials ride the child's env, not argv, and never reach the persisted transcript), then auto-authenticates the seeded method — the only sign-in that works when the credential is delivered by environment. Deferred: a usage footer.
 
 **Round-4 P0 parity pass** (`crates/agents/src/thread/stream_json.rs`, `event.rs`, `tool_call.rs`, `state.rs`; `codex/{protocol.rs,mod.rs,map.rs,approvals.rs}`; `app/src/shell/agent_chat/{plan_approval_card.rs,tool_card.rs,rewind_menu.rs}`):
 
@@ -826,7 +826,7 @@ The `ThreadEvent` seam is the normalization point: e.g. Claude `compact_boundary
 Three independent closeouts, verified against a fresh bundled build of HEAD:
 
 - **Signed-bundle notifications.** `scripts/bundle-macos.sh` gained an opt-in
-  `--sign <identity>` flag / `OXIMUX_CODESIGN_IDENTITY` env (ad-hoc default
+  `--sign <identity>` flag / `TREX_CODESIGN_IDENTITY` env (ad-hoc default
   unchanged, `verify_signature` fails the build if the requested identity
   doesn't show in the sealed bundle's Authority chain). Ad-hoc-signed bundles
   silently drop the `UNUserNotificationCenter` one-time authorization grant on
@@ -857,7 +857,7 @@ Three independent closeouts, verified against a fresh bundled build of HEAD:
 ## Round-7 close-out (`plans/260714-1020-agent-chat-round7-worktree-workspace-import-wiring/`)
 
 Closes the two round-6 follow-ups above. Phases 1–2 code-complete + tested
-(`oximux-app --lib` 1254/0); Phase 3 (signed-bundle notifications, Codex
+(`trex-app --lib` 1254/0); Phase 3 (signed-bundle notifications, Codex
 OAuth, live MCP elicitation, live GUI walk-through) stays user-gated.
 
 - **New-Agent worktree → first-class `Workspace`.** `ChatWorktreeOutcome`
@@ -992,7 +992,7 @@ Two independent zero-setup paths so a fresh install needs no manual CLI installs
 pinned ripgrep release (15.2.0), sha256-verifies it against the release's own
 `.sha256` asset, arch-matches the app build (lipo for a universal build), and
 caches via a stamp file (offline rebuilds stay a no-op). `bundle-macos.sh`
-copies it to `OxiMux.app/Contents/MacOS/rg` and signs it in the nested-first
+copies it to `trex.app/Contents/MacOS/rg` and signs it in the nested-first
 codesign block, before the bundle seal. Runtime resolution is
 `tool_paths::rg_program()` (`apps/desktop/src/shell/tool_paths.rs`): the
 bundled sibling of the running binary first, bare `rg` (PATH lookup) as the
@@ -1062,7 +1062,7 @@ in Settings → About) — and an ignored update simply applies itself at the
 next ordinary quit.
 
 Windows works the same way and needs to more literally: it refuses to overwrite
-a mapped image at all, so `oximux.exe` and every DLL beside it *cannot* be
+a mapped image at all, so `TREX.exe` and every DLL beside it *cannot* be
 replaced while the process holds them. The swap there is per-file
 (move-aside/move-in, all files or none), and the backups it cannot delete —
 because this process is running out of the files it just replaced — are cleared
@@ -1076,7 +1076,7 @@ crates/auto-update/src/
 │   download.rs  Fetcher + host allow-list; URLs from the *signed* tag
 │   swap.rs      swap_all (all or none), restore_or_sweep_backups
 ├── feed.rs      macOS: GitHub /releases/latest; pins the exact asset name
-│                OxiMux-{version}-macos-arm64.dmg (see docs/deployment-guide.md)
+│                trex-{version}-macos-arm64.dmg (see docs/deployment-guide.md)
 ├── version.rs   plain x.y.z parse/compare
 ├── bundle.rs    macOS eligibility() — is this exe update-capable at all
 │                (UnsupportedReason: NotABundle / Translocated /
@@ -1085,7 +1085,7 @@ crates/auto-update/src/
 ├── staging.rs   macOS: PendingUpdate manifest, random-suffix staging dirs,
 │                boot_sweep, apply_pending, recover_interrupted_swap
 └── windows/     install.rs (eligibility + write probe), archive.rs (unzip the
-                 `OxiMux\` payload), pipeline.rs, staging.rs (per-file receipt,
+                 `TREX\` payload), pipeline.rs, staging.rs (per-file receipt,
                  apply_pending, boot_housekeeping's restore-or-sweep)
 ```
 
@@ -1105,7 +1105,7 @@ for the old pid to exit (releasing the single-instance `flock`), then
 exits would just bounce off the still-held lock.
 
 **Trust anchor, macOS.** The running bundle's own `Identifier` + `TeamIdentifier`,
-captured once at boot via `oximux-macos-trust::read_signature` and never
+captured once at boot via `trex-macos-trust::read_signature` and never
 re-derived — an ad-hoc or "not set" team id is rejected as a pin
 (`Signature::pinnable()`). The staged copy has to clear, in order: codesign
 integrity (`verify_signed`), the identifier+team pin, `spctl --assess`
@@ -1120,10 +1120,10 @@ refuse-if-exists + a symlink recheck before the copy lands. Concurrent
 checks are guarded by an `AtomicBool` compare-and-swap. A
 `.update-pending-verify` sentinel wraps the quit-time swap; if boot finds it
 still present, the installed bundle is re-verified before anything else
-runs. `OXIMUX_UPDATE_FEED_URL` / `OXIMUX_UPDATE_SKIP_SPCTL` are
+runs. `TREX_UPDATE_FEED_URL` / `TREX_UPDATE_SKIP_SPCTL` are
 `#[cfg(debug_assertions)]`-gated debug knobs, absent from release builds.
 
-`crates/macos-trust` (`oximux-macos-trust`) is shared with the `cua-driver`
+`crates/macos-trust` (`trex-macos-trust`) is shared with the `cua-driver`
 installer (see "External tool provisioning" above) — same threat model
 (a programmatic download that never gets Gatekeeper's quarantine-xattr
 check for free), same crash-safe same-volume-copy + `renamex_np(RENAME_SWAP)`
@@ -1132,7 +1132,7 @@ placement primitive.
 **Trust anchor, Windows.** There is no codesign pin to take: the Windows
 artifacts are not Authenticode-signed (`scripts/bundle-windows.ps1` says so),
 so there is no publisher identity for an update to have to match. The anchor is
-instead the one the CLI's `oximux update` already uses — a **minisign signature
+instead the one the CLI's `TREX update` already uses — a **minisign signature
 over `manifest.json`**, verified against `packaging/release-pubkey.txt` compiled
 in by `crates/auto-update/build.rs`. That key lives only in the binary; the
 GitHub publish token that could rewrite a release cannot reach it, which is what
@@ -1145,7 +1145,7 @@ have made no request for the payload and touched no installed file).
 The staged payload is *not* re-verified against that signature at quit, and the
 reason is worth stating rather than implying a guarantee that is not there: an
 attacker who could rewrite the staging directory between staging and quit could
-equally well overwrite `oximux.exe` directly, since a per-user install under
+equally well overwrite `TREX.exe` directly, since a per-user install under
 `%LOCALAPPDATA%\Programs` is writable by exactly one account. There is no
 privilege boundary for a re-verification to defend. (macOS pins a codesign
 identity because `/Applications` is *admin-group*-writable — a different threat
@@ -1172,5 +1172,5 @@ it before anything in the install directory has been renamed.
 | Multi-agent dashboard | Phase 7 |
 | embeddable terminal library terminal backend | v2 (ADR in brief.md) |
 | Per-pane-tab relay reattach on restore | follow-on (multi-tab leaves restore dormant for now) |
-| Agent CLI PTYs with OXIMUX_* context env | follow-on |
+| Agent CLI PTYs with TREX_* context env | follow-on |
 | Cross-group multi-tab-drag repaint | follow-on |

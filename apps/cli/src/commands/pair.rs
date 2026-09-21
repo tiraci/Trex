@@ -1,11 +1,11 @@
-//! `oximux pair-new` / `pair-ls` / `pair-rm` — pairing administration against
+﻿//! `TREX pair-new` / `pair-ls` / `pair-rm` — pairing administration against
 //! the running host, over the owner-only local socket. The host enforces the
 //! operator-only gate; this side enforces the OTHER half of the ticket's
 //! safety story: a bearer credential prints to an interactive terminal only.
 
 use std::io::IsTerminal as _;
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -58,7 +58,7 @@ pub async fn pair_new(
     human.push_str(&format!(
         "pairing ticket ({tier}, one-time, expires in ~2 minutes):\n{}\n\
          scan the QR with the mobile app, or paste the ticket into a client.\n\
-         review enrollments with `oximux pair-ls`.",
+         review enrollments with `TREX pair-ls`.",
         issued.ticket
     ));
     let data = json!({

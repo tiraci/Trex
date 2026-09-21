@@ -1,4 +1,4 @@
-//! `AgentRuntime` trait — the seam every adapter implements.
+﻿//! `AgentRuntime` trait — the seam every adapter implements.
 //!
 //! CLI adapters (Claude Code, Codex, Pi, custom-command) wrap one
 //! PTY each. The future ACP runtime (v1.1) will wrap a JSON-RPC stream.
@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use oximux_core::{AgentAdapter, AgentSessionId, AgentSnapshot, AgentStatus};
+use trex_core::{AgentAdapter, AgentSessionId, AgentSnapshot, AgentStatus};
 
 /// What to spawn for one agent session.
 ///
@@ -50,7 +50,7 @@ pub struct AgentSessionConfig {
     /// Whether this spawn resumes / forks a prior session. `None` for a fresh
     /// launch; each adapter's `build_command` maps the variant to its own
     /// resume/fork CLI shape.
-    pub resumption: oximux_core::SessionResumption,
+    pub resumption: trex_core::SessionResumption,
 }
 
 /// Multi-consumer status subscription.

@@ -1,4 +1,4 @@
-//! Turn-grouping for the transcript: long runs of consecutive tool cards
+﻿//! Turn-grouping for the transcript: long runs of consecutive tool cards
 //! collapse to a head + "N more" expander + tail, so a tool-heavy turn doesn't
 //! flood the view. Pure and unit-testable — [`plan_tool_grouping`] decides
 //! per-entry visibility from three parallel bool/index inputs and knows nothing
@@ -13,7 +13,7 @@
 
 use std::collections::HashSet;
 
-use oximux_agents::thread::{ToolCall, ToolCallStatus, ToolDetail};
+use trex_agents::thread::{ToolCall, ToolCallStatus, ToolDetail};
 
 /// Runs of >8 consecutive tool cards collapse to first-3 + "N more" + last-2.
 const TOOL_RUN_COLLAPSE_THRESHOLD: usize = 8;
@@ -121,7 +121,7 @@ pub(super) struct GroupedTool {
     pub target: Option<String>,
     /// A screen-control call. Carried separately from `kind` because
     /// [`ToolDetail`] is provider-agnostic and this is one specific server; a
-    /// variant there would push a detail of OxiMux's own plumbing into the
+    /// variant there would push a detail of TREX's own plumbing into the
     /// vocabulary every backend shares.
     pub screen: bool,
 }
@@ -380,7 +380,7 @@ mod tests {
     /// only the recorded reason distinguishes it from a button the user clicked.
     #[test]
     fn a_refusal_the_user_has_not_read_never_collapses() {
-        let mut refused = ToolCall::new("t", "mcp__oximux-computer-use__click", json!({}));
+        let mut refused = ToolCall::new("t", "mcp__trex-computer-use__click", json!({}));
         refused.status = ToolCallStatus::Rejected;
         refused.result = Some("`click` targeted a process another chat is driving".into());
         assert!(must_stay_visible(&refused));

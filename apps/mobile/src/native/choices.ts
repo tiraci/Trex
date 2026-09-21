@@ -1,4 +1,4 @@
-import type { SessionChoices } from 'oximux-core';
+﻿import type { SessionChoices } from 'trex-core';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useClient } from './client';

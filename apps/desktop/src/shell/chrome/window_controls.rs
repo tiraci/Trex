@@ -1,4 +1,4 @@
-//! Windows caption buttons — Minimize / Maximize-or-Restore / Close.
+﻿//! Windows caption buttons — Minimize / Maximize-or-Restore / Close.
 //!
 //! With `appears_transparent: true` GPUI strips the entire native caption on
 //! Windows, so the app must draw its own caption buttons and mark each with a
@@ -17,7 +17,7 @@ use gpui::{
     App, InteractiveElement as _, IntoElement, ParentElement, RenderOnce, Rgba, Styled, Window,
     WindowControlArea, div, px, svg,
 };
-use oximux_settings::Theme;
+use trex_settings::Theme;
 
 /// One caption button's width — matches the chrome strip's
 /// `TOGGLE_BUTTON_WIDTH` so the trailing cluster reads as one row of

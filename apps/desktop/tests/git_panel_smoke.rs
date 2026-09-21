@@ -1,4 +1,4 @@
-//! Smoke test: `GitPanel::new` + first render against a real (empty) git
+﻿//! Smoke test: `GitPanel::new` + first render against a real (empty) git
 //! repo. Verifies the view constructs, takes the initial `Loading` poll
 //! state, and renders without panic. No `StatusPoller` — we hand a watch
 //! receiver directly, which mirrors what step 14 will do when the parent
@@ -9,11 +9,11 @@
 //! and the watch-task uses tokio sync primitives.
 
 use gpui::TestAppContext;
-use oximux_app::git_state_cache::GitStateCache;
-use oximux_app::shell::git_panel::GitPanel;
-use oximux_core::GitState;
-use oximux_git::{PollState, Repository};
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::git_state_cache::GitStateCache;
+use trex_app::shell::git_panel::GitPanel;
+use trex_core::GitState;
+use trex_git::{PollState, Repository};
+use trex_settings::{Density, Theme, Typography};
 use std::process::Command;
 use tokio::sync::watch;
 

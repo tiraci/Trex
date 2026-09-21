@@ -1,4 +1,4 @@
-//! Pure heuristic generator for conventional-prefix commit messages.
+﻿//! Pure heuristic generator for conventional-prefix commit messages.
 //!
 //! Takes a slice of `FileStatus` records (caller is expected to have
 //! pre-filtered to staged paths via `FileStatus::is_staged`) and emits a
@@ -38,7 +38,7 @@
 
 use std::path::{Component, Path, PathBuf};
 
-use oximux_core::{FileStatus, IndexStatus, RenameKind};
+use trex_core::{FileStatus, IndexStatus, RenameKind};
 
 /// Maximum number of files surfaced in the body bullet list. Above
 /// this we collapse the tail into "… and N more" so the textarea
@@ -383,7 +383,7 @@ fn truncate_with_ellipsis(s: &str, max: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::{RenameInfo, RenameKind, WorktreeStatus};
+    use trex_core::{RenameInfo, RenameKind, WorktreeStatus};
 
     fn fs(path: &str, index: IndexStatus) -> FileStatus {
         FileStatus {

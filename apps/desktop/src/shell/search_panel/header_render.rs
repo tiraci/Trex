@@ -1,4 +1,4 @@
-//! Search panel header: query input with inline icon + toggle pills, plus
+﻿//! Search panel header: query input with inline icon + toggle pills, plus
 //! labeled glob filter inputs and a summary banner.
 //!
 //! All click handlers live in `mod.rs` — this file only assembles the
@@ -147,8 +147,8 @@ pub(super) fn render_header(panel: &SearchPanel, cx: &mut Context<SearchPanel>) 
 fn filter_section(
     label: &'static str,
     input: &gpui::Entity<InputState>,
-    theme: oximux_settings::Theme,
-    typography: &oximux_settings::Typography,
+    theme: trex_settings::Theme,
+    typography: &trex_settings::Typography,
 ) -> AnyElement {
     div()
         .flex()
@@ -181,8 +181,8 @@ fn toggle_pill(
     tooltip: &'static str,
     active: bool,
     which: HeaderToggle,
-    theme: oximux_settings::Theme,
-    density: oximux_settings::Density,
+    theme: trex_settings::Theme,
+    density: trex_settings::Density,
     cx: &mut Context<SearchPanel>,
 ) -> AnyElement {
     let (bg, border, fg) = if active {
@@ -221,7 +221,7 @@ fn toggle_pill(
 
 /// Circular-arc loader rotated continuously. Sized to match `toggle_pill` so
 /// the suffix slots don't jitter when the spinner appears or disappears.
-fn spinner_slot(theme: oximux_settings::Theme) -> AnyElement {
+fn spinner_slot(theme: trex_settings::Theme) -> AnyElement {
     div()
         .flex()
         .items_center()
@@ -246,8 +246,8 @@ fn spinner_slot(theme: oximux_settings::Theme) -> AnyElement {
 
 /// Inline clear (×) — click resets the query and re-focuses the input.
 fn clear_slot(
-    theme: oximux_settings::Theme,
-    density: oximux_settings::Density,
+    theme: trex_settings::Theme,
+    density: trex_settings::Density,
     cx: &mut Context<SearchPanel>,
 ) -> AnyElement {
     div()
@@ -273,8 +273,8 @@ fn clear_slot(
 
 fn summary_banner(
     text: &str,
-    theme: oximux_settings::Theme,
-    typography: &oximux_settings::Typography,
+    theme: trex_settings::Theme,
+    typography: &trex_settings::Typography,
 ) -> AnyElement {
     // Compact status line between filters and result list. A subtle bottom
     // border separates it from the result rows without a heavy divider.

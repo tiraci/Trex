@@ -1,4 +1,4 @@
-//! Workspace domain type — one git worktree per task within a project.
+﻿//! Workspace domain type — one git worktree per task within a project.
 //!
 //! Persisted in the `workspaces` SQLite table (V001). `UNIQUE(project_id,
 //! slug)` is enforced by the schema, not this type.
@@ -59,7 +59,7 @@ pub struct Workspace {
     /// anything unrecognised.
     #[serde(default)]
     pub phase: String,
-    /// Whether OxiMux **minted** this worktree's branch, as opposed to
+    /// Whether TREX **minted** this worktree's branch, as opposed to
     /// adopting one that already existed.
     ///
     /// **A data-loss guard, and the only durable record of the distinction.**

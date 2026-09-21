@@ -1,4 +1,4 @@
-//! Agent Chat UI thread model.
+﻿//! Agent Chat UI thread model.
 //!
 //! The structured conversation layer that backs the chat view (as opposed to
 //! the raw-PTY terminal view). Slice 2A is the pure, gpui-free, fully-tested
@@ -31,10 +31,10 @@ pub(crate) mod snapshot_diff;
 pub mod transport;
 
 // The pure fold + wire vocabulary + stream-json decoder now live in the
-// dependency-minimal, mobile-portable `oximux-agent-core` crate. Re-export the
+// dependency-minimal, mobile-portable `trex-agent-core` crate. Re-export the
 // modules under their original `crate::thread::*` paths so every downstream
 // import site (and this file's own type re-exports below) resolves unchanged.
-pub use oximux_agent_core::thread::{
+pub use trex_agent_core::thread::{
     background_task, context_chip, entry, event, mcp_server_spec, question, state, stream_json,
     tool_call, tool_detail, turn_diff,
 };

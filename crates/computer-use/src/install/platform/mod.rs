@@ -1,4 +1,4 @@
-//! The four steps of an install that no two platforms agree on.
+﻿//! The four steps of an install that no two platforms agree on.
 //!
 //! Everything else in `install/` is shared: resolving the release, streaming
 //! the download, hashing it as it lands, progress, cancellation, the byte
@@ -21,7 +21,7 @@
 //! # Linux
 //!
 //! Upstream publishes Linux archives, but this crate has never been compiled
-//! for Linux (`oximux-computer-use` is not in the Linux CI crate set, and the
+//! for Linux (`trex-computer-use` is not in the Linux CI crate set, and the
 //! desktop app ships for macOS and Windows only). A third recipe would be dead
 //! code that no host builds, so the seam is shaped for it and the file is
 //! deliberately absent. The `compile_error!` below is what a Linux build would

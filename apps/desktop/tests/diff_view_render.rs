@@ -1,4 +1,4 @@
-//! Pure-unit tests for `build_render_plan` — no GPUI, no tokio. Fast.
+﻿//! Pure-unit tests for `build_render_plan` — no GPUI, no tokio. Fast.
 //!
 //! Covers:
 //!   - empty diff vec → empty plan
@@ -10,15 +10,15 @@
 //!   - large diff + expanded=false → `FilePlan::Collapsed` with totals
 //!   - large diff + expanded=true  → `FilePlan::Hunked` (full body)
 
-use oximux_app::shell::diff_view::file_header::{build_row_owner, collect_headers};
-use oximux_app::shell::diff_view::paint::{
+use trex_app::shell::diff_view::file_header::{build_row_owner, collect_headers};
+use trex_app::shell::diff_view::paint::{
     PreparedRow, RulerMark, overview_runs, prepare, prepare_split, region_anchor_rows,
 };
-use oximux_app::shell::diff_view::render::{Highlight, 
+use trex_app::shell::diff_view::render::{Highlight, 
     FilePlan, MAX_RENDERED_DIFF_BYTES, MAX_RENDERED_DIFF_LINES, RenderCtx, build_render_plan,
 };
-use oximux_core::{DiffHunk, DiffLine, DiffLineKind, DiffStatus, FileDiff, change_regions};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{DiffHunk, DiffLine, DiffLineKind, DiffStatus, FileDiff, change_regions};
+use trex_settings::{Density, Theme, Typography};
 use std::collections::HashSet;
 use std::path::PathBuf;
 
@@ -464,7 +464,7 @@ fn rust_file_rows_carry_syntax_tokens() {
 
 #[test]
 fn oversize_diff_skips_syntax_highlighting() {
-    use oximux_app::shell::diff_view::render::SYNTAX_HIGHLIGHT_BUDGET_LINES;
+    use trex_app::shell::diff_view::render::SYNTAX_HIGHLIGHT_BUDGET_LINES;
     // A diff whose total body exceeds the budget renders without syntax
     // tokens (tints/signs/word-diff still apply) so a huge multi-file diff
     // stays responsive.

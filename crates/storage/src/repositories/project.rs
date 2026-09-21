@@ -1,6 +1,6 @@
-//! `ProjectRepo` — typed CRUD over the `projects` table.
+﻿//! `ProjectRepo` — typed CRUD over the `projects` table.
 
-use oximux_core::Project;
+use trex_core::Project;
 use rusqlite::{OptionalExtension, params};
 
 use super::{classify_unique, new_id, now};

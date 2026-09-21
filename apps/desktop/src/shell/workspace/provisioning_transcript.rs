@@ -1,4 +1,4 @@
-//! The provisioning transcript: where one create's event stream is written,
+﻿//! The provisioning transcript: where one create's event stream is written,
 //! and the writer that drains it.
 //!
 //! Lifted out of `workspace_ops.rs`, which sits at the 3000-LOC hard cap
@@ -8,7 +8,7 @@
 
 use std::path::{Path, PathBuf};
 
-use oximux_worktree_ops::ProvisionEvent;
+use trex_worktree_ops::ProvisionEvent;
 
 /// Provisioning transcripts retained per workspace slug.
 const KEEP_TRANSCRIPTS: usize = 3;
@@ -137,7 +137,7 @@ mod tests {
         let writer = tokio::spawn(stream_provisioning(path.clone(), rx, Some(tee_tx)));
         tx.send(ProvisionEvent::SetupStarted("make".into())).unwrap();
         tx.send(ProvisionEvent::SetupLine("building".into())).unwrap();
-        tx.send(ProvisionEvent::SetupFinished(oximux_worktree_ops::SetupOutcome::Ok)).unwrap();
+        tx.send(ProvisionEvent::SetupFinished(trex_worktree_ops::SetupOutcome::Ok)).unwrap();
         drop(tx);
         writer.await.unwrap();
 

@@ -1,4 +1,4 @@
-//! The shared tick engine behind scheduled agent runs — one implementation for
+﻿//! The shared tick engine behind scheduled agent runs — one implementation for
 //! every host, desktop or headless.
 //!
 //! **Level-triggered, not edge-triggered.** `due()` asks `next_fire_at <= now`
@@ -18,7 +18,7 @@
 //! [`Ticker::tick`] on their own cadence.
 //!
 //! **One ticker per data directory.** Ownership is decided by an advisory lock
-//! on [`TICKER_LOCK_FILENAME`] (via `oximux-single-instance`), acquired before
+//! on [`TICKER_LOCK_FILENAME`] (via `trex-single-instance`), acquired before
 //! the loop starts; a process that loses the contest runs no ticker and says so
 //! once. The lock is what makes cross-process double-fire impossible; the
 //! durable claim in [`ScheduleStore::begin_fire`] is the belt to that brace,
@@ -42,7 +42,7 @@ use super::store::{RunOutcome, Schedule, ScheduleRun, ScheduleStore, ScheduleTar
 pub const TICK: Duration = Duration::from_secs(30);
 
 /// The role-lock file, under the data directory, that decides which process
-/// owns this data dir's ticker. Beside the GUI's own `oximux-gui.lock`.
+/// owns this data dir's ticker. Beside the GUI's own `trex-gui.lock`.
 pub const TICKER_LOCK_FILENAME: &str = "schedule-ticker.lock";
 
 /// How one fire attempt ended, as the firer saw it.
@@ -125,7 +125,7 @@ pub fn nudge_existing_session(
 /// that this is a timer the agent itself armed is what makes it act instead.
 fn heartbeat_prompt(schedule: &Schedule) -> String {
     format!(
-        "[oximux heartbeat: {}] This is a scheduled wake-up, delivered by the host on \
+        "[TREX heartbeat: {}] This is a scheduled wake-up, delivered by the host on \
          the cadence set for this session. Nobody typed it. Act on it directly and \
          reply only with what the instruction below asks for.\n\n{}",
         schedule.name, schedule.prompt
@@ -398,7 +398,7 @@ mod tests {
     use chrono::TimeZone;
 
     fn store() -> ScheduleStore {
-        let db = oximux_storage::db::open_memory().expect("open in-memory db");
+        let db = trex_storage::db::open_memory().expect("open in-memory db");
         ScheduleStore::new(db.conn())
     }
 

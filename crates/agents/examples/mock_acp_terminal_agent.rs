@@ -1,15 +1,15 @@
-//! A deterministic mock ACP **agent** that exercises the client's `terminal/*`
-//! path — for verifying OxiMux's ACP embedded-terminal feature without depending
+﻿//! A deterministic mock ACP **agent** that exercises the client's `terminal/*`
+//! path — for verifying TREX's ACP embedded-terminal feature without depending
 //! on whether a third-party agent (gemini/cursor-agent/amp) happens to use
 //! terminals for a given prompt.
 //!
 //! On every prompt it: opens a tool card, calls `terminal/create` (a short shell
 //! loop), embeds the returned terminal in the card (`ToolCallContent::Terminal`),
 //! waits for it to exit, marks the card completed, and ends the turn. Point
-//! OxiMux's ACP chat at this binary, or drive it headlessly with the companion
+//! TREX's ACP chat at this binary, or drive it headlessly with the companion
 //! `acp_terminal_smoke` example.
 //!
-//! Build:  `cargo build -p oximux-agents --example mock_acp_terminal_agent`
+//! Build:  `cargo build -p trex-agents --example mock_acp_terminal_agent`
 //! Binary: `target/debug/examples/mock_acp_terminal_agent`
 
 use agent_client_protocol::schema::v1::{

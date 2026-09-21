@@ -1,4 +1,4 @@
-//! Local-only probe: does the block tree account for every word of the source?
+﻿//! Local-only probe: does the block tree account for every word of the source?
 //!
 //! The tight-list bug parsed a structurally correct list whose items were empty
 //! — the shape was right and the content was gone, which no shape assertion
@@ -7,7 +7,7 @@
 //! developer's own agent sessions.
 use std::collections::HashSet;
 
-use oximux_markdown::{Block, InlineRun, TopBlock, parse_full};
+use trex_markdown::{Block, InlineRun, TopBlock, parse_full};
 
 fn runs_text(runs: &[InlineRun]) -> String {
     // Link destinations count as accounted for: they are carried on the run's

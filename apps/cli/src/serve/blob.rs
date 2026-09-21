@@ -1,4 +1,4 @@
-//! The persisted chat blob, as the headless host reads and writes it.
+﻿//! The persisted chat blob, as the headless host reads and writes it.
 //!
 //! Serve shares the desktop's own persistence: one JSON blob per session under
 //! the settings key `agent_chat:<session_id>`, so a session created on either
@@ -9,9 +9,9 @@
 //! future build adds — rides through `extra` untouched, so a rewrite here
 //! never strips what the desktop wrote.
 
-use oximux_agent_core::thread::{SessionMeta, ThreadEntry};
-use oximux_agents::thread::{ModeChoice, ModelChoice, Transport};
-use oximux_storage::SettingsRepo;
+use trex_agent_core::thread::{SessionMeta, ThreadEntry};
+use trex_agents::thread::{ModeChoice, ModelChoice, Transport};
+use trex_storage::SettingsRepo;
 use serde::{Deserialize, Serialize};
 
 /// Settings key for one chat session's transcript — the desktop's own scheme.
@@ -59,7 +59,7 @@ pub struct ChatBlob {
     #[serde(default)]
     pub codex_posture: Option<(String, String)>,
     #[serde(default)]
-    pub pi_posture: Option<oximux_agents::thread::pi::posture::PiPosture>,
+    pub pi_posture: Option<trex_agents::thread::pi::posture::PiPosture>,
     #[serde(default)]
     pub choices: BlobChoices,
     /// Everything else the writer knew — the desktop's `thinking_level`, any
@@ -98,7 +98,7 @@ impl ChatBlob {
 ///
 /// A free function rather than a method because the live pump must apply the
 /// same rule to the *fold* — and applying it in only one of the two places is
-/// exactly the bug this shape prevents. `oximux ls` used to show a live session
+/// exactly the bug this shape prevents. `TREX ls` used to show a live session
 /// as its own UUID and the same session as "Summarise what a.txt contains"
 /// after a host restart, because the persistence path had the fallback and the
 /// registry path did not. Restarting the host improved the listing, which is

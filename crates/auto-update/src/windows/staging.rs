@@ -1,4 +1,4 @@
-//! Where a verified Windows payload waits for the quit-time swap, and what
+﻿//! Where a verified Windows payload waits for the quit-time swap, and what
 //! happens to it at boot, at quit, and after a crash.
 //!
 //! # Why the swap waits for quit
@@ -11,7 +11,7 @@
 //! individually valid.
 //!
 //! Windows adds a second, blunter reason: it refuses to overwrite a mapped
-//! image at all. `oximux.exe` and every DLL beside it are mapped for as long as
+//! image at all. `TREX.exe` and every DLL beside it are mapped for as long as
 //! the process lives, and the "move aside, then move in" swap in
 //! [`crate::release::swap`] is what makes the replacement possible even then.
 //!
@@ -22,7 +22,7 @@
 //! **not** re-checked at quit, and the reason is worth stating plainly rather
 //! than implying a guarantee that is not there: an attacker who could rewrite
 //! the staged payload between staging and quit could equally well rewrite
-//! `oximux.exe` in the install directory directly, since a per-user install
+//! `TREX.exe` in the install directory directly, since a per-user install
 //! under `%LOCALAPPDATA%\Programs` is writable by exactly one account. There is
 //! no privilege boundary for a re-verification to defend. (macOS pins a
 //! codesign identity because `/Applications` is admin-group-writable, which is
@@ -48,15 +48,15 @@ use crate::UpdateError;
 /// Staged payloads are hidden siblings of the install directory: the same
 /// parent, so every rename in the swap stays on one filesystem, and
 /// dot-prefixed so a user browsing `%LOCALAPPDATA%\Programs` does not find a
-/// second OxiMux folder and wonder which one runs.
-const STAGING_PREFIX: &str = ".OxiMux.update-";
+/// second TREX folder and wonder which one runs.
+const STAGING_PREFIX: &str = ".TREX.update-";
 
 /// Written inside a staging directory once its payload is complete.
 ///
 /// Its presence is what separates a finished staging directory from one that
 /// was interrupted mid-extraction, and the digests inside it are what the quit
 /// path re-checks.
-const RECEIPT: &str = ".oximux-staged.json";
+const RECEIPT: &str = ".trex-staged.json";
 
 /// A verified update waiting on disk for the quit-time swap.
 ///
@@ -331,7 +331,7 @@ mod tests {
 
     fn fixture(files: &[(&str, &str)]) -> (Fixture, PendingUpdate) {
         let root = tempfile::tempdir().expect("tempdir");
-        let install = root.path().join("OxiMux");
+        let install = root.path().join("TREX");
         fs::create_dir(&install).expect("install dir");
         for (name, _) in files {
             fs::write(install.join(name), "v1").expect("installed file");
@@ -367,10 +367,10 @@ mod tests {
 
     #[test]
     fn a_verified_payload_replaces_every_installed_file() {
-        let (fx, pending) = fixture(&[("oximux.exe", "v2"), ("onnxruntime.dll", "native v2")]);
+        let (fx, pending) = fixture(&[("TREX.exe", "v2"), ("onnxruntime.dll", "native v2")]);
 
         assert_eq!(apply_pending(&config(&fx.install), &fx.manifest), SwapOutcome::Applied);
-        assert_eq!(fs::read_to_string(fx.install.join("oximux.exe")).expect("read"), "v2");
+        assert_eq!(fs::read_to_string(fx.install.join("TREX.exe")).expect("read"), "v2");
         assert_eq!(
             fs::read_to_string(fx.install.join("onnxruntime.dll")).expect("read"),
             "native v2"
@@ -384,12 +384,12 @@ mod tests {
     /// install directory has to still be intact when this is caught.
     #[test]
     fn a_staged_file_that_changed_is_refused_and_nothing_is_touched() {
-        let (fx, pending) = fixture(&[("oximux.exe", "v2")]);
-        fs::write(pending.staged_path.join("oximux.exe"), "tampered").expect("tamper");
+        let (fx, pending) = fixture(&[("TREX.exe", "v2")]);
+        fs::write(pending.staged_path.join("TREX.exe"), "tampered").expect("tamper");
 
         assert_eq!(apply_pending(&config(&fx.install), &fx.manifest), SwapOutcome::Refused);
         assert_eq!(
-            fs::read_to_string(fx.install.join("oximux.exe")).expect("read"),
+            fs::read_to_string(fx.install.join("TREX.exe")).expect("read"),
             "v1",
             "the running version must stay installed"
         );
@@ -401,17 +401,17 @@ mod tests {
     /// mistaken for a finished payload.
     #[test]
     fn a_staging_directory_with_no_receipt_is_not_a_payload() {
-        let (fx, pending) = fixture(&[("oximux.exe", "v2")]);
+        let (fx, pending) = fixture(&[("TREX.exe", "v2")]);
         fs::remove_file(pending.staged_path.join(RECEIPT)).expect("remove receipt");
 
         assert_eq!(apply_pending(&config(&fx.install), &fx.manifest), SwapOutcome::Refused);
-        assert_eq!(fs::read_to_string(fx.install.join("oximux.exe")).expect("read"), "v1");
+        assert_eq!(fs::read_to_string(fx.install.join("TREX.exe")).expect("read"), "v1");
     }
 
     #[test]
     fn no_pending_file_means_there_is_nothing_to_do() {
         let root = tempfile::tempdir().expect("tempdir");
-        let install = root.path().join("OxiMux");
+        let install = root.path().join("TREX");
         fs::create_dir(&install).expect("install dir");
         let outcome = apply_pending(&config(&install), &root.path().join("absent.json"));
         assert_eq!(outcome, SwapOutcome::Nothing);
@@ -421,7 +421,7 @@ mod tests {
     /// behind means the install directory grows a copy of every DLL per update.
     #[test]
     fn the_boot_sweep_clears_backups_and_abandoned_staging_dirs() {
-        let (fx, pending) = fixture(&[("oximux.exe", "v2")]);
+        let (fx, pending) = fixture(&[("TREX.exe", "v2")]);
         let backup = fx.install.join("onnxruntime.dll.old-deadbeef");
         fs::write(&backup, "old").expect("backup");
         let abandoned = claim_staging_dir(&fx.install).expect("claims a second");
@@ -438,7 +438,7 @@ mod tests {
     /// in the title bar promises a restart that would do nothing.
     #[test]
     fn a_pending_record_whose_payload_vanished_is_cleared() {
-        let (fx, pending) = fixture(&[("oximux.exe", "v2")]);
+        let (fx, pending) = fixture(&[("TREX.exe", "v2")]);
         fs::remove_dir_all(&pending.staged_path).expect("remove");
 
         boot_sweep(&fx.install, &fx.manifest);
@@ -448,7 +448,7 @@ mod tests {
     #[test]
     fn staging_directories_do_not_collide() {
         let root = tempfile::tempdir().expect("tempdir");
-        let install = root.path().join("OxiMux");
+        let install = root.path().join("TREX");
         fs::create_dir(&install).expect("install dir");
         let a = claim_staging_dir(&install).expect("first");
         let b = claim_staging_dir(&install).expect("second");

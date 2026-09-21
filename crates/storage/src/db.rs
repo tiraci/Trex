@@ -1,4 +1,4 @@
-//! SQLite connection wrapper.
+﻿//! SQLite connection wrapper.
 //!
 //! Every `Db` instance corresponds to one `rusqlite::Connection` wrapped in
 //! `Arc<Mutex<…>>`. WAL allows concurrent readers at the SQLite layer; the
@@ -224,7 +224,7 @@ mod tests {
     #[test]
     fn open_file_uses_wal() {
         let tmp = tempfile::tempdir().expect("tempdir");
-        let path = tmp.path().join("oximux-test.db");
+        let path = tmp.path().join("trex-test.db");
         let db = open(&path).expect("file open");
         let mode = read_pragma_str(&db, "journal_mode");
         assert!(

@@ -1,9 +1,9 @@
-//! Fixture-driven integration tests for `parse_unified_diff` + an end-to-end
+﻿//! Fixture-driven integration tests for `parse_unified_diff` + an end-to-end
 //! smoke test that exercises `Repository::diff_staged` against a real `git`
 //! binary on a tempdir-backed repo (mirrors `repository_smoke.rs`).
 
-use oximux_core::{DiffLineKind, DiffStatus};
-use oximux_git::{Repository, parse_unified_diff};
+use trex_core::{DiffLineKind, DiffStatus};
+use trex_git::{Repository, parse_unified_diff};
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -198,7 +198,7 @@ index 1..2 100644
 @@ broken @@
 ";
     let err = parse_unified_diff(raw).unwrap_err();
-    use oximux_git::DiffParseError;
+    use trex_git::DiffParseError;
     match err {
         DiffParseError::BadHunkHeader { line_no, .. } => {
             assert_eq!(line_no, 5, "@@ broken @@ is line 5");

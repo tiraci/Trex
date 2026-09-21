@@ -1,10 +1,10 @@
-//! ThreadEvent → compact terminal lines. The fold vocabulary is rendered ONCE,
+﻿//! ThreadEvent → compact terminal lines. The fold vocabulary is rendered ONCE,
 //! here — one line per tool call and notice, raw text blocks for the
 //! assistant's words, permission prompts highlighted — deliberately capped at
 //! that: no markdown layout, no color themes, no reflow. Streaming deltas
 //! render as nothing; the finalized event carries the authoritative text.
 
-use oximux_agent_core::thread::ThreadEvent;
+use trex_agent_core::thread::ThreadEvent;
 use serde_json::Value;
 
 /// Cap for one-line summaries (tool inputs, first lines of errors).
@@ -157,7 +157,7 @@ pub fn render_event(event: &ThreadEvent) -> Option<String> {
         ThreadEvent::PermissionRequested { request_id, tool_name, description, .. } => {
             let what = if description.is_empty() { tool_name.clone() } else { description.clone() };
             Some(format!(
-                "⚠ permission needed: {} (request {request_id}) — decide with `oximux permit`",
+                "⚠ permission needed: {} (request {request_id}) — decide with `TREX permit`",
                 one_line(&what)
             ))
         }
@@ -170,7 +170,7 @@ pub fn render_event(event: &ThreadEvent) -> Option<String> {
                 .map(|q| one_line(&q.question))
                 .unwrap_or_else(|| "question".into());
             Some(format!(
-                "? question: {head} (request {request_id}) — answer with `oximux permit answer`"
+                "? question: {head} (request {request_id}) — answer with `TREX permit answer`"
             ))
         }
         ThreadEvent::TurnSummary { detail, .. } => Some(format!("· {}", one_line(detail))),
@@ -295,7 +295,7 @@ pub fn render_entry(entry: &Value) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agent_core::thread::{AskQuestion, QuestionKind, TurnUsage};
+    use trex_agent_core::thread::{AskQuestion, QuestionKind, TurnUsage};
     use serde_json::json;
 
     /// The golden lines: the exact compact strings each event class renders
@@ -350,9 +350,9 @@ mod tests {
                     input: json!({}),
                     description: "Run cargo test".into(),
                     suggestions: vec![],
-                    kind: oximux_agent_core::thread::PermissionKind::Tool,
+                    kind: trex_agent_core::thread::PermissionKind::Tool,
                 },
-                Some("⚠ permission needed: Run cargo test (request req-9) — decide with `oximux permit`"),
+                Some("⚠ permission needed: Run cargo test (request req-9) — decide with `TREX permit`"),
             ),
             (
                 ThreadEvent::QuestionAsked {
@@ -368,7 +368,7 @@ mod tests {
                         is_secret: false,
                     }],
                 },
-                Some("? question: Which scope? (request req-q) — answer with `oximux permit answer`"),
+                Some("? question: Which scope? (request req-q) — answer with `TREX permit answer`"),
             ),
             (
                 ThreadEvent::TurnEnded { result: None, usage: None, is_error: false, turn_diff: None },

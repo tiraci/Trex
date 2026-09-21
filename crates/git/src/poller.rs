@@ -1,4 +1,4 @@
-//! Background tokio task that polls `Repository::status` and surfaces changes
+﻿//! Background tokio task that polls `Repository::status` and surfaces changes
 //! through a `watch` channel. Pauses while the window is blurred.
 //!
 //! v0.9 lesson codified here: the poller does **not** own an `Arc<watch::Sender>`
@@ -10,7 +10,7 @@
 
 use crate::error::GitError;
 use crate::repository::Repository;
-use oximux_core::GitState;
+use trex_core::GitState;
 use std::time::Duration;
 use tokio::sync::watch;
 use tokio::task::AbortHandle;

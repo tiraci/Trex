@@ -1,4 +1,4 @@
-import type { Recurrence } from 'oximux-core';
+﻿import type { Recurrence } from 'trex-core';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -80,7 +80,7 @@ export function ScheduleFormSheet({
         style={field}
       />
       <ThemedText type="small" style={styles.hint}>
-        A folder on the desktop running OxiMux — not on this phone.
+        A folder on the desktop running TREX — not on this phone.
       </ThemedText>
 
       <BottomSheetTextInput
@@ -99,8 +99,8 @@ export function ScheduleFormSheet({
 
       {/* The load-bearing disclaimer — see the component doc. */}
       <ThemedText type="small" style={styles.warning}>
-        Runs only while an OxiMux host is running — the desktop app or a
-        server. OxiMux cannot wake a sleeping machine or relaunch a quit host,
+        Runs only while an TREX host is running — the desktop app or a
+        server. TREX cannot wake a sleeping machine or relaunch a quit host,
         so a run scheduled for a time no host was up will not happen.
       </ThemedText>
 

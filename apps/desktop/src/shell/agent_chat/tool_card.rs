@@ -1,4 +1,4 @@
-//! Tool-call rendering for the chat transcript: a status header, an
+﻿//! Tool-call rendering for the chat transcript: a status header, an
 //! expand/collapse disclosure for the raw input + result, and — while the call
 //! is gated on the user — Allow / Reject buttons that resolve the permission
 //! through the connection (`request_id`-keyed, per this crate's transport).
@@ -11,10 +11,10 @@ use gpui::{
     AnyElement, Context, InteractiveElement, IntoElement, ParentElement, SharedString,
     StatefulInteractiveElement, Styled, div, prelude::FluentBuilder, px,
 };
-use oximux_agents::thread::{
+use trex_agents::thread::{
     PermissionDecision, PermissionKind, PermissionRequest, ToolCall, ToolCallStatus,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::AgentChatView;
 use super::bubble;
@@ -336,7 +336,7 @@ fn approval_row(
         )
     };
 
-    // A durable "always allow this app", offered by OxiMux rather than the
+    // A durable "always allow this app", offered by TREX rather than the
     // agent — the agent has no idea which apps the user trusts. Withheld for
     // the categories where "always" is not a reasonable thing to click once.
     let always_allow = screen.and_then(|screen| {

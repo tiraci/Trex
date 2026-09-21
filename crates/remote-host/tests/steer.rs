@@ -1,4 +1,4 @@
-//! `Steer` against backends that can and cannot take a message mid-turn.
+﻿//! `Steer` against backends that can and cannot take a message mid-turn.
 //!
 //! Only `pi` advertises `supports_steer`; claude, codex and ACP all fall through to
 //! the default `AgentConnection::steer`, which bails. That refusal used to travel the
@@ -9,13 +9,13 @@
 
 use std::sync::Arc;
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::{AgentCapabilities, StubConnection};
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::RegisterReq;
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::{AgentCapabilities, StubConnection};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::RegisterReq;
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {
@@ -53,7 +53,7 @@ fn registry_with_steer(supports_steer: bool) -> (Arc<SessionRegistry>, Arc<StubC
 /// Run `script` against a dispatcher over the in-memory pair.
 async fn against<F, Fut>(registry: Arc<SessionRegistry>, script: F)
 where
-    F: FnOnce(oximux_remote_proto::testing::DuplexTransport) -> Fut,
+    F: FnOnce(trex_remote_proto::testing::DuplexTransport) -> Fut,
     Fut: std::future::Future<Output = ()>,
 {
     let auth = Arc::new(AuthStore::new());

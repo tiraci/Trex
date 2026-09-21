@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -71,7 +71,7 @@ export function NewSessionSheet({
         style={[styles.input, { backgroundColor: theme.backgroundElement, color: theme.text }]}
       />
       <ThemedText type="small" style={styles.hint}>
-        A folder on the desktop running OxiMux — not on this phone.
+        A folder on the desktop running TREX — not on this phone.
       </ThemedText>
 
       {error ? <ErrorBanner message={error} /> : null}

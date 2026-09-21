@@ -1,10 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 
 /** What the user chose in Settings. `system` defers to the OS. */
 export type ThemePreference = 'system' | 'light' | 'dark';
 
-const STORAGE_KEY = '@oximux:theme-preference';
+const STORAGE_KEY = '@TREX:theme-preference';
 
 type State = {
   preference: ThemePreference;

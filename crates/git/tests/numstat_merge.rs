@@ -1,4 +1,4 @@
-//! End-to-end test for `Repository::status` → numstat merge.
+﻿//! End-to-end test for `Repository::status` → numstat merge.
 //!
 //! Spins a real `git init`-backed repo, seeds one commit, then dirties
 //! the worktree in several ways. Asserts the merged `FileStatus.line_counts`
@@ -13,7 +13,7 @@
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_git::Repository;
+use trex_git::Repository;
 use std::path::Path;
 use tempfile::tempdir;
 

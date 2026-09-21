@@ -1,6 +1,6 @@
-//! Import a Codex CLI session rollout (`~/.codex/sessions/YYYY/MM/DD/rollout-
+﻿//! Import a Codex CLI session rollout (`~/.codex/sessions/YYYY/MM/DD/rollout-
 //! <ts>-<uuid>.jsonl`) into a chat transcript (`Vec<ThreadEntry>`), so a Codex
-//! session started outside OxiMux (the terminal `codex`, VS Code, another
+//! session started outside TREX (the terminal `codex`, VS Code, another
 //! app-server client) can be reopened and rendered in the chat view, then
 //! continued live via `thread/resume`.
 //!

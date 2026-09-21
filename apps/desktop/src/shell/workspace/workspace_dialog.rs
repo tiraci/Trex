@@ -1,4 +1,4 @@
-//! Workspace dialog — create + rename modal.
+﻿//! Workspace dialog — create + rename modal.
 //!
 //! `Cmd+Shift+N` opens in `Create` mode; `WorkspaceRoot::request_rename_workspace`
 //! opens in `Rename(workspace)` mode. Create mode adds two dropdowns: a
@@ -23,10 +23,10 @@ use gpui_component::{
     button::{Button, ButtonVariants},
     input::{Enter as InputEnter, Escape as InputEscape, Input, InputEvent, InputState},
 };
-use oximux_core::{AgentAdapter, Project, Workspace};
-use oximux_git::derive_slug;
-use oximux_worktree_ops::select_codename;
-use oximux_settings::{Density, SetupDecision, Theme, Typography};
+use trex_core::{AgentAdapter, Project, Workspace};
+use trex_git::derive_slug;
+use trex_worktree_ops::select_codename;
+use trex_settings::{Density, SetupDecision, Theme, Typography};
 
 use crate::shell::workspace::base_choice::{BaseChoice, BaseMode};
 use crate::shell::forge::ref_parse::parse_forge_ref;
@@ -495,7 +495,7 @@ pub fn agent_label(agent: Option<AgentAdapter>) -> &'static str {
 
 impl Render for WorkspaceDialog {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let Some(mode) = self.mode.clone() else {
             return div().into_any_element();
         };
@@ -859,7 +859,7 @@ impl WorkspaceDialog {
         let project_id = project.id.clone();
         let root = std::path::PathBuf::from(&project.root_path);
         self._branch_load = Some(cx.spawn(async move |this, cx| {
-            let names = match oximux_git::Repository::open(&root).await {
+            let names = match trex_git::Repository::open(&root).await {
                 Ok(repo) => repo
                     .list_branches()
                     .await
@@ -917,14 +917,14 @@ impl WorkspaceDialog {
         let default = project.default_branch.clone();
         let root = std::path::PathBuf::from(&project.root_path);
         self._warning_load = Some(cx.spawn(async move |this, cx| {
-            let Ok(repo) = oximux_git::Repository::open(&root).await else {
+            let Ok(repo) = trex_git::Repository::open(&root).await else {
                 return;
             };
             let default = (!default.is_empty()).then_some(default);
-            let (_, reason) = oximux_worktree_ops::setup_decision(
+            let (_, reason) = trex_worktree_ops::setup_decision(
                 &repo,
                 &base,
-                oximux_settings::SetupDecision::Inherit,
+                trex_settings::SetupDecision::Inherit,
                 default.as_deref(),
             )
             .await;
@@ -1329,12 +1329,12 @@ mod tests {
         Workspace {
             id: "id".to_string(),
             project_id: "pid".to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: "old".to_string(),
             slug: "old".to_string(),
-            branch: "oximux/old".to_string(),
+            branch: "TREX/old".to_string(),
             worktree_path: "/path".to_string(),
             status: "active".to_string(),
             created_at: "now".to_string(),
@@ -1427,7 +1427,7 @@ mod tests {
         // Against the REAL registry, not a second literal: this constant is a
         // restatement of `with_builtin_adapters` (the pi rollout's bug #2 was
         // exactly such a list going stale), so the registry is the oracle.
-        let registry: Vec<AgentAdapter> = oximux_agents::registry::AdapterRegistry::
+        let registry: Vec<AgentAdapter> = trex_agents::registry::AdapterRegistry::
             with_builtin_adapters()
             .entries_without_detection()
             .iter()

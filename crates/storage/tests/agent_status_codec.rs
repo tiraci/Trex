@@ -1,8 +1,8 @@
-//! `AgentStatus` storage-codec round-trips: every variant must survive
+﻿//! `AgentStatus` storage-codec round-trips: every variant must survive
 //! `as_str()` + `exit_code_for_storage()` + `detail_for_storage()` →
 //! `from_row(…)`. Unknown slug → None (caller degrades to Interrupted).
 
-use oximux_core::AgentStatus;
+use trex_core::AgentStatus;
 
 fn round_trip(input: AgentStatus) {
     let slug = input.as_str();

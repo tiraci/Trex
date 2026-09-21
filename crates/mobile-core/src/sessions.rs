@@ -1,4 +1,4 @@
-//! Session-list subscription over the FFI: the pump that forwards pushed
+﻿//! Session-list subscription over the FFI: the pump that forwards pushed
 //! session-list snapshots to the app's [`SessionsSink`], the sink registration, and
 //! the per-connection (re)subscribe.
 //!
@@ -11,7 +11,7 @@
 use std::sync::Arc;
 
 use futures::StreamExt;
-use oximux_remote_session::{RemoteSession, SessionsStream};
+use trex_remote_session::{RemoteSession, SessionsStream};
 
 use crate::callbacks::SessionsSink;
 use crate::client::{MobileClient, Shared};

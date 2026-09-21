@@ -1,7 +1,7 @@
-//! Live provisioning progress — a floating card per in-flight worktree
+﻿//! Live provisioning progress — a floating card per in-flight worktree
 //! create, fed by the same event stream the transcript file is written from.
 //!
-//! Provisioning (`.oximuxinclude` copy, default-branch freshen, the setup
+//! Provisioning (`.TREXinclude` copy, default-branch freshen, the setup
 //! script) already streams [`ProvisionEvent`]s; until now the desktop wrote
 //! them to a file and showed nothing until the create ended. This layer
 //! draws that stream as it happens. The model it paints — one create's
@@ -33,8 +33,8 @@ use gpui::{
 use gpui_component::Sizable;
 use gpui_component::button::{Button, ButtonVariants};
 use gpui_component::spinner::Spinner;
-use oximux_settings::{Density, Theme, Typography};
-use oximux_worktree_ops::ProvisionEvent;
+use trex_settings::{Density, Theme, Typography};
+use trex_worktree_ops::ProvisionEvent;
 
 use super::provision_progress::{ProvisionProgress, ProvisionState, SHOW_AFTER};
 use crate::ui::FloatingSurface;
@@ -290,7 +290,7 @@ impl ProvisionLayer {
 
 impl Render for ProvisionLayer {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if self.entries.iter().all(|e| !e.visible) {
             return div();
         }

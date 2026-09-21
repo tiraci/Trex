@@ -1,4 +1,4 @@
-//! The v16 surface: worktree RPC authorization (the dedicated full-scope
+﻿//! The v16 surface: worktree RPC authorization (the dedicated full-scope
 //! gates) and the paginated transcript fetch — including the property the verb
 //! exists for, that a transcript larger than one transport frame arrives whole
 //! across pages each far below the cap. Every refusal is asserted at the fake
@@ -10,18 +10,18 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use futures::executor::block_on;
 use futures::future::join;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::StubConnection;
-use oximux_remote_host::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::StubConnection;
+use trex_remote_host::{
     AuthStore, Dispatcher, LocalScope, PairingSlot, WorktreeError, WorktreeService,
     registration_proof,
 };
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::{
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::{
     CreateBaseWire, HelloReq, RegisterReq, WorktreeProgressWire, WorktreeWire,
 };
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {
@@ -67,7 +67,7 @@ impl WorktreeService for CountingWorktrees {
         // dispatcher actually forwarded — the counter alone cannot.
         let branch = match base {
             CreateBaseWire::Existing(name) => name.clone(),
-            CreateBaseWire::Default | CreateBaseWire::From(_) => format!("oximux/{slug}"),
+            CreateBaseWire::Default | CreateBaseWire::From(_) => format!("TREX/{slug}"),
         };
         Ok(WorktreeWire {
             id: "wt-1".into(),
@@ -128,7 +128,7 @@ fn local_full_scope_manages_worktrees() {
         else {
             panic!("expected WorktreeCreated");
         };
-        assert_eq!(row.branch, "oximux/feat");
+        assert_eq!(row.branch, "TREX/feat");
         let Response::Worktrees(_) = call(&client, Request::ListWorktrees { project_path: None }).await
         else {
             panic!("expected Worktrees");
@@ -567,7 +567,7 @@ fn a_v15_peer_still_gets_the_legacy_transcript_fetch() {
         };
         assert_eq!(
             ack.protocol_version,
-            oximux_remote_proto::proto::PROTOCOL_VERSION,
+            trex_remote_proto::proto::PROTOCOL_VERSION,
             "the host announces its current version"
         );
         assert_eq!(ack.min_compatible, 1, "and still serves back to v1");

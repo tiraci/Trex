@@ -1,4 +1,4 @@
-//! Cross-version wire skew: the current tree against a **released** binary,
+﻿//! Cross-version wire skew: the current tree against a **released** binary,
 //! in both directions, over one scripted session.
 //!
 //! The protocol's append-only discipline is enforced by review and by unit
@@ -12,12 +12,12 @@
 //! - **new client → old host**: the current CLI drives a released `serve`
 //!   through a full turn.
 //!
-//! Gated on `OXIMUX_SKEW_CLI` — the path to a released `oximux` binary — so
+//! Gated on `TREX_SKEW_CLI` — the path to a released `TREX` binary — so
 //! `cargo test` stays hermetic by default. CI downloads the latest release
 //! and sets it; locally:
 //!
 //! ```sh
-//! OXIMUX_SKEW_CLI=~/.oximux-old/oximux cargo test --test wire_skew_e2e
+//! TREX_SKEW_CLI=~/.trex-old/TREX cargo test --test wire_skew_e2e
 //! ```
 #![cfg(unix)]
 
@@ -32,8 +32,8 @@ use serde_json::Value;
 
 /// The released binary under test, or `None` (→ the suite no-ops).
 fn old_cli() -> Option<PathBuf> {
-    let path = PathBuf::from(std::env::var_os("OXIMUX_SKEW_CLI")?);
-    assert!(path.is_file(), "OXIMUX_SKEW_CLI is set but not a file: {}", path.display());
+    let path = PathBuf::from(std::env::var_os("TREX_SKEW_CLI")?);
+    assert!(path.is_file(), "TREX_SKEW_CLI is set but not a file: {}", path.display());
     Some(path)
 }
 
@@ -41,9 +41,9 @@ fn old_cli() -> Option<PathBuf> {
 /// the current one — nothing may leak in from the runner's own session.
 fn old_bin(old: &PathBuf) -> Command {
     let mut cmd = Command::new(old);
-    cmd.env_remove(oximux_remote_local::SESSION_ENV_VAR);
-    cmd.env_remove(oximux_remote_local::SESSION_TOKEN_ENV_VAR);
-    cmd.env("OXIMUX_RELAY_BINARY", "/nonexistent/oximux-relay-for-tests");
+    cmd.env_remove(trex_remote_local::SESSION_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_TOKEN_ENV_VAR);
+    cmd.env("TREX_RELAY_BINARY", "/nonexistent/trex-relay-for-tests");
     cmd
 }
 
@@ -129,8 +129,8 @@ fn boot_released_serve(
     let mut child = old_bin(old)
         .args(["serve", "--data-dir", data.to_str().unwrap()])
         .env("PATH", common::path_with(shim))
-        .env("OXIMUX_FAKE_AGENT_REPORT", tmp.join("report"))
-        .env("OXIMUX_FAKE_AGENT_SESSION", "skew-old-host")
+        .env("TREX_FAKE_AGENT_REPORT", tmp.join("report"))
+        .env("TREX_FAKE_AGENT_SESSION", "skew-old-host")
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
@@ -161,7 +161,7 @@ fn boot_released_serve(
 #[test]
 fn an_old_client_survives_a_new_hosts_full_stream() {
     let Some(old) = old_cli() else {
-        eprintln!("skipped: OXIMUX_SKEW_CLI is unset");
+        eprintln!("skipped: TREX_SKEW_CLI is unset");
         return;
     };
     let old_protocol = protocol_of(&old);
@@ -265,7 +265,7 @@ fn an_old_client_survives_a_new_hosts_full_stream() {
 #[test]
 fn a_new_client_drives_an_old_host_through_a_full_turn() {
     let Some(old) = old_cli() else {
-        eprintln!("skipped: OXIMUX_SKEW_CLI is unset");
+        eprintln!("skipped: TREX_SKEW_CLI is unset");
         return;
     };
 
@@ -328,13 +328,13 @@ fn a_new_client_drives_an_old_host_through_a_full_turn() {
 #[test]
 fn a_new_client_runs_a_team_on_an_old_host() {
     let Some(old) = old_cli() else {
-        eprintln!("skipped: OXIMUX_SKEW_CLI is unset");
+        eprintln!("skipped: TREX_SKEW_CLI is unset");
         return;
     };
     // Only meaningful against a host below the per-role floor. A release at or
     // above it serves the v2 verbs and there is nothing to fall back from.
     let host_version = protocol_of(&old);
-    if host_version >= oximux_remote_proto::proto::TEAM_PER_ROLE_MIN_VERSION {
+    if host_version >= trex_remote_proto::proto::TEAM_PER_ROLE_MIN_VERSION {
         eprintln!("skipped: the released peer already speaks v{host_version}");
         return;
     }
@@ -409,11 +409,11 @@ fn a_new_client_runs_a_team_on_an_old_host() {
 #[test]
 fn a_new_client_schedules_on_an_old_host() {
     let Some(old) = old_cli() else {
-        eprintln!("skipped: OXIMUX_SKEW_CLI is unset");
+        eprintln!("skipped: TREX_SKEW_CLI is unset");
         return;
     };
     let host_version = protocol_of(&old);
-    if host_version >= oximux_remote_proto::proto::SCHEDULE_CRON_MIN_VERSION {
+    if host_version >= trex_remote_proto::proto::SCHEDULE_CRON_MIN_VERSION {
         eprintln!("skipped: the released peer already speaks v{host_version}");
         return;
     }
@@ -495,11 +495,11 @@ fn a_new_client_schedules_on_an_old_host() {
 #[test]
 fn a_new_client_creates_worktrees_on_an_old_host() {
     let Some(old) = old_cli() else {
-        eprintln!("skipped: OXIMUX_SKEW_CLI is unset");
+        eprintln!("skipped: TREX_SKEW_CLI is unset");
         return;
     };
     let host_version = protocol_of(&old);
-    if host_version >= oximux_remote_proto::proto::CREATE_WORKTREE_BASE_MIN_VERSION {
+    if host_version >= trex_remote_proto::proto::CREATE_WORKTREE_BASE_MIN_VERSION {
         eprintln!("skipped: the released peer already speaks v{host_version}");
         return;
     }

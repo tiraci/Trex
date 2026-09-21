@@ -1,4 +1,4 @@
-//! The CLI's scripting contract, frozen.
+﻿//! The CLI's scripting contract, frozen.
 //!
 //! Everything here is a promise made to something that cannot complain: a shell
 //! script, a CI job, an agent driving this binary from the `agent-context` dump.
@@ -30,10 +30,10 @@ use serde_json::Value;
 /// directory where nothing is serving — every failure here is provoked, not
 /// inherited from the developer's machine.
 fn bin(dir: &std::path::Path) -> Command {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_oximux-cli"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_trex-cli"));
     cmd.args(["--dir", dir.to_str().unwrap(), "--timeout", "5"]);
-    cmd.env_remove(oximux_remote_local::SESSION_ENV_VAR);
-    cmd.env_remove(oximux_remote_local::SESSION_TOKEN_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_TOKEN_ENV_VAR);
     cmd
 }
 
@@ -241,7 +241,7 @@ fn the_documented_verbs_still_exist() {
 fn the_agent_context_dump_describes_arguments_completely() {
     let dump = dump();
 
-    assert_eq!(dump["command"]["name"], "oximux", "the dump names the command users type");
+    assert_eq!(dump["command"]["name"], "TREX", "the dump names the command users type");
     for key in ["json_flag", "async_contract", "session_scope", "turn_bound"] {
         assert!(
             dump["conventions"][key].as_str().is_some_and(|s| !s.is_empty()),
@@ -281,7 +281,7 @@ fn the_agent_context_dump_describes_arguments_completely() {
     }
 
     let (mut args, mut valued) = (0, 0);
-    walk(&dump["command"], "oximux", &mut args, &mut valued);
+    walk(&dump["command"], "TREX", &mut args, &mut valued);
 
     // The tree carries ~105 arguments today. A floor near that catches a walk
     // that silently stops descending; a floor of "more than a handful" would

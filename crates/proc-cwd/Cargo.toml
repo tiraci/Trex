@@ -1,5 +1,5 @@
-[package]
-name = "oximux-proc-cwd"
+﻿[package]
+name = "trex-proc-cwd"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

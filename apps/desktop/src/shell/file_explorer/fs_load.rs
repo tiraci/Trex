@@ -1,4 +1,4 @@
-//! Async filesystem helpers for the file explorer.
+﻿//! Async filesystem helpers for the file explorer.
 //!
 //! Wraps `tokio::fs::read_dir` with the should_include filter and produces
 //! sorted `TreeNode` slices ready for the cache. `depth` is always 0 here;
@@ -80,7 +80,7 @@ pub async fn load_dir_cache(path: PathBuf, repo_root: PathBuf) -> DirCache {
         },
         Ok(Err(e)) => {
             tracing::warn!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 path = %path.display(),
                 error = %e,
                 "dir read failed"
@@ -93,7 +93,7 @@ pub async fn load_dir_cache(path: PathBuf, repo_root: PathBuf) -> DirCache {
         }
         Err(_) => {
             tracing::warn!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 path = %path.display(),
                 "dir read timed out after 5s"
             );

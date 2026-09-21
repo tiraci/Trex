@@ -1,4 +1,4 @@
-//! Smoke test: proves `#[gpui::test]` harness compiles and runs against the
+﻿//! Smoke test: proves `#[gpui::test]` harness compiles and runs against the
 //! dual-`gpui::App` risk documented in `docs/gpui-pins.md`. Uses `build_row`
 //! (pure render fn) inside a minimal `Render` fixture — no PTY process
 //! spawned, no live `TerminalView::mount`.
@@ -9,9 +9,9 @@
 //! converges; do NOT add a `rev = "..."` to the workspace `Cargo.toml`.
 
 use gpui::{Context, IntoElement, Render, TestAppContext, Window, px};
-use oximux_app::shell::terminal_row::build_row;
-use oximux_pty::Cell;
-use oximux_settings::Theme;
+use trex_app::shell::terminal_row::build_row;
+use trex_pty::Cell;
+use trex_settings::Theme;
 
 struct RowFixtureView {
     row: Vec<Cell>,

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Fetch a pinned, checksum-verified ripgrep for bundling into the Windows app.
 
@@ -67,7 +67,7 @@ $Name = "ripgrep-$RgVersion-$Arch-pc-windows-msvc"
 $Zip = "$Name.zip"
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
-$Work = Join-Path ([System.IO.Path]::GetTempPath()) ("oximux-rg-" + [System.Guid]::NewGuid().ToString('N'))
+$Work = Join-Path ([System.IO.Path]::GetTempPath()) ("trex-rg-" + [System.Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force -Path $Work | Out-Null
 
 try {

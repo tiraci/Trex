@@ -1,4 +1,4 @@
-//! `ProjectPanes` — workspace-level container for one project's pane
+﻿//! `ProjectPanes` — workspace-level container for one project's pane
 //! groups.
 //!
 //! The workspace owns one `ProjectPanes` per open project; each holds:
@@ -25,13 +25,13 @@ use gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, SharedString, Subscription,
     WeakEntity, Window,
 };
-use oximux_agents::CliRuntime;
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::CliRuntime;
+use trex_settings::{Density, Theme, Typography};
 
-use oximux_agents::{AgentStatusStream, SharedBackend};
-use oximux_core::{AgentAdapter, AgentSessionId};
-use oximux_pty::TerminalSessionId;
-use oximux_storage::{PaneBufferRepo, PaneRelayIdRepo};
+use trex_agents::{AgentStatusStream, SharedBackend};
+use trex_core::{AgentAdapter, AgentSessionId};
+use trex_pty::TerminalSessionId;
+use trex_storage::{PaneBufferRepo, PaneRelayIdRepo};
 
 use crate::notifier::{Notifier, TabId};
 use crate::persisted_terminals::{

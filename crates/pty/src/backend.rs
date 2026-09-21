@@ -1,4 +1,4 @@
-//! The `TerminalBackend` contract.
+﻿//! The `TerminalBackend` contract.
 //!
 //! One trait object per concrete source (real PTY, fixture replay, ACP).
 //! The UI layer in `apps/desktop` owns a `Box<dyn TerminalBackend>` and
@@ -72,7 +72,7 @@ pub struct SpawnConfig {
 impl Default for SpawnConfig {
     fn default() -> Self {
         Self {
-            shell: oximux_shell_env::default_shell(),
+            shell: trex_shell_env::default_shell(),
             args: Vec::new(),
             // `current_dir` fails only if the cwd was deleted or became
             // unreadable. The old fallback was `/`, which names the current

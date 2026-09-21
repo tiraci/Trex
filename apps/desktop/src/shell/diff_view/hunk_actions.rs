@@ -1,4 +1,4 @@
-//! Per-hunk action chips rendered into the diff hunk header.
+﻿//! Per-hunk action chips rendered into the diff hunk header.
 //!
 //! Three text chips — Stage / Unstage / Discard — that dispatch back to
 //! `DiffView::stage_hunk` / `unstage_hunk` / `request_discard_hunk`
@@ -28,7 +28,7 @@ use gpui::{
     App, ClickEvent, Hsla, InteractiveElement, ParentElement, SharedString,
     StatefulInteractiveElement as _, Styled, WeakEntity, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Render the action-chip cluster for one hunk. `None` when the
 /// current side carries no actions (untracked file, or no visible chip

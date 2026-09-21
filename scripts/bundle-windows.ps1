@@ -1,25 +1,25 @@
-<#
+﻿<#
 .SYNOPSIS
-    Build and lay out the Windows OxiMux app directory.
+    Build and lay out the Windows TREX app directory.
 
 .DESCRIPTION
     The Windows counterpart of scripts/bundle-macos.sh, and a much smaller
     script, because Windows has no bundle format to satisfy: an "app" here is a
     directory whose contents sit beside the executable. That flatness is the
-    whole design. Everything OxiMux resolves at runtime, it resolves as a
+    whole design. Everything TREX resolves at runtime, it resolves as a
     *sibling of the running exe*, so getting the layout right is the entire job.
 
-    Output: dist/OxiMux/
-      -Zip        also dist/OxiMux-<version>-windows-<arch>.zip
-      -Installer  also dist/OxiMux-<version>-x64-setup.exe
+    Output: dist/TREX/
+      -Zip        also dist/trex-<version>-windows-<arch>.zip
+      -Installer  also dist/trex-<version>-x64-setup.exe
 
     What ships, and what breaks without it:
 
-      oximux.exe              the app.
-      oximux-relay.exe        the PTY relay daemon. Missing, every terminal
+      TREX.exe              the app.
+      trex-relay.exe        the PTY relay daemon. Missing, every terminal
                               falls back to an in-process backend that dies on
                               quit, so sessions never survive a relaunch.
-      oximux-screen-gate.exe  the PreToolUse hook that decides an agent's
+      trex-screen-gate.exe  the PreToolUse hook that decides an agent's
                               screen-control calls. Missing, every chat runs
                               unenforced: one warning in the log and otherwise
                               indistinguishable from normal. On Windows this is
@@ -57,11 +57,11 @@
     host build. Only affects where artifacts are read from.
 
 .PARAMETER Zip
-    Also produce dist/OxiMux-<version>-windows-<arch>.zip.
+    Also produce dist/trex-<version>-windows-<arch>.zip.
 
 .PARAMETER Installer
-    Also compile packaging/windows/oximux.iss into
-    dist/OxiMux-<version>-x64-setup.exe. Needs Inno Setup 6.3 or newer on the
+    Also compile packaging/windows/TREX.iss into
+    dist/trex-<version>-x64-setup.exe. Needs Inno Setup 6.3 or newer on the
     machine (`winget install JRSoftware.InnoSetup`); it is preinstalled on
     GitHub's windows-latest runners.
 
@@ -92,7 +92,7 @@ $ErrorActionPreference = 'Stop'
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $RepoRoot
 try {
-    $AppDir = Join-Path $RepoRoot 'dist/OxiMux'
+    $AppDir = Join-Path $RepoRoot 'dist/TREX'
 
     # Cargo puts artifacts under target/<triple>/<profile> when --target is
     # passed and target/<profile> when it is not. Reading the wrong one is how
@@ -108,14 +108,14 @@ try {
     if ($Target) { $CargoFlags += @('--target', $Target) }
 
     if (-not $SkipBuild) {
-        Write-Host "==> Building oximux + oximux-relay + oximux-screen-gate ($Profile)"
+        Write-Host "==> Building TREX + trex-relay + trex-screen-gate ($Profile)"
         # One cargo invocation, not three: the three binaries share almost their
         # whole dependency graph, and three invocations serialise what cargo
         # would otherwise overlap.
         & cargo build @CargoFlags `
-            -p oximux-app --bin oximux `
-            -p oximux-relay --bin oximux-relay `
-            -p oximux-computer-use --bin oximux-screen-gate
+            -p trex-app --bin TREX `
+            -p trex-relay --bin trex-relay `
+            -p trex-computer-use --bin trex-screen-gate
         if ($LASTEXITCODE -ne 0) { throw "cargo build failed with exit code $LASTEXITCODE" }
     }
 
@@ -125,21 +125,21 @@ try {
     # "Access to the path 'onnxruntime.dll' is denied" - which names a file
     # nobody touched and says nothing about the app in the taskbar. Check for
     # the process instead, and say what to do about it.
-    $running = @(Get-Process -Name 'oximux', 'oximux-relay' -ErrorAction SilentlyContinue |
+    $running = @(Get-Process -Name 'TREX', 'trex-relay' -ErrorAction SilentlyContinue |
                  Where-Object { $_.Path -and $_.Path.StartsWith($AppDir, [StringComparison]::OrdinalIgnoreCase) })
     if ($running) {
         $list = ($running | ForEach-Object { "$($_.ProcessName) (pid $($_.Id))" }) -join ', '
         throw @"
 $AppDir is in use by: $list
-Windows cannot replace a running executable or a mapped DLL. Quit that OxiMux
+Windows cannot replace a running executable or a mapped DLL. Quit that TREX
 (and its relay daemon, which outlives the app on purpose) and re-run:
-  Get-Process oximux, oximux-relay | Stop-Process
+  Get-Process TREX, trex-relay | Stop-Process
 "@
     }
     if (Test-Path $AppDir) { Remove-Item -Recurse -Force $AppDir }
     New-Item -ItemType Directory -Force -Path $AppDir | Out-Null
 
-    foreach ($exe in 'oximux.exe', 'oximux-relay.exe', 'oximux-screen-gate.exe') {
+    foreach ($exe in 'TREX.exe', 'trex-relay.exe', 'trex-screen-gate.exe') {
         $src = Join-Path $ArtifactDir $exe
         if (-not (Test-Path $src)) {
             throw "$exe is missing from $ArtifactDir. Build it, or drop -SkipBuild."
@@ -187,20 +187,20 @@ rather than start without dictation. Run a full 'cargo build' first.
     $iconProbe = @'
 using System;
 using System.Runtime.InteropServices;
-public static class OxiMuxIconProbe {
+public static class TREXIconProbe {
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     public static extern int PrivateExtractIconsW(
         string file, int index, int cx, int cy, IntPtr[] icons, int[] ids, int count, int flags);
 }
 '@
-    if (-not ('OxiMuxIconProbe' -as [type])) { Add-Type -TypeDefinition $iconProbe }
+    if (-not ('TREXIconProbe' -as [type])) { Add-Type -TypeDefinition $iconProbe }
     # Null arrays with a count of 0 is the documented "just count them" call.
-    $found = [OxiMuxIconProbe]::PrivateExtractIconsW(
-        (Join-Path $AppDir 'oximux.exe'), 0, 0, 0, $null, $null, 0, 0)
+    $found = [TREXIconProbe]::PrivateExtractIconsW(
+        (Join-Path $AppDir 'TREX.exe'), 0, 0, 0, $null, $null, 0, 0)
     if ($found -lt 1) {
         throw @"
-oximux.exe carries no icon resource.
-apps/desktop/build.rs should have embedded assets/windows/OxiMux.ico at id 1.
+TREX.exe carries no icon resource.
+apps/desktop/build.rs should have embedded assets/windows/trex.ico at id 1.
 Check that a resource compiler was on PATH during the build; embed-resource
 treats a missing one as optional and says so only in the build log.
 "@
@@ -215,10 +215,10 @@ treats a missing one as optional and says so only in the build log.
     }
 
     if ($Zip) {
-        $zipPath = Join-Path $RepoRoot "dist/OxiMux-$version-windows-$arch.zip"
+        $zipPath = Join-Path $RepoRoot "dist/trex-$version-windows-$arch.zip"
         if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
         # The directory, not its contents: extracting has to produce an
-        # `OxiMux\` folder. Zipping `$AppDir\*` instead scatters nine loose
+        # `TREX\` folder. Zipping `$AppDir\*` instead scatters nine loose
         # files into whatever folder the user extracted into, and the app still
         # runs from there - which is worse than failing, because it looks fine.
         Compress-Archive -Path $AppDir -DestinationPath $zipPath
@@ -233,7 +233,7 @@ treats a missing one as optional and says so only in the build log.
         if ($arch -ne 'x64') {
             throw @"
 -Installer only supports an x64 payload (this host reports $arch).
-packaging/windows/oximux.iss is x64-only, and release.yml builds
+packaging/windows/TREX.iss is x64-only, and release.yml builds
 x86_64-pc-windows-msvc only. Cross-bundle with -Target x86_64-pc-windows-msvc,
 or teach the .iss an arm64 variant first.
 "@
@@ -274,8 +274,8 @@ Looked on PATH and in: $($candidates -join ', ')
 "@
         }
 
-        $iss = Join-Path $RepoRoot 'packaging/windows/oximux.iss'
-        $setupPath = Join-Path $RepoRoot "dist/OxiMux-$version-x64-setup.exe"
+        $iss = Join-Path $RepoRoot 'packaging/windows/TREX.iss'
+        $setupPath = Join-Path $RepoRoot "dist/trex-$version-x64-setup.exe"
         if (Test-Path $setupPath) { Remove-Item -Force $setupPath }
 
         # Backslashes throughout: $AppDir carries a forward slash from the
@@ -302,7 +302,7 @@ Looked on PATH and in: $($candidates -join ', ')
 
     $size = [math]::Round(((Get-ChildItem $AppDir -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
     Write-Host "==> $AppDir ready (v$version, $arch, $size MB)"
-    Write-Host "    $(Join-Path $AppDir 'oximux.exe')    # to launch"
+    Write-Host "    $(Join-Path $AppDir 'TREX.exe')    # to launch"
 }
 catch {
     # `powershell.exe -File script.ps1` exits 0 even when the script throws, so

@@ -1,4 +1,4 @@
-//! Pure swimlane layout for the commit graph (the DAG drawing).
+﻿//! Pure swimlane layout for the commit graph (the DAG drawing).
 //!
 //! Turns an ordered (newest-first) slice of commits — each carrying its
 //! parent SHAs — into a per-row drawing model: which lane (column) the
@@ -22,7 +22,7 @@
 //! lane rotates to the next palette slot. The renderer maps the index
 //! through `Theme::graph_lane_colors` at paint time.
 
-use oximux_core::CommitInfo;
+use trex_core::CommitInfo;
 
 /// Number of distinct lane hues (matches `Theme::graph_lane_colors`).
 /// Lane colour index is always taken modulo this.
@@ -229,7 +229,7 @@ pub fn max_lanes(rows: &[RowLayout]) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::CommitInfo;
+    use trex_core::CommitInfo;
 
     /// Terse commit builder: id + parents. Other fields are irrelevant to
     /// the layout so they're left blank.

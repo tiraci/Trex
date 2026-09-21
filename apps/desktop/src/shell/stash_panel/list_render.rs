@@ -1,7 +1,7 @@
-//! Pure render-data helpers for the stash list. Tests live alongside in
+﻿//! Pure render-data helpers for the stash list. Tests live alongside in
 //! `tests/stash_panel_list.rs`.
 
-use oximux_core::StashEntry;
+use trex_core::StashEntry;
 
 /// Single-line label for a stash row: `stash@{N}  [branch]  message`.
 /// Branch and message both trim; an empty message becomes `(no message)`.

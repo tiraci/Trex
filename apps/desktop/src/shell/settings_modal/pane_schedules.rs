@@ -1,4 +1,4 @@
-//! Schedules pane — create scheduled agent runs, list what is armed, and show
+﻿//! Schedules pane — create scheduled agent runs, list what is armed, and show
 //! each schedule's recent run history.
 //!
 //! The desktop is the only producer of schedules today (no mobile RPC exists
@@ -34,10 +34,10 @@ use gpui_component::input::{Input, InputState};
 // clicks. `dropdown_caret(true)` keeps the chevron look on a single trigger.
 use gpui_component::menu::{DropdownMenu as _, PopupMenuItem};
 use gpui_component::{Icon, Sizable as _};
-use oximux_agents::schedule::{
+use trex_agents::schedule::{
     NewSchedule, Recurrence, RecurrenceError, Schedule, ScheduleRun, describe,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 // The wording every schedule surface shares. See that module for why these
 // live beside the Automations page rather than here.
@@ -270,7 +270,7 @@ fn constraint_banner(theme: Theme, typography: &Typography) -> AnyElement {
         .gap(px(2.0))
         .text_size(px(typography.t_sub_label))
         .text_color(theme.fg_subtle)
-        .child("Scheduled runs only fire while OxiMux is running. Leaving it open keeps this")
+        .child("Scheduled runs only fire while TREX is running. Leaving it open keeps this")
         .child("computer awake so a run is not missed — but it cannot wake a sleeping one")
         .child("or relaunch a quit app. Runs use your default agent (Settings → Agents).")
         .into_any_element()

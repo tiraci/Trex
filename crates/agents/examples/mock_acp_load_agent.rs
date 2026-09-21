@@ -1,5 +1,5 @@
-//! A deterministic mock ACP **agent** that advertises `loadSession` and replays
-//! history on `session/load` — for verifying OxiMux's true-restore path: the
+﻿//! A deterministic mock ACP **agent** that advertises `loadSession` and replays
+//! history on `session/load` — for verifying TREX's true-restore path: the
 //! client must send `session/load` (not `session/new`) with the stored id, DROP
 //! the replayed transcript (it repaints its own persisted blob), and still render
 //! live updates after the load resolves.
@@ -8,7 +8,7 @@
 //! resolves; on the next prompt it emits a `LIVE_REPLY` chunk. The companion
 //! `acp_load_smoke` asserts the replay was suppressed and the live reply shown.
 //!
-//! Build:  `cargo build -p oximux-agents --example mock_acp_load_agent`
+//! Build:  `cargo build -p trex-agents --example mock_acp_load_agent`
 //! Binary: `target/debug/examples/mock_acp_load_agent`
 
 use agent_client_protocol::schema::v1::{

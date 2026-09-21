@@ -1,4 +1,4 @@
-//! Per-project-header action menu — small popover anchored under the
+﻿//! Per-project-header action menu — small popover anchored under the
 //! "…" trigger button in a project group header. Routes the user's
 //! selection back to `WorkspaceRoot` via a `WeakEntity` callback, mirroring
 //! the per-workspace `row_menu` pattern.
@@ -10,8 +10,8 @@ use gpui::{
     Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement, Render,
     Styled, WeakEntity, Window, div, px,
 };
-use oximux_core::Project;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::Project;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::workspace_root::WorkspaceRoot;
 
@@ -173,7 +173,7 @@ impl ProjectRowMenu {
 /// paths, and a menu whose label changed under the cursor would dispatch
 /// something other than what the user read.
 fn computer_use_state(project: &Project, cx: &gpui::App) -> Option<bool> {
-    let settings = cx.try_global::<oximux_settings::ComputerUseSettings>()?;
+    let settings = cx.try_global::<trex_settings::ComputerUseSettings>()?;
     settings
         .enabled
         .then(|| settings.is_enabled_for(std::path::Path::new(&project.root_path)))
@@ -181,7 +181,7 @@ fn computer_use_state(project: &Project, cx: &gpui::App) -> Option<bool> {
 
 impl Render for ProjectRowMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let Some((_, x, y)) = self.open_for.clone() else {
             return div().into_any_element();
         };

@@ -1,4 +1,4 @@
-//! Ref-counted prevent-idle-sleep assertion, held for three independent reasons.
+﻿//! Ref-counted prevent-idle-sleep assertion, held for three independent reasons.
 //!
 //! **Agents:** each agent-tab status watcher acquires an [`AwakeHold`] when its
 //! agent enters `Running` and drops it on the way out (or when the tab closes —
@@ -234,13 +234,13 @@ impl Source {
 /// looking for an agent that isn't running.
 fn assertion_name(state: &State) -> &'static str {
     match (state.agent.wants(), state.remote.wants(), state.scheduling.wants()) {
-        (true, true, _) => "OxiMux agent running, remote access on",
-        (false, true, _) => "OxiMux remote access on",
+        (true, true, _) => "TREX agent running, remote access on",
+        (false, true, _) => "TREX remote access on",
         // Named last so an agent actually running still reads as the cause; a
         // schedule merely armed is the weakest of the three explanations for a
         // machine that will not sleep.
-        (false, false, true) => "OxiMux schedule armed",
-        _ => "OxiMux agent running",
+        (false, false, true) => "TREX schedule armed",
+        _ => "TREX agent running",
     }
 }
 
@@ -377,7 +377,7 @@ mod power_request {
     /// A power request is process-wide and handle-based, so it survives the
     /// thread that made it and is released by whoever holds the handle. It also
     /// carries the reason string, which is what makes the hold accountable:
-    /// `powercfg /requests` names OxiMux and says *why*, the same way
+    /// `powercfg /requests` names TREX and says *why*, the same way
     /// `pmset -g assertions` does on macOS.
     pub(super) struct PowerRequestBackend;
 
@@ -451,7 +451,7 @@ mod power_request {
         fn windows_grants_and_releases_a_real_power_request() {
             let backend = PowerRequestBackend;
             let id = backend
-                .create("OxiMux test assertion")
+                .create("TREX test assertion")
                 .expect("PowerCreateRequest + PowerSetRequest should succeed");
             assert_ne!(id, 0, "a granted request has a real handle");
 
@@ -594,11 +594,11 @@ mod tests {
         let awake = Arc::new(AgentAwake::with_backend(backend.clone(), true));
 
         let remote = awake.acquire_remote();
-        assert_eq!(*backend.last_name.lock().unwrap(), "OxiMux remote access on");
+        assert_eq!(*backend.last_name.lock().unwrap(), "TREX remote access on");
         drop(remote);
 
         let _agent = awake.acquire();
-        assert_eq!(*backend.last_name.lock().unwrap(), "OxiMux agent running");
+        assert_eq!(*backend.last_name.lock().unwrap(), "TREX agent running");
     }
 
     #[test]
@@ -626,7 +626,7 @@ mod tests {
 
         let hold = awake.acquire_scheduling();
         assert!(awake.asserted(), "an armed schedule is its own reason to stay awake");
-        assert_eq!(*backend.last_name.lock().unwrap(), "OxiMux schedule armed");
+        assert_eq!(*backend.last_name.lock().unwrap(), "TREX schedule armed");
 
         drop(hold);
         assert!(!awake.asserted(), "released when no schedule is armed");

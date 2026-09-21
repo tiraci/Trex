@@ -1,4 +1,4 @@
--- V001: initial OxiMux schema.
+﻿-- V001: initial TREX schema.
 --
 -- This file is embedded into the binary via include_str! at compile time
 -- (see crates/storage/src/migrations.rs). The runner wraps the whole

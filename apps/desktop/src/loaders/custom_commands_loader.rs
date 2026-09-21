@@ -1,8 +1,8 @@
-//! Loader for user-defined custom commands from TOML config files.
+﻿//! Loader for user-defined custom commands from TOML config files.
 //!
 //! Reads from:
-//! - Global: `~/Library/Application Support/dev.nhtera.oximux/commands.toml`
-//! - Per-project: `<project_root>/.oximux/commands.toml`
+//! - Global: `~/Library/Application Support/dev.tiraci.trex/commands.toml`
+//! - Per-project: `<project_root>/.trex/commands.toml`
 //!
 //! The per-project file is intended to be committed to git so teams can
 //! share commands. Do not store secrets there.
@@ -10,17 +10,17 @@
 //! Both files are parsed with `CustomCommandsFile::from_toml_str`. A
 //! missing file is a no-op (empty list). A malformed file is logged and
 //! skipped — it never crashes the application. The merged result uses
-//! `load_and_merge` from `oximux-settings` with an empty workspace slice
+//! `load_and_merge` from `trex-settings` with an empty workspace slice
 //! (workspace-scoped commands are a future extension).
 
 use std::path::{Path, PathBuf};
 
-use oximux_settings::{CustomCommand, CustomCommandsFile, load_and_merge};
+use trex_settings::{CustomCommand, CustomCommandsFile, load_and_merge};
 
 /// Returns the global commands.toml path, or `None` when the data directory
 /// is unavailable (rare, but defensive).
 fn global_commands_path() -> Option<PathBuf> {
-    crate::app_paths::data_dir().map(|d| d.join(oximux_settings::custom_commands::FILE_NAME))
+    crate::app_paths::data_dir().map(|d| d.join(trex_settings::custom_commands::FILE_NAME))
 }
 
 /// Load and parse one commands TOML file. Returns an empty `Vec` when the
@@ -52,8 +52,8 @@ pub fn load_for_project(project_root: &Path) -> Vec<CustomCommand> {
         .unwrap_or_default();
 
     let project_path = project_root
-        .join(".oximux")
-        .join(oximux_settings::custom_commands::FILE_NAME);
+        .join(".trex")
+        .join(trex_settings::custom_commands::FILE_NAME);
     let project = load_from_path(&project_path);
 
     load_and_merge(&global, &project, &[])
@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn missing_project_file_returns_empty_not_error() {
         let tmp = tempfile::tempdir().unwrap();
-        // Non-existent project root — no .oximux/commands.toml
+        // Non-existent project root — no .trex/commands.toml
         let result = load_from_path(&tmp.path().join("commands.toml"));
         assert!(result.is_empty());
     }

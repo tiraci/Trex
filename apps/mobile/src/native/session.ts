@@ -1,4 +1,4 @@
-import { PermissionReply, type ThreadSnapshot } from 'oximux-core';
+﻿import { PermissionReply, type ThreadSnapshot } from 'trex-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { toChatImage, type Attachment } from './attachments';

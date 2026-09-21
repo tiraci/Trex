@@ -1,4 +1,4 @@
-//! The worktree-management seam: creating, listing, and removing a project's
+﻿//! The worktree-management seam: creating, listing, and removing a project's
 //! git worktrees, expressed without depending on the app that does it.
 //!
 //! The same split as [`SessionLauncher`](crate::SessionLauncher): the real work
@@ -15,7 +15,7 @@
 //! RPC on this surface ever turns a client-supplied string into a filesystem
 //! path.
 
-use oximux_remote_proto::messages::{CreateBaseWire, WorktreeProgressWire, WorktreeWire};
+use trex_remote_proto::messages::{CreateBaseWire, WorktreeProgressWire, WorktreeWire};
 
 /// Why a worktree operation could not happen.
 ///

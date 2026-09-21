@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 # A stand-in agent CLI that STREAMS, for `scripts/mem-smoke.sh`.
 #
 # Why this exists next to `apps/cli/tests/fixtures/fake-agent.sh` rather than
@@ -17,10 +17,10 @@
 #
 # Knobs (read from the environment, since the host owns the argv):
 #
-#   OXIMUX_MEM_AGENT_CHUNKS       delta events per reply            (default 400)
-#   OXIMUX_MEM_AGENT_CHUNK_BYTES  bytes of text per delta           (default 512)
-#   OXIMUX_MEM_AGENT_REPORT       file to append `streamed_bytes=N` to
-#   OXIMUX_MEM_AGENT_SESSION      session id to announce when the host names none
+#   TREX_MEM_AGENT_CHUNKS       delta events per reply            (default 400)
+#   TREX_MEM_AGENT_CHUNK_BYTES  bytes of text per delta           (default 512)
+#   TREX_MEM_AGENT_REPORT       file to append `streamed_bytes=N` to
+#   TREX_MEM_AGENT_SESSION      session id to announce when the host names none
 #
 # The payload is deliberately plain ASCII words with no quotes, backslashes or
 # newlines, so every line below can be assembled with `printf` and no JSON
@@ -30,10 +30,10 @@
 
 set -u
 
-chunks="${OXIMUX_MEM_AGENT_CHUNKS:-400}"
-chunk_bytes="${OXIMUX_MEM_AGENT_CHUNK_BYTES:-512}"
-report="${OXIMUX_MEM_AGENT_REPORT:-}"
-sid="${OXIMUX_MEM_AGENT_SESSION:-mem-smoke-session}"
+chunks="${TREX_MEM_AGENT_CHUNKS:-400}"
+chunk_bytes="${TREX_MEM_AGENT_CHUNK_BYTES:-512}"
+report="${TREX_MEM_AGENT_REPORT:-}"
+sid="${TREX_MEM_AGENT_SESSION:-mem-smoke-session}"
 
 # Adopt the id the host named, exactly as the real CLI does — `--session-id` on
 # a fresh launch, `--resume` on a restore. Announcing our own regardless would

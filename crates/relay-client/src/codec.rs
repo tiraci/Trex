@@ -1,9 +1,9 @@
-// Async framing wrapper around `oximux_relay_proto::{encode_frame,
+﻿// Async framing wrapper around `trex_relay_proto::{encode_frame,
 // decode_frame}`. Mirrors `crates/relay/src/codec.rs` (the daemon
 // side) — kept in two places intentionally so the client doesn't
 // have to depend on the daemon's lib crate.
 
-use oximux_relay_proto::{Frame, ProtoError, decode_frame, encode_frame};
+use trex_relay_proto::{Frame, ProtoError, decode_frame, encode_frame};
 use thiserror::Error;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 

@@ -1,4 +1,4 @@
-//! Read-only index of past agent sessions for a history/resume picker.
+﻿//! Read-only index of past agent sessions for a history/resume picker.
 //!
 //! Two on-disk sources, both journaled by the agent CLIs themselves:
 //!
@@ -27,7 +27,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::Value;
 
-use oximux_core::AgentAdapter;
+use trex_core::AgentAdapter;
 
 use super::import_provider_index;
 use super::{parse_timestamp_ms, read_tail};

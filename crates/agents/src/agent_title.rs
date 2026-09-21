@@ -1,4 +1,4 @@
-//! Ambient agent detection from a terminal's OSC window title.
+﻿//! Ambient agent detection from a terminal's OSC window title.
 //!
 //! Interactive coding-agent CLIs advertise their live state by rewriting the
 //! terminal title as they run: an awaiting marker when idle/waiting on the
@@ -13,7 +13,7 @@
 //! spawned one. A `None` result means "not recognizably an agent activity"
 //! and the caller should fall back to its tracked-session status.
 
-use oximux_core::AgentStatus;
+use trex_core::AgentStatus;
 
 /// Awaiting/idle marker some agents prefix onto the title while waiting on
 /// the user (U+2733, eight-spoked asterisk).
@@ -183,7 +183,7 @@ mod tests {
     #[test]
     fn label_bare_glyph_is_claude() {
         assert_eq!(agent_label_from_title("\u{2807} editing"), Some("Claude Code"));
-        assert_eq!(agent_label_from_title("\u{2733} oximux"), Some("Claude Code"));
+        assert_eq!(agent_label_from_title("\u{2733} TREX"), Some("Claude Code"));
         assert_eq!(agent_label_from_title("claude"), Some("Claude Code"));
     }
 
@@ -195,7 +195,7 @@ mod tests {
 
     #[test]
     fn plain_shell_titles_are_not_agents() {
-        assert_eq!(classify_agent_title("nguyen@host: ~/Code/oximux"), None);
+        assert_eq!(classify_agent_title("nguyen@host: ~/Code/TREX"), None);
         assert_eq!(classify_agent_title("zsh"), None);
         assert_eq!(classify_agent_title("~/Code/projects/graphify-rs"), None);
         assert_eq!(classify_agent_title(""), None);
@@ -213,7 +213,7 @@ mod tests {
     #[test]
     fn idle_marker_reads_as_idle() {
         assert_eq!(
-            classify_agent_title("\u{2733} oximux"),
+            classify_agent_title("\u{2733} TREX"),
             Some(AgentStatus::Idle)
         );
     }

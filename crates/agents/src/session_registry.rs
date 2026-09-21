@@ -1,4 +1,4 @@
-//! Process-wide, gpui-free session registry — the event bus + command surface
+﻿//! Process-wide, gpui-free session registry — the event bus + command surface
 //! every remote surface (and eventually the desktop view) hangs off.
 //!
 //! A [`SessionRegistry`] maps `session_id → `[`SessionHandle`], each holding the
@@ -28,7 +28,7 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::{Context as _, Result};
 use futures::channel::mpsc;
-use oximux_agent_core::redact::{scrub_transcript, ScreenshotFilter};
+use trex_agent_core::redact::{scrub_transcript, ScreenshotFilter};
 use tokio::sync::{broadcast, watch};
 
 use crate::thread::{

@@ -1,8 +1,8 @@
-//! The append-only RPC envelope (`Request`/`Response`) and its postcard codec.
+﻿//! The append-only RPC envelope (`Request`/`Response`) and its postcard codec.
 //! The payload structs each variant carries live in [`crate::messages`] and are
 //! re-exported here.
 //!
-//! **Append-only discipline** (mirrors `oximux-relay-proto`'s `PROTOCOL_VERSION`):
+//! **Append-only discipline** (mirrors `trex-relay-proto`'s `PROTOCOL_VERSION`):
 //! postcard encodes an enum by the ordinal of its variant, so the wire meaning
 //! of `Request`/`Response` is positional. New calls are added by **appending**
 //! variants; existing variants are never reordered, removed, or have their
@@ -132,7 +132,7 @@ pub use crate::messages::*;
 /// Appending variants is *not* a breaking change — postcard ordinals of the
 /// existing ones are untouched, and an older peer simply never sends or receives
 /// the new calls. So this bumps while the transport ALPN
-/// (`remote_iroh::OXIMUX_ALPN`) deliberately does not: that tracks breaking
+/// (`remote_iroh::TREX_ALPN`) deliberately does not: that tracks breaking
 /// changes only, and bumping it would refuse otherwise-compatible peers.
 pub const PROTOCOL_VERSION: u32 = 24;
 
@@ -801,7 +801,7 @@ pub enum Request {
     /// validates — the client never names a location or a ref. A base ref
     /// breaks that: it is a string the host resolves and checks out, and the
     /// worktree's own committed setup script is what provisioning then runs.
-    /// The unreviewed-ref guard in `oximux-worktree-ops` stops that script from
+    /// The unreviewed-ref guard in `trex-worktree-ops` stops that script from
     /// running by default, but the narrower property — *a paired device cannot
     /// name a ref at all* — is worth keeping for peers that are not sitting at
     /// the machine. A remote peer asking for a non-default base gets

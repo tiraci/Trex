@@ -1,4 +1,4 @@
-//! The read-only forge RPCs: issues, pull requests, and CI checks for the
+﻿//! The read-only forge RPCs: issues, pull requests, and CI checks for the
 //! repository a session lives in.
 //!
 //! **No credential crosses this boundary.** Every query shells out to the
@@ -22,10 +22,10 @@
 
 use std::path::PathBuf;
 
-use oximux_remote_proto::messages::{
+use trex_remote_proto::messages::{
     CheckRunWire, ForgeItemDetailWire, ForgeItemKindWire, ForgeItemWire, ForgeStateWire,
 };
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;
@@ -69,7 +69,7 @@ impl Dispatcher {
             Ok(cwd) => cwd,
             Err(e) => return Response::Error(e),
         };
-        let filter = oximux_git::gh::ForgeListFilter {
+        let filter = trex_git::gh::ForgeListFilter {
             state: to_state(state),
             mine,
             // No free-text search from the phone. The value is a raw forge-search
@@ -78,7 +78,7 @@ impl Dispatcher {
             // rather than plumbed and left unused.
             search: None,
         };
-        let items = oximux_git::forge::list_items(&cwd, to_kind(kind), filter).await;
+        let items = trex_git::forge::list_items(&cwd, to_kind(kind), filter).await;
         Response::ForgeItems(items.into_iter().map(to_item_wire).collect())
     }
 
@@ -94,7 +94,7 @@ impl Dispatcher {
             Ok(cwd) => cwd,
             Err(e) => return Response::Error(e),
         };
-        let detail = oximux_git::forge::item_detail(&cwd, to_kind(kind), number).await;
+        let detail = trex_git::forge::item_detail(&cwd, to_kind(kind), number).await;
         Response::ForgeItemDetail(detail.map(|d| ForgeItemDetailWire {
             body: d.body,
             author: d.author.login,
@@ -111,7 +111,7 @@ impl Dispatcher {
             Ok(cwd) => cwd,
             Err(e) => return Response::Error(e),
         };
-        let checks = oximux_git::forge::checks(&cwd).await;
+        let checks = trex_git::forge::checks(&cwd).await;
         Response::ForgeChecks(
             checks
                 .into_iter()
@@ -126,18 +126,18 @@ impl Dispatcher {
     }
 }
 
-fn to_kind(kind: ForgeItemKindWire) -> oximux_core::ForgeRefKind {
+fn to_kind(kind: ForgeItemKindWire) -> trex_core::ForgeRefKind {
     match kind {
-        ForgeItemKindWire::Issue => oximux_core::ForgeRefKind::Issue,
-        ForgeItemKindWire::Pull => oximux_core::ForgeRefKind::Pull,
+        ForgeItemKindWire::Issue => trex_core::ForgeRefKind::Issue,
+        ForgeItemKindWire::Pull => trex_core::ForgeRefKind::Pull,
     }
 }
 
-fn to_state(state: ForgeStateWire) -> oximux_git::gh::ForgeState {
+fn to_state(state: ForgeStateWire) -> trex_git::gh::ForgeState {
     match state {
-        ForgeStateWire::Open => oximux_git::gh::ForgeState::Open,
-        ForgeStateWire::Closed => oximux_git::gh::ForgeState::Closed,
-        ForgeStateWire::All => oximux_git::gh::ForgeState::All,
+        ForgeStateWire::Open => trex_git::gh::ForgeState::Open,
+        ForgeStateWire::Closed => trex_git::gh::ForgeState::Closed,
+        ForgeStateWire::All => trex_git::gh::ForgeState::All,
     }
 }
 
@@ -146,7 +146,7 @@ fn to_state(state: ForgeStateWire) -> oximux_git::gh::ForgeState {
 /// Labels and assignees collapse to plain strings: the source types carry a
 /// single field each (`name`, `login`), and mirroring two more structs across
 /// the wire to hold one string apiece would be shape for its own sake.
-fn to_item_wire(item: oximux_git::gh::ForgeItem) -> ForgeItemWire {
+fn to_item_wire(item: trex_git::gh::ForgeItem) -> ForgeItemWire {
     ForgeItemWire {
         number: item.number,
         title: item.title,

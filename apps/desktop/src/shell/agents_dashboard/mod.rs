@@ -1,4 +1,4 @@
-//! Agents dashboard — the body rendered when the Agents nav item is active.
+﻿//! Agents dashboard — the body rendered when the Agents nav item is active.
 //!
 //! Entry point: `render_agents_dashboard`. Accepts the same snapshot fields
 //! already held by `LeftRail` (pushed down by `WorkspaceRoot::refresh_left_rail`
@@ -21,8 +21,8 @@ use gpui::{
 };
 use gpui_component::Sizable as _;
 use gpui_component::input::{Escape as InputEscape, Input, InputState};
-use oximux_core::{Project, Workspace};
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::{Project, Workspace};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::agents_dashboard::filter::{StatusFilter, apply_filter};
 use crate::shell::agents_dashboard::model::AgentRow;

@@ -1,4 +1,4 @@
-//! Shared row + chip widgets for the settings modal panes.
+﻿//! Shared row + chip widgets for the settings modal panes.
 //!
 //! Editable panes apply immediately: each clickable chip mutates the
 //! modal's working copy and persists the TOML in its `on_click`. The
@@ -20,7 +20,7 @@ use gpui::{
     prelude::FluentBuilder, px, svg,
 };
 use gpui_component::tooltip::Tooltip;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 

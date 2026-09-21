@@ -1,4 +1,4 @@
-//! Startup-time inventory of CLI agent adapters.
+﻿//! Startup-time inventory of CLI agent adapters.
 //!
 //! Step 8 deliverable: bundle every built-in adapter, scan PATH once at
 //! boot, and hand the launch-dialog UI a list of which agents the user
@@ -26,7 +26,7 @@
 
 use std::sync::Arc;
 
-use oximux_core::AgentAdapter;
+use trex_core::AgentAdapter;
 
 use crate::cli::{
     ClaudeCodeAdapter, CliAgentAdapter, CodexAdapter, CustomCommandAdapter, OmpAdapter,

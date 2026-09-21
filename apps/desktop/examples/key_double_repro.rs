@@ -1,4 +1,4 @@
-//! Reproduction probe for issue #3 — "Double Keystroke Output in Terminal".
+﻿//! Reproduction probe for issue #3 — "Double Keystroke Output in Terminal".
 //!
 //! Isolates the exact wiring the terminal pane uses on the alt-screen: an
 //! `on_key_down` listener that encodes the key itself, PLUS a platform
@@ -17,12 +17,12 @@
 //!
 //! ```sh
 //! # the pre-fix wiring: expect 2 writes per keystroke
-//! cargo run -p oximux-app --example key_double_repro
+//! cargo run -p trex-app --example key_double_repro
 //! # what `TerminalView::on_key_down` now does: expect 1 write
-//! REPRO_STOP_PROPAGATION=1 cargo run -p oximux-app --example key_double_repro
+//! REPRO_STOP_PROPAGATION=1 cargo run -p trex-app --example key_double_repro
 //! ```
 //!
-//! Writes one line per delivery to `/tmp/oximux_key_double_repro.log`.
+//! Writes one line per delivery to `/tmp/trex_key_double_repro.log`.
 
 use std::io::Write as _;
 use std::ops::Range;
@@ -34,7 +34,7 @@ use gpui::{
     size,
 };
 
-const LOG: &str = "/tmp/oximux_key_double_repro.log";
+const LOG: &str = "/tmp/trex_key_double_repro.log";
 
 fn log(msg: &str) {
     println!("{msg}");

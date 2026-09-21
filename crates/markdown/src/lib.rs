@@ -1,4 +1,4 @@
-//! Block-level markdown for streaming agent replies.
+﻿//! Block-level markdown for streaming agent replies.
 //!
 //! Two things this crate exists to do, neither of which the renderer it feeds
 //! could do for itself:
@@ -16,7 +16,7 @@
 //! exactly one dependency. Anything that draws belongs to the desktop app.
 //!
 //! ```
-//! use oximux_markdown::{Block, IncrementalParser};
+//! use trex_markdown::{Block, IncrementalParser};
 //!
 //! let mut p = IncrementalParser::new();
 //! p.set_text("# Title\n\nfirst para\n\nsecond ");

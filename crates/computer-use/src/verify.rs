@@ -1,4 +1,4 @@
-//! Supply-chain gate for the third-party driver binary.
+﻿//! Supply-chain gate for the third-party driver binary.
 //!
 //! # Why signature verification rather than a pinned SHA-256
 //!
@@ -6,7 +6,7 @@
 //! That is the right answer when the host *downloads* the artifact — it is not
 //! the right answer here, and shipping it would have been security theatre:
 //!
-//! - OxiMux never downloads the driver. The user installs it, and the driver
+//! - TREX never downloads the driver. The user installs it, and the driver
 //!   ships its own `update --apply` that rewrites the binary in place.
 //! - Upstream releases roughly daily. A pinned hash would go stale within days
 //!   and turn every legitimate update into "computer use stopped working",
@@ -24,7 +24,7 @@
 //!    not a gate.
 //! 3. Notarization ticket stapled — Apple has seen it.
 //!
-//! The gates themselves live in `oximux-macos-trust` (shared with the app's
+//! The gates themselves live in `trex-macos-trust` (shared with the app's
 //! own updater — forked copies of signature-checking code would drift); this
 //! module owns the driver-specific policy, the version floor, and the audit
 //! hash.
@@ -37,7 +37,7 @@
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
-use oximux_macos_trust::{SignaturePolicy, TrustError};
+use trex_macos_trust::{SignaturePolicy, TrustError};
 
 use crate::exec::run_bounded;
 use crate::trust::{Trust, TrustStore};
@@ -102,7 +102,7 @@ fn driver_policy() -> SignaturePolicy {
 /// Run every gate against `path`, or fail with the specific reason.
 pub fn verify(path: &Path) -> Result<VerifiedDriver, Error> {
     let signature =
-        oximux_macos_trust::verify_signed(path, &driver_policy()).map_err(from_trust)?;
+        trex_macos_trust::verify_signed(path, &driver_policy()).map_err(from_trust)?;
 
     let version = read_version(path)?;
     if version < MIN_VERSION {
@@ -174,9 +174,9 @@ pub fn verify_pinned(path: &Path, store: &TrustStore) -> Result<VerifiedDriver, 
 
 /// Gatekeeper's own verdict on an app bundle — the notarization gate the
 /// in-app installer needs, since its programmatic download is never
-/// quarantined. See `oximux_macos_trust::verify_notarized_bundle`.
+/// quarantined. See `trex_macos_trust::verify_notarized_bundle`.
 pub fn verify_notarized_bundle(bundle: &Path) -> Result<(), Error> {
-    oximux_macos_trust::verify_notarized_bundle(bundle).map_err(from_trust)
+    trex_macos_trust::verify_notarized_bundle(bundle).map_err(from_trust)
 }
 
 /// The code-signing identifier of any binary — for an app bundle, its
@@ -187,7 +187,7 @@ pub fn verify_notarized_bundle(bundle: &Path) -> Result<(), Error> {
 /// This one just reads an identity off an arbitrary program, for callers that
 /// treat "unknown" as an ordinary answer rather than an error.
 pub fn signing_identifier(path: &Path) -> Option<String> {
-    oximux_macos_trust::read_signature(path)
+    trex_macos_trust::read_signature(path)
         .ok()
         .map(|signature| signature.identifier)
         .filter(|identifier| !identifier.is_empty())

@@ -1,8 +1,8 @@
-//! Reading daemon state — deliberately *not* controlling it.
+﻿//! Reading daemon state — deliberately *not* controlling it.
 //!
-//! # OxiMux does not own the daemon
+//! # TREX does not own the daemon
 //!
-//! The plan this phase came from assumed OxiMux would start, supervise, and
+//! The plan this phase came from assumed TREX would start, supervise, and
 //! reap a `cua-driver serve` process on a private socket. Probing the shipped
 //! driver showed that is wrong on all three counts, so this module reads state
 //! and nothing else. What the driver actually does, verified by running it:
@@ -14,16 +14,16 @@
 //! - It launches through LaunchServices *on purpose*. macOS attributes TCC to
 //!   the responsible process, and going through `open -a` makes that
 //!   `CuaDriver.app` — a stable identity whose Accessibility and Screen
-//!   Recording grants survive OxiMux rebuilds. (The "never launch via `open -a`"
+//!   Recording grants survive TREX rebuilds. (The "never launch via `open -a`"
 //!   rule applies to the deferred *embedded* mode, where the point is to
-//!   inherit OxiMux's own grants instead.)
+//!   inherit TREX's own grants instead.)
 //! - The socket is a fixed shared path, not per-host, and the daemon outlives
 //!   the `mcp` proxy that started it. It is a machine-wide singleton serving
 //!   every MCP client the user has configured.
 //!
 //! That last point is why there is no reap-on-quit here and no kqueue watch on
-//! OxiMux's pid: killing the daemon on OxiMux exit would tear the driver out
-//! from under the user's other agents. OxiMux's cleanup obligation is its own
+//! TREX's pid: killing the daemon on TREX exit would tear the driver out
+//! from under the user's other agents. TREX's cleanup obligation is its own
 //! *sessions* (see [`crate::session`]), which it can end without touching
 //! anyone else's.
 //!
@@ -50,7 +50,7 @@
 //!   `not-registered` on a fresh install, so a Windows box has no daemon
 //!   running until something starts one.
 //!
-//! The *conclusion* still holds: OxiMux does not own the daemon, so it must not
+//! The *conclusion* still holds: TREX does not own the daemon, so it must not
 //! reap it. `cua-driver mcp` still starts one when none is up — the CLI
 //! documents `--direct` as "own the runtime in this MCP process", which means
 //! the default path does not, and describes the compat flag as forwarded "to

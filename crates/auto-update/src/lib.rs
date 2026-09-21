@@ -1,4 +1,4 @@
-//! In-app auto-update for the desktop bundle.
+﻿//! In-app auto-update for the desktop bundle.
 //!
 //! The lifecycle, deliberately split in two:
 //!
@@ -28,7 +28,7 @@
 //!
 //! What both sides share — the manifest, its minisign signature, the download
 //! host allow-list, the all-or-nothing swap — lives in [`release`], once, and
-//! is shared with the CLI's `oximux update` rather than reimplemented per
+//! is shared with the CLI's `TREX update` rather than reimplemented per
 //! consumer.
 //!
 //! The two platform modules present the same three entry points, so the host
@@ -63,7 +63,7 @@ pub use bundle::UnsupportedReason;
 #[cfg(target_os = "macos")]
 pub use bundle::{eligibility, InstalledApp};
 #[cfg(target_os = "macos")]
-pub use oximux_macos_trust::{DiskShortfall, SignaturePolicy, TrustError};
+pub use trex_macos_trust::{DiskShortfall, SignaturePolicy, TrustError};
 #[cfg(target_os = "macos")]
 pub use staging::{boot_sweep, PendingUpdate};
 pub use version::Version;
@@ -156,7 +156,7 @@ pub enum UpdateError {
     #[error("could not mount the update image: {detail}")]
     Mount { detail: String },
 
-    #[error("no OxiMux.app inside the update image")]
+    #[error("no trex.app inside the update image")]
     NoAppInImage,
 
     #[error("{detail}")]
@@ -181,7 +181,7 @@ pub enum UpdateError {
     ///
     /// Transparent rather than re-worded per variant. Those errors are already
     /// written to be read by a user — "the release manifest is not signed by
-    /// the OxiMux release key" says the whole thing — and a second layer of
+    /// the TREX release key" says the whole thing — and a second layer of
     /// paraphrase is how the specific one gets lost.
     #[error(transparent)]
     Release(#[from] release::ReleaseError),
@@ -255,7 +255,7 @@ pub fn spawn_check(
 
     let (tx, rx) = mpsc::channel();
     let handle = std::thread::Builder::new()
-        .name("oximux-update-check".into())
+        .name("trex-update-check".into())
         .spawn(move || {
             let _guard = RunGuard;
             let emit = |status: UpdateStatus| {
@@ -382,15 +382,15 @@ mod tests {
             current_version: Version::new(0, 1, 0),
             #[cfg(target_os = "macos")]
             app: InstalledApp {
-                bundle_root: PathBuf::from("/Applications/OxiMux.app"),
+                bundle_root: PathBuf::from("/Applications/trex.app"),
                 pin: SignaturePolicy {
-                    identifier: "dev.nhtera.oximux".into(),
+                    identifier: "dev.tiraci.trex".into(),
                     team_id: "TEAM".into(),
                 },
             },
             #[cfg(target_os = "windows")]
             app: InstalledApp {
-                install_dir: PathBuf::from(r"C:\nowhere\OxiMux"),
+                install_dir: PathBuf::from(r"C:\nowhere\TREX"),
             },
             cache_dir: std::env::temp_dir(),
             manifest_path: std::env::temp_dir().join("never-written.json"),

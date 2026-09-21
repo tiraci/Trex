@@ -1,4 +1,4 @@
-//! Turning "these pids are listening" into "this project is serving this".
+﻿//! Turning "these pids are listening" into "this project is serving this".
 //!
 //! The kernel answers about pids. A person thinks about projects. Everything
 //! in this file is the join between those two, kept pure so that the rules —
@@ -43,7 +43,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-use oximux_proc_ports::ListeningPort;
+use trex_proc_ports::ListeningPort;
 
 /// One terminal's process tree, flattened.
 ///
@@ -54,7 +54,7 @@ use oximux_proc_ports::ListeningPort;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TreeSnapshot {
     /// Working directory of the pane group the terminal belongs to. This is
-    /// the grain a person recognises: they started the server "in OxiMux",
+    /// the grain a person recognises: they started the server "in TREX",
     /// not "in pid 21044".
     pub project: PathBuf,
     /// The shell, then its descendants. Bounded by the tree walk itself.
@@ -305,11 +305,11 @@ impl PidMetaCache {
 /// One process's identity, straight from the kernel. **Blocking.**
 fn read_meta(pid: u32) -> PidMeta {
     PidMeta {
-        name: oximux_proc_tree::process(pid)
+        name: trex_proc_tree::process(pid)
             .map(|p| p.name)
             .unwrap_or_default(),
-        cwd: oximux_proc_cwd::cwd_of_pid(pid),
-        argv: oximux_proc_tree::argv_of_pid(pid).unwrap_or_default(),
+        cwd: trex_proc_cwd::cwd_of_pid(pid),
+        argv: trex_proc_tree::argv_of_pid(pid).unwrap_or_default(),
     }
 }
 
@@ -322,7 +322,7 @@ fn read_meta(pid: u32) -> PidMeta {
 /// open.
 ///
 /// Each terminal's root is included in its own tree, not just its descendants:
-/// a terminal whose command replaced the shell outright — `oximux run npm
+/// a terminal whose command replaced the shell outright — `TREX run npm
 /// start` rather than a shell that then ran it — has the listener at the root,
 /// and walking only downward would miss exactly the case a user is most likely
 /// to have set up on purpose.
@@ -334,9 +334,9 @@ pub fn gather(
     let trees: Vec<TreeSnapshot> = terminal_roots
         .into_iter()
         .map(|(project, root)| {
-            let mut procs: Vec<(u32, String)> = oximux_proc_tree::process(root)
+            let mut procs: Vec<(u32, String)> = trex_proc_tree::process(root)
                 .into_iter()
-                .chain(oximux_proc_tree::descendants(root))
+                .chain(trex_proc_tree::descendants(root))
                 .map(|p| (p.pid, p.name))
                 .collect();
             // A shell whose name the kernel would not give up is still a pid
@@ -347,7 +347,7 @@ pub fn gather(
             TreeSnapshot { project, procs }
         })
         .collect();
-    let ports = oximux_proc_ports::listening_ports();
+    let ports = trex_proc_ports::listening_ports();
     // Only listening pids get metadata read for them. The socket table is the
     // filter that keeps a machine-wide scan from becoming a process census.
     let mut pids: Vec<u32> = ports.iter().map(|p| p.pid).collect();
@@ -640,7 +640,7 @@ mod tests {
     /// which would make every row unattributable.
     ///
     /// The name is asserted everywhere because every platform can supply one.
-    /// The working directory is asserted only where `oximux-proc-cwd`
+    /// The working directory is asserted only where `trex-proc-cwd`
     /// implements it — macOS via `PROC_PIDVNODEPATHINFO`, Linux via
     /// `/proc/<pid>/cwd`. It has no Windows implementation and answers `None`
     /// there, which is a documented gap rather than a failure: attribution on

@@ -1,10 +1,10 @@
-//! The pre-auth handshake handlers: `Register` (first-time pairing), `Connect`
+﻿//! The pre-auth handshake handlers: `Register` (first-time pairing), `Connect`
 //! (token fast path or challenge), and `AuthProve` (Ed25519 nonce signature).
 //! Each transitions the connection's [`ConnAuthn`] state; the authenticated
 //! session RPCs live in [`super::handlers`].
 
-use oximux_remote_proto::messages::{ConnectReq, HelloAckWire, HelloReq, RegisterReq};
-use oximux_remote_proto::proto::{
+use trex_remote_proto::messages::{ConnectReq, HelloAckWire, HelloReq, RegisterReq};
+use trex_remote_proto::proto::{
     MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Response, RpcError, is_compatible,
 };
 use rand::RngCore;

@@ -1,7 +1,7 @@
-//! Substring filter for the changed-files list. Pure helper so the entity
+﻿//! Substring filter for the changed-files list. Pure helper so the entity
 //! module stays focused on render orchestration.
 
-use oximux_core::FileStatus;
+use trex_core::FileStatus;
 
 /// Filter `files` to entries whose relative path contains `query` (case
 /// insensitive). Empty / whitespace-only query is a pass-through.

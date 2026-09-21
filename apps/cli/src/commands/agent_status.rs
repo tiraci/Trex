@@ -1,6 +1,6 @@
-//! `oximux agent-status` — the command an installed hook actually runs.
+﻿//! `TREX agent-status` — the command an installed hook actually runs.
 //!
-//! Every agent CLI OxiMux teaches to report runs this with a `--state`, and
+//! Every agent CLI TREX teaches to report runs this with a `--state`, and
 //! hands it the lifecycle event as JSON on stdin. It resolves the pane it is
 //! running in, asks the relay to frame the state as OSC-9999 on that pane's
 //! output stream, and gets out of the way.
@@ -12,12 +12,12 @@
 //! turn.
 //!
 //! Dispatched before clap, like the desktop's copy, for two reasons: the flags
-//! come from a file OxiMux itself wrote (a newer OxiMux may have written a flag
+//! come from a file TREX itself wrote (a newer TREX may have written a flag
 //! this binary has never heard of, which must be ignored rather than refused),
 //! and clap answers an unknown flag by printing usage and exiting 2 — which is
 //! exactly the failure the paragraph above forbids.
 
-use oximux_agent_hooks::report::StatusArgs;
+use trex_agent_hooks::report::StatusArgs;
 
 use crate::cli::exit;
 
@@ -34,7 +34,7 @@ pub fn run() -> u8 {
         // The one failure worth reporting: the hook entry itself is wrong, and
         // nothing will make it work until someone edits it.
         Err(msg) => {
-            eprintln!("oximux agent-status: {msg}");
+            eprintln!("TREX agent-status: {msg}");
             return exit::USAGE;
         }
     };
@@ -44,30 +44,30 @@ pub fn run() -> u8 {
         let _ = std::io::stdin().read_to_string(&mut buf);
         buf
     };
-    // Absent outside an OxiMux pane — a plain shell, or an agent started from
+    // Absent outside an TREX pane — a plain shell, or an agent started from
     // somewhere else entirely. There is no row to report to, and that is not an
     // error.
-    let pty_id = match std::env::var("OXIMUX_PTY_ID") {
+    let pty_id = match std::env::var("TREX_PTY_ID") {
         Ok(id) if !id.is_empty() => id,
         _ => return exit::OK,
     };
     let Some(payload) = args.payload(&stdin_json) else {
         return exit::OK;
     };
-    // The host's data root, the same one `oximux serve` defaults to and the
+    // The host's data root, the same one `TREX serve` defaults to and the
     // desktop computes for itself. A host serving a `--data-dir` elsewhere is
     // not reachable from here: the hook is handed no way to learn about it.
-    let Some(runtime_dir) = oximux_remote_local::default_runtime_dir() else {
-        eprintln!("oximux agent-status: this platform reports no local data directory");
+    let Some(runtime_dir) = trex_remote_local::default_runtime_dir() else {
+        eprintln!("TREX agent-status: this platform reports no local data directory");
         return exit::ERROR;
     };
-    let token = match std::fs::read_to_string(oximux_remote_local::token_path(&runtime_dir)) {
+    let token = match std::fs::read_to_string(trex_remote_local::token_path(&runtime_dir)) {
         Ok(token) => token.trim().to_owned(),
-        // No relay running — the common case outside OxiMux, and nothing the
+        // No relay running — the common case outside TREX, and nothing the
         // agent should hear about.
         Err(_) => return exit::OK,
     };
-    let socket = oximux_remote_local::socket_path(&runtime_dir);
+    let socket = trex_remote_local::socket_path(&runtime_dir);
 
     let Ok(rt) = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -88,9 +88,9 @@ pub fn run() -> u8 {
         // loaded machine still reports.
         let deadline = std::time::Duration::from_secs(3);
         let sent = tokio::time::timeout(deadline, async {
-            let client = oximux_relay_client::RelayClient::connect(&socket, &token).await.ok()?;
+            let client = trex_relay_client::RelayClient::connect(&socket, &token).await.ok()?;
             client
-                .request(oximux_relay_proto::Request::AgentStatus { pty_id, payload })
+                .request(trex_relay_proto::Request::AgentStatus { pty_id, payload })
                 .await
                 .ok()
         })

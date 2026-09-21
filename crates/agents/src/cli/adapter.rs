@@ -1,4 +1,4 @@
-//! `CliAgentAdapter` — the per-CLI contract.
+﻿//! `CliAgentAdapter` — the per-CLI contract.
 //!
 //! One impl per agent binary (Claude Code, Codex, Pi, custom-command).
 //! The adapter is pure metadata + arg-construction; the actual PTY spawn
@@ -6,7 +6,7 @@
 
 use anyhow::Result;
 use async_trait::async_trait;
-use oximux_core::AgentStatus;
+use trex_core::AgentStatus;
 use regex::bytes::Regex;
 use std::path::PathBuf;
 
@@ -14,7 +14,7 @@ use crate::runtime::AgentSessionConfig;
 
 /// What to spawn in the PTY. The runtime takes this, layers in standard
 /// PTY config (cols/rows from `AgentSessionConfig`, sandboxed env), and
-/// hands it to `oximux-pty`.
+/// hands it to `trex-pty`.
 #[derive(Debug, Clone)]
 pub struct CommandSpec {
     /// Absolute path or bare name resolvable on PATH.

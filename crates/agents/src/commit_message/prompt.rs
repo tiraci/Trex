@@ -1,4 +1,4 @@
-//! Prompt assembly + agent-output cleaning for AI commit-message generation.
+﻿//! Prompt assembly + agent-output cleaning for AI commit-message generation.
 //!
 //! Two related concerns live here:
 //!
@@ -36,7 +36,7 @@ pub const STAGED_SUMMARY_BYTE_BUDGET: usize = 6_000;
 pub const CUSTOM_PROMPT_BYTE_BUDGET: usize = 4_000;
 
 /// Snapshot of the worktree state the prompt is built from. Mirrors
-/// the shape of `oximux_git::staged_context::StagedContext` but is
+/// the shape of `trex_git::staged_context::StagedContext` but is
 /// duplicated locally so this crate doesn't take a git-crate
 /// dependency — callers convert between the two at the boundary.
 #[derive(Debug, Clone)]

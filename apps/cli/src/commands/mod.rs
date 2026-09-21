@@ -1,4 +1,4 @@
-//! One module per verb family. Each returns `(json data, human text)` so the
+﻿//! One module per verb family. Each returns `(json data, human text)` so the
 //! output layer owns the envelope and the verbs own only their content.
 
 use crate::cli::exit;
@@ -35,8 +35,8 @@ pub fn turn_timeout_failure(session: &str, secs: u64) -> Failure {
         format!("the turn did not finish within --turn-timeout ({secs}s); the agent is still running"),
     )
     .with_steps([
-        format!("`oximux permit ls {session}` — a turn parks here when it needs a decision"),
-        format!("`oximux attach {session}` to keep watching, or raise --turn-timeout"),
+        format!("`TREX permit ls {session}` — a turn parks here when it needs a decision"),
+        format!("`TREX attach {session}` to keep watching, or raise --turn-timeout"),
     ])
     .with_data(serde_json::json!({ "session_id": session }))
 }
@@ -61,9 +61,9 @@ pub fn stall_failure(session: &str, quiet_secs: u64, last_seq: u64) -> Failure {
         format!("the agent produced nothing for {quiet_secs}s (--stalled-after); it is still running"),
     )
     .with_steps([
-        format!("`oximux permit ls {session}` — a silent turn is often waiting on a decision"),
-        format!("`oximux attach {session} --from {last_seq}` to watch from where it went quiet"),
-        format!("`oximux stop {session}` interrupts the turn if the agent is genuinely wedged"),
+        format!("`TREX permit ls {session}` — a silent turn is often waiting on a decision"),
+        format!("`TREX attach {session} --from {last_seq}` to watch from where it went quiet"),
+        format!("`TREX stop {session}` interrupts the turn if the agent is genuinely wedged"),
     ])
     .with_data(serde_json::json!({
         "session_id": session,
@@ -128,7 +128,7 @@ pub fn resolve_prompt(prompt: String) -> Result<String, Failure> {
     if text.trim().is_empty() {
         return Err(Failure::new("empty-prompt", exit::USAGE, "the prompt read from stdin is empty")
             .with_steps([
-                "pipe the prompt in: `… | oximux send <SESSION> -`".into(),
+                "pipe the prompt in: `… | TREX send <SESSION> -`".into(),
                 "or pass it as an argument instead of `-`".into(),
             ]));
     }
@@ -203,6 +203,9 @@ pub mod transcript;
 pub mod update;
 pub mod wait;
 pub mod worktree;
+pub mod orchestration;
+pub mod accounts;
+pub mod diff;
 
 #[cfg(test)]
 mod stall_tests {

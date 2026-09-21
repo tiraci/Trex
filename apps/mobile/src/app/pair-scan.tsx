@@ -1,4 +1,4 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
+﻿import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Device from 'expo-device';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -15,11 +15,11 @@ import { useClient, type PairStep } from '@/native/client';
 import { describePairingError } from '@/native/errors';
 
 /**
- * The desktop encodes pairing tickets as `oximux://connect?ticket=…`. Anything
+ * The desktop encodes pairing tickets as `TREX://connect?ticket=…`. Anything
  * else is ignored rather than handed to the Rust core, so a stray QR on a poster
  * cannot start a pairing attempt.
  */
-const TICKET_PREFIX = 'oximux://connect?ticket=';
+const TICKET_PREFIX = 'TREX://connect?ticket=';
 
 /** Side of the viewfinder cutout. Large enough that a desktop screen's code
  * fills it from a comfortable arm's length. */
@@ -86,7 +86,7 @@ export default function PairScanScreen() {
     async (ticket: string) => {
       const value = ticket.trim();
       if (!value.startsWith(TICKET_PREFIX)) {
-        setProgress({ kind: 'failed', message: "That isn't an OxiMux pairing link." });
+        setProgress({ kind: 'failed', message: "That isn't an TREX pairing link." });
         return false;
       }
       const generation = ++attempt.current;
@@ -169,7 +169,7 @@ export default function PairScanScreen() {
 
   if (!permission.granted) {
     return (
-      <Prompt message="OxiMux needs the camera to scan the pairing code your desktop shows.">
+      <Prompt message="TREX needs the camera to scan the pairing code your desktop shows.">
         <Button label="Grant camera access" variant="primary" onPress={requestPermission} />
         <Button label="Paste a link instead" variant="ghost" onPress={() => setManual(true)} />
       </Prompt>
@@ -304,7 +304,7 @@ function ManualEntry({
         <TextInput
           value={typed}
           onChangeText={setTyped}
-          placeholder="oximux://connect?ticket=…"
+          placeholder="TREX://connect?ticket=…"
           placeholderTextColor={theme.textMuted}
           autoCapitalize="none"
           autoCorrect={false}

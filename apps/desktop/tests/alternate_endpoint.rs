@@ -1,4 +1,4 @@
-//! The provider-env phase's headline criterion, proven end to end against a
+﻿//! The provider-env phase's headline criterion, proven end to end against a
 //! real socket and a real child process rather than asserted about.
 //!
 //! **Why this lives in its own test binary.** It prepends a directory to the
@@ -26,8 +26,8 @@ use std::io::{Read as _, Write as _};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use oximux_agents::thread::{ChatBackend, ConnectSpec, ThreadEvent, Transport, connect};
-use oximux_settings::AgentLaunchSettings;
+use trex_agents::thread::{ChatBackend, ConnectSpec, ThreadEvent, Transport, connect};
+use trex_settings::AgentLaunchSettings;
 
 /// What the alternate endpoint answers with. The turn has to carry it back, so
 /// a pass cannot be explained by anything other than the round trip happening.

@@ -1,4 +1,4 @@
-//! Git changed-files panel — first UI surface consuming the `oximux-git`
+﻿//! Git changed-files panel — first UI surface consuming the `trex-git`
 //! wrappers shipped in Phase 2 steps 1–7. Subscribes to a `StatusPoller`
 //! receiver, partitions `GitState::files` into three sections, dispatches
 //! file-level stage / unstage / revert actions.
@@ -37,10 +37,10 @@ use gpui::{
     Render, ScrollHandle, StatefulInteractiveElement, Styled, Task, Window, div, px,
 };
 use gpui_component::scroll::ScrollableElement as _;
-use oximux_core::{GitState, ViewMode};
-use oximux_git::{PollState, Repository};
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::WorktreeSettingsRepo;
+use trex_core::{GitState, ViewMode};
+use trex_git::{PollState, Repository};
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::WorktreeSettingsRepo;
 use std::collections::HashSet;
 use std::path::PathBuf;
 use tokio::sync::watch;
@@ -51,7 +51,7 @@ pub struct GitPanel {
     /// `pub(super)` so [`selection`] can clone the handle to spawn
     /// vectorised stage / unstage ops in `bulk_stage_selected` /
     /// `bulk_unstage_selected`. No other sibling submodule mutates the
-    /// field; the inner `RwLock` cache stays internal to `oximux-git`.
+    /// field; the inner `RwLock` cache stays internal to `trex-git`.
     pub(super) repo: Repository,
     /// Last `Ready` payload observed on the watch channel. Cleared back to
     /// `None` on a fresh `Loading` or `Failed` transition so the render path
@@ -280,7 +280,7 @@ impl GitPanel {
                 s.view_mode_override = Some(next);
             }) {
                 tracing::warn!(
-                    target: "oximux_app::git_panel",
+                    target: "trex_app::git_panel",
                     error = %e,
                     key = %key,
                     "view_mode upsert failed; preference will reset on next launch"
@@ -397,7 +397,7 @@ impl GitPanel {
             // can see the deferral in the logs. Surfaced as `debug` —
             // not a warning; the chord wiring is intentional.
             tracing::debug!(
-                target: "oximux_app::git_panel",
+                target: "trex_app::git_panel",
                 count = self.selected.len(),
                 "R chord skipped: multi-row discard lands in Slice C (DiscardAllArea)"
             );
@@ -479,7 +479,7 @@ impl Focusable for GitPanel {
 
 impl Render for GitPanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let body = match (&self.poll_state, &self.git_state) {
             (PollState::Failed(e), _) => placeholder_state(
                 &format!("git status failed: {e}"),
@@ -497,7 +497,7 @@ impl Render for GitPanel {
                 // borrowed slices; we clone to an owned Vec so partition's
                 // `&[FileStatus]` signature stays unchanged. Cost is trivial
                 // at the row counts a working tree produces.
-                let filtered: Vec<oximux_core::FileStatus> =
+                let filtered: Vec<trex_core::FileStatus> =
                     filter_files(&state.files, &self.filter_query)
                         .into_iter()
                         .cloned()
@@ -642,18 +642,18 @@ fn initial_view_mode(repo: &Repository, settings_repo: Option<&WorktreeSettingsR
 pub(super) fn spawn_repo_op<F, Fut>(repo: Repository, op: F, label: &'static str)
 where
     F: FnOnce(Repository) -> Fut + Send + 'static,
-    Fut: std::future::Future<Output = oximux_git::Result<()>> + Send + 'static,
+    Fut: std::future::Future<Output = trex_git::Result<()>> + Send + 'static,
 {
     match tokio::runtime::Handle::try_current() {
         Ok(handle) => {
             handle.spawn(async move {
                 if let Err(e) = op(repo).await {
-                    tracing::warn!(target: "oximux_app::git_panel", error = %e, op = label, "git op failed");
+                    tracing::warn!(target: "trex_app::git_panel", error = %e, op = label, "git op failed");
                 }
             });
         }
         Err(_) => {
-            tracing::warn!(target: "oximux_app::git_panel", op = label, "no tokio runtime entered; op skipped (step 14 wires runtime)");
+            tracing::warn!(target: "trex_app::git_panel", op = label, "no tokio runtime entered; op skipped (step 14 wires runtime)");
         }
     }
 }

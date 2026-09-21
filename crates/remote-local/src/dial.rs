@@ -1,11 +1,11 @@
-//! The client half: read the token, connect, prove it, claim a scope.
+﻿//! The client half: read the token, connect, prove it, claim a scope.
 
 use std::path::Path;
 use std::sync::Arc;
 
 use interprocess::local_socket::traits::tokio::Stream as _;
 use interprocess::local_socket::{ToFsName as _, ToNsName as _};
-use oximux_relay_proto::endpoint::{Endpoint, endpoint_for};
+use trex_relay_proto::endpoint::{Endpoint, endpoint_for};
 
 use crate::hello::{HelloError, LocalIdentity, client_handshake};
 use crate::secure::read_token_file;
@@ -57,7 +57,7 @@ pub enum DialError {
 /// children (a macOS sandbox profile, a separate uid, a namespace). Until that
 /// exists, this crate's confinement holds against an agent that misuses the
 /// protocol, not against one that goes around it. See
-/// [`oximux-remote-local`'s module docs](crate).
+/// [`trex-remote-local`'s module docs](crate).
 pub fn credential(runtime_dir: &Path) -> Result<(LocalIdentity, String), std::io::Error> {
     let session_id = std::env::var(crate::SESSION_ENV_VAR)
         .ok()

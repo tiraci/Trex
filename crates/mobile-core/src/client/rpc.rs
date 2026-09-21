@@ -1,10 +1,10 @@
-//! The async RPC surface: list sessions, drive a turn, resolve permissions. Each
-//! grabs the live [`RemoteSession`](oximux_remote_session::RemoteSession) and
+﻿//! The async RPC surface: list sessions, drive a turn, resolve permissions. Each
+//! grabs the live [`RemoteSession`](trex_remote_session::RemoteSession) and
 //! delegates to its wire method, mapping errors to [`MobileError`].
 
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use oximux_agent_core::thread::{AskQuestion, PermissionDecision, QuestionAnswers};
+use trex_agent_core::thread::{AskQuestion, PermissionDecision, QuestionAnswers};
 
 use crate::client::MobileClient;
 use crate::ffi_types::{
@@ -54,7 +54,7 @@ fn check_media_types(images: &[ChatImage]) -> Result<(), MobileError> {
 /// phone camera roll makes this reachable without doing anything unusual: base64
 /// inflates by ~4/3, so a handful of full-resolution shots clears the cap.
 fn check_prompt_size(text: &str, images: &[ChatImage]) -> Result<(), MobileError> {
-    let budget = oximux_remote_iroh::MAX_FRAME.saturating_sub(FRAME_HEADROOM);
+    let budget = trex_remote_iroh::MAX_FRAME.saturating_sub(FRAME_HEADROOM);
     let total: usize = images.iter().map(|i| i.data.len() + i.media_type.len()).sum::<usize>()
         + text.len();
     if total > budget {
@@ -108,7 +108,7 @@ impl MobileClient {
         let session = self.shared.session()?;
         check_media_types(&images)?;
         check_prompt_size(&text, &images)?;
-        let images: Vec<oximux_agent_core::thread::ChatImage> =
+        let images: Vec<trex_agent_core::thread::ChatImage> =
             images.into_iter().map(Into::into).collect();
         let corr = CORR.fetch_add(1, Ordering::Relaxed);
         session

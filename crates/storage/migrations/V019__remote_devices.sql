@@ -1,6 +1,6 @@
--- V019: persist remote-control paired devices so the authorized set, each
+﻿-- V019: persist remote-control paired devices so the authorized set, each
 -- device's scope, and revocation survive an app restart. The in-memory
--- `AuthStore` (oximux-remote-host) seeds from this at boot and writes through on
+-- `AuthStore` (trex-remote-host) seeds from this at boot and writes through on
 -- register / revoke. One row per app-signing Ed25519 public key (lowercase hex).
 --
 -- `scope` is 'full' (a static/global pairing — the confirmed default) or

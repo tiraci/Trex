@@ -1,9 +1,9 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+﻿import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import PairScanScreen from '@/app/pair-scan';
 import type { PairStep } from '@/native/client';
 
-const TICKET = 'oximux://connect?ticket=abc';
+const TICKET = 'TREX://connect?ticket=abc';
 
 /*
  * Here rather than beside the screen it covers: everything under `src/app` is a
@@ -16,7 +16,7 @@ const TICKET = 'oximux://connect?ticket=abc';
  * may only reference out-of-scope bindings starting with that prefix.
  *
  * The client module is stubbed rather than driven, the way the other suites here
- * do it: importing it for real pulls in the `OximuxCore` TurboModule, which does
+ * do it: importing it for real pulls in the `TREXCore` TurboModule, which does
  * not exist under Node. What is under test is the screen's progress machine, and
  * that only needs `pair` to be a promise it can hold open.
  */
@@ -57,7 +57,7 @@ jest.mock('expo-camera', () => ({
 jest.mock('expo-router', () => ({ router: { replace: jest.fn() } }));
 
 function submitTicket() {
-  fireEvent.changeText(screen.getByPlaceholderText('oximux://connect?ticket=…'), TICKET);
+  fireEvent.changeText(screen.getByPlaceholderText('TREX://connect?ticket=…'), TICKET);
   fireEvent.press(screen.getByText('Pair'));
 }
 

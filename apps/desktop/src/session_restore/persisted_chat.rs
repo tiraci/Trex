@@ -1,4 +1,4 @@
-//! Per-session Agent Chat transcript persistence.
+﻿//! Per-session Agent Chat transcript persistence.
 //!
 //! A restored chat tab needs two things the pane-layout blob can't cheaply
 //! carry: the full message history (to paint instantly, before the resumed
@@ -18,8 +18,8 @@
 
 use serde::{Deserialize, Serialize};
 
-use oximux_agents::thread::{ThreadEntry, Transport};
-use oximux_storage::SettingsRepo;
+use trex_agents::thread::{ThreadEntry, Transport};
+use trex_storage::SettingsRepo;
 
 use crate::shell::agent_chat::ThinkingLevel;
 
@@ -46,10 +46,10 @@ pub fn chat_settings_key(session_id: &str) -> String {
 pub struct PersistedChoices {
     /// The model catalog this session's backend offered.
     #[serde(default)]
-    pub models: Vec<oximux_agents::thread::ModelChoice>,
+    pub models: Vec<trex_agents::thread::ModelChoice>,
     /// The permission/edit modes it offered.
     #[serde(default)]
-    pub modes: Vec<oximux_agents::thread::ModeChoice>,
+    pub modes: Vec<trex_agents::thread::ModeChoice>,
     /// The model actually in force — including the backend's own default when the
     /// user never picked one, which [`PersistedChatTranscript::model`]
     /// deliberately omits so a restored tab still launches on that default rather
@@ -85,7 +85,7 @@ pub struct PersistedChatTranscript {
     /// the session-detail popover would be empty on a restored chat.
     /// `#[serde(default)]` keeps blobs written before this field loadable.
     #[serde(default)]
-    pub session_meta: oximux_agents::thread::SessionMeta,
+    pub session_meta: trex_agents::thread::SessionMeta,
     /// The chat-wide thinking display level. `#[serde(default)]` (→ `Auto`)
     /// keeps blobs written before this field loadable.
     #[serde(default)]
@@ -141,18 +141,18 @@ pub struct PersistedChatTranscript {
     /// would silently *widen* what the agent may do — hence it is persisted
     /// rather than re-derived.
     #[serde(default)]
-    pub pi_posture: Option<oximux_agents::thread::pi::posture::PiPosture>,
+    pub pi_posture: Option<trex_agents::thread::pi::posture::PiPosture>,
     /// omp's approval posture (`--approval-mode`) chosen via the composer, so
     /// a reopened omp chat respawns under the same mode. Its own field, NOT a
     /// reuse of `pi_posture` — the domains differ (a tool allowlist vs an
     /// approval mode). `#[serde(default)]` (→ `None`) keeps older blobs
-    /// loadable; a restore then uses OxiMux's `Write` default, never omp's
+    /// loadable; a restore then uses TREX's `Write` default, never omp's
     /// own `yolo` (the spawn flag is always explicit).
     ///
     /// The stakes are the same as Pi's: a lost posture silently WIDENS what a
     /// restored session may do, so it is persisted rather than re-derived.
     #[serde(default)]
-    pub omp_posture: Option<oximux_agents::thread::omp::posture::OmpPosture>,
+    pub omp_posture: Option<trex_agents::thread::omp::posture::OmpPosture>,
     /// Claude's fast-mode toggle as last set in the composer, so a reopened
     /// Claude chat respawns with the same `fastMode` overlay. `None` = never
     /// touched (the CLI's own setting applies). `#[serde(default)]` keeps
@@ -233,8 +233,8 @@ pub fn load_chat_transcript(repo: &SettingsRepo, session_id: &str) -> Option<Per
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::thread::AssistantMessage;
-    use oximux_storage::open_memory;
+    use trex_agents::thread::AssistantMessage;
+    use trex_storage::open_memory;
 
     fn repo() -> SettingsRepo {
         SettingsRepo::new(open_memory().expect("in-memory db"))
@@ -275,7 +275,7 @@ mod tests {
 
     #[test]
     fn pi_posture_round_trips_so_a_restore_cannot_silently_widen_it() {
-        use oximux_agents::thread::pi::posture::{PiPosture, TOOLS_READ_ONLY};
+        use trex_agents::thread::pi::posture::{PiPosture, TOOLS_READ_ONLY};
         let repo = repo();
         let t = PersistedChatTranscript {
             session_meta: Default::default(),
@@ -310,7 +310,7 @@ mod tests {
 
     #[test]
     fn omp_posture_round_trips_so_a_restore_cannot_silently_widen_it() {
-        use oximux_agents::thread::omp::posture::OmpPosture;
+        use trex_agents::thread::omp::posture::OmpPosture;
         let repo = repo();
         let t = PersistedChatTranscript {
             session_meta: Default::default(),

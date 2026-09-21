@@ -1,4 +1,4 @@
-//! Row painting for the file explorer.
+﻿//! Row painting for the file explorer.
 //!
 //! `paint_row` converts a `RowPlan` + click metadata into a GPUI element with
 //! an attached `on_mouse_down` listener that dispatches back to `FileExplorer`.
@@ -17,7 +17,7 @@ use gpui_component::{
     Icon, IconName, Sizable as _,
     input::{Input, InputState},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 use std::path::PathBuf;
 
 /// Style + layout tokens threaded into `paint_row` to avoid exceeding the

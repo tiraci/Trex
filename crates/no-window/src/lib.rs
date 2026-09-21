@@ -1,4 +1,4 @@
-//! `CREATE_NO_WINDOW` for every child the app spawns.
+﻿//! `CREATE_NO_WINDOW` for every child the app spawns.
 //!
 //! # The failure this exists to stop
 //!
@@ -11,7 +11,7 @@
 //! flash every 500 ms courtesy of the git status poller.
 //!
 //! Nothing in the app ever wants that window. Every child either talks over
-//! pipes or over a ConPTY (which renders into OxiMux itself), so the console
+//! pipes or over a ConPTY (which renders into TREX itself), so the console
 //! Windows offers to create has nothing to show — `CREATE_NO_WINDOW` declines
 //! it. On every other platform there is no such window and this is a no-op,
 //! which is why call sites apply it unconditionally instead of behind a `cfg`.

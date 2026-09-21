@@ -1,4 +1,4 @@
-//! Command-mark gutter badges survive a real `clear(1)` without resurrecting.
+﻿//! Command-mark gutter badges survive a real `clear(1)` without resurrecting.
 //!
 //! The badge a finished prompt draws in the terminal's left padding is anchored
 //! to an absolute history line (`history_size + cursor_row` when the OSC 133 `A`
@@ -10,13 +10,13 @@
 
 #![cfg(unix)]
 
-use oximux_pty::{
+use trex_pty::{
     CommandMarkKind, PortablePtyBackend, SpawnConfig, TerminalBackend, TerminalEvent,
 };
-use oximux_shell_env::test_support::{run_script, test_cwd, test_shell};
+use trex_shell_env::test_support::{run_script, test_cwd, test_shell};
 use std::time::{Duration, Instant};
 
-const DONE: &str = "OXIMUX_MARKS_DONE";
+const DONE: &str = "TREX_MARKS_DONE";
 const TEST_TIMEOUT: Duration = Duration::from_secs(10);
 const POLL_INTERVAL: Duration = Duration::from_millis(20);
 const ROWS: u16 = 10;

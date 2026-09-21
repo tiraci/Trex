@@ -1,4 +1,4 @@
-//! Inline rename for the file explorer.
+﻿//! Inline rename for the file explorer.
 //!
 //! Matches the UX shown in the design reference: the file row
 //! transforms into an editable input field in-place. Enter commits,
@@ -169,7 +169,7 @@ impl FileExplorer {
         // the target already exists.
         if target.exists() {
             tracing::warn!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 from = %original.display(),
                 to = %target.display(),
                 "rename aborted: target already exists"
@@ -180,7 +180,7 @@ impl FileExplorer {
         match std::fs::rename(&original, &target) {
             Ok(()) => {
                 tracing::info!(
-                    target: "oximux_app::file_explorer",
+                    target: "trex_app::file_explorer",
                     from = %original.display(),
                     to = %target.display(),
                     "rename succeeded"
@@ -202,7 +202,7 @@ impl FileExplorer {
             }
             Err(err) => {
                 tracing::warn!(
-                    target: "oximux_app::file_explorer",
+                    target: "trex_app::file_explorer",
                     from = %original.display(),
                     to = %target.display(),
                     error = %err,

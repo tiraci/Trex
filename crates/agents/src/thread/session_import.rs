@@ -1,6 +1,6 @@
-//! Import a Claude CLI session log (`~/.claude/projects/<slug>/<sid>.jsonl`)
+﻿//! Import a Claude CLI session log (`~/.claude/projects/<slug>/<sid>.jsonl`)
 //! into a chat transcript (`Vec<ThreadEntry>`), so a session started outside
-//! OxiMux (e.g. in the terminal `claude`) can be reopened and rendered in the
+//! TREX (e.g. in the terminal `claude`) can be reopened and rendered in the
 //! chat view, then continued live with `--resume`.
 //!
 //! The session file is a superset of the `-p --output-format stream-json`

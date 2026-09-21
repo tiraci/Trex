@@ -1,4 +1,4 @@
-//! Session lifecycle for one dictation press: capture → resample → decode.
+﻿//! Session lifecycle for one dictation press: capture → resample → decode.
 //!
 //! One worker thread owns the warm engine cache and the session state machine
 //! (Idle → Recording → Transcribing → Idle/Failed). A capture thread fills a
@@ -81,7 +81,7 @@ impl DictationController {
         let active = Arc::new(AtomicBool::new(false));
         let worker_active = Arc::clone(&active);
         std::thread::Builder::new()
-            .name("oximux-dictation".into())
+            .name("trex-dictation".into())
             .spawn(move || worker_loop(cmd_rx, evt_tx, worker_active))
             .expect("spawn dictation worker");
         (Self { cmd_tx, active }, evt_rx)
@@ -224,7 +224,7 @@ fn run_session(
     let cap_events = evt_tx.clone();
     let cap_stop = Arc::clone(&capture_stop);
     let capture_handle = std::thread::Builder::new()
-        .name("oximux-dictation-capture".into())
+        .name("trex-dictation-capture".into())
         .spawn(move || capture::run(cap_shared, cap_events, cap_stop, device))
         .ok();
 

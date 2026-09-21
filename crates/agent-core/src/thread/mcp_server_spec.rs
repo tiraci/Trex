@@ -1,12 +1,12 @@
-//! MCP servers the *host* declares for a spawned agent.
+﻿//! MCP servers the *host* declares for a spawned agent.
 //!
-//! OxiMux historically injected no MCP configuration at all: the Claude arg
+//! TREX historically injected no MCP configuration at all: the Claude arg
 //! builder emitted only `--model`/`--effort`/`--resume`, and the ACP arm sent a
 //! hardcoded empty `mcpServers`. Whatever servers an agent saw came from the
 //! user's own config, discovered via `--setting-sources`. This type is the seam
-//! that lets OxiMux add its own — a stdio server it supplies and supervises.
+//! that lets TREX add its own — a stdio server it supplies and supervises.
 //!
-//! Deliberately stdio-only. Every server OxiMux hosts is a local sidecar it
+//! Deliberately stdio-only. Every server TREX hosts is a local sidecar it
 //! spawns; HTTP/SSE transports exist in ACP's vocabulary but have no host-side
 //! use case here, and modelling them would be shape without a consumer.
 //!
@@ -78,7 +78,7 @@ impl McpServerSpec {
 /// <configs...>` as "Load MCP servers from JSON files or strings", so the
 /// string form is passed inline and no temp file is needed.
 ///
-/// Note this does *not* pass `--strict-mcp-config`: OxiMux spawns with
+/// Note this does *not* pass `--strict-mcp-config`: TREX spawns with
 /// `--setting-sources user,project,local` precisely so the chat sees the user's
 /// own servers, and strict mode would suppress them. Host-declared servers are
 /// additive.
@@ -106,13 +106,13 @@ mod tests {
 
     #[test]
     fn one_server_renders_claude_shape() {
-        let spec = McpServerSpec::new("oximux-computer-use", "cua-driver")
+        let spec = McpServerSpec::new("trex-computer-use", "cua-driver")
             .args(vec!["mcp".into(), "--socket".into(), "/tmp/s.sock".into()])
             .env(vec![("CUA_DRIVER_EMBEDDED".into(), "1".into())]);
         let raw = to_claude_mcp_config(std::slice::from_ref(&spec)).expect("some");
         let v: Value = serde_json::from_str(&raw).expect("valid json");
 
-        let entry = &v["mcpServers"]["oximux-computer-use"];
+        let entry = &v["mcpServers"]["trex-computer-use"];
         assert_eq!(entry["type"], "stdio");
         assert_eq!(entry["command"], "cua-driver");
         assert_eq!(entry["args"], json!(["mcp", "--socket", "/tmp/s.sock"]));

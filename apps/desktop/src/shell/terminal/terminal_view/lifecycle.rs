@@ -1,14 +1,14 @@
-use super::*;
+﻿use super::*;
 
 impl TerminalView {
     /// Stable surface (leaf) id — read by the persistence layer to round-
-    /// trip `OXIMUX_SURFACE_ID` across restarts.
+    /// trip `trex_SURFACE_ID` across restarts.
     pub fn surface_id(&self) -> &str {
         &self.ids.surface_id
     }
 
     /// Stable terminal id — read by the persistence layer to round-trip
-    /// `OXIMUX_TAB_ID` across restarts.
+    /// `trex_TAB_ID` across restarts.
     pub fn tab_id(&self) -> &str {
         &self.ids.tab_id
     }
@@ -405,7 +405,7 @@ impl TerminalView {
         // Clone so the cwd can be restored into `dormant_cwd` if the promote
         // fails (the pane stays dormant + retryable rather than wedged in a
         // no-shell / no-poll-task limbo). The env re-injects the SAME context
-        // ids so a respawned shell keeps its OXIMUX_SURFACE_ID / TAB_ID across
+        // ids so a respawned shell keeps its trex_SURFACE_ID / TAB_ID across
         // the dormant cycle.
         let mut cfg = shell_spawn_config(
             cwd.clone(),
@@ -478,7 +478,7 @@ impl TerminalView {
         // into one wake; one drain consumes the whole queued batch.
         let (tx, mut rx) = futures::channel::mpsc::channel::<()>(1);
         let tx = std::sync::Mutex::new(tx);
-        let waker: oximux_pty::OutputWaker = std::sync::Arc::new(move || {
+        let waker: trex_pty::OutputWaker = std::sync::Arc::new(move || {
             if let Ok(mut tx) = tx.lock() {
                 // Full (a wake is already pending) or closed (view gone) → drop.
                 let _ = tx.try_send(());

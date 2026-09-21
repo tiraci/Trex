@@ -1,4 +1,4 @@
-//! App-side loader + persistence for [`AgentRetrySettings`].
+﻿//! App-side loader + persistence for [`AgentRetrySettings`].
 //!
 //! Reads `agent_retry.toml` from the app data dir on boot (default if absent)
 //! and installs it as a GPUI global. No file watcher: like the auto-update
@@ -13,7 +13,7 @@
 use std::path::PathBuf;
 
 use gpui::App;
-use oximux_settings::agent_retry::AgentRetrySettings;
+use trex_settings::agent_retry::AgentRetrySettings;
 
 fn settings_path() -> Option<PathBuf> {
     crate::app_paths::data_dir().map(|d| d.join(AgentRetrySettings::FILE_NAME))

@@ -1,4 +1,4 @@
-//! xtask — repo-level lint orchestrator. CI calls these subcommands.
+﻿//! xtask — repo-level lint orchestrator. CI calls these subcommands.
 //!
 //! Subcommands:
 //!   xtask file-size-lint   Walk the Rust source roots and warn > 1500 LOC,
@@ -122,7 +122,7 @@ fn print_help() {
         .collect::<Vec<_>>()
         .join(", ");
     println!(
-        "xtask — OxiMux repo checks\n\
+        "xtask — TREX repo checks\n\
          \n\
          USAGE:\n  xtask <command>\n\
          \n\
@@ -132,7 +132,7 @@ fn print_help() {
            literal-lint     Keep radius/type sizes on the Density + Typography scales\n\
            appearance-lint  Keep token-caching views pulling the current appearance\n\
            reliability-gates  Validate config/reliability-gates.toml (shape only, runs no tests)\n\
-           icon [--check]   Derive assets/windows/OxiMux.ico from assets/AppIcon.icns\n\
+           icon [--check]   Derive assets/windows/trex.ico from assets/AppIcon.icns\n\
            ci-check         Run all checks: file-size-lint, data-dir-lint, literal-lint, appearance-lint, reliability-gates, icon --check\n\
            help             Print this message"
     );

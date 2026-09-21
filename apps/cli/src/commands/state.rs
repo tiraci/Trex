@@ -1,4 +1,4 @@
-//! `oximux state` — the coordination blackboard.
+﻿//! `TREX state` — the coordination blackboard.
 //!
 //! `--if-version` is the point of the verb. A script that reads a value, edits
 //! it, and writes it back passes the version it read; if another agent got
@@ -6,8 +6,8 @@
 //! stdout, so the caller can merge and retry rather than clobber. Without that
 //! the board would be a race with extra steps.
 
-use oximux_remote_proto::messages::{StateEntryWire, StateSetReq};
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::messages::{StateEntryWire, StateSetReq};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -200,7 +200,7 @@ pub async fn watch(
 fn emit_change(
     seq: u64,
     key: &str,
-    entry: Option<&oximux_remote_proto::messages::StateEntryWire>,
+    entry: Option<&trex_remote_proto::messages::StateEntryWire>,
     json_mode: bool,
     replayed: bool,
 ) {

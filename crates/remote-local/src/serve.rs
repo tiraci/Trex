@@ -1,4 +1,4 @@
-//! The listener half: bind the control socket owner-only, authenticate each
+﻿//! The listener half: bind the control socket owner-only, authenticate each
 //! connection against the token, hand back a ready [`Transport`] + the scope
 //! the caller claimed. The host decides what the claim is worth.
 
@@ -10,7 +10,7 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use interprocess::local_socket::traits::tokio::{Listener as _, Stream as _};
 use interprocess::local_socket::{ListenerOptions, ToFsName as _, ToNsName as _};
-use oximux_relay_proto::endpoint::{Endpoint, endpoint_for};
+use trex_relay_proto::endpoint::{Endpoint, endpoint_for};
 
 use crate::hello::{HelloError, LocalClaim, LocalIdentity, server_handshake};
 use crate::secure;
@@ -107,10 +107,10 @@ impl LocalControlListener {
         // `sockaddr_un.sun_path` is a fixed 104 bytes on macOS and 108 on Linux,
         // and a data dir long enough to push the socket past it fails the bind
         // with "local socket name length exceeds capacity of sun_path" — wrapped
-        // by the caller in "is another OxiMux host already serving here?", which
+        // by the caller in "is another TREX host already serving here?", which
         // sends the reader hunting for a conflicting process that does not
         // exist. Plausible on a server, where a data dir like
-        // `/var/lib/oximux/instances/<customer>/<env>/data` is ordinary.
+        // `/var/lib/TREX/instances/<customer>/<env>/data` is ordinary.
         //
         // Named here rather than left to the OS so the message says the thing
         // the operator can act on: the path is too long, by this much.
@@ -314,7 +314,7 @@ fn node_identity(path: &Path) -> Option<(u64, u64)> {
 #[cfg(windows)]
 fn owner_only_descriptor()
 -> Result<interprocess::os::windows::security_descriptor::SecurityDescriptor> {
-    let sddl = oximux_owner_only::owner_only_sddl().context("build owner-only SDDL")?;
+    let sddl = trex_owner_only::owner_only_sddl().context("build owner-only SDDL")?;
     let wide = widestring::U16CString::from_str(&sddl)
         .context("security descriptor string is not valid UTF-16")?;
     interprocess::os::windows::security_descriptor::SecurityDescriptor::deserialize(&wide)

@@ -1,11 +1,11 @@
-//! Integration tests for stash operations on `Repository`: `is_dirty`,
+﻿//! Integration tests for stash operations on `Repository`: `is_dirty`,
 //! `stash_push`, `stash_list`, `stash_apply`, `stash_pop`, `stash_drop`.
 //! Tempdir + real `git` binary on PATH.
 
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_git::{GitError, Repository};
+use trex_git::{GitError, Repository};
 
 #[tokio::test]
 async fn is_dirty_clean_repo_returns_false() {
@@ -260,7 +260,7 @@ async fn stash_pop_invalid_ref_errors() {
 
     let repo = Repository::open(p).await.unwrap();
     let err = repo
-        .stash_pop(&oximux_core::StashRef { index: 99 })
+        .stash_pop(&trex_core::StashRef { index: 99 })
         .await
         .unwrap_err();
     assert!(matches!(err, GitError::NonZero { .. }), "got {err:?}");

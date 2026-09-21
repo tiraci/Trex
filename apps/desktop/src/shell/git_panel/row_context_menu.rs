@@ -1,4 +1,4 @@
-//! Right-click context menu for git_panel file rows. Mirrors the
+﻿//! Right-click context menu for git_panel file rows. Mirrors the
 //! [`crate::shell::file_tree_context_menu`] shape: one shared entity
 //! owned by `WorkspaceRoot`, opened with cursor coords + a target
 //! scope, closed on any outside click via an absolute overlay.
@@ -31,7 +31,7 @@ use gpui::{
     Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement, Render,
     Styled, WeakEntity, Window, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 use std::path::PathBuf;
@@ -142,7 +142,7 @@ impl GitRowContextMenu {
 
 impl Render for GitRowContextMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

@@ -1,4 +1,4 @@
-//! Building a chat view and keeping its composer in step with it.
+﻿//! Building a chat view and keeping its composer in step with it.
 //!
 //! `assemble` is the shared constructor every chat-view flavor funnels
 //! through; `sync_composer` pushes connection and turn state back down into
@@ -200,9 +200,9 @@ impl AgentChatView {
         if let Ok(handle) = tokio::runtime::Handle::try_current() {
             let engine_cwd = cwd.clone();
             let (tx, rx) =
-                tokio::sync::oneshot::channel::<Option<oximux_git::checkpoint::CheckpointEngine>>();
+                tokio::sync::oneshot::channel::<Option<trex_git::checkpoint::CheckpointEngine>>();
             handle.spawn(async move {
-                let engine = oximux_git::checkpoint::CheckpointEngine::new(&engine_cwd)
+                let engine = trex_git::checkpoint::CheckpointEngine::new(&engine_cwd)
                     .await
                     .ok()
                     .flatten();

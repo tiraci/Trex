@@ -1,12 +1,12 @@
-//! Exclude guard: temporarily hides oversized untracked files from
+﻿//! Exclude guard: temporarily hides oversized untracked files from
 //! `git add --all` by appending a marked block to `.git/info/exclude`,
 //! restored byte-exact on drop.
 
 use super::{CheckpointError, Result};
 use std::path::{Path, PathBuf};
 
-const START_MARKER: &str = "# >>> oximux checkpoint (auto, do not edit)";
-const END_MARKER: &str = "# <<< oximux checkpoint";
+const START_MARKER: &str = "# >>> TREX checkpoint (auto, do not edit)";
+const END_MARKER: &str = "# <<< TREX checkpoint";
 
 /// Untracked files at or above this size are excluded from checkpoints
 /// (and consequently not restored by rewind — accepted limitation).

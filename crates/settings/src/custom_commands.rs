@@ -1,10 +1,10 @@
-//! User-defined custom commands loaded from TOML config files.
+﻿//! User-defined custom commands loaded from TOML config files.
 //!
 //! Commands are defined in `commands.toml` in the global app data dir
-//! and/or a per-project `.oximux/commands.toml` (git-committable so
+//! and/or a per-project `.trex/commands.toml` (git-committable so
 //! teams can share commands). The per-project file overrides global
 //! entries by name. Do not put secrets in project-level files —
-//! `.oximux/commands.toml` is intended to be committed to git.
+//! `.trex/commands.toml` is intended to be committed to git.
 //!
 //! Parsing is tolerant: unknown TOML keys are ignored for forward-compat;
 //! malformed files return an error (logged by the caller, never panics).

@@ -1,4 +1,4 @@
-//! Palette entry types — mode enum, static command catalog, and the unified
+﻿//! Palette entry types — mode enum, static command catalog, and the unified
 //! runtime item type that merges built-in and custom commands.
 //!
 //! The static `PALETTE_COMMANDS` catalog uses non-capturing fn pointers so
@@ -221,7 +221,7 @@ pub const PALETTE_COMMANDS: &[CommandEntry] = &[
 /// Build the unified candidate list from the static catalog plus loaded
 /// custom commands. Built-in entries come first under the "Commands" group;
 /// custom entries appear after under the "Custom" group.
-pub fn build_palette_items(custom_commands: &[oximux_settings::CustomCommand]) -> Vec<PaletteItem> {
+pub fn build_palette_items(custom_commands: &[trex_settings::CustomCommand]) -> Vec<PaletteItem> {
     let mut items: Vec<PaletteItem> = PALETTE_COMMANDS
         .iter()
         .map(|c| PaletteItem {
@@ -329,7 +329,7 @@ mod tests {
     #[test]
     fn build_palette_items_appends_custom_commands() {
         let custom = vec![
-            oximux_settings::CustomCommand {
+            trex_settings::CustomCommand {
                 name: "My Command".to_string(),
                 prompt: "do something".to_string(),
                 scope: None,
@@ -347,7 +347,7 @@ mod tests {
     #[test]
     fn build_palette_items_skips_empty_name_commands() {
         let custom = vec![
-            oximux_settings::CustomCommand {
+            trex_settings::CustomCommand {
                 name: String::new(),
                 prompt: "orphan".to_string(),
                 scope: None,

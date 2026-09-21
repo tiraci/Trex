@@ -1,8 +1,8 @@
-//! AgentSessionRepo integration tests — status codec round-trip + shutdown
+﻿//! AgentSessionRepo integration tests — status codec round-trip + shutdown
 //! query semantics + FK cascade.
 
-use oximux_core::AgentStatus;
-use oximux_storage::{AgentSessionRepo, ProjectRepo, WorkspaceRepo, open_memory};
+use trex_core::AgentStatus;
+use trex_storage::{AgentSessionRepo, ProjectRepo, WorkspaceRepo, open_memory};
 
 fn fixture() -> (String, WorkspaceRepo, AgentSessionRepo) {
     let db = open_memory().expect("open memory");
@@ -12,7 +12,7 @@ fn fixture() -> (String, WorkspaceRepo, AgentSessionRepo) {
 
     let p = projects.insert("Acme", "/r", "main").expect("project");
     let w = workspaces
-        .insert(&p.id, "F", "f", "oximux/f", "/wt/f", true)
+        .insert(&p.id, "F", "f", "TREX/f", "/wt/f", true)
         .expect("workspace");
     (w.id, workspaces, agents)
 }

@@ -1,8 +1,8 @@
-//! Recognise an agent CLI from a process in a terminal's process tree.
+﻿//! Recognise an agent CLI from a process in a terminal's process tree.
 //!
 //! The window title and the status sideband only describe an agent that
 //! chooses to describe itself: the title is opt-in for several CLIs and absent
-//! by default in others, and the sideband exists only where OxiMux installed
+//! by default in others, and the sideband exists only where TREX installed
 //! hooks. A running process is neither optional nor polite — it is there for
 //! as long as the agent is, whether or not the agent is producing output.
 //! That makes the process tree the one presence signal that covers every CLI

@@ -1,4 +1,4 @@
-//! The `AgentConnection` trait + stdin serializers + a test stub.
+﻿//! The `AgentConnection` trait + stdin serializers + a test stub.
 //!
 //! `AgentConnection` is the transport-agnostic seam: the app holds a
 //! `Box<dyn AgentConnection>` and a `Receiver<ThreadEvent>`, drains events into
@@ -449,7 +449,7 @@ pub fn control_response_json(request_id: &str, decision: &PermissionDecision) ->
 pub fn set_permission_mode_json(mode: &str) -> Value {
     use std::sync::atomic::{AtomicU64, Ordering};
     static REQ_SEQ: AtomicU64 = AtomicU64::new(1);
-    let request_id = format!("oximux-set-mode-{}", REQ_SEQ.fetch_add(1, Ordering::Relaxed));
+    let request_id = format!("trex-set-mode-{}", REQ_SEQ.fetch_add(1, Ordering::Relaxed));
     json!({"type": "control_request", "request_id": request_id,
            "request": {"subtype": "set_permission_mode", "mode": mode}})
 }
@@ -464,7 +464,7 @@ pub fn set_permission_mode_json(mode: &str) -> Value {
 pub fn apply_flag_settings_json(settings: Value) -> Value {
     use std::sync::atomic::{AtomicU64, Ordering};
     static REQ_SEQ: AtomicU64 = AtomicU64::new(1);
-    let request_id = format!("oximux-apply-settings-{}", REQ_SEQ.fetch_add(1, Ordering::Relaxed));
+    let request_id = format!("trex-apply-settings-{}", REQ_SEQ.fetch_add(1, Ordering::Relaxed));
     json!({"type": "control_request", "request_id": request_id,
            "request": {"subtype": "apply_flag_settings", "settings": settings}})
 }
@@ -490,7 +490,7 @@ pub fn apply_flag_settings_json(settings: Value) -> Value {
 pub fn interrupt_json() -> Value {
     use std::sync::atomic::{AtomicU64, Ordering};
     static REQ_SEQ: AtomicU64 = AtomicU64::new(1);
-    let request_id = format!("oximux-interrupt-{}", REQ_SEQ.fetch_add(1, Ordering::Relaxed));
+    let request_id = format!("trex-interrupt-{}", REQ_SEQ.fetch_add(1, Ordering::Relaxed));
     json!({"type": "control_request", "request_id": request_id,
            "request": {"subtype": "interrupt"}})
 }
@@ -663,7 +663,7 @@ mod tests {
         assert_eq!(v["request"]["subtype"], "interrupt");
         let id1 = v["request_id"].as_str().unwrap().to_string();
         let id2 = interrupt_json()["request_id"].as_str().unwrap().to_string();
-        assert!(id1.starts_with("oximux-interrupt-"));
+        assert!(id1.starts_with("trex-interrupt-"));
         assert_ne!(id1, id2, "each request mints a fresh id");
     }
 
@@ -676,7 +676,7 @@ mod tests {
         // A unique request_id is minted (prefix + monotonic counter).
         let id1 = v["request_id"].as_str().unwrap().to_string();
         let id2 = set_permission_mode_json("plan")["request_id"].as_str().unwrap().to_string();
-        assert!(id1.starts_with("oximux-set-mode-"));
+        assert!(id1.starts_with("trex-set-mode-"));
         assert_ne!(id1, id2, "each request mints a fresh id");
     }
 
@@ -688,7 +688,7 @@ mod tests {
         assert_eq!(v["request"]["settings"]["fastMode"], true);
         let id1 = v["request_id"].as_str().unwrap().to_string();
         let id2 = apply_flag_settings_json(json!({}))["request_id"].as_str().unwrap().to_string();
-        assert!(id1.starts_with("oximux-apply-settings-"));
+        assert!(id1.starts_with("trex-apply-settings-"));
         assert_ne!(id1, id2, "each request mints a fresh id");
     }
 

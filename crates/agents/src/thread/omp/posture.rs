@@ -1,4 +1,4 @@
-//! omp's session approval posture — the `--approval-mode` spawn flag.
+﻿//! omp's session approval posture — the `--approval-mode` spawn flag.
 //!
 //! Unlike Pi (whose gating is a spawn-time tool ALLOWLIST with no per-call
 //! approval anywhere), omp has real tiered tool approval: under `always-ask`
@@ -8,10 +8,10 @@
 //!
 //! 🚨 **omp's own default is `yolo`** (`settings-schema.ts` —
 //! `tools.approvalMode: "yolo"`, auto-approve everything including exec), and
-//! rpc-mode setting overrides do not reset it. OxiMux therefore NEVER omits
+//! rpc-mode setting overrides do not reset it. TREX therefore NEVER omits
 //! the flag: every spawn and respawn emits `--approval-mode <mode>`
 //! explicitly, with [`OmpPosture::default`] = `Write` as the deliberate
-//! OxiMux default. `to_args` is the single source of those flags, and its
+//! TREX default. `to_args` is the single source of those flags, and its
 //! unconditional emit is locked by test.
 
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 pub enum OmpPosture {
     /// Every tool call asks first.
     AlwaysAsk,
-    /// Read-tier tools run free; write/exec-tier tools ask. The OxiMux
+    /// Read-tier tools run free; write/exec-tier tools ask. The TREX
     /// default — omp's own default (`yolo`) auto-approves exec, which is not a
     /// posture to put a user in without their say-so.
     #[default]

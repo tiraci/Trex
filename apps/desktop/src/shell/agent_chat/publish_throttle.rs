@@ -1,4 +1,4 @@
-//! Rate-limits the remote transcript snapshot.
+﻿//! Rate-limits the remote transcript snapshot.
 //!
 //! [`AgentChatView::publish_remote_transcript`] serializes the *whole* fold, and
 //! it used to run on every settled batch — so a turn that made twenty tool
@@ -128,8 +128,8 @@ mod tests {
     use std::sync::Arc;
 
     use gpui::TestAppContext;
-    use oximux_agents::thread::{StubConnection, ThreadEvent};
-    use oximux_settings::{Density, Theme, Typography};
+    use trex_agents::thread::{StubConnection, ThreadEvent};
+    use trex_settings::{Density, Theme, Typography};
 
     use super::super::AgentChatView;
     use super::*;

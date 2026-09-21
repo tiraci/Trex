@@ -1,4 +1,4 @@
-//! Codex adapter (`codex` CLI from OpenAI).
+﻿//! Codex adapter (`codex` CLI from OpenAI).
 //!
 //! Spawns the `codex` interactive TUI in a PTY. Optional `-m <model>` from
 //! `AgentSessionConfig::model`; prompt as trailing positional. No
@@ -114,7 +114,7 @@ impl CliAgentAdapter for CodexAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::AgentAdapter;
+    use trex_core::AgentAdapter;
 
     fn cfg() -> AgentSessionConfig {
         AgentSessionConfig {
@@ -128,7 +128,7 @@ mod tests {
             cols: 80,
             rows: 24,
             custom_command: None,
-            resumption: oximux_core::SessionResumption::None,
+            resumption: trex_core::SessionResumption::None,
         }
     }
 
@@ -193,7 +193,7 @@ mod tests {
     #[test]
     fn build_command_codex_resume() {
         let mut c = cfg();
-        c.resumption = oximux_core::SessionResumption::Resume { id: "y".into() };
+        c.resumption = trex_core::SessionResumption::Resume { id: "y".into() };
         let spec = CodexAdapter.build_command(&c).unwrap();
         // Resume is the leading subcommand token, not a flag.
         assert_eq!(&spec.args[0..2], &["resume".to_string(), "y".into()]);
@@ -202,7 +202,7 @@ mod tests {
     #[test]
     fn build_command_codex_fork() {
         let mut c = cfg();
-        c.resumption = oximux_core::SessionResumption::Fork { id: "z".into() };
+        c.resumption = trex_core::SessionResumption::Fork { id: "z".into() };
         let spec = CodexAdapter.build_command(&c).unwrap();
         assert_eq!(&spec.args[0..2], &["fork".to_string(), "z".into()]);
     }

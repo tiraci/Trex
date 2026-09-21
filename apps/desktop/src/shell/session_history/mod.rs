@@ -1,4 +1,4 @@
-//! Session-history picker modal (`⌘⇧H`).
+﻿//! Session-history picker modal (`⌘⇧H`).
 //!
 //! A centered overlay — same shape as the command palette — listing past
 //! Claude Code and Codex sessions newest-first. Type to fuzzy-filter, or narrow
@@ -23,9 +23,9 @@ use gpui::{
     StatefulInteractiveElement, Styled, Task, Window, div, hsla, prelude::FluentBuilder, px,
 };
 use gpui_component::{Icon, IconName};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
-use oximux_agents::session_log::{
+use trex_agents::session_log::{
     import_provider_index::load_import_provider_preview,
     now_unix_ms,
     session_index::{SessionEntry, SessionIndex, SessionScope},
@@ -479,7 +479,7 @@ impl SessionHistoryModal {
         let id = picker::entry_slug(entry);
         let open_chat = entry_opens_as_chat(entry)
             && cx
-                .try_global::<oximux_settings::AgentLaunchSettings>()
+                .try_global::<trex_settings::AgentLaunchSettings>()
                 .map(|s| s.opens_as_chat(id))
                 .unwrap_or(false);
         if open_chat {
@@ -500,7 +500,7 @@ impl SessionHistoryModal {
 pub(crate) fn entry_opens_as_chat(entry: &SessionEntry) -> bool {
     if matches!(
         entry.adapter,
-        oximux_core::AgentAdapter::ClaudeCode | oximux_core::AgentAdapter::Codex
+        trex_core::AgentAdapter::ClaudeCode | trex_core::AgentAdapter::Codex
     ) {
         return true;
     }
@@ -517,7 +517,7 @@ impl Focusable for SessionHistoryModal {
 
 impl Render for SessionHistoryModal {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }
@@ -818,7 +818,7 @@ impl Render for SessionHistoryModal {
             }))
             .child(card.with_animation(
                 "session-history-enter",
-                Animation::new(motion.m_overlay).with_easing(oximux_settings::ease_out_spring()),
+                Animation::new(motion.m_overlay).with_easing(trex_settings::ease_out_spring()),
                 |el, delta| el.opacity(delta).mt(px(6.0 * (1.0 - delta))),
             ))
             .into_any_element()
@@ -953,13 +953,13 @@ fn type_filter_chips(
 }
 
 /// Friendly name for the assistant side of a previewed transcript.
-pub(crate) fn adapter_display(adapter: oximux_core::AgentAdapter) -> &'static str {
+pub(crate) fn adapter_display(adapter: trex_core::AgentAdapter) -> &'static str {
     match adapter {
-        oximux_core::AgentAdapter::ClaudeCode => "Claude",
-        oximux_core::AgentAdapter::Codex => "Codex",
-        oximux_core::AgentAdapter::Pi => "Pi",
-        oximux_core::AgentAdapter::Omp => "omp",
-        oximux_core::AgentAdapter::Custom => "Assistant",
+        trex_core::AgentAdapter::ClaudeCode => "Claude",
+        trex_core::AgentAdapter::Codex => "Codex",
+        trex_core::AgentAdapter::Pi => "Pi",
+        trex_core::AgentAdapter::Omp => "omp",
+        trex_core::AgentAdapter::Custom => "Assistant",
     }
 }
 

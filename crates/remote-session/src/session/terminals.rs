@@ -1,4 +1,4 @@
-//! The terminal RPCs: list, attach, type, resize, detach.
+﻿//! The terminal RPCs: list, attach, type, resize, detach.
 //!
 //! Attaching returns only the replay snapshot. The live frames that follow
 //! arrive on the connection's terminal stream ([`RemoteSession::take_terminals`])
@@ -6,8 +6,8 @@
 //! them off the reply path, exactly as it does session events, so an RPC issued
 //! while a terminal is streaming still gets its own answer back.
 
-use oximux_remote_proto::messages::TerminalSummary;
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::messages::TerminalSummary;
+use trex_remote_proto::proto::{Request, Response};
 
 use crate::error::SessionError;
 use crate::session::{RemoteSession, Result};

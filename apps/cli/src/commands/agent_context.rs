@@ -1,4 +1,4 @@
-//! `oximux agent-context` — the command surface as data, for agents driving
+﻿//! `TREX agent-context` — the command surface as data, for agents driving
 //! this CLI. Derived by walking the live clap tree, so it CANNOT drift from
 //! what the parser actually accepts; there is no second schema to maintain.
 
@@ -44,7 +44,7 @@ pub fn dump() -> Value {
             "turn_bound": "--timeout bounds one host reply, never an agent's turn; run/send stream unbounded unless given --turn-timeout <SECS> (exit 4), which stops the wait and leaves the agent running",
             "session_scope": format!(
                 "when {} is set, this CLI reaches only that session",
-                oximux_remote_local::SESSION_ENV_VAR
+                trex_remote_local::SESSION_ENV_VAR
             ),
         },
     })
@@ -134,7 +134,7 @@ mod tests {
         assert!(!takes_value("json"), "--json is a bare switch");
         assert_eq!(dump["exit_codes"]["access_denied"], 5);
         assert_eq!(dump["exit_codes"]["host_unreachable"], 3);
-        assert_eq!(dump["command"]["name"], "oximux", "users type `oximux`");
+        assert_eq!(dump["command"]["name"], "TREX", "users type `TREX`");
     }
 
     /// The dump declares its own shape. Without this a consumer that cached or

@@ -1,4 +1,4 @@
-//! The shape screen control leaves behind on platforms that do not have it.
+﻿//! The shape screen control leaves behind on platforms that do not have it.
 //!
 //! Computer use is macOS-only for now (see `docs/windows-port-exclusions.md`).
 //! But the chat view that hosts it is one of the largest surfaces in the app,
@@ -24,7 +24,7 @@
 //! that there is "no capability to police". That was true when written and is
 //! false on Windows, for a reason that inverts the macOS argument.
 //!
-//! On macOS the side door exists because OxiMux *holds* an Accessibility grant
+//! On macOS the side door exists because TREX *holds* an Accessibility grant
 //! and every child inherits it — the capability is delegated, so removing the
 //! delegation removes the reach. On Windows there is no grant to hold or
 //! inherit: `SendInput`, window messages, and UI Automation are available to
@@ -41,15 +41,15 @@
 //!
 //! What is *not* declared is any MCP server: there is no verified driver to
 //! point at (Phase 2 of `plans/260801-0157-windows-computer-use/`), and
-//! `oximux-computer-use` refuses to build one on Windows regardless.
+//! `trex-computer-use` refuses to build one on Windows regardless.
 
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 
 use gpui::{AnyElement, App, Context};
-use oximux_agents::thread::{AgentConnection, ConnectSpec, ThreadEvent, ToolCall};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::{AgentConnection, ConnectSpec, ThreadEvent, ToolCall};
+use trex_settings::{Density, Theme, Typography};
 use serde_json::Value;
 
 use super::AgentChatView;
@@ -138,7 +138,7 @@ pub(super) mod computer_use {
         #[cfg(not(windows))]
         let _ = chat;
 
-        oximux_agents::thread::connect(spec)
+        trex_agents::thread::connect(spec)
     }
 
     /// Attach the `PreToolUse` hook, with no server and no tool names.
@@ -149,7 +149,7 @@ pub(super) mod computer_use {
     /// to include a driver" would read as a decision rather than an absence.
     #[cfg(windows)]
     fn declare_hook_only(spec: &mut ConnectSpec, chat: &ScreenControl) {
-        use oximux_agents::thread::Transport;
+        use trex_agents::thread::Transport;
 
         // Hooks are the Claude CLI's mechanism; the other transports have no
         // equivalent, so there is nowhere to put the policy. Same rule as the
@@ -166,11 +166,11 @@ pub(super) mod computer_use {
             return;
         };
 
-        let declaration = oximux_computer_use::mcp::declaration(
-            // No driver, ever, on this path. `oximux-computer-use` also refuses
+        let declaration = trex_computer_use::mcp::declaration(
+            // No driver, ever, on this path. `trex-computer-use` also refuses
             // to build a server spec on Windows, so this is belt and braces.
             None,
-            &oximux_computer_use::mcp::HookSpec {
+            &trex_computer_use::mcp::HookSpec {
                 command: &gate,
                 chat: &chat.label,
                 grants: &grants_path(),
@@ -199,7 +199,7 @@ pub(super) mod computer_use {
         let gate = std::env::current_exe()
             .ok()?
             .parent()?
-            .join(oximux_computer_use::gate_binary_file_name());
+            .join(trex_computer_use::gate_binary_file_name());
         gate.is_file().then_some(gate)
     }
 
@@ -214,7 +214,7 @@ pub(super) mod computer_use {
     fn grants_path() -> std::path::PathBuf {
         crate::app_paths::data_dir()
             .unwrap_or_else(std::env::temp_dir)
-            .join(oximux_computer_use::grants::GRANTS_FILE_NAME)
+            .join(trex_computer_use::grants::GRANTS_FILE_NAME)
     }
 
     /// Drop any grants a previous run left behind.
@@ -230,7 +230,7 @@ pub(super) mod computer_use {
     /// boot-time sweep.
     pub fn clear_stale_screen_control_grants() {
         #[cfg(windows)]
-        if !oximux_computer_use::GrantTable::at(grants_path()).clear() {
+        if !trex_computer_use::GrantTable::at(grants_path()).clear() {
             tracing::error!(
                 path = ?grants_path(),
                 "could not clear screen-control grants from the last run"
@@ -246,13 +246,13 @@ pub(super) mod screen_card {
     /// True for a screen-control tool call — including one replayed from a
     /// transcript written on a Mac, which is why this is not `false`.
     pub(in super::super) fn is_screen_call(name: &str) -> bool {
-        oximux_agent_core::screen_tools::is_computer_use_tool(name)
+        trex_agent_core::screen_tools::is_computer_use_tool(name)
     }
 
     /// The bare tool name, minus the driver-specific phrasing the macOS build
     /// derives from its own tool table.
     pub(in super::super) fn display_name(tc: &ToolCall) -> Option<String> {
-        let bare = oximux_agent_core::screen_tools::bare_tool_name(&tc.name)?;
+        let bare = trex_agent_core::screen_tools::bare_tool_name(&tc.name)?;
         Some(format!("Computer use · {bare}"))
     }
 
@@ -366,13 +366,13 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn the_absent_path_declares_a_hook_and_never_a_driver() {
-        let declaration = oximux_computer_use::mcp::declaration(
+        let declaration = trex_computer_use::mcp::declaration(
             None,
-            &oximux_computer_use::mcp::HookSpec {
-                command: Path::new(r"C:\Program Files\OxiMux\oximux-screen-gate.exe"),
+            &trex_computer_use::mcp::HookSpec {
+                command: Path::new(r"C:\Program Files\TREX\trex-screen-gate.exe"),
                 chat: "chat-1",
-                grants: Path::new(r"C:\Users\u\AppData\Roaming\OxiMux\grants.json"),
-                host: Path::new(r"C:\Program Files\OxiMux\oximux.exe"),
+                grants: Path::new(r"C:\Users\u\AppData\Roaming\TREX\grants.json"),
+                host: Path::new(r"C:\Program Files\TREX\TREX.exe"),
                 worktree: None,
                 started_at: None,
             },
@@ -386,7 +386,7 @@ mod tests {
             serde_json::from_str(&declaration.hook_settings).expect("valid json");
         let hook = &v["hooks"]["PreToolUse"][0];
         let command = hook["hooks"][0]["command"].as_str().expect("command");
-        assert!(command.contains("oximux-screen-gate"), "{command}");
+        assert!(command.contains("trex-screen-gate"), "{command}");
         assert!(
             hook["matcher"].as_str().expect("matcher").contains("Bash"),
             "the shell is the whole point of the hook here"

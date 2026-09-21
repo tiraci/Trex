@@ -1,4 +1,4 @@
-//! SearchPanel — repo-wide full-text search via `ripgrep --json`.
+﻿//! SearchPanel — repo-wide full-text search via `ripgrep --json`.
 //!
 //! Three input fields (`query`, include glob, exclude glob) feed `SearchOptions`.
 //! Every change schedules a 300ms-debounced background search that runs
@@ -23,7 +23,7 @@ use gpui::{
 };
 use gpui_component::input::{InputEvent, InputState};
 use gpui_component::scroll::ScrollableElement as _;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::search_panel::header_render::{SummaryState, render_header};
 use crate::shell::search_panel::result_row::{RowPaintCtx, paint_file_row, paint_match_row};
@@ -352,7 +352,7 @@ fn empty_ref() -> &'static SearchResults {
 
 impl Render for SearchPanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let header = render_header(self, cx);
 

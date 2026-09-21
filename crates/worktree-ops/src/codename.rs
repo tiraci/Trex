@@ -1,4 +1,4 @@
-//! Codenames: the name a workspace gets when the user does not type one.
+﻿//! Codenames: the name a workspace gets when the user does not type one.
 //!
 //! The create dialog no longer insists on a name, because naming the work
 //! before knowing what it is was the step that made "one keystroke to a
@@ -22,10 +22,10 @@
 use std::collections::hash_map::RandomState;
 use std::hash::BuildHasher;
 
-use oximux_git::validate_slug;
+use trex_git::validate_slug;
 
 /// The vocabulary. Every entry is lowercase ASCII letters only, so each passes
-/// [`validate_slug`] and [`oximux_git::derive_slug`] returns it unchanged —
+/// [`validate_slug`] and [`trex_git::derive_slug`] returns it unchanged —
 /// pinned by a test, because a codename that git refuses is a create that
 /// fails after the dialog closed.
 pub const CODENAMES: &[&str] = &[
@@ -75,7 +75,7 @@ pub fn select_codename_seeded(existing: &[String], seed: u64) -> String {
         .expect("an unbounded suffix sequence always finds a free name")
 }
 
-/// True iff `slug` is one OxiMux generated: a codename, optionally with a
+/// True iff `slug` is one TREX generated: a codename, optionally with a
 /// `-N` uniquing suffix — or the legacy `agent-<unix-seconds>` shape the
 /// chat's fresh-worktree toggle minted before it used codenames.
 ///
@@ -128,7 +128,7 @@ fn random_seed() -> u64 {
 pub fn every_codename_is_a_valid_slug() -> Result<(), String> {
     for name in CODENAMES {
         validate_slug(name).map_err(|e| format!("{name:?}: {e}"))?;
-        let derived = oximux_git::derive_slug(name);
+        let derived = trex_git::derive_slug(name);
         if derived != *name {
             return Err(format!("{name:?} derives to {derived:?}"));
         }

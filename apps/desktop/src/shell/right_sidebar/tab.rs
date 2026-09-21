@@ -1,4 +1,4 @@
-//! Tab identity and visibility rules for the right activity bar.
+﻿//! Tab identity and visibility rules for the right activity bar.
 
 /// Tabs available in the right sidebar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -22,7 +22,7 @@ pub struct TabVisibility {
 /// Returns the ordered list of tabs that should be visible given `v`.
 ///
 /// `Files` is intentionally **omitted** here even though the variant still
-/// exists. The `oximux-editor::FileTree` model (live filesystem watcher +
+/// exists. The `trex-editor::FileTree` model (live filesystem watcher +
 /// background walker + future LSP-aware affordances) is wired through
 /// `FileTreeView`, but exposing it as a second file-tab alongside
 /// `Explorer` confuses users (two folder icons, no clear semantic split).

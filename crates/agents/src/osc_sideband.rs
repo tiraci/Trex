@@ -1,4 +1,4 @@
-//! OSC-9999 structured-status sideband scanner.
+﻿//! OSC-9999 structured-status sideband scanner.
 //!
 //! Agent CLIs (or a thin hook) can emit a private OSC sequence carrying a
 //! JSON status payload:
@@ -29,7 +29,7 @@
 
 use std::borrow::Cow;
 
-use oximux_core::{AgentSidebandState, AgentStatus, SidebandDetail};
+use trex_core::{AgentSidebandState, AgentStatus, SidebandDetail};
 
 /// Hard cap on an accumulated OSC-9999 payload. The Phase-1 schema tops out
 /// near ~840 bytes (512 msg + 256 input + 64 tool + framing); 4 KiB leaves

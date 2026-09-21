@@ -1,4 +1,4 @@
-//! Row painters for the search result list.
+﻿//! Row painters for the search result list.
 //!
 //! Pure rendering glue between `SearchRow` plans and GPUI elements. Logic
 //! that affects content (truncation, summary text) lives in sibling pure
@@ -13,7 +13,7 @@ use gpui::{
     ParentElement, Styled, div, px,
 };
 use gpui_component::{Icon, IconName, Sizable as _};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Constants shared by file + match rows. Both heights are intentionally
 /// tighter than the global `density.h_row = 24` because search results

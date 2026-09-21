@@ -1,4 +1,4 @@
-# OxiMux reliability gates.
+﻿# TREX reliability gates.
 #
 # A gate is a reliability claim with its evidence attached. It records what must
 # be true, how you would notice it stopped being true, and — the field that does
@@ -37,7 +37,7 @@ platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos", "windows", "linux"]
 coverage_notes = """
 Genuinely covered on all three: the macOS job runs the workspace all-targets, \
-and the Linux and Windows jobs each name `-p oximux-relay --test \
+and the Linux and Windows jobs each name `-p trex-relay --test \
 relay_integration` as their own step. The Windows run is the load-bearing one \
 — it boots the daemon over a real named pipe and runs the v8 mutual handshake \
 from both ends, which is where this invariant would break if it broke."""
@@ -99,7 +99,7 @@ abort with exit 101 here, panicking `child argv missing the spawned arg; got \
 ""`. The cause is contention, not the argv path: this file runs 18 \
 daemon-and-subprocess-spawning tests in parallel and the argv readback races to \
 empty. It passes reliably in isolation \
-(`cargo test -p oximux-relay --test relay_integration \
+(`cargo test -p trex-relay --test relay_integration \
 spawn_args_reach_child_process -- --exact`). Two consequences worth carrying: \
 `cargo test --workspace` is fail-fast, so one trip here aborts the run before \
 later crates and yields a short, misleading count — always verify with \
@@ -128,9 +128,9 @@ platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos", "windows"]
 coverage_notes = """
 The gap is Linux, not Windows — the reverse of the intuition. Windows names \
-`-p oximux-pty --test backend_smoke` as its own step precisely because the \
+`-p trex-pty --test backend_smoke` as its own step precisely because the \
 workspace sweep there is `--lib` and would skip it, so ConPTY's drain shape is \
-asserted. The Linux job tests six named crates and `oximux-pty` is not among \
+asserted. The Linux job tests six named crates and `trex-pty` is not among \
 them, so this suite never runs on Linux at all."""
 test_files = ["crates/pty/tests/backend_smoke.rs"]
 assertions = [
@@ -173,7 +173,7 @@ Two fixtures cover a happy path and one variation; they do not cover the error \
 and control-request shapes Claude's six do. An earlier draft of this row said \
 these agents had no fixtures at all, which was false. Platforms: these are lib tests, reached by \
 the macOS all-targets run and the Windows `--workspace --lib` sweep; the Linux \
-job names six crates and `oximux-agent-core` is not one, so Linux is listed \
+job names six crates and `trex-agent-core` is not one, so Linux is listed \
 uncovered rather than assumed. The logic is platform-independent, which is an \
 argument that the Linux gap is low-risk — not that it is covered. This row is \
 the baseline Phase 4 of \
@@ -210,7 +210,7 @@ agents = ["claude", "codex"]
 covered_agents = ["claude", "codex"]
 coverage_notes = """
 Pure time arithmetic over parsed values, so it is platform-agnostic in fact; \
-Linux is listed uncovered because the Linux job does not test `oximux-agents`, \
+Linux is listed uncovered because the Linux job does not test `trex-agents`, \
 not because the arithmetic differs there. \
 Note what is NOT covered here: acquiring the numbers. Claude's come from an \
 OAuth probe that dies at token expiry and Codex's are read from an on-disk \
@@ -254,7 +254,7 @@ title = "A status hook never points at a raw target/debug binary"
 status = "stable"
 owner = "agent-hooks"
 invariant = """
-Hooks OxiMux writes are distinguishable from hand-written ones and are never \
+Hooks TREX writes are distinguishable from hand-written ones and are never \
 adopted by mistake. A hook command must resolve through the guarded dispatcher \
 rather than naming a build-tree binary directly."""
 oracle = """
@@ -271,7 +271,7 @@ across platforms — two use a hooks directory rather than a file, one takes its
 timeout in milliseconds, one matches on a regex, one is a TypeScript extension. \
 The ownership test is a lib test, so the macOS all-targets run and the Windows \
 `--workspace --lib` sweep both reach it; the Linux job does not test \
-`oximux-agent-hooks`. What no job asserts on any platform is the per-dialect \
+`trex-agent-hooks`. What no job asserts on any platform is the per-dialect \
 writers — the inspector is shared, the nine writers are not, and they are where \
 the dialects actually diverge."""
 test_files = ["crates/agent-hooks/src/inspect.rs"]
@@ -302,7 +302,7 @@ coverage_notes = """
 project scripts are a unix-shell feature today. This is a scope boundary, not \
 an untested claim — if Windows support lands, this row must gain the platform \
 first and the coverage second. Linux is declared and uncovered: the Linux job \
-tests six named crates and `oximux-worktree-ops` is not among them, so only the \
+tests six named crates and `trex-worktree-ops` is not among them, so only the \
 macOS run reaches these tests. One asymmetry the subset rule cannot express: \
 these tests carry no `cfg` gate, so they do in fact execute in the Windows \
 `--workspace --lib` sweep — but Windows is not a declared platform here, so \
@@ -344,7 +344,7 @@ covered_platforms = ["macos"]
 coverage_notes = """
 The rollback test runs in the desktop test suite, which is macOS-only \
 (`apps/desktop/tests/` is reached by the macOS `--workspace --all-targets` \
-step; the Windows job runs `-p oximux-app --lib`, and the Linux job does not \
+step; the Windows job runs `-p trex-app --lib`, and the Linux job does not \
 build this crate at all). Path handling is the part most likely to diverge on \
 Windows, and it is exactly the part not covered. Phase 2 added the \
 setup-failure arm this note previously anticipated."""
@@ -364,7 +364,7 @@ title = "A worktree reported created has been provisioned"
 status = "stable"
 owner = "worktree-ops"
 invariant = """
-Worktree creation copies the project's `.oximuxinclude` files and then runs its \
+Worktree creation copies the project's `.TREXinclude` files and then runs its \
 `setup` script, in that order, before the workspace row is inserted. A setup \
 failure — non-zero exit, signal, or timeout — fails creation. A project that \
 has not set `auto_setup` runs no setup at all."""
@@ -389,14 +389,14 @@ platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos", "windows"]
 coverage_notes = """
 Split coverage, and the halves are not equivalent. The bounded-execution unit \
-tests live in `oximux-worktree-ops`, whose lib tests run on macOS \
+tests live in `trex-worktree-ops`, whose lib tests run on macOS \
 (`--workspace --all-targets`) and Windows (`--workspace --lib`) but not on \
 Linux, which never builds this crate. The end-to-end ordering and rollback \
 arms live under `apps/desktop/tests/` and run on macOS only.
 
 So Windows proves the timeout, the closed stdin, and the non-zero exit; it \
 proves nothing about the order, the rollback, or the opt-in default. Closing \
-the Linux half means adding `oximux-worktree-ops` to the Linux job; closing the \
+the Linux half means adding `trex-worktree-ops` to the Linux job; closing the \
 Windows half means an integration harness that does not depend on the desktop \
 test target.
 
@@ -433,11 +433,11 @@ assertions = [
 
 [[gate]]
 id = "worktree.include-copy-cannot-write-outside-the-worktree"
-title = "The .oximuxinclude copy is a containment boundary"
+title = "The .TREXinclude copy is a containment boundary"
 status = "stable"
 owner = "worktree-ops"
 invariant = """
-Copying `.oximuxinclude` files into a new worktree never reads through a source \
+Copying `.TREXinclude` files into a new worktree never reads through a source \
 symlink, never writes through a symlink in the destination path, never \
 overwrites a file git already checked out, and never resolves a pattern outside \
 the project root."""
@@ -523,7 +523,7 @@ title = "A second launch activates the running app instead of racing it"
 status = "accepted-gap"
 owner = "desktop"
 invariant = """
-Launching OxiMux while an instance is running activates the existing window \
+Launching TREX while an instance is running activates the existing window \
 rather than starting a second process. Two instances would contend for the \
 same database, relay socket, and single-instance lock file."""
 oracle = """
@@ -566,7 +566,7 @@ platforms = ["macos", "windows"]
 covered_platforms = ["macos", "windows"]
 coverage_notes = """
 Covered on both declared platforms: the Windows job runs `-p \
-oximux-computer-use` all-targets rather than `--lib`, specifically so the \
+trex-computer-use` all-targets rather than `--lib`, specifically so the \
 suites under `tests/` are reached. `platforms` omits linux: there is no driver \
 there. One caveat that is coverage rather than a gap — the two `live_driver` \
 tests self-ignore without a real driver binary, which is correct on Windows \
@@ -646,7 +646,7 @@ keeping the gate: **any test touching a `static` needs a serializing lock**, \
 and poisoning should be recovered rather than propagated so a panicking test \
 does not turn its neighbour's result into a `PoisonError`. These are lib tests, \
 so the macOS all-targets run and the Windows `--workspace --lib` sweep both \
-reach them; the Linux job does not test `oximux-computer-use`, and linux is not \
+reach them; the Linux job does not test `trex-computer-use`, and linux is not \
 declared because there is no driver there."""
 test_files = ["crates/computer-use/src/install/mod.rs"]
 assertions = [
@@ -682,12 +682,12 @@ platforms = ["macos", "linux", "windows"]
 covered_platforms = ["macos"]
 coverage_notes = """
 The skew job downloads the previous release and runs both directions, on macOS \
-only. The evidence is sound in CI — the step always sets `OXIMUX_SKEW_CLI` under \
+only. The evidence is sound in CI — the step always sets `TREX_SKEW_CLI` under \
 `set -euo pipefail`, so a failed download fails the job. The hazard is \
 everywhere else: `old_cli()` returns `None` when that variable is unset and each \
 test then returns early, so a local `cargo test --workspace` reports all four \
 GREEN having asserted nothing. This is not hypothetical: the Linux and Windows \
-jobs both run `cargo test -p oximux-cli`, which compiles and "passes" all four \
+jobs both run `cargo test -p trex-cli`, which compiles and "passes" all four \
 of these without the variable set. Read a pass as evidence only from the macOS \
 skew step."""
 test_files = ["apps/cli/tests/wire_skew_e2e.rs"]
@@ -720,7 +720,7 @@ platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos"]
 coverage_notes = """
 **macOS only, and the first draft of this row claimed all three.** The claim \
-was wrong in the way this ledger exists to catch: `oximux-agents` appears in \
+was wrong in the way this ledger exists to catch: `trex-agents` appears in \
 the Linux job only under `cargo check --all-targets` (ci.yml:216-217), which \
 compiles the tests without running them, and it is absent from the Windows \
 test list entirely (ci.yml:648-654 names six unrelated crates). Reading either \
@@ -729,7 +729,7 @@ job's crate list rather than trusting the memory of it is what corrected this. \
 The gap is low-risk and deliberately not closed here: the classifier and policy \
 are pure arithmetic over data with no clock, filesystem, process or path in \
 them, so there is no plausible platform-specific divergence. Adding \
-`-p oximux-agents` to the Linux test step would close it for the cost of one \
+`-p trex-agents` to the Linux test step would close it for the cost of one \
 line, and is worth doing the next time that job is touched. \
 \
 The vocabulary is the load-bearing part and is NOT captured from a live rate \
@@ -775,7 +775,7 @@ platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos"]
 coverage_notes = """
 macOS only, for the same reason as `agent.rate-limit-retry-never-spends`: \
-`oximux-agents` is checked but not tested on Linux, and not named at all in \
+`trex-agents` is checked but not tested on Linux, and not named at all in \
 the Windows test step. Pure caller-seeded arithmetic, so the distribution is \
 asserted deterministically and would behave identically anywhere it ran. \
 \
@@ -805,7 +805,7 @@ turn is never retried. Neither reads as a units bug from the UI."""
 platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos"]
 coverage_notes = """
-macOS only: `oximux-agent-core` is `cargo check`ed on Linux (ci.yml:216) and \
+macOS only: `trex-agent-core` is `cargo check`ed on Linux (ci.yml:216) and \
 absent from the Windows test list, so only the macOS `--workspace \
 --all-targets` run executes it. \
 \
@@ -844,9 +844,9 @@ platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos"]
 coverage_notes = """
 macOS only, and for a sharper reason than the usual one: retry exists **only in \
-the desktop app**. `oximux serve` — the host the CLI actually talks to — has no \
+the desktop app**. `TREX serve` — the host the CLI actually talks to — has no \
 retry at all, so there is no second platform's implementation to cover here. \
-The Windows job runs `-p oximux-app --lib`, which does include these tests; it \
+The Windows job runs `-p trex-app --lib`, which does include these tests; it \
 is listed uncovered because that has not been observed for this gate, not \
 because the code is macOS-specific. \
 \
@@ -906,8 +906,8 @@ item is caught here, naming the row and the rule."""
 platforms = ["macos", "windows", "linux"]
 covered_platforms = ["macos"]
 coverage_notes = """
-macOS only, for the reason recorded on the retry gates: `oximux-agents` and \
-`oximux-agent-core` are `cargo check`ed on Linux (ci.yml:216-217) and absent \
+macOS only, for the reason recorded on the retry gates: `trex-agents` and \
+`trex-agent-core` are `cargo check`ed on Linux (ci.yml:216-217) and absent \
 from the Windows test list (ci.yml:648-654), so only the macOS `--workspace \
 --all-targets` job runs them. Pure fold logic with no clock, filesystem or \
 process, so there is no platform-specific behaviour to miss. \

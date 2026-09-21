@@ -1,4 +1,4 @@
-//! Shell commands that can drive the GUI without going near the driver.
+﻿//! Shell commands that can drive the GUI without going near the driver.
 //!
 //! # Why a shell tool needs a screen-control policy at all
 //!
@@ -11,7 +11,7 @@
 //!
 //! The grant doing that is not the driver's. `CuaDriver` carries its own TCC
 //! identity under launchd, so nothing leaks out of it. The grant that leaks is
-//! the one OxiMux takes for the **Escape kill switch** — an event tap needs
+//! the one TREX takes for the **Escape kill switch** — an event tap needs
 //! Accessibility. So the safety feature is what opens this door, it opens for
 //! every project regardless of which ones opted in, and no wrapper process is
 //! going to shut it.
@@ -35,7 +35,7 @@
 //! The one thing Windows *does* enforce is the integrity boundary — UIPI stops
 //! input crossing into a higher-integrity process, in the kernel. That raises
 //! the floor under elevated apps and says nothing about the ones that matter
-//! here, which run at the same level as OxiMux. See [`crate::blocked`].
+//! here, which run at the same level as TREX. See [`crate::blocked`].
 //!
 //! ## What that costs in precision
 //!

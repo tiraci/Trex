@@ -1,4 +1,4 @@
-//! Discard plumbing for `GitPanel` — single-path and per-area variants.
+﻿//! Discard plumbing for `GitPanel` — single-path and per-area variants.
 //!
 //! Phase 01 shipped the single-path flow (`discard_path` →
 //! `confirmed_discard_path`) and the `DiscardRequest` modal contract.
@@ -30,7 +30,7 @@ use crate::shell::git_panel::discard_confirm::{
     self, DiscardAllArea, DiscardCopy, DiscardKind,
 };
 use gpui::{Context, EventEmitter};
-use oximux_git::Repository;
+use trex_git::Repository;
 use std::path::{Path, PathBuf};
 use tokio::sync::oneshot;
 
@@ -218,7 +218,7 @@ impl GitPanel {
         self.in_flight_discards.insert(path.clone());
         cx.notify();
 
-        oximux_editor::pause_autosave(&path);
+        trex_editor::pause_autosave(&path);
 
         let is_untracked = self.is_pure_untracked(&path);
         let repo = self.repo.clone();
@@ -238,11 +238,11 @@ impl GitPanel {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::git_panel",
+                    target: "trex_app::git_panel",
                     "no tokio runtime; confirmed_discard_path skipped (test wiring)"
                 );
                 self.in_flight_discards.remove(&path);
-                oximux_editor::resume_autosave(&path);
+                trex_editor::resume_autosave(&path);
                 cx.notify();
                 return;
             }
@@ -254,10 +254,10 @@ impl GitPanel {
             let result = rx.await;
             let _ = this.update(cx, |panel, cx| {
                 panel.in_flight_discards.remove(&path);
-                oximux_editor::resume_autosave(&path);
+                trex_editor::resume_autosave(&path);
                 if let Ok(Err(err)) = result {
                     tracing::warn!(
-                        target: "oximux_app::git_panel",
+                        target: "trex_app::git_panel",
                         error = %err,
                         "single-path discard failed"
                     );
@@ -301,7 +301,7 @@ impl GitPanel {
         self.pending_discard = None;
         for p in &paths {
             self.in_flight_discards.insert(p.clone());
-            oximux_editor::pause_autosave(p);
+            trex_editor::pause_autosave(p);
         }
         cx.notify();
 
@@ -318,13 +318,13 @@ impl GitPanel {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::git_panel",
+                    target: "trex_app::git_panel",
                     area = ?area,
                     "no tokio runtime; confirmed_discard_area skipped (test wiring)"
                 );
                 for p in &paths {
                     self.in_flight_discards.remove(p);
-                    oximux_editor::resume_autosave(p);
+                    trex_editor::resume_autosave(p);
                 }
                 cx.notify();
                 return;
@@ -336,11 +336,11 @@ impl GitPanel {
             let _ = this.update(cx, |panel, cx| {
                 for p in &paths {
                     panel.in_flight_discards.remove(p);
-                    oximux_editor::resume_autosave(p);
+                    trex_editor::resume_autosave(p);
                 }
                 if let Ok(Err(err)) = result {
                     tracing::warn!(
-                        target: "oximux_app::git_panel",
+                        target: "trex_app::git_panel",
                         area = ?area,
                         error = %err,
                         "confirmed_discard_area failed"
@@ -360,7 +360,7 @@ impl GitPanel {
     /// `git restore` path, which is harmless for "the path no longer
     /// exists" (git errors, we log, modal already closed).
     fn is_pure_untracked(&self, path: &Path) -> bool {
-        use oximux_core::{IndexStatus, WorktreeStatus};
+        use trex_core::{IndexStatus, WorktreeStatus};
         self.git_state
             .as_ref()
             .and_then(|s| s.files.iter().find(|f| f.path == path))
@@ -384,7 +384,7 @@ async fn run_area_discard_sequence(
     repo: &Repository,
     area: DiscardAllArea,
     paths: &[&Path],
-) -> oximux_git::Result<()> {
+) -> trex_git::Result<()> {
     match area {
         DiscardAllArea::Staged => {
             repo.unstage_paths(paths).await?;

@@ -1,4 +1,4 @@
-//! Shared agent-state presentation helpers.
+﻿//! Shared agent-state presentation helpers.
 //!
 //! Single source of truth for mapping an `AgentStatus` + `is_live` flag to a
 //! human-readable verb label and a theme-token color. Both the left-rail status
@@ -10,8 +10,8 @@
 //! Running→focus_ring) — that distinction is intentional and out of scope here.
 
 use gpui::Hsla;
-use oximux_core::AgentStatus;
-use oximux_settings::Theme;
+use trex_core::AgentStatus;
+use trex_settings::Theme;
 
 /// A resolved verb label + color for one agent state. Produced by
 /// `agent_verb` and consumed by the card painter and `status_dot_color`.
@@ -106,7 +106,7 @@ pub struct AmbientAgent {
     /// Hook sideband detail (prompt title + live tool step) when the status
     /// came from a sideband packet; `None` for a title-only reading. Lets the
     /// rail show a hand-typed agent's prompt as its row title.
-    pub detail: Option<oximux_core::SidebandDetail>,
+    pub detail: Option<trex_core::SidebandDetail>,
 }
 
 /// Map a tracked-session adapter id (as stored in the agent-session row) to a

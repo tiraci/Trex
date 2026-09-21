@@ -1,9 +1,9 @@
-//! Agent notification dispatch — platform-agnostic surface.
+﻿//! Agent notification dispatch — platform-agnostic surface.
 //!
 //! The badge alone covers the in-app case; this module covers the
 //! out-of-app case: a desktop notification fires when an agent transitions
 //! into a notify-worthy state (`NeedsApproval`, `WaitingForInput`, `Done`,
-//! `Failed`) — by default only while the OxiMux window is not the active
+//! `Failed`) — by default only while the TREX window is not the active
 //! one. Clicking the notification brings the window forward and switches
 //! the workspace tab to the originating agent.
 //!
@@ -27,7 +27,7 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
-use oximux_core::{AgentSessionId, AgentStatus};
+use trex_core::{AgentSessionId, AgentStatus};
 
 pub mod null;
 
@@ -72,7 +72,7 @@ pub struct NotificationRequest {
     pub label: String,
     /// Short payload (e.g. approval reason); may be empty.
     pub body: String,
-    /// True when the OxiMux window is frontmost.
+    /// True when the TREX window is frontmost.
     pub window_active: bool,
     /// True when the originating pane is the visible tab of a rendered
     /// group. A visible pane in a frontmost window never banners — the

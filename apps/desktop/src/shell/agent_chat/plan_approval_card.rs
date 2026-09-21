@@ -1,4 +1,4 @@
-//! The plan-approval card — Claude's `ExitPlanMode` request rendered as a
+﻿//! The plan-approval card — Claude's `ExitPlanMode` request rendered as a
 //! dedicated card (plan markdown + the CLI's own three choices) instead of the
 //! generic key:value permission card.
 //!
@@ -12,8 +12,8 @@
 use gpui::{
     AnyElement, Context, IntoElement, ParentElement, SharedString, Styled, div, px,
 };
-use oximux_agents::thread::{PermissionRequest, ToolCall};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::{PermissionRequest, ToolCall};
+use trex_settings::{Density, Theme, Typography};
 
 use super::bubble;
 use super::tool_card::pill_button;

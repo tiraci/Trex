@@ -1,5 +1,5 @@
-[package]
-name = "oximux-macos-trust"
+﻿[package]
+name = "trex-macos-trust"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

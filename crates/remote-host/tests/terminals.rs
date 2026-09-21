@@ -1,4 +1,4 @@
-//! The terminal RPCs driven through the real dispatcher over the in-memory
+﻿//! The terminal RPCs driven through the real dispatcher over the in-memory
 //! loopback, against a scripted [`TerminalSource`].
 //!
 //! The load-bearing assertions are the two authorization tiers. Terminal attach
@@ -10,15 +10,15 @@
 
 use std::sync::Arc;
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{
     AttachmentId, AuthStore, Dispatcher, PairingSlot, TerminalAttach, TerminalError, TerminalFrame,
     TerminalSource, registration_proof,
 };
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::{RegisterReq, TerminalSummary};
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::{RegisterReq, TerminalSummary};
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
 
@@ -312,10 +312,10 @@ async fn a_session_scoped_device_is_refused_terminals() {
 
 /// A host with NO terminal source answers `Unsupported`, not `Unauthorized`.
 ///
-/// The distinction is the whole diagnosis. A headless `oximux serve` that could
+/// The distinction is the whole diagnosis. A headless `TREX serve` that could
 /// not start a relay serves everything except terminals — documented as normal
 /// in `docs/server-install.md` — and it used to report that as an access
-/// refusal, which the CLI renders with next-steps about `$OXIMUX_SESSION_ID`.
+/// refusal, which the CLI renders with next-steps about `$trex_SESSION_ID`.
 /// An operator on a fresh server hits this on their first `term ls` and goes
 /// hunting for a credential problem that does not exist.
 ///

@@ -1,6 +1,6 @@
-//! The CLI's app-signing identity, **one key per host**.
+﻿//! The CLI's app-signing identity, **one key per host**.
 //!
-//! Mirrors `oximux_remote_host::identity`'s file+0600+readback pattern rather
+//! Mirrors `trex_remote_host::identity`'s file+0600+readback pattern rather
 //! than the phone's storage: `mobile-core` keeps its seed in the OS keystore
 //! and rebuilds via `ClientSigner::from_seed`, which has no portable
 //! equivalent here.
@@ -11,13 +11,13 @@
 //! bound it: the file is owner-only and *verified so by readback* (a write that
 //! cannot be restricted fails rather than proceeding), keys are per host so a
 //! compromised enrollment does not transfer to the rest of the fleet, and
-//! `oximux hosts rm` unpairs host-side so revocation does not depend on the
+//! `TREX hosts rm` unpairs host-side so revocation does not depend on the
 //! file. If OS-keyring integration is ever wanted for laptop installs, this is
 //! the module it replaces.
 
 use std::path::{Path, PathBuf};
 
-use oximux_remote_session::ClientSigner;
+use trex_remote_session::ClientSigner;
 use rand::RngCore;
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
@@ -95,10 +95,10 @@ fn persist(path: &Path, seed: &[u8; 32]) -> Result<(), Failure> {
     {
         std::fs::write(path, seed).map_err(|e| io("write", e))?;
     }
-    oximux_owner_only::restrict_file(path).map_err(|e| io("restrict", e))?;
+    trex_owner_only::restrict_file(path).map_err(|e| io("restrict", e))?;
     // The receipt. `restrict_file` succeeding is not the same as the file being
     // restricted — this is the only check that actually looks.
-    match oximux_owner_only::is_restricted_to_owner(path) {
+    match trex_owner_only::is_restricted_to_owner(path) {
         Ok(true) => Ok(()),
         Ok(false) => Err(Failure::new(
             "identity",
@@ -137,7 +137,7 @@ mod tests {
         load_or_generate(dir.path(), "server").expect("generate");
         let path = seed_path(dir.path(), "server");
         assert!(
-            oximux_owner_only::is_restricted_to_owner(&path).unwrap(),
+            trex_owner_only::is_restricted_to_owner(&path).unwrap(),
             "a signing seed must not be readable by other accounts"
         );
     }

@@ -1,6 +1,6 @@
-# Windows port — what is left behind, and what that costs
+﻿# Windows port — what is left behind, and what that costs
 
-OxiMux ships on macOS. The Windows port keeps the whole product except the
+TREX ships on macOS. The Windows port keeps the whole product except the
 features listed here, each of which is macOS-shaped down to the OS API. This
 file is the record of *why* each one is out and *what is lost by leaving it
 out* — the second half matters more, because a feature that only removes
@@ -37,7 +37,7 @@ Detail in `plans/260801-0157-windows-computer-use/findings.md`.
 
 ### And what replaced it: the user as the trust anchor
 
-That policy question has been answered. `oximux_computer_use::trust` pins the
+That policy question has been answered. `TREX_computer_use::trust` pins the
 SHA-256 of the binary **the user approved** and refuses to hand the driver to an
 agent if those bytes ever change. Trust-on-first-use, anchored on a person
 rather than a certificate authority.
@@ -92,7 +92,7 @@ recorded here rather than hidden:
 
 **No in-app installer.** `install` downloads and stages a notarized `.app`; none
 of that has a Windows meaning. The user installs the driver themselves, which is
-also what makes the trust anchor coherent — they choose the route, OxiMux
+also what makes the trust anchor coherent — they choose the route, TREX
 enforces the choice.
 
 **A weaker "an agent is driving" indicator** (verified present on a real desktop, 2026-08-01). macOS gets a menu-bar status item,
@@ -115,7 +115,7 @@ approving one `chrome.exe` is not approving every file with that name.
 It used to cost nothing, because there was no kill switch to report on. Now
 there is. A `WH_KEYBOARD_LL` hook can be starved of the key it exists to catch —
 by the secure desktop (UAC, Ctrl+Alt+Del, the lock screen) and by UIPI when the
-foreground window outranks OxiMux — and Windows offers no way to ask whether
+foreground window outranks TREX — and Windows offers no way to ask whether
 that is happening.
 
 The macOS build can therefore say "Escape will stop an agent" and mean it. A
@@ -136,7 +136,7 @@ interactive session. So an agent's shell can drive the screen on a machine where
 computer use was never installed and cannot be. The side door was already open;
 what was missing was anything watching it.
 
-**Packaging requirement — met.** The hook resolves `oximux-screen-gate.exe`
+**Packaging requirement — met.** The hook resolves `trex-screen-gate.exe`
 beside the app executable. `scripts/bundle-windows.ps1` copies it there and
 fails the build if it is missing, because a packaged Windows build that omits
 the step runs every chat unenforced, logging one warning and otherwise looking
@@ -166,30 +166,30 @@ build, and nothing in the compiler would say so.
 Revisit in v2.
 
 The error was in the first sentence, not the last. "Screen-driving capability"
-was read as something OxiMux would have to *land*, so the trigger looked like it
+was read as something TREX would have to *land*, so the trigger looked like it
 was in the future. On Windows it is ambient: the capability was on the machine
-before OxiMux was installed, and the hook was owed from the first Windows build.
+before TREX was installed, and the hook was owed from the first Windows build.
 The conditional held; what it was conditional on had already happened.
 
 ## What still compiles everywhere
 
 Two pieces that live near computer use are deliberately **not** excluded:
 
-- **Transcript screenshot scrubbing** (`oximux-agent-core::redact`) — captures
+- **Transcript screenshot scrubbing** (`trex-agent-core::redact`) — captures
   are produced only on macOS, but a transcript containing them can be *read*
   anywhere: agent CLIs keep their session stores under the user's home
   directory, and those get synced between machines. A Windows host serving a
-  paired phone must still scrub. Moved out of `oximux-computer-use` for exactly
+  paired phone must still scrub. Moved out of `trex-computer-use` for exactly
   this reason.
-- **The screen-tool naming contract** (`oximux-agent-core::screen_tools`) — what
+- **The screen-tool naming contract** (`trex-agent-core::screen_tools`) — what
   the scrubber matches on.
 
-## Enumerated `oximux_computer_use` call sites
+## Enumerated `TREX_computer_use` call sites
 
 The crate **is** in the Windows dependency graph now — one edge, for the hook:
 
 ```
-cargo tree --target x86_64-pc-windows-msvc -p oximux-app -i oximux-computer-use
+cargo tree --target x86_64-pc-windows-msvc -p trex-app -i trex-computer-use
 ```
 
 All but two of the call sites below now compile on Windows as well as macOS.
@@ -201,7 +201,7 @@ macOS half of `pane_computer_use.rs`'s driver row, which is replaced by
 with:
 
 ```
-grep -rn "oximux_computer_use" apps/ crates/ --include="*.rs"
+grep -rn "TREX_computer_use" apps/ crates/ --include="*.rs"
 ```
 
 The Windows CI job does not exclude the crate. Its Windows-specific halves — the
@@ -221,6 +221,6 @@ user-pinned trust anchor — are run by `cargo test (computer-use, hook half)`.
 | `apps/desktop/src/platform/screen_control_indicator.rs` | Menu-bar item / tray icon |
 | `apps/desktop/src/agent_glue/screen_control_watch.rs` | Session watch |
 
-The two crate-level consumers that once reached for it — `oximux-agents`
-(`session_registry`) and `oximux-remote-host` (`dispatcher/handlers`) — now
-depend on `oximux-agent-core::redact` instead and no longer name it at all.
+The two crate-level consumers that once reached for it — `trex-agents`
+(`session_registry`) and `trex-remote-host` (`dispatcher/handlers`) — now
+depend on `trex-agent-core::redact` instead and no longer name it at all.

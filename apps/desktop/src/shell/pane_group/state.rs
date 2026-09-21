@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 impl PaneGroup {
     #[allow(clippy::too_many_arguments)]
@@ -625,7 +625,7 @@ impl PaneGroup {
                     // is the common one: an agent waiting at its prompt emits
                     // no hook, and most CLIs write no title at all.
                     None if by_process.is_some() => Some(AmbientAgent {
-                        status: title_status.unwrap_or(oximux_core::AgentStatus::Idle),
+                        status: title_status.unwrap_or(trex_core::AgentStatus::Idle),
                         label,
                         detail: None,
                     }),
@@ -875,8 +875,8 @@ impl PaneGroup {
 /// agent at its prompt, which is where an agent spends most of its life and is
 /// not a reason to refuse anything. `Done`, `Failed` and `Interrupted` are a
 /// process that has gone.
-pub(crate) fn turn_in_flight(status: &oximux_core::AgentStatus) -> bool {
-    use oximux_core::AgentStatus;
+pub(crate) fn turn_in_flight(status: &trex_core::AgentStatus) -> bool {
+    use trex_core::AgentStatus;
     match status {
         AgentStatus::Running | AgentStatus::NeedsApproval(_) => true,
         AgentStatus::Idle
@@ -890,7 +890,7 @@ pub(crate) fn turn_in_flight(status: &oximux_core::AgentStatus) -> bool {
 #[cfg(test)]
 mod turn_in_flight_tests {
     use super::turn_in_flight;
-    use oximux_core::AgentStatus;
+    use trex_core::AgentStatus;
 
     /// The merge refusal's whole usability rests on this line. An agent tab
     /// open at its prompt is the cockpit's resting state; if that counted as a

@@ -1,4 +1,4 @@
-//! Team runs: one fan-out of roles, each worked by its own agent session,
+﻿//! Team runs: one fan-out of roles, each worked by its own agent session,
 //! recorded host-side so the run outlives the process that started it.
 //!
 //! **Why this is host state and not a script's bookkeeping.** A client-side
@@ -397,7 +397,7 @@ mod tests {
     use chrono::TimeZone;
 
     fn store() -> TeamStore {
-        let db = oximux_storage::db::open_memory().expect("open in-memory db");
+        let db = trex_storage::db::open_memory().expect("open in-memory db");
         TeamStore::new(db.conn())
     }
 

@@ -1,11 +1,11 @@
-//! The turn-end "N files changed" card.
+﻿//! The turn-end "N files changed" card.
 //!
 //! An editing turn otherwise ends with only prose: the model says it changed
 //! something and the user has to take its word, or expand the tool cards one by
 //! one. This closes the turn with what actually landed on disk — file count and
 //! per-file ±.
 //!
-//! The stats are computed at fold time ([`oximux_agents::thread::turn_diff`]);
+//! The stats are computed at fold time ([`trex_agents::thread::turn_diff`]);
 //! this module only renders them. The Review affordance is wired but no caller
 //! passes a handler yet: opening the turn's diff needs a viewer entry point that
 //! takes an in-memory diff, and `DiffView` currently loads only from a git repo.
@@ -14,8 +14,8 @@ use gpui::{
     AnyElement, App, ClickEvent, InteractiveElement, IntoElement, ParentElement, SharedString,
     StatefulInteractiveElement, Styled, div, px,
 };
-use oximux_agents::thread::TurnFileChange;
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::TurnFileChange;
+use trex_settings::{Density, Theme, Typography};
 
 /// Opens the turn's diff. Boxed so the caller can decide at runtime whether a
 /// turn is reviewable at all.

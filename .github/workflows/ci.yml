@@ -1,4 +1,4 @@
-name: ci
+﻿name: ci
 
 on:
   push:
@@ -112,7 +112,7 @@ jobs:
       # with itself; only this step proves it against a peer that no longer
       # exists in the tree — the released CLI drives the new host (and must
       # survive its full stream, downgrades included), and the new CLI drives
-      # the released serve. The suite self-skips without OXIMUX_SKEW_CLI, so
+      # the released serve. The suite self-skips without TREX_SKEW_CLI, so
       # the plain `cargo test` above stays hermetic.
       - name: wire-skew vs latest release
         run: |
@@ -125,12 +125,12 @@ jobs:
           mkdir -p /tmp/skew-old
           curl -fsSL "https://github.com/${{ github.repository }}/releases/latest/download/${ARCHIVE}" \
             | tar -xz -C /tmp/skew-old
-          OXIMUX_SKEW_CLI=/tmp/skew-old/oximux cargo test -p oximux-cli --test wire_skew_e2e
+          TREX_SKEW_CLI=/tmp/skew-old/TREX cargo test -p trex-cli --test wire_skew_e2e
 
       - name: xtask file-size-lint
         run: cargo run -p xtask -- file-size-lint
 
-      # Where OxiMux keeps its data is one decision owned by `app_paths`. A
+      # Where TREX keeps its data is one decision owned by `app_paths`. A
       # direct `dirs::data_dir()` elsewhere reads correctly on the machine that
       # wrote it and silently splits the data directory on the platform whose
       # convention differs — which is why this is a lint and not a review note.
@@ -150,7 +150,7 @@ jobs:
       - name: xtask appearance-lint
         run: cargo run -p xtask -- appearance-lint
 
-      # The reliability ledger records what OxiMux claims to be true and where
+      # The reliability ledger records what TREX claims to be true and where
       # that claim is actually proven. It is checked here rather than left to
       # review because the failure it exists to catch — a claim of coverage with
       # nothing behind it — reads exactly like a claim with everything behind
@@ -184,7 +184,7 @@ jobs:
           echo "Info.plist and Cargo.toml agree at $CARGO"
 
   # Linux leg of the portability gate, added ahead of the CLI/serve work: the
-  # crate set below is exactly what the `oximux` CLI and `oximux serve` reuse,
+  # crate set below is exactly what the `TREX` CLI and `TREX serve` reuse,
   # and "Windows-CI-proven, therefore probably Linux-clean" is an assumption
   # until a Linux runner says so. GPUI, dictation, computer-use, macos-trust,
   # auto-update, editor and ui stay out on purpose — the CLI does not link
@@ -210,11 +210,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-v1-
 
-      # `oximux-settings` is deliberately missing from this list: with default
+      # `trex-settings` is deliberately missing from this list: with default
       # features it links gpui, which is exactly what a headless consumer must
       # not do. It gets its own gpui-free step below.
       #
-      # `oximux-cli` IS here, and belongs here: this crate set existed to prove
+      # `trex-cli` IS here, and belongs here: this crate set existed to prove
       # the CLI's dependencies build headless, but the binary on top of them was
       # never itself compiled for Linux — so its own code (the self-update
       # module, build.rs, the serve wiring) had no Linux gate at all until a
@@ -223,32 +223,32 @@ jobs:
       - name: cargo check (CLI crate set)
         run: >
           cargo check --all-targets
-          -p oximux-cli
-          -p oximux-core
-          -p oximux-pty
-          -p oximux-git
-          -p oximux-agent-core
-          -p oximux-agents
-          -p oximux-storage
-          -p oximux-markdown
-          -p oximux-syntax
-          -p oximux-relay-proto
-          -p oximux-relay
-          -p oximux-relay-client
-          -p oximux-relay-supervisor
-          -p oximux-relay-terminals
-          -p oximux-single-instance
-          -p oximux-remote-proto
-          -p oximux-remote-host
-          -p oximux-remote-session
-          -p oximux-remote-iroh
-          -p oximux-shell-env
-          -p oximux-owner-only
-          -p oximux-proc-cwd
-          -p oximux-job-object
-          -p oximux-no-window
-          -p oximux-remote-local
-          -p oximux-cli
+          -p trex-cli
+          -p trex-core
+          -p trex-pty
+          -p trex-git
+          -p trex-agent-core
+          -p trex-agents
+          -p trex-storage
+          -p trex-markdown
+          -p trex-syntax
+          -p trex-relay-proto
+          -p trex-relay
+          -p trex-relay-client
+          -p trex-relay-supervisor
+          -p trex-relay-terminals
+          -p trex-single-instance
+          -p trex-remote-proto
+          -p trex-remote-host
+          -p trex-remote-session
+          -p trex-remote-iroh
+          -p trex-shell-env
+          -p trex-owner-only
+          -p trex-proc-cwd
+          -p trex-job-object
+          -p trex-no-window
+          -p trex-remote-local
+          -p trex-cli
 
       # The step above already builds remote-iroh's accept-loop half: selected
       # via `-p`, the crate's OWN `default = ["host"]` applies (the opt-in
@@ -259,7 +259,7 @@ jobs:
       # `--lib`, not `--all-targets`: the integration tests under tests/
       # exercise the accept loop and only compile with `host` on.
       - name: cargo check (remote-iroh client half, host off)
-        run: cargo check --lib -p oximux-remote-iroh --no-default-features
+        run: cargo check --lib -p trex-remote-iroh --no-default-features
 
       # The musl leg of the release matrix, proven HERE first: release jobs run
       # only on tags, so without this the first execution of the musl build
@@ -273,30 +273,30 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y musl-tools
           rustup target add x86_64-unknown-linux-musl
-          cargo build --target x86_64-unknown-linux-musl -p oximux-cli -p oximux-relay
+          cargo build --target x86_64-unknown-linux-musl -p trex-cli -p trex-relay
 
       # The build the CLI will actually use: settings with the UI toolkit
       # absent from the dependency tree entirely.
       - name: cargo check (settings without gpui)
-        run: cargo check --all-targets -p oximux-settings --no-default-features
+        run: cargo check --all-targets -p trex-settings --no-default-features
 
       # Separate test steps, not one `-p a -p b --test t` invocation: cargo
       # applies `--test` across every `-p` given and silently skips a package
       # without that target, so proc-cwd's unit tests would never run.
       - name: cargo test (proc-cwd Linux arm)
-        run: cargo test -p oximux-proc-cwd
+        run: cargo test -p trex-proc-cwd
 
       # The only end-to-end coverage of PTY spawn/attach/replay on Linux —
       # same rationale as the Windows job's step of the same name.
       - name: cargo test (relay daemon end-to-end)
-        run: cargo test -p oximux-relay --test relay_integration
+        run: cargo test -p trex-relay --test relay_integration
 
       # The CLI's trust factors are filesystem facts (0700 dir, 0600 socket
       # and token, readback-asserted), so the only Linux that ever checks
       # them is this runner. The CLI E2E drives the compiled binary against
       # a live dispatcher over a real socket — exit codes are the contract.
       - name: cargo test (local control socket)
-        run: cargo test -p oximux-remote-local
+        run: cargo test -p trex-remote-local
 
       # Covers every suite under apps/cli/tests, including the four that boot a
       # real `serve` and spawn a real agent through a `claude` shim on PATH
@@ -304,8 +304,8 @@ jobs:
       # anywhere that cross a process boundary into a spawned agent, which is
       # where the confinement credential and the inherited-environment scrub
       # are the only observable.
-      - name: cargo test (oximux CLI end-to-end)
-        run: cargo test -p oximux-cli
+      - name: cargo test (TREX CLI end-to-end)
+        run: cargo test -p trex-cli
 
       # `docs/cli-reference.md` is generated from the CLI's own clap tree, so it
       # can only be wrong by being stale. Regenerating and diffing is what makes
@@ -326,37 +326,37 @@ jobs:
             exit 1
           fi
 
-      # `oximux-markdown` exists to be the half of markdown rendering that has
+      # `trex-markdown` exists to be the half of markdown rendering that has
       # no opinion about pixels, and "no GPUI dependency" is the property that
       # makes it unit-testable in isolation. A rule nothing enforces is a rule
       # that lasts until the first time rendering would be convenient to add
       # here — so enforce it, the same way the CLI's tree is enforced below.
       - name: markdown crate links no UI toolkit
         run: |
-          cargo tree -p oximux-markdown -e normal > /tmp/md-tree.txt
+          cargo tree -p trex-markdown -e normal > /tmp/md-tree.txt
           if grep -E '(^| )(gpui|gpui_platform|gpui-component)( |$)' /tmp/md-tree.txt; then
-            echo "oximux-markdown must not depend on a UI toolkit (see matches above)"
+            echo "trex-markdown must not depend on a UI toolkit (see matches above)"
             exit 1
           fi
-          echo "oximux-markdown tree is toolkit-free"
+          echo "trex-markdown tree is toolkit-free"
 
       - name: cargo test (markdown parity corpus)
-        run: cargo test -p oximux-markdown
+        run: cargo test -p trex-markdown
 
-      # Same rule and same reason as the markdown crate above: `oximux-syntax`
+      # Same rule and same reason as the markdown crate above: `trex-syntax`
       # emits neutral kinds precisely so no renderer is in its dependency tree,
       # and that property survives only while something checks it.
       - name: syntax crate links no UI toolkit
         run: |
-          cargo tree -p oximux-syntax -e normal > /tmp/syn-tree.txt
+          cargo tree -p trex-syntax -e normal > /tmp/syn-tree.txt
           if grep -E '(^| )(gpui|gpui_platform|gpui-component)( |$)' /tmp/syn-tree.txt; then
-            echo "oximux-syntax must not depend on a UI toolkit (see matches above)"
+            echo "trex-syntax must not depend on a UI toolkit (see matches above)"
             exit 1
           fi
-          echo "oximux-syntax tree is toolkit-free"
+          echo "trex-syntax tree is toolkit-free"
 
       - name: cargo test (syntax crate)
-        run: cargo test -p oximux-syntax
+        run: cargo test -p trex-syntax
 
       # The serve binary's dependency hygiene, as a hard gate: the CLI must
       # never link the GUI toolkit or the desktop-only capability stacks. A
@@ -364,16 +364,16 @@ jobs:
       # transitively — a compile would happily succeed with gpui in tree.
       - name: cli dependency-tree gate (no gpui / dictation / computer-use)
         run: |
-          cargo tree -p oximux-cli -e normal > /tmp/cli-tree.txt
-          if grep -E '(^| )(gpui|gpui_platform|oximux-dictation|oximux-computer-use|oximux-ui|oximux-editor)( |$)' /tmp/cli-tree.txt; then
-            echo "forbidden dependency in the oximux-cli tree (see matches above)"
+          cargo tree -p trex-cli -e normal > /tmp/cli-tree.txt
+          if grep -E '(^| )(gpui|gpui_platform|trex-dictation|trex-computer-use|trex-ui|trex-editor)( |$)' /tmp/cli-tree.txt; then
+            echo "forbidden dependency in the trex-cli tree (see matches above)"
             exit 1
           fi
 
   # The only job that measures anything at runtime. Every other job here is
   # check/test/package: they prove the code compiles and behaves, and say
   # nothing at all about what it retains — which is how a residency regression
-  # ships. `scripts/mem-smoke.sh` boots a real `oximux serve`, streams real
+  # ships. `scripts/mem-smoke.sh` boots a real `TREX serve`, streams real
   # agent partials at it through a fixture built for the purpose, and samples
   # the host's RSS at four checkpoints.
   #
@@ -381,7 +381,7 @@ jobs:
   # in this file boots a GPUI window, so the GUI half of residency (sprite
   # atlas, decoded images, the transcript's render caches) is out of reach of
   # CI entirely. What IS reachable is the engine half, which is where this
-  # plan's allocations live, and `oximux serve` is exactly that half with no
+  # plan's allocations live, and `TREX serve` is exactly that half with no
   # window attached. Read a green run as "the headless surface did not
   # regress", never as "memory is fine" — the script's own header says which
   # macOS commands to reach for when a user report disagrees with this gate.
@@ -415,8 +415,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-v1-
 
-      - name: cargo build (oximux-cli)
-        run: cargo build -p oximux-cli
+      - name: cargo build (trex-cli)
+        run: cargo build -p trex-cli
 
       # `--check` turns the thresholds on; without it the script only reports.
       # The JSON is uploaded rather than only printed so a later phase can diff
@@ -424,7 +424,7 @@ jobs:
       - name: mem-smoke
         run: ./scripts/mem-smoke.sh --check --json mem-smoke.json
         env:
-          OXIMUX_MEM_CLI: target/debug/oximux-cli
+          TREX_MEM_CLI: target/debug/trex-cli
           # Set HERE rather than inherited from the script's defaults, and set
           # wide, because no Linux number for this workload exists yet — the
           # script's defaults come from a macOS band (8.1x-9.5x steady-state
@@ -437,9 +437,9 @@ jobs:
           # band once several runs exist, record that band in the script header
           # next to the macOS one, and then drop these overrides so the
           # defaults are the single source of truth.
-          OXIMUX_MEM_MAX_RETENTION_MULTIPLE: 20
-          OXIMUX_MEM_MAX_IDLE_GROWTH_KB: 32768
-          OXIMUX_MEM_MAX_REOPEN_MS: 8000
+          TREX_MEM_MAX_RETENTION_MULTIPLE: 20
+          TREX_MEM_MAX_IDLE_GROWTH_KB: 32768
+          TREX_MEM_MAX_REOPEN_MS: 8000
 
       # `always()`, because the run that FAILED a threshold is the one whose
       # numbers someone needs to read.
@@ -485,7 +485,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y musl-tools
           rustup target add aarch64-unknown-linux-musl
-          cargo build --target aarch64-unknown-linux-musl -p oximux-cli -p oximux-relay
+          cargo build --target aarch64-unknown-linux-musl -p trex-cli -p trex-relay
 
   # Permanent gate for the Windows port. macOS is still the only shipping
   # target; this job stops a macOS-only API from landing on a shared path
@@ -561,11 +561,11 @@ jobs:
           $payload = Join-Path $env:RUNNER_TEMP 'iss-payload'
           $out = Join-Path $env:RUNNER_TEMP 'iss-out'
           New-Item -ItemType Directory -Force -Path $payload, $out | Out-Null
-          Set-Content -Path (Join-Path $payload 'oximux.exe') -Value 'not an exe'
+          Set-Content -Path (Join-Path $payload 'TREX.exe') -Value 'not an exe'
           & $iscc /Q "/DAppVersion=0.0.0" "/DSourceDir=$payload" "/DOutputDir=$out" `
-                  packaging/windows/oximux.iss
+                  packaging/windows/TREX.iss
           if ($LASTEXITCODE -ne 0) { throw "iscc failed with exit code $LASTEXITCODE" }
-          Write-Host 'packaging/windows/oximux.iss compiles'
+          Write-Host 'packaging/windows/TREX.iss compiles'
 
       - name: Install Rust toolchain
         run: |
@@ -621,7 +621,7 @@ jobs:
 
       # `macos-trust` is macOS-shaped by construction: it wraps codesign and
       # spctl. Note what the exclusion does and does not buy. Its library is
-      # already in the Windows graph — `oximux-auto-update` depends on it
+      # already in the Windows graph — `trex-auto-update` depends on it
       # unconditionally — and compiles there, so this only skips its own tests,
       # 6 of which fail on Windows because their fixtures are POSIX-shaped
       # (`/bin/sleep`, `ditto`, statvfs) rather than because the code under test
@@ -639,7 +639,7 @@ jobs:
       - name: cargo check
         run: >
           cargo check --workspace --all-targets --target x86_64-pc-windows-msvc
-          --exclude oximux-macos-trust
+          --exclude trex-macos-trust
 
       # Blocking, and deliberately narrow. These five crates are where the
       # Windows-specific behavior lives and where a failure is unambiguous:
@@ -661,12 +661,12 @@ jobs:
       - name: cargo test (windows-specific crates)
         run: >
           cargo test --lib --target x86_64-pc-windows-msvc
-          -p oximux-owner-only
-          -p oximux-job-object
-          -p oximux-shell-env
-          -p oximux-pty
-          -p oximux-settings
-          -p oximux-remote-local
+          -p trex-owner-only
+          -p trex-job-object
+          -p trex-shell-env
+          -p trex-pty
+          -p trex-settings
+          -p trex-remote-local
 
       # The desktop crate's unit suite passes in full on Windows as of the
       # single-instance fix and the fixture ports alongside it, so it graduates
@@ -679,7 +679,7 @@ jobs:
       # single-instance lock could not read its own holder PID under mandatory
       # locking), and it sat undetected because nothing blocking ran this.
       - name: cargo test (desktop app unit suite)
-        run: cargo test --lib --target x86_64-pc-windows-msvc -p oximux-app
+        run: cargo test --lib --target x86_64-pc-windows-msvc -p trex-app
 
       # The Windows self-updater. All-targets rather than `--lib`, and for the
       # same reason the computer-use step below spells out: the suite that
@@ -689,7 +689,7 @@ jobs:
       # signed release staged, swapped, and swept, plus the refusals that must
       # touch nothing — never runs anywhere.
       - name: cargo test (windows self-update)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-auto-update
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-auto-update
 
       # Screen control is off on Windows and the driver is never declared, but
       # the crate is compiled and half-used: the PreToolUse hook ships, and with
@@ -705,7 +705,7 @@ jobs:
       # driver to point them at because there is not yet a Windows driver worth
       # trusting. See `plans/260801-0157-windows-computer-use/findings.md`.
       - name: cargo test (computer-use, hook half)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-computer-use
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-computer-use
 
       # The only end-to-end coverage of the piece carrying the most
       # Windows-specific machinery. Between them these boot the daemon over a
@@ -713,12 +713,12 @@ jobs:
       # exercise spawn/attach/detach/replay/checkpoint — none of which a
       # compile check says anything about.
       - name: cargo test (relay daemon end-to-end)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-relay --test relay_integration
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-relay --test relay_integration
 
       - name: cargo test (relay client end-to-end)
         run: >
           cargo test --target x86_64-pc-windows-msvc
-          -p oximux-relay-client --test relay_client_integration
+          -p trex-relay-client --test relay_client_integration
 
       # These three were ported to Windows at the same time as the two suites
       # above, and need naming here for the same reason those do: nothing else
@@ -727,13 +727,13 @@ jobs:
       # ported for a platform that never runs it is worse than one left
       # unported — it compiles green and rots without anyone noticing.
       - name: cargo test (pty backend smoke)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-pty --test backend_smoke
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-pty --test backend_smoke
 
       - name: cargo test (pty snapshot smoke)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-pty --test snapshot_smoke
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-pty --test snapshot_smoke
 
       - name: cargo test (relay checkpoint lifecycle)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-relay --test checkpoint_lifecycle
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-relay --test checkpoint_lifecycle
 
       # Windows is a full-parity CLI target, and the named pipe carries an
       # explicit owner-only DACL instead of directory permissions — a claim
@@ -741,10 +741,10 @@ jobs:
       # reaches the unit tests; these two reach the integration suites under
       # tests/, which it cannot.
       - name: cargo test (local control socket)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-remote-local
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-remote-local
 
-      - name: cargo test (oximux CLI end-to-end)
-        run: cargo test --target x86_64-pc-windows-msvc -p oximux-cli
+      - name: cargo test (TREX CLI end-to-end)
+        run: cargo test --target x86_64-pc-windows-msvc -p trex-cli
 
       # Blocking as of the port of the last macOS-shaped fixtures: this was the
       # informational sweep, kept non-blocking to produce the list of what
@@ -767,4 +767,4 @@ jobs:
       - name: cargo test (full unit suite)
         run: >
           cargo test --workspace --lib --target x86_64-pc-windows-msvc
-          --exclude oximux-macos-trust
+          --exclude trex-macos-trust

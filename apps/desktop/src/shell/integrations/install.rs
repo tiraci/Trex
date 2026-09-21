@@ -1,4 +1,4 @@
-//! Running a package manager on the user's behalf, and saying what happened.
+﻿//! Running a package manager on the user's behalf, and saying what happened.
 //!
 //! The shape is deliberately the same as [`crate::shell::driver_install`]: a
 //! background thread does the work, the UI holds a small state enum and polls.
@@ -18,7 +18,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, TryRecvError, channel};
 
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 
 use super::catalog::Recipe;
 

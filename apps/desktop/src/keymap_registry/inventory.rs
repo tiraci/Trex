@@ -1,4 +1,4 @@
-//! The action inventory — every user-facing action with its id, label,
+﻿//! The action inventory — every user-facing action with its id, label,
 //! category, and default chord. Replaces the old hand-mirrored keymap +
 //! settings-pane table pair; this table is the only place a default chord
 //! is written. Deliberately a data table, so it may exceed the usual file
@@ -28,7 +28,7 @@ use crate::actions::{
 // The AppKit application menu's actions, bound only where that menu exists.
 #[cfg(target_os = "macos")]
 use crate::menu::{Copy, HideApp, HideOthers, Minimize, Quit};
-use oximux_editor::{EditorZoomIn, EditorZoomOut, EditorZoomReset, SaveFile};
+use trex_editor::{EditorZoomIn, EditorZoomOut, EditorZoomReset, SaveFile};
 
 /// Shorthand for the per-entry bind fn — each closure is non-capturing so
 /// it coerces to a `fn` pointer and the table stays `const`.
@@ -142,9 +142,9 @@ pub const ACTIONS: &[ActionSpec] = &[
     // are spoken for elsewhere — Ctrl+H is Replace, Ctrl+M is Enter in a
     // terminal. An action that cannot work should not hold a chord hostage.
     #[cfg(target_os = "macos")]
-    entry!("quit", "Quit OxiMux", Global, "cmd-q", Quit),
+    entry!("quit", "Quit TREX", Global, "cmd-q", Quit),
     #[cfg(target_os = "macos")]
-    entry!("hide_app", "Hide OxiMux", Global, "cmd-h", HideApp),
+    entry!("hide_app", "Hide TREX", Global, "cmd-h", HideApp),
     #[cfg(target_os = "macos")]
     entry!("hide_others", "Hide others", Global, "cmd-alt-h", HideOthers),
     #[cfg(target_os = "macos")]

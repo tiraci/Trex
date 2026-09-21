@@ -1,4 +1,4 @@
-//! Canvas-based paint for `TerminalView` — replaces the per-cell flex-row
+﻿//! Canvas-based paint for `TerminalView` — replaces the per-cell flex-row
 //! div stack with direct pixel painting via `paint_quad` + `shape_line`.
 //!
 //! Why a custom paint path:
@@ -12,7 +12,7 @@
 //!      the text shaping returned (usually `glyph_advance * char_count`),
 //!      which can be sub-pixel and accumulate. Over 80–200 cols, glyphs
 //!      drifted off the cell grid, producing the "looks fuzzy / not crisp"
-//!      complaint when the user compared OxiMux to native terminal apps.
+//!      complaint when the user compared TREX to native terminal apps.
 //!
 //!   2. **Resize jitter.** The flex layout solver runs at the parent
 //!      column level, so during a window drag the spans briefly re-pack
@@ -34,8 +34,8 @@ use gpui::{
     App, Bounds, FontStyle, FontWeight, Hsla, Pixels, Point, SharedString, Size, StrikethroughStyle,
     TextAlign, TextRun, UnderlineStyle, Window, fill, point, px,
 };
-use oximux_pty::{Cell, CellColor, CursorShapeKind, TerminalSnapshot};
-use oximux_settings::{Theme, Typography};
+use trex_pty::{Cell, CellColor, CursorShapeKind, TerminalSnapshot};
+use trex_settings::{Theme, Typography};
 
 use crate::shell::box_drawing;
 use crate::shell::cell_metrics::CellMetrics;
@@ -819,7 +819,7 @@ fn row_selection_span(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_pty::{Cell, NamedColor16};
+    use trex_pty::{Cell, NamedColor16};
 
     #[test]
     fn span_single_row_normal_order() {

@@ -1,4 +1,4 @@
-//! `CliRuntime` — the concrete `AgentRuntime` for any `CliAgentAdapter`.
+﻿//! `CliRuntime` — the concrete `AgentRuntime` for any `CliAgentAdapter`.
 //!
 //! Architecture:
 //! - One `CliRuntime` per app. Holds an adapter registry keyed by
@@ -17,8 +17,8 @@
 
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
-use oximux_core::{AgentAdapter, AgentSessionId, AgentSnapshot, AgentStatus};
-use oximux_pty::{PortablePtyBackend, SpawnConfig, TerminalBackend, TerminalSessionId};
+use trex_core::{AgentAdapter, AgentSessionId, AgentSnapshot, AgentStatus};
+use trex_pty::{PortablePtyBackend, SpawnConfig, TerminalBackend, TerminalSessionId};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -210,7 +210,7 @@ impl CliRuntime {
     /// The `TerminalSessionId` the underlying PTY was assigned at spawn
     /// time. The renderer needs this to filter `TerminalEvent`s coming out
     /// of the shared backend (each backend can serve multiple sessions in
-    /// principle — `oximux-pty` does not enforce one-id-per-backend).
+    /// principle — `trex-pty` does not enforce one-id-per-backend).
     pub fn terminal_session_id(&self, id: AgentSessionId) -> Result<TerminalSessionId> {
         let inner = lock_recover(&self.inner, "CliRuntime sessions");
         inner
@@ -475,7 +475,7 @@ impl AgentRuntime for CliRuntime {
 /// Spawn RPC takes only a shell (no argv), so we run the user's shell and
 /// hand the agent to it as a launch line.
 fn wrapper_shell() -> String {
-    oximux_shell_env::default_shell()
+    trex_shell_env::default_shell()
 }
 
 /// Resolve a program (possibly a bare name like `claude`) to an absolute

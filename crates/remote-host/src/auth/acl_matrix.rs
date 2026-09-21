@@ -1,4 +1,4 @@
-//! The ACL as one table: every predicate against every caller class.
+﻿//! The ACL as one table: every predicate against every caller class.
 //!
 //! The sibling [`tests`](super::tests) module proves the *pairing* machinery —
 //! that a proof registers, that revocation bites, that a one-time code is spent.
@@ -19,7 +19,7 @@
 //! `assert!` line number.
 
 use ed25519_dalek::SigningKey;
-use oximux_remote_proto::messages::RegisterReq;
+use trex_remote_proto::messages::RegisterReq;
 
 use super::{AppPubkey, AuthStore, LocalScope, PairingSlot, Peer, registration_proof};
 

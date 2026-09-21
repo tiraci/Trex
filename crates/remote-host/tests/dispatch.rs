@@ -1,4 +1,4 @@
-//! End-to-end dispatcher tests over the in-memory loopback transport — a full
+﻿//! End-to-end dispatcher tests over the in-memory loopback transport — a full
 //! pair → command → revoke conversation, plus the Ed25519 reconnect handshake,
 //! with no network.
 
@@ -7,16 +7,16 @@ use std::sync::Arc;
 use ed25519_dalek::{Signer, SigningKey};
 use futures::executor::block_on;
 use futures::future::join;
-use oximux_agent_core::thread::{PermissionDecision, PermissionKind, ThreadEvent};
-use oximux_agents::session_registry::{SessionMeta, SessionRegistry};
-use oximux_agents::thread::{AgentCapabilities, StubConnection};
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
-use oximux_remote_proto::messages::{ConnectReq, HelloReq, RegisterReq, SendPromptReq};
-use oximux_remote_proto::proto::{
+use trex_agent_core::thread::{PermissionDecision, PermissionKind, ThreadEvent};
+use trex_agents::session_registry::{SessionMeta, SessionRegistry};
+use trex_agents::thread::{AgentCapabilities, StubConnection};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
+use trex_remote_proto::messages::{ConnectReq, HelloReq, RegisterReq, SendPromptReq};
+use trex_remote_proto::proto::{
     MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Request, Response, RpcError,
 };
-use oximux_remote_proto::testing::duplex_pair;
-use oximux_remote_proto::{AuthProveReq, ResolvePermissionReq, Transport};
+use trex_remote_proto::testing::duplex_pair;
+use trex_remote_proto::{AuthProveReq, ResolvePermissionReq, Transport};
 use serde_json::json;
 
 const NOW: u64 = 1_700_000_000;
@@ -878,7 +878,7 @@ fn a_revoked_device_cannot_unpair_away_its_tombstone() {
 /// nothing about whether `FetchTranscript` actually calls it.
 #[test]
 fn an_oversize_transcript_is_trimmed_to_fit_one_frame() {
-    use oximux_remote_host::transcript_budget::IMAGE_BUDGET;
+    use trex_remote_host::transcript_budget::IMAGE_BUDGET;
 
     let registry = Arc::new(SessionRegistry::new());
     let session = registry.register("sess-1".into(), Arc::new(StubConnection::default()));
@@ -936,7 +936,7 @@ fn an_oversize_transcript_is_trimmed_to_fit_one_frame() {
 /// recording every id it was asked for.
 #[derive(Default)]
 struct FakeCatalog {
-    dormant: Vec<oximux_remote_host::catalog::DormantSession>,
+    dormant: Vec<trex_remote_host::catalog::DormantSession>,
     opened: std::sync::Mutex<Vec<String>>,
     registry: Option<Arc<SessionRegistry>>,
     /// When set, `open` refuses instead of registering.
@@ -946,8 +946,8 @@ struct FakeCatalog {
 }
 
 #[async_trait::async_trait]
-impl oximux_remote_host::catalog::SessionCatalog for FakeCatalog {
-    fn dormant(&self) -> Vec<oximux_remote_host::catalog::DormantSession> {
+impl trex_remote_host::catalog::SessionCatalog for FakeCatalog {
+    fn dormant(&self) -> Vec<trex_remote_host::catalog::DormantSession> {
         let live = self.registry.as_ref().map(|r| r.statuses()).unwrap_or_default();
         self.dormant
             .iter()
@@ -959,9 +959,9 @@ impl oximux_remote_host::catalog::SessionCatalog for FakeCatalog {
     fn transcript(
         &self,
         session_id: &str,
-    ) -> Option<oximux_remote_host::catalog::DormantTranscript> {
+    ) -> Option<trex_remote_host::catalog::DormantTranscript> {
         let known = self.dormant.iter().find(|d| d.session_id == session_id)?;
-        Some(oximux_remote_host::catalog::DormantTranscript {
+        Some(trex_remote_host::catalog::DormantTranscript {
             entries_json: self
                 .transcripts
                 .get(session_id)
@@ -971,15 +971,15 @@ impl oximux_remote_host::catalog::SessionCatalog for FakeCatalog {
         })
     }
 
-    fn choices(&self, session_id: &str) -> Option<oximux_remote_host::catalog::DormantChoices> {
+    fn choices(&self, session_id: &str) -> Option<trex_remote_host::catalog::DormantChoices> {
         let known = self.dormant.iter().find(|d| d.session_id == session_id)?;
-        Some(oximux_remote_host::catalog::DormantChoices {
-            models: vec![oximux_remote_host::catalog::DormantChoice {
+        Some(trex_remote_host::catalog::DormantChoices {
+            models: vec![trex_remote_host::catalog::DormantChoice {
                 id: "claude-opus-5".into(),
                 label: "Opus 5".into(),
                 description: Some("Most capable".into()),
             }],
-            modes: vec![oximux_remote_host::catalog::DormantChoice {
+            modes: vec![trex_remote_host::catalog::DormantChoice {
                 id: "plan".into(),
                 label: "Plan".into(),
                 description: None,
@@ -1001,8 +1001,8 @@ impl oximux_remote_host::catalog::SessionCatalog for FakeCatalog {
     }
 }
 
-fn dormant(id: &str, title: &str) -> oximux_remote_host::catalog::DormantSession {
-    oximux_remote_host::catalog::DormantSession {
+fn dormant(id: &str, title: &str) -> trex_remote_host::catalog::DormantSession {
+    trex_remote_host::catalog::DormantSession {
         session_id: id.into(),
         title: Some(title.into()),
         model: Some("claude-opus-5".into()),

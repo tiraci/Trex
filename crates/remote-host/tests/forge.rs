@@ -1,4 +1,4 @@
-//! The read-only forge RPCs (v9): issues, pull requests and CI checks.
+﻿//! The read-only forge RPCs (v9): issues, pull requests and CI checks.
 //!
 //! These tests run against a directory that is **not** forge-hosted (a bare temp
 //! dir with no `origin`), which is deliberate: it exercises the contract that
@@ -12,13 +12,13 @@
 
 use std::sync::Arc;
 
-use oximux_agents::session_registry::{SessionMeta, SessionRegistry};
-use oximux_agents::thread::StubConnection;
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::{ForgeItemKindWire, ForgeStateWire, RegisterReq};
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_agents::session_registry::{SessionMeta, SessionRegistry};
+use trex_agents::thread::StubConnection;
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::{ForgeItemKindWire, ForgeStateWire, RegisterReq};
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {

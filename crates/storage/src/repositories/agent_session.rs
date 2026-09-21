@@ -1,9 +1,9 @@
-//! `AgentSessionRepo` — typed CRUD over the `agent_sessions` table. The
+﻿//! `AgentSessionRepo` — typed CRUD over the `agent_sessions` table. The
 //! three-column codec (`status`, `exit_code`, `status_detail`) is owned
 //! by `AgentStatus::{as_str, exit_code_for_storage, detail_for_storage,
-//! from_row}` in `oximux-core`; this repo only plumbs the values.
+//! from_row}` in `trex-core`; this repo only plumbs the values.
 
-use oximux_core::{AgentSession, AgentStatus};
+use trex_core::{AgentSession, AgentStatus};
 use rusqlite::{OptionalExtension, params};
 
 use super::{new_id, now};

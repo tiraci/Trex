@@ -1,4 +1,4 @@
-//! `WorktreeSettingsRepo` — typed CRUD over the V006 `worktree_settings`
+﻿//! `WorktreeSettingsRepo` — typed CRUD over the V006 `worktree_settings`
 //! table (one optional SCM scratch row per workspace).
 //!
 //! All payload columns are nullable; `get` returns `None` when no row
@@ -6,7 +6,7 @@
 //! `upsert` writes every field unconditionally — callers who want to
 //! merge against existing state should `get` first.
 
-use oximux_core::WorktreeSettings;
+use trex_core::WorktreeSettings;
 use rusqlite::{Connection, OptionalExtension, params};
 
 use super::now;

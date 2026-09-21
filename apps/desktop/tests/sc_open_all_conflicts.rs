@@ -1,4 +1,4 @@
-//! End-to-end regression test for the ConflictSummaryCard's "Open all
+﻿//! End-to-end regression test for the ConflictSummaryCard's "Open all
 //! in editor" wiring. Drives a real `tokio::Runtime` + GPUI test
 //! context against a temp git repo that we deliberately push into a
 //! conflict state, then asserts the panel's `open_all_conflicts`
@@ -15,10 +15,10 @@
 use gpui::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, TestAppContext, Window, div,
 };
-use oximux_app::shell::file_tree_view::OnOpenFile;
-use oximux_app::shell::source_control::{PanelConfig, SourceControlPanel};
-use oximux_git::{PollState, Repository};
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::file_tree_view::OnOpenFile;
+use trex_app::shell::source_control::{PanelConfig, SourceControlPanel};
+use trex_git::{PollState, Repository};
+use trex_settings::{Density, Theme, Typography};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
@@ -45,14 +45,14 @@ fn seed_conflicted_repo(p: &Path) {
             .args(args)
             .current_dir(p)
             .env("GIT_AUTHOR_NAME", "Test")
-            .env("GIT_AUTHOR_EMAIL", "test@oximux.dev")
+            .env("GIT_AUTHOR_EMAIL", "test@TREX.dev")
             .env("GIT_COMMITTER_NAME", "Test")
-            .env("GIT_COMMITTER_EMAIL", "test@oximux.dev")
+            .env("GIT_COMMITTER_EMAIL", "test@TREX.dev")
             .status()
             .expect("git on PATH");
     };
     st(&["init", "-b", "main"]);
-    st(&["config", "user.email", "test@oximux.dev"]);
+    st(&["config", "user.email", "test@TREX.dev"]);
     st(&["config", "user.name", "Test"]);
     // Base commit with two files.
     std::fs::write(p.join("alpha.txt"), "base\n").expect("write");
@@ -78,9 +78,9 @@ fn seed_conflicted_repo(p: &Path) {
         .args(["merge", "feature"])
         .current_dir(p)
         .env("GIT_AUTHOR_NAME", "Test")
-        .env("GIT_AUTHOR_EMAIL", "test@oximux.dev")
+        .env("GIT_AUTHOR_EMAIL", "test@TREX.dev")
         .env("GIT_COMMITTER_NAME", "Test")
-        .env("GIT_COMMITTER_EMAIL", "test@oximux.dev")
+        .env("GIT_COMMITTER_EMAIL", "test@TREX.dev")
         .status();
 }
 
@@ -117,7 +117,7 @@ async fn open_all_conflicts_dispatches_on_open_file_per_path(cx: &mut TestAppCon
             // for their async wiring. Build minimal stand-ins via the
             // existing constructors.
             let diff_view = cx2.new(|cx3| {
-                oximux_app::shell::diff_view::DiffView::new(
+                trex_app::shell::diff_view::DiffView::new(
                     repo.clone(),
                     Theme::default(),
                     Density::default(),
@@ -127,7 +127,7 @@ async fn open_all_conflicts_dispatches_on_open_file_per_path(cx: &mut TestAppCon
             });
             let git_panel_rx = state_rx.clone();
             let git_panel = cx2.new(|cx3| {
-                oximux_app::shell::git_panel::GitPanel::new(
+                trex_app::shell::git_panel::GitPanel::new(
                     repo.clone(),
                     git_panel_rx,
                     None,

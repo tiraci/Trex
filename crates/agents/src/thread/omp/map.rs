@@ -1,4 +1,4 @@
-//! omp `AgentSessionEvent` → [`ThreadEvent`] mapping.
+﻿//! omp `AgentSessionEvent` → [`ThreadEvent`] mapping.
 //!
 //! Pure decode, mirrored from the Pi mapper — omp kept Pi's event taxonomy
 //! verbatim (re-verified live on 18.0.4: `message_update` still re-sends full
@@ -484,7 +484,7 @@ mod tests {
     /// so all five agents are measured the same way.
     ///
     /// Regenerate a deliberate change with
-    /// `UPDATE_TRANSCRIPT_SNAPSHOTS=1 cargo test -p oximux-agents`, then read
+    /// `UPDATE_TRANSCRIPT_SNAPSHOTS=1 cargo test -p trex-agents`, then read
     /// the diff — the point of the pin is that a render change has to be
     /// noticed and named, not accepted silently.
     #[test]
@@ -496,7 +496,7 @@ mod tests {
             let (events, _) = replay(&format!("{fixture}.jsonl"));
             assert!(!events.is_empty(), "{fixture} decoded to nothing");
             let thread = render(&events);
-            oximux_agent_core::thread::snapshot::assert_thread_snapshot(
+            trex_agent_core::thread::snapshot::assert_thread_snapshot(
                 format!(
                     "{}/tests/snapshots/{fixture}.transcript.json",
                     env!("CARGO_MANIFEST_DIR")
@@ -526,7 +526,7 @@ mod tests {
                 .iter()
                 .any(|e| matches!(e, ThreadEvent::TurnEnded { .. }));
             let thread = render(&events);
-            oximux_agent_core::thread::invariants::assert_holds(fixture, &thread, settled);
+            trex_agent_core::thread::invariants::assert_holds(fixture, &thread, settled);
         }
     }
 

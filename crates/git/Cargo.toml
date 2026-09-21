@@ -1,5 +1,5 @@
-[package]
-name = "oximux-git"
+﻿[package]
+name = "trex-git"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,8 +8,8 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-oximux-core = { workspace = true }
-oximux-no-window = { workspace = true }
+trex-core = { workspace = true }
+trex-no-window = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

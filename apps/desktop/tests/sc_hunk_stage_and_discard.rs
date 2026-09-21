@@ -1,4 +1,4 @@
-//! End-to-end regression test for the DiffView hunk-level dispatch.
+﻿//! End-to-end regression test for the DiffView hunk-level dispatch.
 //!
 //! Drives a real `tokio::Runtime` + GPUI test context against a temp
 //! git repo with one 10-line committed file dirtied at lines 1 and 10
@@ -20,9 +20,9 @@
 use gpui::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, TestAppContext, Window, div,
 };
-use oximux_app::shell::diff_view::DiffView;
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::diff_view::DiffView;
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -42,14 +42,14 @@ fn seed_two_hunk_repo(p: &Path) {
             .args(args)
             .current_dir(p)
             .env("GIT_AUTHOR_NAME", "Test")
-            .env("GIT_AUTHOR_EMAIL", "test@oximux.dev")
+            .env("GIT_AUTHOR_EMAIL", "test@TREX.dev")
             .env("GIT_COMMITTER_NAME", "Test")
-            .env("GIT_COMMITTER_EMAIL", "test@oximux.dev")
+            .env("GIT_COMMITTER_EMAIL", "test@TREX.dev")
             .status()
             .expect("git on PATH");
     };
     st(&["init", "-b", "main"]);
-    st(&["config", "user.email", "test@oximux.dev"]);
+    st(&["config", "user.email", "test@TREX.dev"]);
     st(&["config", "user.name", "Test"]);
     let base = (1..=10).map(|n| format!("line {n}\n")).collect::<String>();
     std::fs::write(p.join("multi.txt"), &base).expect("write");
@@ -86,7 +86,7 @@ async fn stage_hunk_dispatches_through_to_git(cx: &mut TestAppContext) {
         .block_on(repo.diff_unstaged())
         .expect("diff_unstaged pre");
     assert_eq!(unstaged.len(), 1);
-    let regions = oximux_core::change_regions(&unstaged[0]);
+    let regions = trex_core::change_regions(&unstaged[0]);
     assert!(
         regions.len() >= 2,
         "expected ≥2 stageable regions, got {}",
@@ -168,7 +168,7 @@ async fn discard_hunk_reverts_worktree_without_touching_index(cx: &mut TestAppCo
         .block_on(repo.diff_unstaged())
         .expect("diff_unstaged pre");
     assert_eq!(unstaged.len(), 1);
-    assert!(oximux_core::change_regions(&unstaged[0]).len() >= 2);
+    assert!(trex_core::change_regions(&unstaged[0]).len() >= 2);
 
     cx.update(|cx| cx.set_global(gpui_component::Theme::default()));
 

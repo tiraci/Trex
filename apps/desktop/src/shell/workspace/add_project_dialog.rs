@@ -1,4 +1,4 @@
-//! Add-Project dialog — card chooser plus an inline Clone-from-URL form.
+﻿//! Add-Project dialog — card chooser plus an inline Clone-from-URL form.
 //!
 //! Reached from the left rail toolbar's "Add Project" button and from
 //! the project picker's "Open Folder…" row. Two cards:
@@ -26,12 +26,12 @@ use gpui_component::{
     button::{Button, ButtonVariants},
     input::{Input, InputState},
 };
-use oximux_core::Project;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::Project;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::workspace::project_picker::detect_default_branch;
 use crate::ui::FloatingSurface;
-use oximux_storage::ProjectRepo;
+use trex_storage::ProjectRepo;
 use tokio::sync::oneshot;
 
 /// Card grid width.
@@ -224,7 +224,7 @@ impl AddProjectDialog {
             cx.notify();
             return;
         }
-        let Some(name) = oximux_git::repo_name_from_url(&url) else {
+        let Some(name) = trex_git::repo_name_from_url(&url) else {
             self.clone_error = Some("Could not read a repository name from that URL.".to_string());
             cx.notify();
             return;
@@ -258,7 +258,7 @@ impl AddProjectDialog {
             let (tx, rx) = oneshot::channel::<Result<PathBuf, String>>();
             handle.spawn(async move {
                 let _ = tx.send(
-                    oximux_git::clone_repo(&url, &dest)
+                    trex_git::clone_repo(&url, &dest)
                         .await
                         .map_err(|e| e.to_string()),
                 );
@@ -330,7 +330,7 @@ impl Focusable for AddProjectDialog {
 
 impl Render for AddProjectDialog {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }
@@ -403,7 +403,7 @@ impl AddProjectDialog {
         let subtitle = div()
             .text_size(px(typography.t_body_sm))
             .text_color(theme.fg_muted)
-            .child("Add another project to manage with OxiMux.");
+            .child("Add another project to manage with TREX.");
 
         let card_row = div()
             .flex()
@@ -569,8 +569,8 @@ mod tests {
     #[test]
     fn name_from_path_uses_basename() {
         assert_eq!(
-            name_from_path(&PathBuf::from("/Users/a/Code/oximux")),
-            "oximux"
+            name_from_path(&PathBuf::from("/Users/a/Code/TREX")),
+            "TREX"
         );
     }
 

@@ -1,4 +1,4 @@
-//! Per-project terminal-tab persistence.
+﻿//! Per-project terminal-tab persistence.
 //!
 //! Stored as a single JSON blob in the `settings` table under the key
 //! `terminal_tabs:<project_id>` (size cap 64 KiB — generous for dozens of
@@ -17,7 +17,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use oximux_core::AgentAdapter;
+use trex_core::AgentAdapter;
 
 #[cfg(test)]
 use crate::shell::pane_tree::PaneId;
@@ -198,12 +198,12 @@ pub struct PersistedSubPane {
     /// (pre-per-pane-tabs) reader still restores the visible terminal.
     #[serde(default)]
     pub cwd: Option<String>,
-    /// Stable `OXIMUX_SURFACE_ID` of the leaf's active tab. Empty for
+    /// Stable `trex_SURFACE_ID` of the leaf's active tab. Empty for
     /// pre-existing blobs → restore mints a fresh one. Round-tripping it
     /// keeps the surface id identical across an app quit -> reattach.
     #[serde(default)]
     pub surface_id: String,
-    /// Stable `OXIMUX_TAB_ID` of the leaf's active tab. Empty for older
+    /// Stable `trex_TAB_ID` of the leaf's active tab. Empty for older
     /// blobs → restore mints a fresh one.
     #[serde(default)]
     pub tab_id: String,

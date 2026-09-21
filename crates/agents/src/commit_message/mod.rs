@@ -1,4 +1,4 @@
-//! AI commit-message generation surface.
+﻿//! AI commit-message generation surface.
 //!
 //! Three modes dispatched from a single entry point:
 //!
@@ -24,7 +24,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use oximux_core::FileStatus;
+use trex_core::FileStatus;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -150,7 +150,7 @@ mod tests {
     use super::*;
     use std::path::PathBuf;
 
-    use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+    use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 
     fn ctx() -> StagedContext {
         StagedContext {

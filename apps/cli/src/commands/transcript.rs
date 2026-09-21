@@ -1,8 +1,8 @@
-//! `oximux transcript` — the session's full folded transcript, reassembled
+﻿//! `TREX transcript` — the session's full folded transcript, reassembled
 //! from `FetchTranscriptPage` pages so no transcript is too large to fetch
 //! (the legacy single-frame verb dies at the transport's frame cap).
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;

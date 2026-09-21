@@ -1,4 +1,4 @@
-//! Wire types for `omp --mode rpc-ui` — one `\n`-terminated JSON value per
+﻿//! Wire types for `omp --mode rpc-ui` — one `\n`-terminated JSON value per
 //! message, same envelope as Pi's (omp is a Pi fork) with three deltas this
 //! module owns:
 //!
@@ -60,7 +60,7 @@ pub enum OmpCommand {
     SetModel { id: String, provider: String, model_id: String },
     SetThinkingLevel { id: String, level: String },
     /// Depth of subagent event forwarding (`off`/`lifecycle`/`progress`/`full`
-    /// per omp's union; OxiMux drives the minimal folding level).
+    /// per omp's union; TREX drives the minimal folding level).
     SetSubagentSubscription { id: String, level: String },
 }
 

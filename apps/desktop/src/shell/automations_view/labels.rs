@@ -1,4 +1,4 @@
-//! The words the Automations page and the Schedules settings pane both say.
+﻿//! The words the Automations page and the Schedules settings pane both say.
 //!
 //! Two surfaces now render the same rows — the full-width Automations pane and
 //! the narrow Settings → Schedules list. Wording that drifted between them
@@ -12,8 +12,8 @@
 
 use chrono::{DateTime, Local};
 use gpui::Hsla;
-use oximux_agents::schedule::{RunOutcome, ScheduleRun};
-use oximux_settings::Theme;
+use trex_agents::schedule::{RunOutcome, ScheduleRun};
+use trex_settings::Theme;
 
 /// How many characters of a schedule's prompt the card shows before eliding.
 /// Long enough to recognise the task, short enough that a pasted paragraph

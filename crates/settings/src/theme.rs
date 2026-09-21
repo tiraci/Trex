@@ -1,4 +1,4 @@
-//! Theme tokens — two palettes, one shape.
+﻿//! Theme tokens — two palettes, one shape.
 //!
 //! Hex values are owned by `docs/design-guidelines.md`. Keep this file and
 //! that doc in sync — the doc is the contract.
@@ -182,7 +182,7 @@ impl Theme {
         }
     }
 
-    /// The original OxiMux theme: monochrome charcoal.
+    /// The original TREX theme: monochrome charcoal.
     pub fn charcoal() -> Self {
         Self {
             choice: ThemeChoice::Charcoal,

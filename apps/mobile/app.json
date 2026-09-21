@@ -1,15 +1,15 @@
-{
+﻿{
   "expo": {
-    "name": "OxiMux",
-    "slug": "oximux",
+    "name": "TREX",
+    "slug": "TREX",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "oximux",
+    "scheme": "TREX",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "sh.oximux.mobile",
+      "bundleIdentifier": "sh.TREX.mobile",
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -17,7 +17,7 @@
       "appleTeamId": "QCLXRD7V9M"
     },
     "android": {
-      "package": "sh.oximux.mobile",
+      "package": "sh.TREX.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#15171A",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -38,13 +38,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "OxiMux uses the camera only to scan the pairing QR code shown by your desktop."
+          "cameraPermission": "TREX uses the camera only to scan the pairing QR code shown by your desktop."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "OxiMux uses your photo library only to attach images to a prompt you send to your desktop."
+          "photosPermission": "TREX uses your photo library only to attach images to a prompt you send to your desktop."
         }
       ],
       "./plugins/with-system-configuration",
@@ -59,7 +59,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "OxiMux uses the microphone only to dictate a prompt, which your desktop transcribes."
+          "microphonePermission": "TREX uses the microphone only to dictate a prompt, which your desktop transcribes."
         }
       ],
       "expo-asset"
@@ -74,6 +74,6 @@
         "projectId": "bf9437bf-8dc0-4f2c-a08a-0a5f924124b0"
       }
     },
-    "owner": "nhtera"
+    "owner": "tiraci"
   }
 }

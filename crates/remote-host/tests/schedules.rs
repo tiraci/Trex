@@ -1,4 +1,4 @@
-//! The schedule RPCs (v10): create, list, delete, toggle, and read run history
+﻿//! The schedule RPCs (v10): create, list, delete, toggle, and read run history
 //! for the desktop's scheduled agent runs.
 //!
 //! These name no session, so the interesting axis is device *tier*, not
@@ -11,13 +11,13 @@ use std::sync::Arc;
 
 use chrono::Timelike;
 
-use oximux_agents::schedule::ScheduleStore;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
-use oximux_remote_proto::messages::{RecurrenceV2Wire, RecurrenceWire, RegisterReq};
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
-use oximux_remote_proto::Transport;
+use trex_agents::schedule::ScheduleStore;
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
+use trex_remote_proto::messages::{RecurrenceV2Wire, RecurrenceWire, RegisterReq};
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
+use trex_remote_proto::Transport;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {
@@ -44,7 +44,7 @@ fn register_req(pubkey: [u8; 32]) -> RegisterReq {
 /// An empty in-memory store with the app's schema applied, shared by `Arc` so a
 /// test can inspect the same rows the dispatcher writes.
 fn store() -> Arc<ScheduleStore> {
-    let db = oximux_storage::open_memory().expect("open memory db");
+    let db = trex_storage::open_memory().expect("open memory db");
     Arc::new(ScheduleStore::new(db.conn()))
 }
 
@@ -128,12 +128,12 @@ async fn a_read_only_device_lists_but_cannot_create() {
     // Seed one schedule directly so there is something to read.
     store
         .create(
-            oximux_agents::schedule::NewSchedule {
+            trex_agents::schedule::NewSchedule {
                 name: "Seeded".into(),
                 cwd: "/work".into(),
                 prompt: "hi".into(),
                 agent_id: None,
-                recurrence: oximux_agents::schedule::Recurrence::DailyAt { hour: 8, minute: 0 },
+                recurrence: trex_agents::schedule::Recurrence::DailyAt { hour: 8, minute: 0 },
             },
             chrono::Local::now(),
         )

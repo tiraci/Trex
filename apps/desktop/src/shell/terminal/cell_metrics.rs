@@ -1,4 +1,4 @@
-//! Live cell metrics for the terminal grid.
+﻿//! Live cell metrics for the terminal grid.
 //!
 //! Centralises the `cell_width` / `line_height` math that used to live as
 //! magic-number constants (8.4 × 17 px) in the legacy pane host. Measuring per render
@@ -13,7 +13,7 @@
 //! measure the monospace cell advance.
 
 use gpui::{Pixels, Window, px};
-use oximux_settings::Typography;
+use trex_settings::Typography;
 
 /// Extra pixels added on top of `t_body_lg` to derive line-height. Tuned so
 /// half-block glyphs (▀ ▄ █) tile cleanly: the mono face's em-square plus a

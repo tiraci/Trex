@@ -1,4 +1,4 @@
-//! The voice-transcription RPC (v11): decode one recorded clip to text.
+﻿//! The voice-transcription RPC (v11): decode one recorded clip to text.
 //!
 //! It names no session and mutates nothing, so — unlike the schedule RPCs — it
 //! carries no tier gate: any paired device may dictate, including a read-only
@@ -13,13 +13,13 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD;
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::transcribe::{AudioTranscriber, TranscribeError};
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::RegisterReq;
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::transcribe::{AudioTranscriber, TranscribeError};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::RegisterReq;
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {

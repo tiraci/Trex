@@ -1,4 +1,4 @@
-//! The security pass, as tests rather than as a checklist.
+﻿//! The security pass, as tests rather than as a checklist.
 //!
 //! Each of these is a claim that was previously argued from a code reading. The
 //! difference matters: a code reading is correct until someone edits the code,
@@ -102,12 +102,12 @@ fn the_hosts_own_token_never_appears_in_its_logs() {
     // tempted to log what it rejected.
     let _ = cli(&data_dir)
         .arg("ls")
-        .env(oximux_remote_local::SESSION_ENV_VAR, "security-logs")
-        .env(oximux_remote_local::SESSION_TOKEN_ENV_VAR, "not-the-real-secret")
+        .env(trex_remote_local::SESSION_ENV_VAR, "security-logs")
+        .env(trex_remote_local::SESSION_TOKEN_ENV_VAR, "not-the-real-secret")
         .output();
     let _ = await_report(&report, "ls_exit", Duration::from_secs(30));
 
-    let token = std::fs::read_to_string(oximux_remote_local::token_path(&data_dir))
+    let token = std::fs::read_to_string(trex_remote_local::token_path(&data_dir))
         .expect("the host wrote a token file");
     let token = token.trim();
     assert!(!token.is_empty(), "the token file is empty — this test would be vacuous");
@@ -145,8 +145,8 @@ fn a_refused_credential_is_never_echoed_to_the_caller() {
     const WRONG: &str = "deadbeefdeadbeefdeadbeefdeadbeef";
     let out = cli(&data_dir)
         .arg("ls")
-        .env(oximux_remote_local::SESSION_ENV_VAR, "security-echo")
-        .env(oximux_remote_local::SESSION_TOKEN_ENV_VAR, WRONG)
+        .env(trex_remote_local::SESSION_ENV_VAR, "security-echo")
+        .env(trex_remote_local::SESSION_TOKEN_ENV_VAR, WRONG)
         .output()
         .expect("ls");
 
@@ -184,10 +184,10 @@ fn the_hosts_runtime_state_is_owner_only_on_disk() {
         AgentBehaviour::default(),
     );
 
-    let token = oximux_remote_local::token_path(&data_dir);
+    let token = trex_remote_local::token_path(&data_dir);
     assert!(token.is_file(), "the host wrote no token file");
     assert!(
-        oximux_owner_only::is_restricted_to_owner(&token).expect("read back the token's mode"),
+        trex_owner_only::is_restricted_to_owner(&token).expect("read back the token's mode"),
         "the bearer token is readable by more than its owner: {}",
         token.display(),
     );
@@ -196,7 +196,7 @@ fn the_hosts_runtime_state_is_owner_only_on_disk() {
     // a correctly-restricted `0o700` as a failure. (It did, on the first run of
     // this test — the assertion was wrong, not the host.)
     assert!(
-        oximux_owner_only::is_dir_restricted_to_owner(&data_dir)
+        trex_owner_only::is_dir_restricted_to_owner(&data_dir)
             .expect("read back the dir's mode"),
         "the host's data directory is reachable by more than its owner: {}",
         data_dir.display(),

@@ -1,4 +1,4 @@
-//! Smoke test: construct `FileExplorer` with a static watch channel, push a
+﻿//! Smoke test: construct `FileExplorer` with a static watch channel, push a
 //! `PollState::Ready(GitState)` through the channel, and assert that the
 //! entity's status_map is populated after the push.
 //!
@@ -9,10 +9,10 @@
 //! watch is covered instead.
 
 use gpui::TestAppContext;
-use oximux_app::shell::file_explorer::FileExplorer;
-use oximux_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
-use oximux_git::{PollState, Repository};
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::file_explorer::FileExplorer;
+use trex_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
+use trex_git::{PollState, Repository};
+use trex_settings::{Density, Theme, Typography};
 use std::process::Command;
 use tokio::sync::watch;
 

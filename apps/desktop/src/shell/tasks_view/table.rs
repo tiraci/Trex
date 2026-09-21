@@ -1,4 +1,4 @@
-//! Column-header row and toolbar rendering for the Tasks table.
+﻿//! Column-header row and toolbar rendering for the Tasks table.
 //!
 //! Both functions are pure layout builders — they receive the state they need
 //! via arguments so they can live in their own module without a `self` borrow.
@@ -11,8 +11,8 @@ use gpui::{
 };
 use gpui_component::Sizable as _;
 use gpui_component::input::{Input, InputState};
-use oximux_core::Project;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::Project;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::forge::{ForgeListFilter, ForgeState};
 use crate::shell::tasks_view::row::{

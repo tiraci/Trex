@@ -1,4 +1,4 @@
-//! Usage-meter data model.
+﻿//! Usage-meter data model.
 //!
 //! The status-bar meter shows each configured agent account's REAL rate-limit
 //! utilization, taken from whatever that provider itself publishes — never
@@ -10,7 +10,7 @@
 //! windows are, so a reading is a *list* of labeled windows rather than a
 //! fixed pair. Labels are derived from the span (see
 //! [`UsageWindow::short_label`]), which means a provider reporting a window
-//! shape OxiMux has never seen still renders something true.
+//! shape TREX has never seen still renders something true.
 
 /// A five-hour window's span, in minutes — the short rolling limit both
 /// current sources report.

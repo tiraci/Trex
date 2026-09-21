@@ -1,4 +1,4 @@
-//! Unpacking the desktop app's release zip.
+﻿//! Unpacking the desktop app's release zip.
 //!
 //! The CLI extracts two known file names out of a `.tar.gz` and can therefore
 //! ignore everything an archive claims about its own layout. An app payload
@@ -13,7 +13,7 @@
 //! * `enclosed_name` refuses absolute paths, drive letters, and any `..` hop —
 //!   an entry that fails it is not skipped but fatal, because a release zip
 //!   containing one is not a release zip.
-//! * Every entry must sit under the single `OxiMux/` root the bundle script
+//! * Every entry must sit under the single `TREX/` root the bundle script
 //!   produces. Anything else means the archive is not the shape this expects,
 //!   and guessing at a different one is how a payload lands in the wrong place.
 //! * Nothing is executed, and no entry mode is honoured — Windows has no
@@ -24,15 +24,15 @@ use std::path::{Component, Path, PathBuf};
 
 use crate::release::ReleaseError;
 
-/// The directory `Compress-Archive -Path dist/OxiMux` puts at the top of the
-/// zip. Extracting `dist/OxiMux/*` instead would scatter loose files into
+/// The directory `Compress-Archive -Path dist/TREX` puts at the top of the
+/// zip. Extracting `dist/TREX/*` instead would scatter loose files into
 /// whatever folder someone unzipped into, so the bundle script deliberately
 /// archives the directory — and this deliberately depends on that.
-const PAYLOAD_ROOT: &str = "OxiMux";
+const PAYLOAD_ROOT: &str = "TREX";
 
 /// The one file whose absence means the archive is not an app payload at all.
 /// Checked after extraction so the error names what was actually in there.
-const REQUIRED: &str = "oximux.exe";
+const REQUIRED: &str = "TREX.exe";
 
 /// Uncompressed ceiling. The real payload is a couple of hundred megabytes,
 /// dominated by `onnxruntime.dll`; a gigabyte is far above any release and far
@@ -129,9 +129,9 @@ pub fn extract(archive: &[u8], into: &Path) -> Result<Vec<PathBuf>, ReleaseError
     Ok(written)
 }
 
-/// `OxiMux/foo/bar.dll` → `foo/bar.dll`; anything not under that root →
+/// `TREX/foo/bar.dll` → `foo/bar.dll`; anything not under that root →
 /// `None`. The comparison is case-insensitive because the archive is built and
-/// consumed on Windows, where `oximux/` and `OxiMux/` name one directory.
+/// consumed on Windows, where `TREX/` and `TREX/` name one directory.
 fn strip_payload_root(path: &Path) -> Option<PathBuf> {
     let mut components = path.components();
     let Some(Component::Normal(first)) = components.next() else {
@@ -168,9 +168,9 @@ mod tests {
 
     fn payload() -> Vec<u8> {
         zip_of(&[
-            ("OxiMux/oximux.exe", b"app"),
-            ("OxiMux/oximux-relay.exe", b"relay"),
-            ("OxiMux/onnxruntime.dll", b"native"),
+            ("TREX/TREX.exe", b"app"),
+            ("TREX/trex-relay.exe", b"relay"),
+            ("TREX/onnxruntime.dll", b"native"),
         ])
     }
 
@@ -184,12 +184,12 @@ mod tests {
             written,
             vec![
                 PathBuf::from("onnxruntime.dll"),
-                PathBuf::from("oximux-relay.exe"),
-                PathBuf::from("oximux.exe"),
+                PathBuf::from("trex-relay.exe"),
+                PathBuf::from("TREX.exe"),
             ]
         );
-        assert_eq!(std::fs::read(dir.path().join("oximux.exe")).expect("read"), b"app");
-        assert!(!dir.path().join("OxiMux").exists(), "the root must be stripped, not kept");
+        assert_eq!(std::fs::read(dir.path().join("TREX.exe")).expect("read"), b"app");
+        assert!(!dir.path().join("TREX").exists(), "the root must be stripped, not kept");
     }
 
     /// Nested paths are real — a future payload may ship a `resources/`
@@ -197,7 +197,7 @@ mod tests {
     #[test]
     fn a_nested_file_keeps_its_relative_path() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let archive = zip_of(&[("OxiMux/oximux.exe", b"app"), ("OxiMux/res/icon.ico", b"icon")]);
+        let archive = zip_of(&[("TREX/TREX.exe", b"app"), ("TREX/res/icon.ico", b"icon")]);
 
         extract(&archive, dir.path()).expect("extracts");
         assert_eq!(std::fs::read(dir.path().join("res/icon.ico")).expect("read"), b"icon");
@@ -209,13 +209,13 @@ mod tests {
     fn an_entry_escaping_the_payload_root_is_fatal_not_skipped() {
         let dir = tempfile::tempdir().expect("tempdir");
         for bad in [
-            "OxiMux/../../evil.exe",
+            "TREX/../../evil.exe",
             "../evil.exe",
-            "Other/oximux.exe",
+            "Other/TREX.exe",
             "evil.exe",
             "/etc/passwd",
         ] {
-            let archive = zip_of(&[("OxiMux/oximux.exe", b"app"), (bad, b"pwned")]);
+            let archive = zip_of(&[("TREX/TREX.exe", b"app"), (bad, b"pwned")]);
             let err = extract(&archive, dir.path()).expect_err("must refuse {bad}");
             assert!(
                 matches!(err, ReleaseError::Archive { .. }),
@@ -226,23 +226,23 @@ mod tests {
 
     /// An archive that verified its signature and its digest but carries the
     /// wrong contents is still not installable, and the error has to say what
-    /// was in there — "no oximux.exe" alone sends nobody anywhere.
+    /// was in there — "no TREX.exe" alone sends nobody anywhere.
     #[test]
     fn an_archive_without_the_app_names_what_it_did_contain() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let archive = zip_of(&[("OxiMux/readme.txt", b"hi")]);
+        let archive = zip_of(&[("TREX/readme.txt", b"hi")]);
 
         let err = extract(&archive, dir.path()).expect_err("must refuse");
         let rendered = err.to_string();
-        assert!(rendered.contains("oximux.exe"), "{rendered}");
+        assert!(rendered.contains("TREX.exe"), "{rendered}");
         assert!(rendered.contains("readme.txt"), "{rendered}");
     }
 
     #[test]
     fn the_root_directory_matches_case_insensitively() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let archive = zip_of(&[("oximux/oximux.exe", b"app")]);
+        let archive = zip_of(&[("TREX/TREX.exe", b"app")]);
         extract(&archive, dir.path()).expect("extracts");
-        assert!(dir.path().join("oximux.exe").is_file());
+        assert!(dir.path().join("TREX.exe").is_file());
     }
 }

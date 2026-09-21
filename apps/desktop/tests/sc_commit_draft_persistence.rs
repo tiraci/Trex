@@ -1,4 +1,4 @@
-//! Round-trip the SCM commit_draft load helper against an in-memory
+﻿//! Round-trip the SCM commit_draft load helper against an in-memory
 //! SQLite store. Mirrors `sc_base_ref_persistence.rs` for the
 //! commit_draft column.
 //!
@@ -11,9 +11,9 @@
 //! here is the LOAD half: panel mount semantics for what the textarea
 //! is pre-populated with.
 
-use oximux_app::shell::source_control::load_initial_commit_draft;
-use oximux_core::WorktreeSettings;
-use oximux_storage::{Db, WorktreeSettingsRepo, open_memory};
+use trex_app::shell::source_control::load_initial_commit_draft;
+use trex_core::WorktreeSettings;
+use trex_storage::{Db, WorktreeSettingsRepo, open_memory};
 
 /// Seed the `projects` and `workspaces` rows the FK on
 /// `worktree_settings.workspace_id` resolves against. Mirrors the

@@ -1,7 +1,7 @@
-//! The signed-release trust chain, shared by every updater in the workspace.
+﻿//! The signed-release trust chain, shared by every updater in the workspace.
 //!
 //! Two very different programs update themselves from the same GitHub Release:
-//! `oximux update` replaces two CLI binaries, and the desktop app replaces its
+//! `TREX update` replaces two CLI binaries, and the desktop app replaces its
 //! whole install directory at quit. What they must *not* have is two answers to
 //! "is this release genuine" — so the manifest, its signature, the download
 //! host allow-list, and the move-aside/move-in swap live here, once.
@@ -87,7 +87,7 @@ impl std::fmt::Display for ReleaseError {
             Self::Archive { detail } => write!(f, "{detail}"),
             Self::Staging { detail } => write!(f, "{detail}"),
             Self::ManagedInstall { manager, .. } => {
-                write!(f, "this oximux was installed by {manager}, which owns the files")
+                write!(f, "this TREX was installed by {manager}, which owns the files")
             }
             Self::Manifest(err) => write!(f, "{err}"),
             Self::Verify(err) => write!(f, "{err}"),
@@ -166,7 +166,7 @@ impl Staging {
         let mut suffix = [0u8; 6];
         rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut suffix);
         let hex: String = suffix.iter().map(|b| format!("{b:02x}")).collect();
-        let path = dir.join(format!(".oximux.update-{hex}"));
+        let path = dir.join(format!(".TREX.update-{hex}"));
         std::fs::create_dir(&path).map_err(|err| ReleaseError::Staging {
             detail: format!("could not stage the update in {}: {err}", dir.display()),
         })?;

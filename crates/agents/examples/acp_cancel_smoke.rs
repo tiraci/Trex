@@ -1,4 +1,4 @@
-//! Headless end-to-end verification that a client `session/cancel` resolves an
+﻿//! Headless end-to-end verification that a client `session/cancel` resolves an
 //! agent's outstanding `session/request_permission` with a `Cancelled` outcome
 //! (rather than leaving it parked forever — the round-2 wedge fix).
 //!
@@ -8,14 +8,14 @@
 //! assistant message; this driver asserts it was `cancelled`. Exits non-zero if
 //! the outcome is anything else or the flow times out.
 //!
-//! Run: `cargo run -p oximux-agents --example acp_cancel_smoke`
+//! Run: `cargo run -p trex-agents --example acp_cancel_smoke`
 
 use std::sync::mpsc::RecvTimeoutError;
 use std::time::{Duration, Instant};
 
-use oximux_agents::thread::acp::AcpConnection;
-use oximux_agents::thread::connection::AgentConnection;
-use oximux_agents::thread::event::ThreadEvent;
+use trex_agents::thread::acp::AcpConnection;
+use trex_agents::thread::connection::AgentConnection;
+use trex_agents::thread::event::ThreadEvent;
 
 fn main() {
     let agent_bin = std::env::current_exe()
@@ -24,7 +24,7 @@ fn main() {
         .expect("locate mock_acp_cancel_agent");
     if !agent_bin.exists() {
         eprintln!(
-            "FAIL: {} not built — run `cargo build -p oximux-agents --example mock_acp_cancel_agent` first",
+            "FAIL: {} not built — run `cargo build -p trex-agents --example mock_acp_cancel_agent` first",
             agent_bin.display()
         );
         std::process::exit(1);

@@ -1,11 +1,11 @@
-//! Remote-control wire protocol shared by the OxiMux desktop host and the
+﻿//! Remote-control wire protocol shared by the TREX desktop host and the
 //! phone's Rust core.
 //!
 //! Three concerns:
 //! - [`proto`] — the append-only RPC envelope (`Request`/`Response`), the
 //!   [`HostEvent`](proto::HostEvent) stream frame, and their postcard codec.
 //! - [`pairing`] — the [`PairingTicket`](pairing::PairingTicket) a QR carries
-//!   and the `oximux://connect?ticket=` URL helpers.
+//!   and the `TREX://connect?ticket=` URL helpers.
 //! - [`transport`] — the [`Transport`](transport::Transport) trait the dispatcher
 //!   speaks over, so iroh is one impl and an in-memory loopback drives tests.
 //!

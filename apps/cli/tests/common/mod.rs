@@ -1,4 +1,4 @@
-//! Shared scaffolding for the suites that drive a **real** `oximux serve` with
+﻿//! Shared scaffolding for the suites that drive a **real** `TREX serve` with
 //! a **real** spawned agent.
 //!
 //! `agent_spawn_e2e`, `recovery_e2e` and `security_e2e` all need the same three
@@ -28,7 +28,7 @@ pub fn fixture() -> PathBuf {
 /// A POSIX `sh`, found even where PATH has none.
 ///
 /// The resolution `crates/agents/src/thread/sh_fixture.rs` documents, kept local
-/// because that module is `pub(crate)` to `oximux-agents` and widening a
+/// because that module is `pub(crate)` to `trex-agents` and widening a
 /// production crate's API to share test scaffolding is the worse trade.
 ///
 /// Windows-only: the unix shim carries a `#!/bin/sh` shebang and needs no
@@ -99,10 +99,10 @@ pub fn path_with(dir: &Path) -> std::ffi::OsString {
 /// The CLI binary with the runner's own credentials scrubbed, so nothing leaks
 /// in from whatever environment `cargo test` happens to carry.
 pub fn bin() -> Command {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_oximux-cli"));
-    cmd.env_remove(oximux_remote_local::SESSION_ENV_VAR);
-    cmd.env_remove(oximux_remote_local::SESSION_TOKEN_ENV_VAR);
-    cmd.env("OXIMUX_RELAY_BINARY", "/nonexistent/oximux-relay-for-tests");
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_trex-cli"));
+    cmd.env_remove(trex_remote_local::SESSION_ENV_VAR);
+    cmd.env_remove(trex_remote_local::SESSION_TOKEN_ENV_VAR);
+    cmd.env("TREX_RELAY_BINARY", "/nonexistent/trex-relay-for-tests");
     cmd
 }
 
@@ -153,9 +153,9 @@ pub fn boot_serve(
     let mut cmd = bin();
     cmd.args(["serve", "--data-dir", data_dir.to_str().unwrap()])
         .env("PATH", path_with(shim_dir))
-        .env("OXIMUX_FAKE_AGENT_REPORT", report)
-        .env("OXIMUX_FAKE_AGENT_SESSION", session)
-        .env("OXIMUX_FAKE_AGENT_CLI", env!("CARGO_BIN_EXE_oximux-cli"))
+        .env("TREX_FAKE_AGENT_REPORT", report)
+        .env("TREX_FAKE_AGENT_SESSION", session)
+        .env("TREX_FAKE_AGENT_CLI", env!("CARGO_BIN_EXE_trex-cli"))
         .env("CLAUDECODE", "1")
         .env("CLAUDE_CODE_CHILD_SESSION", "outer-session")
         .env("CLAUDE_CODE_ENTRYPOINT", "cli")
@@ -170,14 +170,14 @@ pub fn boot_serve(
         .env("RUST_LOG", "trace");
 
     if behaviour.probe {
-        cmd.env("OXIMUX_FAKE_AGENT_DIR", data_dir);
+        cmd.env("TREX_FAKE_AGENT_DIR", data_dir);
     } else {
-        cmd.env_remove("OXIMUX_FAKE_AGENT_DIR");
+        cmd.env_remove("TREX_FAKE_AGENT_DIR");
     }
     if behaviour.stall {
-        cmd.env("OXIMUX_FAKE_AGENT_STALL", "1");
+        cmd.env("TREX_FAKE_AGENT_STALL", "1");
     } else {
-        cmd.env_remove("OXIMUX_FAKE_AGENT_STALL");
+        cmd.env_remove("TREX_FAKE_AGENT_STALL");
     }
 
     let mut child =
@@ -211,7 +211,7 @@ pub fn boot_serve(
     });
     let line = rx.recv_timeout(Duration::from_secs(60)).expect("serve prints its readiness line");
     let ready: Value = serde_json::from_str(line.trim()).expect("the readiness line is JSON");
-    assert_eq!(ready["type"], "oximux_serve_ready");
+    assert_eq!(ready["type"], "trex_serve_ready");
     ServeUnderTest { child, ready, stderr: stderr_buf }
 }
 
@@ -272,7 +272,7 @@ impl ServeUnderTest {
 ///
 /// `kill_hard`/`stop_gracefully` are the last line of a test body, so an
 /// assertion failure, a panic, or an interrupted `cargo test` skipped them and
-/// orphaned a live `oximux serve` — one holding a socket and a SQLite handle
+/// orphaned a live `TREX serve` — one holding a socket and a SQLite handle
 /// against a temp dir already deleted. CI hides it (fresh container per job);
 /// developer machines collected them, seven alive on one, the oldest 11 hours.
 ///

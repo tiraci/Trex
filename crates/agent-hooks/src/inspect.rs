@@ -1,4 +1,4 @@
-//! What is actually installed right now, read back off disk.
+﻿//! What is actually installed right now, read back off disk.
 //!
 //! The state is computed with [`agent_hooks_global::is_managed`] — the very
 //! predicate the installer uses to decide what to prune — rather than a second
@@ -15,14 +15,14 @@ use serde_json::Value;
 use crate::agent_hook_dialects::{DIALECTS, HookDialect, Install};
 use crate::agent_hooks_global;
 
-/// What OxiMux's hooks are doing in one agent's config right now.
+/// What TREX's hooks are doing in one agent's config right now.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HookState {
     /// The agent has no config directory, so it has never run on this machine.
-    /// OxiMux adds to an agent's home and never conjures one, so this is a
+    /// TREX adds to an agent's home and never conjures one, so this is a
     /// terminal state rather than "not installed yet".
     AgentAbsent,
-    /// The agent is here; the file OxiMux would write is not.
+    /// The agent is here; the file TREX would write is not.
     NoFile,
     /// The file is there and holds no entry of ours. `foreign` counts what the
     /// user (or another tool) put there, all of which `on` will preserve.
@@ -36,12 +36,12 @@ pub enum HookState {
 }
 
 impl HookState {
-    /// Whether OxiMux is currently reporting through this agent.
+    /// Whether TREX is currently reporting through this agent.
     pub fn is_installed(&self) -> bool {
         matches!(self, Self::Installed { .. })
     }
 
-    /// Entries in this file that OxiMux did not write and must not remove.
+    /// Entries in this file that TREX did not write and must not remove.
     pub fn foreign(&self) -> usize {
         match self {
             Self::Absent { foreign } | Self::Installed { foreign, .. } => *foreign,
@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn an_agent_that_has_never_run_is_reported_absent_not_uninstalled() {
-        // The distinction is why OxiMux never writes into a home it did not
+        // The distinction is why TREX never writes into a home it did not
         // find: "you don't have this agent" and "this agent is not reporting"
         // call for completely different next steps. Asserted through the table
         // itself — every dialect must answer `AgentAbsent` for a home that is
@@ -209,7 +209,7 @@ mod tests {
                     "Stop": [
                         { "hooks": [{ "type": "command", "command": "make lint" }] },
                         { "hooks": [{ "type": "command",
-                                      "command": "'/x/oximux' agent-status --state idle" }] }
+                                      "command": "'/x/TREX' agent-status --state idle" }] }
                     ]
                 }
             })
@@ -234,10 +234,10 @@ mod tests {
     #[test]
     fn an_extension_is_installed_by_its_mere_presence() {
         // No entries to count: the agent loads the file and dispatches its own
-        // events, and nothing but OxiMux writes at that path.
+        // events, and nothing but TREX writes at that path.
         let pi = dialect_for_slug("pi").expect("pi is in the table");
         let dir = tempfile::tempdir().expect("tempdir");
-        let path = dir.path().join("oximux-agent-status.ts");
+        let path = dir.path().join("trex-agent-status.ts");
         std::fs::write(&path, "export default {}").expect("write");
         assert_eq!(
             read_state_at(&path, &pi.install),

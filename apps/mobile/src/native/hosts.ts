@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { fromBase64, toBase64 } from './base64';
 
@@ -11,7 +11,7 @@ import { fromBase64, toBase64 } from './base64';
  * host rotates it, so a replayed ticket would fail. Reconnecting instead proves
  * this device's own Ed25519 identity, which lives in the keystore.
  */
-const HOST_KEY = 'oximux.host.v1';
+const HOST_KEY = 'TREX.host.v1';
 
 const ENDPOINT_ID_BYTES = 32;
 

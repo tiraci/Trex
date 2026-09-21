@@ -1,10 +1,10 @@
-//! Keep every token-caching view pulling the current appearance.
+﻿//! Keep every token-caching view pulling the current appearance.
 //!
 //! Views are handed a `Theme`, a `Density` and a `Typography` when they are
 //! built and keep them. That is deliberate — it keeps render paths total and
 //! testable — but it means a live theme, density or zoom change leaves every
 //! one of those snapshots stale. The refresh is therefore a pull: each
-//! `Render` impl calls `oximux_settings::appearance::sync` at the top of its
+//! `Render` impl calls `trex_settings::appearance::sync` at the top of its
 //! `render`, and cannot then be stale for longer than a frame. A view holding
 //! only a palette calls `appearance::theme` instead, because `sync` wants all
 //! three tokens and such a view has no other two to give it.
@@ -35,7 +35,7 @@ const SYNC_CALLS: &[&str] = &[
 /// The half-answer: it sizes the type scale and leaves the faces at the
 /// platform default, so a caller that stops there paints its surface in a
 /// typeface the user replaced while everything around it obeys.
-/// `oximux_settings::appearance::typography(cx)` is the whole answer.
+/// `trex_settings::appearance::typography(cx)` is the whole answer.
 const HALF_RESOLVER: &str = "Typography::for_appearance(";
 /// What to reach for instead.
 const WHOLE_RESOLVER: &str = "appearance::typography(cx)";
@@ -227,14 +227,14 @@ pub fn run(files: &[(String, String)]) -> Result<(), Box<dyn Error>> {
     for miss in &misses {
         eprintln!(
             "{}: `{}` caches density/typography but its render never calls \
-             oximux_settings::appearance::sync",
+             trex_settings::appearance::sync",
             miss.file, miss.view
         );
     }
     for hit in &half {
         eprintln!(
             "{}:{}: `{HALF_RESOLVER}…)` leaves the font choice behind — use \
-             `oximux_settings::{WHOLE_RESOLVER}`",
+             `trex_settings::{WHOLE_RESOLVER}`",
             hit.file, hit.line
         );
     }
@@ -286,7 +286,7 @@ impl Render for Sidebar {
 pub struct Sidebar { theme: Theme }
 impl Render for Sidebar {
     fn render(&mut self, _w: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        self.theme = oximux_settings::appearance::theme(cx);
+        self.theme = trex_settings::appearance::theme(cx);
         div()
     }
 }
@@ -316,7 +316,7 @@ impl Render for Fixture {
 pub struct Panel { density: Density, typography: Typography }
 impl Render for Panel {
     fn render(&mut self, _w: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.density, &mut self.typography, cx);
         div()
     }
 }
@@ -347,7 +347,7 @@ impl Render for Panel {
 pub struct Panel { typography: Typography }
 impl Render for Panel {
     fn render(&mut self, _w: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync_typography(&mut self.typography, cx);
+        trex_settings::appearance::sync_typography(&mut self.typography, cx);
         div()
     }
 }
@@ -451,7 +451,7 @@ pub struct Panel { density: Density, typography: Typography }
         let src = "\
 pub struct Panel { density: Density, typography: Typography }
 impl Panel {
-    fn render_row(&self) { oximux_settings::appearance::sync(a, b, cx); }
+    fn render_row(&self) { trex_settings::appearance::sync(a, b, cx); }
 }
 impl Render for Panel {
     fn render(&mut self, _w: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {

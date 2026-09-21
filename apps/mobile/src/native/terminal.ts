@@ -1,4 +1,4 @@
-import type { TerminalInfo } from 'oximux-core';
+﻿import type { TerminalInfo } from 'trex-core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { toArrayBuffer, toBase64 } from './base64';

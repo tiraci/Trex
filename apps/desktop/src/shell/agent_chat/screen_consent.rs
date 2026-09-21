@@ -1,4 +1,4 @@
-//! Copy and affordances for a screen-control consent card.
+﻿//! Copy and affordances for a screen-control consent card.
 //!
 //! Not a fourth card implementation: the ordinary tool card renders this, the
 //! same way it renders an MCP elicitation. What lives here is the part that is
@@ -14,9 +14,9 @@
 //! goes up and the result is held until it is answered.
 
 use gpui::{AnyElement, Context, IntoElement, ParentElement, SharedString, Styled, div, px};
-use oximux_agents::thread::PermissionDecision;
-use oximux_computer_use::{Category, TargetApp};
-use oximux_settings::{ComputerUseSettings, Density, Theme, Typography};
+use trex_agents::thread::PermissionDecision;
+use trex_computer_use::{Category, TargetApp};
+use trex_settings::{ComputerUseSettings, Density, Theme, Typography};
 
 use super::AgentChatView;
 use super::computer_use::Decision;
@@ -28,7 +28,7 @@ use super::tool_card::pill_button;
 /// carries only a description string and this needs structure — the bundle id
 /// for the allowlist, the category for the warning.
 ///
-/// [`PermissionRequest`]: oximux_agents::thread::PermissionRequest
+/// [`PermissionRequest`]: trex_agents::thread::PermissionRequest
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct ScreenPrompt {
     /// What to call the app on screen.
@@ -274,13 +274,13 @@ impl AgentChatView {
     /// [`ScreenControl::remember_app`](super::computer_use::ScreenControl::remember_app)
     /// for why the first answer is the one that stands.
     fn note_screen_target(&mut self, input: &serde_json::Value) {
-        let Some(pid) = oximux_computer_use::policy::addressed_pid(input) else {
+        let Some(pid) = trex_computer_use::policy::addressed_pid(input) else {
             return;
         };
         if self.screen_control.app_named(pid).is_some() {
             return;
         }
-        if let Some(name) = oximux_computer_use::target::name_of_pid(pid) {
+        if let Some(name) = trex_computer_use::target::name_of_pid(pid) {
             self.screen_control.remember_app(pid, name);
         }
     }
@@ -300,23 +300,23 @@ impl AgentChatView {
     /// still be true — the policy allows the call, so the pixels are taken
     /// either way — and the indicator then stands for the rest of the turn,
     /// while the agent can still take more and Escape can still stop it.
-    pub(super) fn note_screen_capture(&self, ev: &oximux_agents::thread::ThreadEvent) {
-        let oximux_agents::thread::ThreadEvent::ToolResultImages { tool_use_id, images } = ev else {
+    pub(super) fn note_screen_capture(&self, ev: &trex_agents::thread::ThreadEvent) {
+        let trex_agents::thread::ThreadEvent::ToolResultImages { tool_use_id, images } = ev else {
             return;
         };
         if images.is_empty() {
             return;
         }
         let captured = self.thread.entries.iter().rev().find_map(|entry| match entry {
-            oximux_agents::thread::ThreadEntry::ToolCall(tc)
+            trex_agents::thread::ThreadEntry::ToolCall(tc)
                 if tc.id == *tool_use_id
-                    && oximux_computer_use::is_computer_use_tool(&tc.name) =>
+                    && trex_computer_use::is_computer_use_tool(&tc.name) =>
             {
                 // `Some(None)` is a real answer, not a miss: the call was ours
                 // and returned a picture, it just named no process. Collapsing
                 // it to "not found" would drop exactly the capture that is
                 // hardest to notice any other way.
-                Some(oximux_computer_use::policy::addressed_pid(&tc.input))
+                Some(trex_computer_use::policy::addressed_pid(&tc.input))
             }
             _ => None,
         });
@@ -329,8 +329,8 @@ impl AgentChatView {
     ///
     /// Reads the pid through the policy's own accessor, so the name on the card
     /// always belongs to the process the policy actually decided about.
-    pub(super) fn screen_context(&self, tc: &oximux_agents::thread::ToolCall) -> ScreenContext {
-        let app = oximux_computer_use::policy::addressed_pid(&tc.input)
+    pub(super) fn screen_context(&self, tc: &trex_agents::thread::ToolCall) -> ScreenContext {
+        let app = trex_computer_use::policy::addressed_pid(&tc.input)
             .and_then(|pid| self.screen_control.app_named(pid))
             .map(str::to_string);
         ScreenContext { prompt: self.screen_prompts.get(&tc.id).cloned(), app }

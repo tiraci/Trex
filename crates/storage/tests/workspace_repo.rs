@@ -1,7 +1,7 @@
-//! WorkspaceRepo integration tests — UNIQUE conflict + cascade behaviour
+﻿//! WorkspaceRepo integration tests — UNIQUE conflict + cascade behaviour
 //! are the focus; the worktree-rollback flow is exercised at step 6.
 
-use oximux_storage::{
+use trex_storage::{
     AgentSessionRepo, PaneSessionRepo, ProjectRepo, StorageError, WorkspaceRepo, open_memory,
 };
 
@@ -21,7 +21,7 @@ fn project_and_repos() -> (String, WorkspaceRepo, PaneSessionRepo, AgentSessionR
 fn workspace_insert_returns_full_row() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "Feat", "feat", "oximux/feat", "/wt/feat", true)
+        .insert(&project_id, "Feat", "feat", "TREX/feat", "/wt/feat", true)
         .expect("insert");
     assert!(!w.id.is_empty());
     assert_eq!(w.project_id, project_id);
@@ -35,7 +35,7 @@ fn workspace_insert_returns_full_row() {
 fn workspace_get_by_id() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "F", "f", "oximux/f", "/wt/f", true)
+        .insert(&project_id, "F", "f", "TREX/f", "/wt/f", true)
         .expect("insert");
     let fetched = workspaces.get_by_id(&w.id).expect("get").expect("present");
     assert_eq!(fetched, w);
@@ -45,7 +45,7 @@ fn workspace_get_by_id() {
 fn workspace_set_linked_issue_round_trips() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "Fix", "fix", "oximux/fix", "/wt/fix", true)
+        .insert(&project_id, "Fix", "fix", "TREX/fix", "/wt/fix", true)
         .expect("insert");
     // Fresh inserts have no linked issue.
     assert!(w.linked_issue.is_none());
@@ -69,7 +69,7 @@ fn workspace_set_linked_issue_round_trips() {
 fn workspace_set_tint_round_trips() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "Tint", "tint", "oximux/tint", "/wt/tint", true)
+        .insert(&project_id, "Tint", "tint", "TREX/tint", "/wt/tint", true)
         .expect("insert");
     assert!(w.tint.is_none());
 
@@ -89,10 +89,10 @@ fn workspace_set_tint_round_trips() {
 fn workspace_list_for_project_excludes_archived() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let a = workspaces
-        .insert(&project_id, "A", "a", "oximux/a", "/wt/a", true)
+        .insert(&project_id, "A", "a", "TREX/a", "/wt/a", true)
         .expect("a");
     workspaces
-        .insert(&project_id, "B", "b", "oximux/b", "/wt/b", true)
+        .insert(&project_id, "B", "b", "TREX/b", "/wt/b", true)
         .expect("b");
     workspaces.mark_archived(&a.id).expect("archive a");
     let active = workspaces.list_for_project(&project_id).expect("list");
@@ -104,7 +104,7 @@ fn workspace_list_for_project_excludes_archived() {
 fn workspace_mark_archived_sets_timestamp_and_status() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "A", "a", "oximux/a", "/wt/a", true)
+        .insert(&project_id, "A", "a", "TREX/a", "/wt/a", true)
         .expect("insert");
     workspaces.mark_archived(&w.id).expect("archive");
     let after = workspaces.get_by_id(&w.id).expect("get").expect("present");
@@ -116,7 +116,7 @@ fn workspace_mark_archived_sets_timestamp_and_status() {
 fn workspace_rename() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "Old", "o", "oximux/o", "/wt/o", true)
+        .insert(&project_id, "Old", "o", "TREX/o", "/wt/o", true)
         .expect("insert");
     workspaces.rename(&w.id, "New").expect("rename");
     let after = workspaces.get_by_id(&w.id).expect("get").expect("present");
@@ -127,7 +127,7 @@ fn workspace_rename() {
 fn workspace_delete_removes_row() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "A", "a", "oximux/a", "/wt/a", true)
+        .insert(&project_id, "A", "a", "TREX/a", "/wt/a", true)
         .expect("insert");
     workspaces.delete(&w.id).expect("delete");
     assert!(workspaces.get_by_id(&w.id).expect("get").is_none());
@@ -137,10 +137,10 @@ fn workspace_delete_removes_row() {
 fn workspace_unique_project_slug_conflict() {
     let (project_id, workspaces, _, _) = project_and_repos();
     workspaces
-        .insert(&project_id, "A", "feat", "oximux/feat", "/wt/feat", true)
+        .insert(&project_id, "A", "feat", "TREX/feat", "/wt/feat", true)
         .expect("first");
     let err = workspaces
-        .insert(&project_id, "B", "feat", "oximux/feat2", "/wt/feat2", true)
+        .insert(&project_id, "B", "feat", "TREX/feat2", "/wt/feat2", true)
         .expect_err("conflict");
     match err {
         StorageError::Conflict { table, constraint } => {
@@ -158,7 +158,7 @@ fn workspace_unique_project_slug_conflict() {
 fn workspace_delete_cascades_to_panes_but_keeps_agent_history() {
     let (project_id, workspaces, panes, agents) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "A", "a", "oximux/a", "/wt/a", true)
+        .insert(&project_id, "A", "a", "TREX/a", "/wt/a", true)
         .expect("workspace");
     panes.insert(&w.id, "bash", "0,0,1,1", None).expect("pane");
     agents
@@ -179,7 +179,7 @@ fn workspace_delete_cascades_to_panes_but_keeps_agent_history() {
 fn workspace_archive_unarchive_round_trip_preserves_every_field() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let w = workspaces
-        .insert(&project_id, "Feat", "feat", "oximux/feat", "/wt/feat", true)
+        .insert(&project_id, "Feat", "feat", "TREX/feat", "/wt/feat", true)
         .expect("insert");
     // Set every field a user can change, so the restore has something to lose.
     workspaces.set_tint(&w.id, Some("blue")).expect("tint");
@@ -246,10 +246,10 @@ fn workspace_list_archived_is_scoped_to_its_project() {
     let b = projects.insert("B", "/b", "main").expect("project b");
     let workspaces = WorkspaceRepo::new(db);
     let wa = workspaces
-        .insert(&a.id, "A1", "a1", "oximux/a1", "/wt/a1", true)
+        .insert(&a.id, "A1", "a1", "TREX/a1", "/wt/a1", true)
         .expect("insert a1");
     workspaces
-        .insert(&b.id, "B1", "b1", "oximux/b1", "/wt/b1", true)
+        .insert(&b.id, "B1", "b1", "TREX/b1", "/wt/b1", true)
         .expect("insert b1");
     workspaces.mark_archived(&wa.id).expect("archive");
 
@@ -274,7 +274,7 @@ fn workspace_list_archived_is_scoped_to_its_project() {
 fn branch_minted_round_trips_in_both_states() {
     let (project_id, workspaces, _, _) = project_and_repos();
     let minted = workspaces
-        .insert(&project_id, "Mine", "mine", "oximux/mine", "/wt/mine", true)
+        .insert(&project_id, "Mine", "mine", "TREX/mine", "/wt/mine", true)
         .expect("insert minted");
     let adopted = workspaces
         .insert(&project_id, "Theirs", "theirs", "feature/api/retry", "/wt/theirs", false)
@@ -299,7 +299,7 @@ fn branch_minted_round_trips_in_both_states() {
 }
 
 /// Adoption is one transaction: the row and its un-vetted marker exist
-/// together, the branch is never one OxiMux minted, and clearing the marker
+/// together, the branch is never one TREX minted, and clearing the marker
 /// is its own explicit act.
 #[test]
 fn an_adopted_workspace_is_unvetted_until_reviewed() {
@@ -317,7 +317,7 @@ fn an_adopted_workspace_is_unvetted_until_reviewed() {
 
     // A provisioned row is vetted by construction, and never adopted.
     let minted = workspaces
-        .insert(&project_id, "Feat", "feat", "oximux/feat", "/wt/feat", true)
+        .insert(&project_id, "Feat", "feat", "TREX/feat", "/wt/feat", true)
         .expect("insert");
     assert!(!workspaces.is_adopted(&minted.id).unwrap());
     assert!(!workspaces.is_unvetted(&minted.id).unwrap());
@@ -332,7 +332,7 @@ fn an_adopted_workspace_is_unvetted_until_reviewed() {
 fn adopt_reports_a_slug_conflict_and_writes_nothing() {
     let (project_id, workspaces, _, _) = project_and_repos();
     workspaces
-        .insert(&project_id, "Feat", "feat", "oximux/feat", "/wt/feat", true)
+        .insert(&project_id, "Feat", "feat", "TREX/feat", "/wt/feat", true)
         .expect("insert");
     let err = workspaces
         .adopt(&project_id, "feat", "feat", "feat", "/elsewhere/feat")

@@ -1,4 +1,4 @@
-//! Persistence for scheduled runs, and the run history each fire appends to.
+﻿//! Persistence for scheduled runs, and the run history each fire appends to.
 //!
 //! Holds no opinion about *when* anything fires — that is [`super::recurrence`]
 //! — and none about how a run is performed. It answers "which schedules are due"
@@ -693,7 +693,7 @@ mod tests {
 
     fn store() -> ScheduleStore {
         let conn = Connection::open_in_memory().expect("open memory db");
-        for m in oximux_storage::MIGRATIONS {
+        for m in trex_storage::MIGRATIONS {
             conn.execute_batch(m.sql).expect("apply migration");
         }
         ScheduleStore::new(Arc::new(Mutex::new(conn)))

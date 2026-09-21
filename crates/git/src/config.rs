@@ -1,4 +1,4 @@
-//! Reads of `git config` values OxiMux needs to name things.
+﻿//! Reads of `git config` values TREX needs to name things.
 //!
 //! Repository-scoped on purpose: `git config user.name` run inside a worktree
 //! answers with the repo-local override when there is one and falls through to

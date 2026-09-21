@@ -1,8 +1,8 @@
-//! Named remote hosts: `hosts.toml` in the CLI's own config directory.
+﻿//! Named remote hosts: `hosts.toml` in the CLI's own config directory.
 //!
 //! **Client-side state, deliberately not in any host's data directory.** A
 //! laptop pairs with several hosts, so the list of them cannot live under one
-//! of their data dirs; and the CLI must work on a machine with no OxiMux host
+//! of their data dirs; and the CLI must work on a machine with no TREX host
 //! installed at all. `config_local_dir` rather than `config_dir` for the reason
 //! the desktop's `app_paths` picks the local variants everywhere: on Windows
 //! the roaming profile follows the user between machines, and an enrollment is
@@ -45,7 +45,7 @@ pub struct HostEntry {
 /// The whole file.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct HostsFile {
-    /// The host used when no `--host` and no `OXIMUX_HOST` say otherwise.
+    /// The host used when no `--host` and no `trex_HOST` say otherwise.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default: Option<String>,
     #[serde(default, rename = "hosts")]
@@ -55,14 +55,14 @@ pub struct HostsFile {
 /// Override the config directory. Set by the test suite so a test run never
 /// touches the developer's real hosts file — and usable by anyone who wants
 /// their fleet somewhere else.
-pub const CONFIG_DIR_ENV_VAR: &str = "OXIMUX_CONFIG_DIR";
+pub const CONFIG_DIR_ENV_VAR: &str = "TREX_CONFIG_DIR";
 
 /// The CLI's config directory, creating nothing.
 pub fn config_dir() -> Result<PathBuf, Failure> {
     if let Some(dir) = std::env::var_os(CONFIG_DIR_ENV_VAR).filter(|d| !d.is_empty()) {
         return Ok(PathBuf::from(dir));
     }
-    dirs::config_local_dir().map(|d| d.join("oximux")).ok_or_else(|| {
+    dirs::config_local_dir().map(|d| d.join("TREX")).ok_or_else(|| {
         Failure::new("no-config-dir", exit::ERROR, "this platform reports no config directory")
     })
 }
@@ -94,7 +94,7 @@ impl HostsFile {
 
     pub fn save(&self, dir: &Path) -> Result<(), Failure> {
         std::fs::create_dir_all(dir).map_err(|e| read_error("create", dir, e))?;
-        // Owner-only, for the same reason `oximux serve` hardens its data dir:
+        // Owner-only, for the same reason `TREX serve` hardens its data dir:
         // a shared server is exactly where other accounts exist. `create_dir_all`
         // above applies the umask, which on a typical box leaves this 0755.
         //
@@ -106,14 +106,14 @@ impl HostsFile {
         // Best-effort: a config directory that cannot be restricted must not
         // stop the CLI from working, unlike a key file, where the same failure
         // is fatal by design.
-        if let Err(err) = oximux_owner_only::prepare_owner_only_dir(dir) {
+        if let Err(err) = trex_owner_only::prepare_owner_only_dir(dir) {
             tracing::debug!(%err, dir = %dir.display(), "could not restrict the config directory");
         }
         let path = dir.join(HOSTS_FILE);
         let text = toml::to_string_pretty(self)
             .map_err(|e| read_error("encode", &path, e))?;
         std::fs::write(&path, text).map_err(|e| read_error("write", &path, e))?;
-        if let Err(err) = oximux_owner_only::restrict_file(&path) {
+        if let Err(err) = trex_owner_only::restrict_file(&path) {
             tracing::debug!(%err, file = %path.display(), "could not restrict the hosts file");
         }
         Ok(())
@@ -146,7 +146,7 @@ impl HostsFile {
 
     /// Which host a verb should talk to, given the flag and the environment.
     ///
-    /// Order: `--host` → `OXIMUX_HOST` → the recorded default → none (the local
+    /// Order: `--host` → `trex_HOST` → the recorded default → none (the local
     /// socket). A **named** host that is not in the file is an error rather
     /// than a silent fallback to local: a typo'd `--host prod` must not quietly
     /// drive the machine you are sitting at.
@@ -156,8 +156,8 @@ impl HostsFile {
             return self.get(name).map(Some).ok_or_else(|| {
                 Failure::new("unknown-host", exit::USAGE, format!("no host named `{name}` ({source})"))
                     .with_steps([
-                        "list what is paired with `oximux hosts ls`".into(),
-                        "pair a new one with `oximux pair <ticket>`".into(),
+                        "list what is paired with `TREX hosts ls`".into(),
+                        "pair a new one with `TREX pair <ticket>`".into(),
                     ])
             });
         }
@@ -169,7 +169,7 @@ impl HostsFile {
 
 /// The environment variable naming a host, for callers that do not pass
 /// `--host`.
-pub const HOST_ENV_VAR: &str = "OXIMUX_HOST";
+pub const HOST_ENV_VAR: &str = "TREX_HOST";
 
 /// 32 bytes from 64 hex characters.
 pub fn parse_endpoint_id(hex: &str) -> Result<[u8; 32], Failure> {
@@ -279,7 +279,7 @@ mod tests {
         assert!(err.message.contains("prod"));
     }
 
-    /// An empty value reads as unset, so `OXIMUX_HOST=` behaves like not
+    /// An empty value reads as unset, so `trex_HOST=` behaves like not
     /// setting it rather than erroring on a host named "".
     #[test]
     fn an_empty_name_is_treated_as_unset() {

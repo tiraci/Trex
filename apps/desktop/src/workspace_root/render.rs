@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 /// Static registry slug for an import-provider preset id, for the `&'static str`
 /// `adapter_id` the spawn layer + settings lookups expect.
@@ -14,7 +14,7 @@ fn import_preset_slug(id: &str) -> &'static str {
 
 impl Render for WorkspaceRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Push sidebar data down before LeftRail::render runs in the tree.
         self.refresh_left_rail(cx);
 
@@ -616,7 +616,7 @@ impl Render for WorkspaceRoot {
                     let project_root = std::path::PathBuf::from(&project.root_path);
                     // The same locator the rail's create uses, so a chat-made
                     // worktree lands beside a rail-made one — the sibling
-                    // `oximux-wt-<slug>` scheme this path used to have is gone.
+                    // `trex-wt-<slug>` scheme this path used to have is gone.
                     // A refused root is the chat's own failure banner, not a
                     // log line: this path runs unattended.
                     use crate::shell::workspace_ops::WorktreeLocator as _;
@@ -714,7 +714,7 @@ impl Render for WorkspaceRoot {
                             // outcome — otherwise a failure here would be the
                             // hardest one to diagnose and the least visible.
                             &Provision::new(
-                                oximux_settings::SetupDecision::Inherit,
+                                trex_settings::SetupDecision::Inherit,
                                 provision_tx,
                             )
                             .freshening_default(freshen_default),
@@ -820,11 +820,11 @@ impl Render for WorkspaceRoot {
             }))
             .on_action(cx.listener(|this, action: &ResumeAgentSession, window, cx| {
                 let resumption = if action.fork {
-                    oximux_core::SessionResumption::Fork {
+                    trex_core::SessionResumption::Fork {
                         id: action.session_id.clone(),
                     }
                 } else {
-                    oximux_core::SessionResumption::Resume {
+                    trex_core::SessionResumption::Resume {
                         id: action.session_id.clone(),
                     }
                 };
@@ -839,7 +839,7 @@ impl Render for WorkspaceRoot {
                 // row's `Custom` adapter with no command and surface a
                 // baffling "Start custom agent" plumbing error instead.
                 if let Some(preset) = action.preset_id.as_deref()
-                    && oximux_settings::import_resume_command(preset, &action.resume_handle)
+                    && trex_settings::import_resume_command(preset, &action.resume_handle)
                         .is_none()
                 {
                     crate::shell::toast::toast_op_error(
@@ -885,13 +885,13 @@ impl Render for WorkspaceRoot {
                     .preset_id
                     .as_deref()
                     .and_then(|id| {
-                        oximux_settings::import_resume_command(id, &action.resume_handle)
+                        trex_settings::import_resume_command(id, &action.resume_handle)
                             .map(|cmd| (import_preset_slug(id), cmd))
                     }) {
                     Some((slug, cmd)) => (
-                        oximux_core::AgentAdapter::Custom,
+                        trex_core::AgentAdapter::Custom,
                         slug,
-                        oximux_core::SessionResumption::None,
+                        trex_core::SessionResumption::None,
                         Some(cmd),
                     ),
                     None => (
@@ -956,7 +956,7 @@ impl Render for WorkspaceRoot {
                 },
             ))
             .on_action(cx.listener(
-                |this, action: &oximux_editor::RevealInExplorer, _window, cx| {
+                |this, action: &trex_editor::RevealInExplorer, _window, cx| {
                     this.reveal_path_in_explorer(std::path::PathBuf::from(&action.path), cx);
                 },
             ))
@@ -1943,7 +1943,7 @@ impl Render for WorkspaceRoot {
                     primary,
                     &self.usage,
                     crate::appearance_settings::active(cx).usage_detail,
-                    oximux_agents::session_log::now_unix_ms(),
+                    trex_agents::session_log::now_unix_ms(),
                     update_ready,
                     move |window, cx| {
                         if let Some(sc) = scm_for_click.clone() {
@@ -1999,7 +1999,7 @@ impl Render for WorkspaceRoot {
                 let weak_close = cx.entity().downgrade();
                 let card = crate::shell::usage_meter::render_usage_popover(
                     &self.usage,
-                    oximux_agents::session_log::now_unix_ms(),
+                    trex_agents::session_log::now_unix_ms(),
                     theme,
                     density,
                     typography,
@@ -2063,7 +2063,7 @@ impl Render for WorkspaceRoot {
                 #[cfg(any(target_os = "macos", windows))]
                 let ready = cx.try_global::<crate::updater::UpdaterState>().and_then(
                     |state| match &state.status {
-                        oximux_auto_update::UpdateStatus::Ready { version, notes } => {
+                        trex_auto_update::UpdateStatus::Ready { version, notes } => {
                             Some((version.clone(), notes.clone()))
                         }
                         _ => None,
@@ -2236,17 +2236,17 @@ impl Render for WorkspaceRoot {
 /// - **every other adapter** tolerates a second reader of one session log, and
 ///   resuming one in a terminal beside its chat is supported behavior.
 fn resume_collides_with_open_chat(
-    adapter: oximux_core::AgentAdapter,
+    adapter: trex_core::AgentAdapter,
     fork: bool,
     chat_holds_session: impl FnOnce() -> bool,
 ) -> bool {
-    adapter == oximux_core::AgentAdapter::Codex && !fork && chat_holds_session()
+    adapter == trex_core::AgentAdapter::Codex && !fork && chat_holds_session()
 }
 
 #[cfg(test)]
 mod resume_guard_tests {
     use super::resume_collides_with_open_chat;
-    use oximux_core::AgentAdapter;
+    use trex_core::AgentAdapter;
 
     #[test]
     fn only_a_codex_resume_onto_an_open_chat_is_refused() {

@@ -1,10 +1,10 @@
-//! Unit tests for `status_display` — dominant, should_propagate,
+﻿//! Unit tests for `status_display` — dominant, should_propagate,
 //! build_status_map, build_folder_status_map.
 
-use oximux_app::shell::file_explorer::status_display::{
+use trex_app::shell::file_explorer::status_display::{
     BadgeStatus, build_folder_status_map, build_status_map, dominant, should_propagate,
 };
-use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 use std::path::PathBuf;
 
 fn fs(path: &str, index: IndexStatus, worktree: WorktreeStatus) -> FileStatus {

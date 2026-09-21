@@ -1,4 +1,4 @@
-//! Auto-rename: a codename workspace takes the name of its work.
+﻿//! Auto-rename: a codename workspace takes the name of its work.
 //!
 //! A workspace created without a name (see [`crate::codename`]) is called
 //! `amber` until something knows what it is for. The first thing that does is
@@ -31,9 +31,9 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use oximux_core::Workspace;
-use oximux_git::{derive_slug, validate_slug};
-use oximux_storage::WorkspaceRepo;
+use trex_core::Workspace;
+use trex_git::{derive_slug, validate_slug};
+use trex_storage::WorkspaceRepo;
 
 use crate::branch_name;
 use crate::codename::is_generated_codename;
@@ -252,24 +252,24 @@ mod tests {
 
     #[test]
     fn a_codename_row_with_a_usable_summary_is_proposed() {
-        let p = propose_auto_rename(&row("amber", "oximux/amber", true), "Fix login redirect")
+        let p = propose_auto_rename(&row("amber", "TREX/amber", true), "Fix login redirect")
             .unwrap();
         assert_eq!(p.new_slug, "fix-login-redirect");
-        assert_eq!(p.new_branch, "oximux/fix-login-redirect");
+        assert_eq!(p.new_branch, "TREX/fix-login-redirect");
         assert_eq!(p.new_name, "Fix login redirect");
     }
 
     #[test]
     fn a_suffixed_codename_is_still_eligible_and_keeps_its_prefix() {
-        let p = propose_auto_rename(&row("amber-2", "nhtera/amber-2", true), "Parser edge cases")
+        let p = propose_auto_rename(&row("amber-2", "tiraci/amber-2", true), "Parser edge cases")
             .unwrap();
-        assert_eq!(p.new_branch, "nhtera/parser-edge-cases");
+        assert_eq!(p.new_branch, "tiraci/parser-edge-cases");
     }
 
     #[test]
     fn a_user_typed_name_is_never_proposed() {
         assert_eq!(
-            propose_auto_rename(&row("fix-login", "oximux/fix-login", true), "Auth flow"),
+            propose_auto_rename(&row("fix-login", "TREX/fix-login", true), "Auth flow"),
             Err(Ineligible::NotACodename)
         );
     }
@@ -293,7 +293,7 @@ mod tests {
     fn a_summary_that_reduces_to_nothing_is_not_proposed() {
         for summary in ["", "   ", "!!!", "…", "日本語", "--", "..."] {
             assert_eq!(
-                propose_auto_rename(&row("amber", "oximux/amber", true), summary),
+                propose_auto_rename(&row("amber", "TREX/amber", true), summary),
                 Err(Ineligible::NoUsableSlug),
                 "{summary:?}"
             );
@@ -303,7 +303,7 @@ mod tests {
     #[test]
     fn a_summary_that_is_the_codename_is_not_proposed() {
         assert_eq!(
-            propose_auto_rename(&row("amber", "oximux/amber", true), "Amber"),
+            propose_auto_rename(&row("amber", "TREX/amber", true), "Amber"),
             Err(Ineligible::SameSlug)
         );
     }
@@ -312,7 +312,7 @@ mod tests {
     /// summary's, which is not a codename, so a second pass declines.
     #[test]
     fn a_second_proposal_after_a_rename_is_declined() {
-        let before = row("amber", "oximux/amber", true);
+        let before = row("amber", "TREX/amber", true);
         let p = propose_auto_rename(&before, "Fix login redirect").unwrap();
         let mut after = before.clone();
         after.slug = p.new_slug.clone();
@@ -327,7 +327,7 @@ mod tests {
     #[test]
     fn the_display_name_is_whitespace_collapsed_and_capped() {
         let long = format!("Fix   the\n\tthing {}", "x".repeat(200));
-        let p = propose_auto_rename(&row("amber", "oximux/amber", true), &long).unwrap();
+        let p = propose_auto_rename(&row("amber", "TREX/amber", true), &long).unwrap();
         assert!(p.new_name.starts_with("Fix the thing x"));
         assert_eq!(p.new_name.chars().count(), MAX_NAME_CHARS);
     }

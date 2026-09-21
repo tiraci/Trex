@@ -1,4 +1,4 @@
-# OxiMux — Project Changelog
+﻿# TREX — Project Changelog
 
 Entries are newest-first. Each entry links to the commit SHA and notes what shipped.
 
@@ -20,7 +20,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
 
 - **The rail sees worktrees it did not create.** Each project gains a
   collapsed `Untracked (N)` group listing worktrees git knows about but no
-  OxiMux row points at — one made by `git worktree add` in a terminal, or
+  TREX row points at — one made by `git worktree add` in a terminal, or
   by another tool. Rows show the directory, its branch, and its path.
   One `git worktree list` per project rides the existing refresher every
   ten seconds; there is no new poller and no directory scan, because git
@@ -180,7 +180,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   pulls), about eight seconds of cold build. The
   workspace `rust-version` now reads 1.92 (hayro's floor); the toolchain was
   already pinned at 1.95 on every CI target. Spike table and fixtures in
-  `plans/260827-2313-oximux-gap-closure/phase-11-pdf-viewer.md`.
+  `plans/260827-2313-trex-gap-closure/phase-11-pdf-viewer.md`.
 
 ### 2026-09-04 — The Claude model picker follows the installed CLI (`feat/enhancement`)
 
@@ -190,7 +190,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   blurb, effort levels, fast-mode support — without starting an API turn.
   `crates/agents/src/thread/claude_catalog.rs` runs that probe (with
   `--setting-sources ""`, so the user's SessionStart hooks do not fire and
-  OxiMux's own status hook cannot paint a phantom session) and publishes the
+  TREX's own status hook cannot paint a phantom session) and publishes the
   parsed catalog into a process-wide slot that every live Claude connection
   reads. `SessionHandle::models()` is `conn.models()`, so the phone sees the
   same rows with no extra plumbing. The static list in `claude_stream_json.rs`
@@ -238,7 +238,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
 - **The menus both grew what they were missing.** macOS gets a
   "Check for Updates…" item under About and a Help menu (Documentation, Report
   an Issue). The Windows `⋯` title-bar menu gets a `Help ▸` submenu carrying
-  the same four entries. "About OxiMux" now opens Settings → About on *both*
+  the same four entries. "About TREX" now opens Settings → About on *both*
   platforms rather than AppKit's standard About panel — that panel can show a
   version and an icon and nothing else, and the question people open About to
   answer is usually "what am I running, and is there a newer one".
@@ -250,7 +250,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   only surviving copy deleted.
 - **One trust chain, two consumers.** The manifest, its minisign signature, the
   GitHub host allow-list, and the swap moved out of `apps/cli/src/update/` into
-  `crates/auto-update/src/release/`, shared by `oximux update` and the desktop
+  `crates/auto-update/src/release/`, shared by `TREX update` and the desktop
   app. The Windows artifacts are not Authenticode-signed, so there is no
   publisher identity to pin the way macOS pins a Developer ID; the anchor is the
   signed `manifest.json` verified against `packaging/release-pubkey.txt`, which a
@@ -293,7 +293,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   cards, and Deny was verified to block the tool's effect on disk against a
   real omp 18.0.4.
 - **Safety posture**: `--approval-mode` is ALWAYS passed explicitly (omp's
-  own default is `yolo`); OxiMux defaults to `write`, the composer's
+  own default is `yolo`); TREX defaults to `write`, the composer's
   Approvals pill respawns with the chosen mode, the choice persists across
   restart (a lost posture can only narrow, never widen), and the settings
   chip that toggles `--approval-mode yolo` replaces a conflicting
@@ -325,13 +325,13 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
 
 ### 2026-08-24 — v0.1.13: Windows gets an installer (`main`)
 
-- **`d7a9b5f`** — Windows ships `OxiMux-<version>-x64-setup.exe` alongside the
-  portable zip, built by Inno Setup from the same `dist/OxiMux` directory the
+- **`d7a9b5f`** — Windows ships `trex-<version>-x64-setup.exe` alongside the
+  portable zip, built by Inno Setup from the same `dist/TREX` directory the
   zip is made from, so the two cannot disagree about what is inside them. The
   zip was a fine way to try the app and a poor way to keep it: no Start menu
   entry, no Add/Remove entry, and no upgrade path other than deleting the
   folder and extracting over it. The installer is per-user, into
-  `%LOCALAPPDATA%\Programs\OxiMux` — not modesty, but the only shape a future
+  `%LOCALAPPDATA%\Programs\TREX` — not modesty, but the only shape a future
   Windows auto-updater can write to without an elevated helper service
   existing purely to copy files. It closes the relay daemon on upgrade (it
   outlives the app on purpose, so the directory is busy even when the app is
@@ -365,7 +365,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   cost stopped tracking transcript length (measured, and pinned by a test).
   The renderer is now our own: an incremental block parser crate
   (`markdown`), a neutral-kind highlighting crate built on syntect, and a
-  chat markdown renderer OxiMux owns end to end. The tail glides into place
+  chat markdown renderer TREX owns end to end. The tail glides into place
   instead of being assigned, long fence lines no longer wrap (they scroll
   sideways, with a fade on the fuller edge, and copy as code), and four
   defects only a live window could show were found and fixed that way.
@@ -400,7 +400,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
 
 ### 2026-08-14 — the rest of the agents report what they said (`main`)
 
-- **`7631b3f`** — status hooks for every agent CLI OxiMux names, not just two.
+- **`7631b3f`** — status hooks for every agent CLI TREX names, not just two.
   Codex closed the gap for one agent; the same gap was open for the other six,
   because presence and activity can be inferred from outside an agent but only
   the agent can say what it SAID. The two hand-written installs are now one
@@ -413,19 +413,19 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   matcher is a **regular expression** so the `*` everyone else uses matches
   nothing, and Copilot's and Cursor's entries are **flat** — a nested group
   written into one of those parses as an entry with no command at all.
-  Copilot and Grok read a *directory* of hook files, so OxiMux writes its own
+  Copilot and Grok read a *directory* of hook files, so TREX writes its own
   and deletes it to uninstall rather than merging into the user's.
 
   Pi has no hooks file: its extension point is an in-process TypeScript API, so
-  OxiMux writes a small extension that subscribes to Pi's own events and shells
-  out to the same `oximux agent-status` CLI as everything else, composing its
+  TREX writes a small extension that subscribes to Pi's own events and shells
+  out to the same `TREX agent-status` CLI as everything else, composing its
   payload in Claude's key names so nothing downstream is Pi-shaped. Pi emits
   the reply *before* the turn ends and fires two events at each end of a turn,
   so the extension holds the reply until `agent_end` and drops a report
-  identical to the one before it. It is inert outside an OxiMux pane.
+  identical to the one before it. It is inert outside an TREX pane.
 
   The sweep also turned up a leak already in the field. Our entries were found
-  again only by the `_oximux_managed` marker, so any written before that marker
+  again only by the `_TREX_managed` marker, so any written before that marker
   existed were invisible and never pruned — a real `~/.claude/settings.json`
   held sixteen of them across four superseded binary paths, and Claude was
   running five copies of the hook on every event with one more due at each new
@@ -453,11 +453,11 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
 
 - **`2819688`** — a terminal's agent is now detected from its process tree.
   Ambient detection could only see an agent that volunteered evidence: the
-  OSC-9999 sideband, which exists only where OxiMux installs hooks (Claude
+  OSC-9999 sideband, which exists only where TREX installs hooks (Claude
   alone), or an OSC window title, which several CLIs never write — Codex's is
   an opt-in setup flow. Both are events, so an agent sitting idle at its
   prompt vanished from the rail even after being seen. Presence now comes
-  from the process tree (`oximux-proc-tree`), which holds for as long as the
+  from the process tree (`trex-proc-tree`), which holds for as long as the
   agent runs and covers every CLI; the sideband and the title keep their real
   job of saying what it is *doing*, and an agent that has reported nothing is
   idle. Identity is `argv[0]`, never the executable name — the kernel names a
@@ -473,7 +473,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   hooks. A Codex row showed a bare status verb where a Claude row showed the
   reply, because only the agent can report what it said. Codex has the same
   kind of lifecycle hooks in `$CODEX_HOME/hooks.json`, in the same shape and
-  on stdin, so `oximux agent-status` serves both behind `--format codex`.
+  on stdin, so `TREX agent-status` serves both behind `--format codex`.
   Codex's `notify` is deliberately unused: it is a single program rather than
   a list, so writing it would replace whatever is already there. A Codex entry
   carries no marker and no `async` — Codex rejects fields it does not define,
@@ -515,7 +515,7 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
   installer picks it on musl systems.
 - Released same day: workflow green on the first run (second release in a
   row), all 6 tarballs verified against the signed manifest before publish,
-  the musl binary confirmed static-pie, and the 0.1.8 → 0.1.9 `oximux update`
+  the musl binary confirmed static-pie, and the 0.1.8 → 0.1.9 `TREX update`
   swap proven — the updated binary reports protocol v20.
 
 ---
@@ -523,9 +523,9 @@ Entries are newest-first. Each entry links to the commit SHA and notes what ship
 ### 2026-08-08 — v0.1.8: live list titles, safer typo tips, installer polish (`main`)
 
 A small release whose second purpose is to be the first *upgrade*: v0.1.7
-installs prove `oximux update`'s positive swap path against it. Proven on
-release day — a public 0.1.7 install detected 0.1.8, swapped `oximux` and
-`oximux-relay` together, and left no backup debris. The release workflow
+installs prove `TREX update`'s positive swap path against it. Proven on
+release day — a public 0.1.7 install detected 0.1.8, swapped `TREX` and
+`trex-relay` together, and left no backup debris. The release workflow
 went green on its first run, and the Homebrew tap updated automatically
 on publish.
 
@@ -542,16 +542,16 @@ on publish.
 
 ---
 
-### 2026-08-07 — v0.1.7: the `oximux` CLI, a headless host, and self-update (`main`)
+### 2026-08-07 — v0.1.7: the `TREX` CLI, a headless host, and self-update (`main`)
 
-Ships `oximux` as a standalone command-line client and host — installable on a
+Ships `TREX` as a standalone command-line client and host — installable on a
 server, driven over SSH, and able to run and steer agent sessions with no GUI
 present. It reaches the host over an owner-only local control socket and
 updates itself from a signed release manifest.
 
-- **`27b8f93`** — PR #2 (`feat/oximux-cli`, 71 commits): the CLI itself —
+- **`27b8f93`** — PR #2 (`feat/trex-cli`, 71 commits): the CLI itself —
   session verbs, `serve` as a headless host, worktrees, the scheduler,
-  coordination state, permission mediation, and `oximux update` with a
+  coordination state, permission mediation, and `TREX update` with a
   minisign-signed manifest as its trust root. This is the first release to
   build and ship the CLI at all.
 - **`7a6123d`**, **`f01a46f`**, **`e93c84f`** — protocol v19: a resume cursor
@@ -663,14 +663,14 @@ onboarding + settings surfaces,
 
 ### 2026-07-31 — Desktop auto-update: background check, staged install, swap only at quit (`main`)
 
-OxiMux now updates itself: the app polls GitHub releases in the background,
+TREX now updates itself: the app polls GitHub releases in the background,
 downloads and verifies a new build, and stages it next to the installed one —
 but never swaps a running bundle. The swap happens only as part of quitting,
 and restart is always the user's call.
 
-- **feat**: new `crates/auto-update` (`oximux-auto-update`) — `feed.rs` polls
+- **feat**: new `crates/auto-update` (`trex-auto-update`) — `feed.rs` polls
   GitHub `/releases/latest` pinned to the exact asset name
-  `OxiMux-{version}-macos-arm64.dmg`; `pipeline.rs` downloads, mounts, and
+  `trex-{version}-macos-arm64.dmg`; `pipeline.rs` downloads, mounts, and
   stages a copy; `staging.rs` tracks it via a `PendingUpdate` manifest in a
   random-suffix staging dir, sweeps pending updates at boot, and does the
   quit-time swap (`apply_pending`). Public state machine `UpdateStatus`
@@ -680,7 +680,7 @@ and restart is always the user's call.
 - **feat**: `apps/desktop/src/updater.rs` wires it into the app — a 6h
   background ticker (first check 60s after boot), a boot sweep, and
   `apply_pending_at_quit` called from `on_app_quit` in `main.rs`. The bundle
-  is never swapped while OxiMux runs: the relay daemon, the `agent-status`
+  is never swapped while TREX runs: the relay daemon, the `agent-status`
   hook CLI embedded into live agent sessions, and the screen-control gate are
   all resolved from the bundle path at spawn time, so a live swap would hand
   an old-version app new-version helpers. The app never auto-restarts;
@@ -695,7 +695,7 @@ and restart is always the user's call.
   "Updated to vX.Y.Z" toast after an update lands. Settings persist to
   `auto_update.toml` via `apps/desktop/src/app_settings/auto_update_settings.rs`
   + `crates/settings/src/auto_update.rs`.
-- **refactor**: new `crates/macos-trust` (`oximux-macos-trust`) extracts the
+- **refactor**: new `crates/macos-trust` (`trex-macos-trust`) extracts the
   codesign/spctl verification and crash-safe `renamex_np` bundle-swap
   primitives out of `crates/computer-use`'s driver installer, so the updater
   doesn't fork its own copy of the same gate. `computer-use` now delegates to
@@ -714,7 +714,7 @@ and restart is always the user's call.
   Re-entrancy is an `AtomicBool` compare-and-swap. A `.update-pending-verify`
   sentinel wraps the quit-time swap; found at boot, it triggers
   re-verification of the installed bundle before anything else runs.
-  `OXIMUX_UPDATE_FEED_URL` / `OXIMUX_UPDATE_SKIP_SPCTL` debug knobs are
+  `TREX_UPDATE_FEED_URL` / `TREX_UPDATE_SKIP_SPCTL` debug knobs are
   `#[cfg(debug_assertions)]`-gated and verified absent from release builds.
 
 **Touches**: `crates/macos-trust/` (new), `crates/auto-update/` (new),
@@ -737,7 +737,7 @@ by the app itself.
 - **feat**: search (right-sidebar Search tab + Quick Open) needs no system
   `ripgrep` anymore. `scripts/fetch-ripgrep.sh` fetches a pinned, sha256-verified
   ripgrep 15.2.0 at build time (arch-matched to the app build, stamp-file
-  cached); `bundle-macos.sh` copies it into `OxiMux.app/Contents/MacOS/rg` and
+  cached); `bundle-macos.sh` copies it into `trex.app/Contents/MacOS/rg` and
   signs it nested-first. Runtime resolution (`shell/tool_paths.rs::rg_program()`)
   prefers the bundled sibling and falls back to PATH only for dev builds; the
   "missing rg" hint at all 3 call sites now reads as a dev-build-only note.
@@ -781,7 +781,7 @@ Releases now ship as a signed, notarized drag-to-Applications DMG instead of a
 bare zip, and the whole pipeline runs in GitHub Actions off a version tag.
 
 - **`d5fd6b7`** — `feat(release)`: `scripts/make-dmg.sh` packages
-  `dist/OxiMux.app` into `OxiMux-<version>-macos-<arch>.dmg` via create-dmg
+  `dist/trex.app` into `trex-<version>-macos-<arch>.dmg` via create-dmg
   (app icon + Applications alias + dashed guide arrow over a HiDPI backdrop;
   `scripts/generate-dmg-background.swift` regenerates it), signs the image,
   and with `--notarize` submits it to Apple, staples the ticket, and
@@ -813,7 +813,7 @@ spawned Claude CLIs silently not saving transcripts at all.
 - **`01addad`** — `fix(spawn)`: a GUI (or relay daemon) launched from inside a
   Claude Code session inherited `CLAUDE_CODE_CHILD_SESSION` (+11 sibling
   markers, incl. cmux's `CLAUDE_CODE_SANDBOXED` trust bypass), so every
-  `claude` spawned in OxiMux showed "Transcript saving is off" and wrote no
+  `claude` spawned in TREX showed "Transcript saving is off" and wrote no
   session file. Both binaries now scrub the marker set first thing in `main`,
   before any thread exists (env writes are only sound pre-thread in edition
   2024; the relay restructured off `#[tokio::main]` for this). Codex/Pi/
@@ -896,10 +896,10 @@ spawned Claude CLIs silently not saving transcripts at all.
 - **`c981a9a`** — `git mv crates/app apps/desktop`, so `apps/` now holds both
   product surfaces (`desktop`, `mobile`) and `crates/` holds libraries and
   sidecars. 426 renames plus the two `Cargo.toml` lines (`members`, the
-  `oximux-app` path dep) needed to keep the workspace building —
+  `trex-app` path dep) needed to keep the workspace building —
   `cargo check --workspace --all-targets` passed with no other edit, proving the
-  crate was never coupled to its location. Package name (`oximux-app`) and
-  binary name (`oximux`) are unchanged, so `README`, `.claude/launch.json`, and
+  crate was never coupled to its location. Package name (`trex-app`) and
+  binary name (`TREX`) are unchanged, so `README`, `.claude/launch.json`, and
   `scripts/bundle-macos.sh` keep working as-is.
 - **`39f39d4`** — `xtask file-size-lint` walked a hardcoded `crates/` root and
   would have kept exiting green while silently skipping ~73% of the source.
@@ -923,16 +923,16 @@ spawned Claude CLIs silently not saving transcripts at all.
 
 ### 2026-07-18 — Remote Control groundwork: agent-core split + SessionRegistry (`feat/remote-control-headless-registry`, in progress)
 
-Phase 1-2 groundwork for controlling OxiMux from a phone over Iroh P2P (plan:
-`plans/260717-2037-oximux-remote-control/`). Not a shipped feature — no remote
+Phase 1-2 groundwork for controlling TREX from a phone over Iroh P2P (plan:
+`plans/260717-2037-trex-remote-control/`). Not a shipped feature — no remote
 transport exists yet, nothing below is wired into the view except the ownership
 change.
 
-- **`23b9308`** — Extracted `crates/agent-core` (`oximux-agent-core`): the
+- **`23b9308`** — Extracted `crates/agent-core` (`trex-agent-core`): the
   pure `ChatThread` fold + `ThreadEvent` wire vocabulary + stream-json decoder,
-  split out of `oximux-agents`. Deps are serde/serde_json/tracing only — no
+  split out of `trex-agents`. Deps are serde/serde_json/tracing only — no
   pty, rusqlite, ACP, gpui, or tokio — so it can cross-compile for a mobile
-  Rust core. `oximux-agents` re-exports the moved modules under their
+  Rust core. `trex-agents` re-exports the moved modules under their
   original `crate::thread::*` paths; every downstream import site is
   unchanged.
 - **`86ad9b6`** — Added `crates/agents/src/session_registry.rs`: a
@@ -943,11 +943,11 @@ change.
 - **`990a84f`** — The agent-chat view now holds its connection as
   `Arc<dyn AgentConnection>` (was `Box`) so the registry can share it. Pure
   ownership change — same `&self` call surface, no behavior change.
-- **`e242b1e`** — Added `crates/remote-proto` (`oximux-remote-proto`): the
+- **`e242b1e`** — Added `crates/remote-proto` (`trex-remote-proto`): the
   transport-free wire vocabulary for the future desktop host and the phone's
   Rust core — postcard `Request`/`Response` envelope (`PROTOCOL_VERSION = 1`,
   mirrors `relay-proto`'s versioning discipline), `HostEvent` stream frame,
-  and `PairingTicket` codec (`oximux://connect?ticket=` deep link, secret
+  and `PairingTicket` codec (`TREX://connect?ticket=` deep link, secret
   redacted in `Debug`). `ThreadEvent`/`PermissionDecision` carry
   `serde_json::Value`, which postcard can't deserialize, so they ride the
   wire as a nested `serde_json` string instead of a shadow type — added
@@ -956,7 +956,7 @@ change.
   `remote-proto`: a framed, bidirectional seam (iroh will be one impl; an
   in-memory loopback drives tests). `async-trait` is the only new dep — no
   runtime — so the crate stays mobile-portable.
-- **`f41b894`** — Added `crates/remote-host` (`oximux-remote-host`): the
+- **`f41b894`** — Added `crates/remote-host` (`trex-remote-host`): the
   transport-agnostic core of the in-app remote server, driven over the
   `Transport` seam. A per-connection RPC dispatcher wired to the Phase-2
   `SessionRegistry`; the QR pairing / auth handshake (HMAC-SHA256 proof →
@@ -1012,7 +1012,7 @@ text, the usual icefall convention. They cannot emit lowercase at all.
 `ModelSpec::uppercase_output` now flags such models, and their transcripts run
 through `text_filter::sentence_case`. It is applied **before** the custom-words
 pass — running it after would undo the dictionary's capitalization
-("OxiMux" → "Oximux"). Whisper is mixed-case and is never rewritten; a guard test
+("TREX" → "TREX"). Whisper is mixed-case and is never rewritten; a guard test
 pins the flagged set to exactly the two zipformers.
 
 True casing is unrecoverable (the model never encoded it), so proper nouns come
@@ -1130,7 +1130,7 @@ crate dependency** (Silero VAD ships inside sherpa-rs).
   cleaned on failure); a missing/offline model degrades to the plain peak gate.
   Warmed alongside the recognizer; `vad_enabled` setting (default on) + toggle.
 - **Custom-words dictionary** — a user dictionary the transcript is fuzzy-
-  corrected toward ("oxy mux" → "OxiMux", "charge bee" → "ChargeBee"). Pure
+  corrected toward ("oxy mux" → "TREX", "charge bee" → "ChargeBee"). Pure
   `custom_words::apply` (self-contained Levenshtein, n-gram 3→2→1 windows, length
   prefilter, exact-key shortcut, case/punct preservation). **No phonetic/soundex
   bonus** — it coarsely collided common words (later↔Ladder) and was cut after
@@ -1418,7 +1418,7 @@ worktree" — the latter sends the staged message into the project with no orpha
 workspace. Escape does not dismiss the popover, but the sibling model picker
 behaves identically, so that is a pre-existing app-wide pattern, not a regression.
 
-Tests: `oximux-app --lib` **1259/0**; workspace **2972/0**.
+Tests: `trex-app --lib` **1259/0**; workspace **2972/0**.
 
 ---
 
@@ -1446,13 +1446,13 @@ was already populated for the footer note. Regression test
 `import_bridge_labels_bubbles_with_its_own_provider`; verified to fail when the
 preference is removed. GUI-verified on a Pi bridge.
 
-Tests: `oximux-app --lib` 1255 passed / 0 failed.
+Tests: `trex-app --lib` 1255 passed / 0 failed.
 
 ---
 
 ### 2026-07-14 — Fix catalog probe leaking an OS thread out of the test scheduler
 
-**Symptom:** `cargo test -p oximux-app --lib` aborted with SIGABRT, reporting
+**Symptom:** `cargo test -p trex-app --lib` aborted with SIGABRT, reporting
 `Detected activity on thread None ThreadId(N), but test scheduler is running on
 Some("unbound_draft_switches_agent_and_model_without_binding")`. The suite passed
 with that one test skipped, and the test passed alone — a race, which is why it
@@ -1482,7 +1482,7 @@ spawning a subprocess".
 
 The production path is unchanged: real views still probe live off-thread.
 
-Verified: six consecutive unskipped `cargo test -p oximux-app --lib` runs, no
+Verified: six consecutive unskipped `cargo test -p trex-app --lib` runs, no
 SIGABRT, 1254 passed / 0 failed each (1253 baseline + the new test). Whole
 workspace 2967 passed / 0 failed.
 
@@ -1521,8 +1521,8 @@ correctly; only the width it measured at was wrong.
   under-count; with honest heights it is unnecessary, and it was leaving a ~565px
   blank gap under the last message. `tail_gap` is now just the breathing margin.
 
-Tests: whole workspace green — 2967 passed / 0 failed (`oximux-app --lib` 1254,
-`oximux-agents` 614).
+Tests: whole workspace green — 2967 passed / 0 failed (`trex-app --lib` 1254,
+`trex-agents` 614).
 
 ---
 
@@ -1576,13 +1576,13 @@ live MCP elicitation, live GUI walk-through) stays user-gated.
   Copilot stays resume-only (no transcript mapper wired). **Why.** Modeled on
   the terminal-resume bridge pattern (Validation Session 1): read the past
   turns in Chat View, continue the session in a terminal.
-- **Verification.** Full workspace test suite green (`oximux-app --lib` 1254/0);
+- **Verification.** Full workspace test suite green (`trex-app --lib` 1254/0);
   the round-6 `send_on_armed_draft_stages_the_message_instead_of_binding` test was
   updated to the new stage-and-emit architecture (state parks at `Creating`, not
   `Failed`, since the runtime/git step moved from the roster to the host).
-  **Both phases live-verified** on a fresh `dist/OxiMux.app` build: a New-Agent
+  **Both phases live-verified** on a fresh `dist/trex.app` build: a New-Agent
   worktree (`r7-verify`) produced a sidebar card + `⌘J` entry + git worktree +
-  `oximux/r7-verify` branch + DB row, the agent bound and replied, and Delete
+  `TREX/r7-verify` branch + DB row, the agent bound and replied, and Delete
   cleaned up worktree/branch/row/dir; an imported Pi session opened as a bridge
   with its multi-turn transcript seeded as chat bubbles (no raw JSON), and
   Resume-in-terminal spawned a live `pi (resumed)` TUI on the same conversation.
@@ -1599,11 +1599,11 @@ live MCP elicitation, live GUI walk-through) stays user-gated.
 
 **What shipped:** three independent closeouts from the round-6 plan
 (`plans/260714-0248-agent-chat-round6-closeout-worktree/`), across
-`scripts/bundle-macos.sh`, `oximux-agents`, and `oximux-app`.
+`scripts/bundle-macos.sh`, `trex-agents`, and `trex-app`.
 
 - **Opt-in codesigning for real notification grants.** `bundle-macos.sh` gained
-  a `--sign <identity>` flag + `OXIMUX_CODESIGN_IDENTITY` env var (the legacy
-  `OXIMUX_SIGN_ID` still works), read ahead of the script's existing
+  a `--sign <identity>` flag + `TREX_CODESIGN_IDENTITY` env var (the legacy
+  `TREX_SIGN_ID` still works), read ahead of the script's existing
   positional-arg parsing so `--debug-fast`/profile handling is untouched. The
   ad-hoc (`-`) default is byte-identical to before — only a real identity
   triggers `verify_signature`, which fails the build loudly if the sealed
@@ -1630,14 +1630,14 @@ live MCP elicitation, live GUI walk-through) stays user-gated.
   transcript-shaped data for that future wiring. Investigated Copilot's
   `session-store.db` `turns` table along the way: it does hold readable
   `user_message`/`assistant_response` text, but Copilot has no chat surface in
-  OxiMux to seed, so it stays resume-only (documented for a future round).
+  TREX to seed, so it stays resume-only (documented for a future round).
 - **"New Agent in a fresh worktree."** The New Agent composer's worktree
   toggle now creates a real git worktree before the first send:
   `roster.rs`'s toggle + slug input calls
   `workspace_ops::create_agent_chat_worktree(repo_root, slug)` (branch
-  `oximux/<slug>`, sibling path via the same `suggest_worktree_path` helper
+  `TREX/<slug>`, sibling path via the same `suggest_worktree_path` helper
   the manual Worktree panel form uses) → on success rebinds the chat's `cwd`
-  to the new worktree and labels the tab `oximux/<slug>`; on failure shows an
+  to the new worktree and labels the tab `TREX/<slug>`; on failure shows an
   inline banner with Retry or "continue without a worktree." Hidden entirely
   for non-git projects. **Known limitation** _(closed in round-7 — see the entry
   above)_**:** the created worktree gets no
@@ -1649,14 +1649,14 @@ live MCP elicitation, live GUI walk-through) stays user-gated.
   DB-inserting `create_workspace_with_rollback`) so the worktree becomes a
   first-class workspace.
 - **Verification.** Full round-5 observation backlog re-checked live against a
-  fresh `dist/OxiMux.app` build of HEAD: subagent log, Codex session reopen,
+  fresh `dist/trex.app` build of HEAD: subagent log, Codex session reopen,
   mid-turn Codex rewind (rewinds an active turn without crashing the session),
   and cold restore all confirmed working; live MCP elicitation and Codex
   OAuth remain user-gated follow-ups (fixture/unit coverage stands for
   elicitation; OAuth's RPC login-start was already verified live in
   round-5). code-reviewer flagged and fixed a submit-during-Creating race and
   a worktree-toggle message-loss bug, both closed with regression tests.
-  Tests: workspace suite green; `oximux-app` lib 1258 tests (verified this
+  Tests: workspace suite green; `trex-app` lib 1258 tests (verified this
   session).
 
 ---
@@ -1691,16 +1691,16 @@ resume like the native ones.
   core adapter variants (which would leak into the workspace-create dialog, the
   CLI runtime, and persistence). The picker keys filtering, the row tag, the
   icon, and resume routing on `preset_id`; a single `import_resume_command`
-  resolver in `oximux-settings` owns each provider's resume argv so the index,
+  resolver in `trex-settings` owns each provider's resume argv so the index,
   picker, and spawn layer can't drift.
 - **Why disk-scan.** The reference app reaches OpenCode/Copilot over a live
   server/RPC, but every provider keeps a local store carrying the same fields,
   so a synchronous read matches the existing Claude/Codex indexing without
   spawning a subprocess. Like the reference, import rows show no transcript
   preview for the SQLite providers (their list APIs return none either).
-- **Scope.** New collectors in `oximux-agents`
+- **Scope.** New collectors in `trex-agents`
   (`session_log/import_provider_index.rs`, unit-tested for all three shapes +
-  cwd scoping); picker/routing in `oximux-app`; resolver in `oximux-settings`;
+  cwd scoping); picker/routing in `trex-app`; resolver in `trex-settings`;
   the three providers' brand marks (`currentColor`) registered in `assets.rs`.
   GUI-verified against real local stores: OpenCode, Copilot, and Pi each list
   their cwd-scoped sessions and resume in a terminal. Tests: agents 598/0,
@@ -1713,7 +1713,7 @@ resume like the native ones.
 **What shipped:** the session index now discovers Codex sessions from the CLI's
 rollout store instead of a stale companion file, so the `⌘⇧H` modal's **Codex**
 filter lists real, resumable sessions (previously "No Codex sessions").
-`oximux-agents` only.
+`trex-agents` only.
 
 - **Root cause.** `collect_codex` read `~/.codex/session_index.jsonl` — a
   cwd-less legacy/desktop index. Because it carried no cwd, Codex sessions were
@@ -1732,15 +1732,15 @@ filter lists real, resumable sessions (previously "No Codex sessions").
   selected Codex session shows its opening exchange instead of a blank pane.
 - Streaming head read (early-stop at the first genuine prompt, bounded cap)
   keeps the scan cheap despite Codex inlining a large `AGENTS.md` block as the
-  first synthetic turn. Tests: `oximux-agents` 590/0 (session_log 63/0).
+  first synthetic turn. Tests: `trex-agents` 590/0 (session_log 63/0).
 
 ---
 
 ### 2026-07-13 — Session-history import: agent-type filter + mode-aware routing
 
 **What shipped:** the centered session-history / import modal (`⌘⇧H`) gained
-agent-type segmentation and surface-aware import, in `oximux-app` +
-`oximux-settings`.
+agent-type segmentation and surface-aware import, in `trex-app` +
+`trex-settings`.
 
 - **Agent-type filter chips.** A header chip row (`All | Claude | Codex |
   OpenCode`) narrows the list to one agent family; click a chip or press `Tab`
@@ -1761,7 +1761,7 @@ agent-type segmentation and surface-aware import, in `oximux-app` +
 ### 2026-07-13 — Agent Chat round-5 P1 wave (6 product-parity features)
 
 **What shipped:** the deferred P1 backlog from the round-4 research report plus two
-round-4 verification carry-overs, across `oximux-agents` and `oximux-app`.
+round-4 verification carry-overs, across `trex-agents` and `trex-app`.
 
 - **Subagent activity → parent tool card.** Claude sidechain events (matched by
   `parent_tool_use_id`) and Codex collab child-thread activity (buffered by
@@ -1807,7 +1807,7 @@ tracked in `plans/260713-1243-agent-chat-round5-p1-wave/reports/gui-verification
 ### 2026-07-13 — Agent Chat round-4 P0 parity (5 protocol-correctness gaps)
 
 **What shipped:** five P0 agent-chat parity features closing the round-4 research
-gaps found in round-4 research, across the `oximux-agents` and `oximux-app` crates.
+gaps found in round-4 research, across the `trex-agents` and `trex-app` crates.
 
 **Claude:**
 - **Live tool-input streaming** — the decoder now handles `content_block_start`
@@ -1930,7 +1930,7 @@ Gate `cargo test --workspace --no-fail-fast` green at **2866 / 0** (baseline 283
 
 **Touches**: `crates/agents/{src/thread/{connect,acp/{mod,worker}}.rs,examples/{mock_acp_env_auth_agent,acp_env_auth_smoke}.rs (new),Cargo.toml}`, `crates/app/src/shell/agent_chat/{mod,auth_card}.rs`
 
-Turns EnvVar-kind ACP auth from an instructions-only card into a working sign-in. The card now shows a **masked secret field per advertised variable**; on submit OxiMux **respawns the agent subprocess with those values in its environment**, then authenticates — the only way an env-credentialed agent can sign in, since a running process can't pick up env after it spawned and `AuthenticateRequest` carries no credential values.
+Turns EnvVar-kind ACP auth from an instructions-only card into a working sign-in. The card now shows a **masked secret field per advertised variable**; on submit TREX **respawns the agent subprocess with those values in its environment**, then authenticates — the only way an env-credentialed agent can sign in, since a running process can't pick up env after it spawned and `AuthenticateRequest` carries no credential values.
 
 - **Agent side.** `ConnectSpec` gained `env` + `auth_method`; `AcpConnection::spawn` is now a thin wrapper over `spawn_with_env` (existing callers unchanged). The worker builds the child via `AcpAgent::from_args` with leading `NAME=value` tokens so the secrets land in the process **environment, never argv** (no `ps` leak); the no-env path still uses `from_str` (byte-identical). After a respawn the worker `authenticate`s the seeded method **once** on the first `AuthRequired`, then retries the open (falling through to the interactive card on failure).
 - **App side.** Masked `InputState` fields are reconciled from the card in `render` (the event fold has no `Window`); `submit_env_auth` reads them straight into the respawn's in-flight `ConnectSpec.env` and **never** into the persisted transcript. Plain `respawn` (Stop→resume, live switch) is unchanged — it's `respawn_with_env(vec![], None)`.
@@ -1947,7 +1947,7 @@ Closes the five round-2 ACP client-side correctness gaps + the UX tail found aft
 
 - **P1 — turn correctness.** `session/prompt`'s `stop_reason` is no longer discarded: `Refusal`/`MaxTokens`/`MaxTurnRequests` end the turn with the error banner + a human reason (they used to render as clean turns); `EndTurn`/`Cancelled` (+ any future `#[non_exhaustive]` reason) stay clean. `cancel()` now drains the parked `session/request_permission` responders (drop-to-resolve), so a Stop while a permission card is pending answers the agent `Cancelled` instead of leaving its next turn wedged (the ACP child isn't respawned on Stop).
 - **P2 — prompt richness.** Attached images now ride an ACP prompt as base64 `ContentBlock::Image`, gated on `prompt_capabilities.image` (text-only fallback when absent — no rejected turns). Agent-spawned embedded terminals default `PAGER=""`/`GIT_PAGER=cat` so `git log` &c. can't hang on a pager. `mcpServers: []` serialization locked by a tripwire test.
-- **P3 — true session restore.** A restored ACP tab resumes the agent's real context via `session/load` when it advertises `loadSession`; a `replaying` gate drops the agent's history replay (OxiMux repaints its own persisted blob — one code path for all agents, instant paint) while letting control updates through. Non-auth load failure falls back to a fresh session with a visible notice (worst case = today's amnesiac behavior, now explicit).
+- **P3 — true session restore.** A restored ACP tab resumes the agent's real context via `session/load` when it advertises `loadSession`; a `replaying` gate drops the agent's history replay (TREX repaints its own persisted blob — one code path for all agents, instant paint) while letting control updates through. Non-auth load failure falls back to a fresh session with a visible notice (worst case = today's amnesiac behavior, now explicit).
 - **P4 — auth flow.** A logged-out agent (`AuthRequired`/-32000) is no longer a dead end: its `auth_methods` render an auth card — Agent pill (`authenticate`), Terminal inline login (runs the agent's login command in an embedded terminal), EnvVar instructions — and `authenticate` retries the session on the **same connection** (no respawn). Enables the `unstable_auth_methods` cargo feature (the env-var/terminal `AuthMethod` variants are feature-gated at the pinned schema; the plan's validation log had wrongly assumed they were stable). EnvVar landed instructions-only here; its functional respawn-with-env sign-in shipped in the follow-up above.
 - **P5 — UX tail.** Permission requests surface the agent's **extra allow-kind options** as pills that answer with their exact `option_id` (reject-kind stays behind the base Reject button; Claude's card byte-identical — empty suggestions for a plain allow/reject request). A `ThoughtLevel`-category config option drives the reasoning-effort picker in-session (mirroring the ACP model picker; the Model-only extractor generalized to `select_for(category)`). Slash-command argument hints (`AvailableCommand.input`) feed the composer's existing usage-hint strip.
 
@@ -1975,8 +1975,8 @@ Gates: `cargo test --workspace --no-fail-fast` green; agents `+9` tests (classif
 
 Gives ACP agents a true chat+terminal experience: an agent can create a terminal, run a command, and embed it **live and inline** in a tool card. Wire shapes locked against `agent-client-protocol-schema 1.4.0` (`schema::v1`). Claude/Codex and existing ACP paths byte-identical.
 
-- **Protocol layer (`oximux-agents`, commit f73146e).** Advertise the ACP `terminal` capability and serve all five `terminal/*` methods (create/output/wait_for_exit/kill/release) by delegating to an app-installed `AcpTerminalHost` trait — dependency inversion that keeps the domain crate free of the UI/relay stack, mirroring the `AgentConnection`/`TerminalBackend` seams. `ToolCallContent::Terminal` maps to a new `ToolTerminal` event that binds the client-minted terminal id to its tool card. Inert until a host is installed (capability advertises false, handlers reject).
-- **App backing + inline UI (`oximux-app`, commit e9ed321).** `EmbeddedTerminalHost` spawns a real PTY through the app's own terminal stack (`spawn_embedded_command`: relay daemon when up, in-process fallback), with a per-terminal watcher thread draining the PTY's independent status-event stream into an output ring + exit latch (so `terminal/output`/`wait_for_exit` answer off the renderer's queue). The chat view mounts a live inline `TerminalView` per tool-call id (mirroring the question-card reconcile), bounded-height inside the card, and reaps on tab close + when the card leaves the transcript. Background mount so a mid-turn spawn never steals composer focus; reaping releases the host entry by its own terminal id (a distinct id-space from the tool-call id).
+- **Protocol layer (`trex-agents`, commit f73146e).** Advertise the ACP `terminal` capability and serve all five `terminal/*` methods (create/output/wait_for_exit/kill/release) by delegating to an app-installed `AcpTerminalHost` trait — dependency inversion that keeps the domain crate free of the UI/relay stack, mirroring the `AgentConnection`/`TerminalBackend` seams. `ToolCallContent::Terminal` maps to a new `ToolTerminal` event that binds the client-minted terminal id to its tool card. Inert until a host is installed (capability advertises false, handlers reject).
+- **App backing + inline UI (`trex-app`, commit e9ed321).** `EmbeddedTerminalHost` spawns a real PTY through the app's own terminal stack (`spawn_embedded_command`: relay daemon when up, in-process fallback), with a per-terminal watcher thread draining the PTY's independent status-event stream into an output ring + exit latch (so `terminal/output`/`wait_for_exit` answer off the renderer's queue). The chat view mounts a live inline `TerminalView` per tool-call id (mirroring the question-card reconcile), bounded-height inside the card, and reaps on tab close + when the card leaves the transcript. Background mount so a mid-turn spawn never steals composer focus; reaping releases the host entry by its own terminal id (a distinct id-space from the tool-call id).
 
 Gates: `cargo test --workspace --no-fail-fast` green (2804/0); `+12` tests (agents: `terminal/*` handler translation, `ToolTerminal` map + fold; app: host registry edge cases + output-ring truncation). A `code-reviewer` pass caught two real defects — a reap id-space mismatch (host entry leaked because release was called with the tool id, not the terminal id) and a focus-theft on mount — both fixed before commit. Static verification confirmed the relay/in-process PTY plumbing (both back `subscribe_status_events` + `capture_status_events`), and that `create()` on the ACP worker's non-tokio thread is safe (relay owns its runtime handle). Plan: `plans/260710-1022-agent-chat-acp-parity-research/` (P4).
 
@@ -2008,7 +2008,7 @@ Brings two of the three chat adapters closer to completeness. Architecture uncha
 - **P1 — Claude stream-json taxonomy.** `decode_assistant` gained `server_tool_use`/`mcp_tool_use` (mcp qualifies as `<server>.<tool>`) and a muted `redacted_thinking` marker (never renders the ciphertext). `decode_user` accepts the 6 `*_tool_result` variants (mcp/web_search/web_fetch/code_execution/bash_code_execution/text_editor) and **extracts inline base64 images** → a new `ToolResultImages` event, rendered as clickable thumbnails in the tool card (reusing the user-image lightbox) instead of the `[image]` placeholder. `compact_boundary` → a new `CompactBoundary` divider (reuses the `ContextCompaction` render). A debug-only unhandled-block log tripwires SDK drift. *Empirical note:* the live CLI wraps WebSearch/MCP as plain `tool_use`/`tool_result`, so the `server_tool_use`/`*_tool_result` arms are forward-compatible coverage; the confirmed daily win is inline images.
 - **P2 — Codex app-server.** `turn/plan/updated` → the shared `PlanUpdated` plan panel (maps Codex `inProgress`→`in_progress`; no per-step priority → `medium`). `item/commandExecution/outputDelta` → a new `ToolOutputDelta` that streams live command output into the open card (completion still replaces with the authoritative `aggregatedOutput`, but a **blank** final no longer erases already-streamed text). `item/tool/requestUserInput` (was auto-answered empty) now renders the interactive question card and routes selections back via a Codex-shaped `answer_question` (`{answers:{<qid>:{answers:[..]}}}`, keyed by the backend's native question id — distinct from Claude's text-keyed shape). Codex's `isSecret` flag is threaded through `AskQuestion` and shown as a "🔒 Sensitive" card hint (full input-masking + no-persist is a tracked follow-up). `thread/compacted` → the same compaction divider.
 
-Gates: `cargo test -p oximux-agents` green (479, +15 incl. a fixture-replay over the full new Claude taxonomy and Codex plan/output/question round-trips); `cargo check -p oximux-app` clean; `cargo test --workspace --no-fail-fast` green after fixing the long-stale `right_sidebar_tab` test (a `History` tab added in dd24107 was never reflected there — unrelated to this change). A `code-reviewer` pass returned 1 high (verified a non-issue against the 18-variant Codex `ThreadItem` schema + render path), 1 medium (`isSecret`, now handled), 3 low (2 fixed, 1 pre-existing spun off as a task). Plan: `plans/260710-1022-agent-chat-acp-parity-research/`. GUI verification pending (stale-binary rule).
+Gates: `cargo test -p trex-agents` green (479, +15 incl. a fixture-replay over the full new Claude taxonomy and Codex plan/output/question round-trips); `cargo check -p trex-app` clean; `cargo test --workspace --no-fail-fast` green after fixing the long-stale `right_sidebar_tab` test (a `History` tab added in dd24107 was never reflected there — unrelated to this change). A `code-reviewer` pass returned 1 high (verified a non-issue against the 18-variant Codex `ThreadItem` schema + render path), 1 medium (`isSecret`, now handled), 3 low (2 fixed, 1 pre-existing spun off as a task). Plan: `plans/260710-1022-agent-chat-acp-parity-research/`. GUI verification pending (stale-binary rule).
 
 ---
 
@@ -2025,7 +2025,7 @@ Closes the short, high-value tail between the shipped Claude chat and a Claude-D
 - **New / Clear in place.** `ChatThread::clear()` + a "New chat" composer button reset the tab to a fresh non-resumed session (old child reaped); typing `/clear` is intercepted and resets locally instead of being sent as literal text. Guards on `rewinding` to avoid racing an in-flight rewind's respawn.
 - **In-chat find (Cmd+F).** A find bar over the transcript searches user/assistant/tool text and steps between matches (`n/total`, ↑/↓), reusing a new entry→scroll-child map and the shared row-flash. `Search` is handled on the focused chat (stops propagation before the workspace-root→terminal fallback); Enter/Shift+Enter route to next/prev only while the find input is focused. Counter only counts jumpable (visible-transcript) matches. Close: the ✕ button, Escape (via `capture_action(InputEscape)`), OR a second Cmd+F (toggle) — the toggle is a deliberate keyboard-close fallback because some macOS input methods swallow Escape while a text field is focused.
 
-Gates: `cargo check -p oximux-app` clean; `cargo test -p oximux-app -p oximux-agents --lib` green (1197 + 400, incl. new tests for the error/retry path, regenerate selection + non-tail refusal, tool-card dispatch, `clear()`, `recompute_matches`, and the entry-child map); `cargo test --workspace --no-fail-fast` shows only 2 pre-existing unrelated `right_sidebar_tab` stale-test failures (flagged separately). Clippy clean on all touched files. A `code-reviewer` pass found 6 issues (1 critical, 1 high, 2 medium, 2 low); all addressed in-session (see `plans/reports/reviewer-260707-agent-chat-completion.md`). **GUI-verified via computer-use** on the fresh build: code-block copy button, Regenerate present on the last reply + hidden on earlier replies (the critical fix), New-chat reset + empty-restore, and the find bar (open/`n/total`/Enter-next/toggle-close). Found + fixed one GUI bug during verification: the find bar didn't close on Escape (this machine's IME eats Escape) → added the Cmd+F toggle-close. Plan: `plans/260707-0253-oximux-agent-chat-claude-desktop-completion/`.
+Gates: `cargo check -p trex-app` clean; `cargo test -p trex-app -p trex-agents --lib` green (1197 + 400, incl. new tests for the error/retry path, regenerate selection + non-tail refusal, tool-card dispatch, `clear()`, `recompute_matches`, and the entry-child map); `cargo test --workspace --no-fail-fast` shows only 2 pre-existing unrelated `right_sidebar_tab` stale-test failures (flagged separately). Clippy clean on all touched files. A `code-reviewer` pass found 6 issues (1 critical, 1 high, 2 medium, 2 low); all addressed in-session (see `plans/reports/reviewer-260707-agent-chat-completion.md`). **GUI-verified via computer-use** on the fresh build: code-block copy button, Regenerate present on the last reply + hidden on earlier replies (the critical fix), New-chat reset + empty-restore, and the find bar (open/`n/total`/Enter-next/toggle-close). Found + fixed one GUI bug during verification: the find bar didn't close on Escape (this machine's IME eats Escape) → added the Cmd+F toggle-close. Plan: `plans/260707-0253-trex-agent-chat-claude-desktop-completion/`.
 
 ---
 
@@ -2046,13 +2046,13 @@ GUI-verified: with two agents, activating one then sending from a terminal lands
 
 **Touches**: `crates/app/src/shell/terminal/shell_integration.rs` (new), `crates/app/src/shell/terminal/mod.rs`, `crates/app/src/shell/terminal/terminal_view/{mod,lifecycle,input}.rs`, `crates/app/src/app_settings/terminal_settings.rs`, `crates/settings/src/terminal.rs`
 
-Makes **Send Last Output to Agent** (and the exit-code gutter badges) work out of the box. The terminal already *parsed* OSC 133/633 command marks but a stock shell emits none, so the prompt/output bands stayed empty and the action was a silent no-op for the default shell. Now OxiMux injects a small command-mark bootstrap when it spawns a plain shell.
+Makes **Send Last Output to Agent** (and the exit-code gutter badges) work out of the box. The terminal already *parsed* OSC 133/633 command marks but a stock shell emits none, so the prompt/output bands stayed empty and the action was a silent no-op for the default shell. Now TREX injects a small command-mark bootstrap when it spawns a plain shell.
 
-- **Bootstrap generator** (`shell_integration::augment_spawn_config`). Detects zsh / bash / fish from the spawn config's shell and merges the right `env` + `args` so both the in-process backend and the relay daemon pick it up over the existing spawn wire fields (no protocol change). zsh has no extra-rcfile flag, so we point `ZDOTDIR` at an overlay dir whose four startup files `source` the user's real ones (via `OXIMUX_ORIG_ZDOTDIR`, default `$HOME`) then arm `precmd`/`preexec` and restore `ZDOTDIR`; bash takes `--rcfile`; fish takes `--init-command`. The hooks emit `133;A` (prompt), `133;C` (output start), `133;D;$?` (command end with exit). Overlay scripts are written app-side under the data dir and only rewritten when their content changes.
+- **Bootstrap generator** (`shell_integration::augment_spawn_config`). Detects zsh / bash / fish from the spawn config's shell and merges the right `env` + `args` so both the in-process backend and the relay daemon pick it up over the existing spawn wire fields (no protocol change). zsh has no extra-rcfile flag, so we point `ZDOTDIR` at an overlay dir whose four startup files `source` the user's real ones (via `TREX_ORIG_ZDOTDIR`, default `$HOME`) then arm `precmd`/`preexec` and restore `ZDOTDIR`; bash takes `--rcfile`; fish takes `--init-command`. The hooks emit `133;A` (prompt), `133;C` (output start), `133;D;$?` (command end with exit). Overlay scripts are written app-side under the data dir and only rewritten when their content changes.
 - **Injected only for genuine shells.** Wired at the four plain-shell spawn sites (new spawn — relay + portable fallback — and both dormant-promote/restore paths); launched-agent PTYs (where the agent binary is argv[0]) are untouched.
-- **Guarded against double-emitting.** Two integrations both emitting `133;A` per prompt would collapse the output band to nothing, so the hook generically detects an *existing* OSC-133 emitter — any already-registered prompt/pre-exec hook whose body contains a `133;` mark (covers a user's own prompt framework, another terminal's hooks, etc.), plus the VS Code / iTerm env sentinels — and **skips its own injection**, deferring to the existing one. Also gated by a re-entry sentinel (idempotent re-source) and a new `shell_integration` setting (on by default; mirrors the `OXIMUX_SHELL_INTEGRATION=0` env opt-out).
+- **Guarded against double-emitting.** Two integrations both emitting `133;A` per prompt would collapse the output band to nothing, so the hook generically detects an *existing* OSC-133 emitter — any already-registered prompt/pre-exec hook whose body contains a `133;` mark (covers a user's own prompt framework, another terminal's hooks, etc.), plus the VS Code / iTerm env sentinels — and **skips its own injection**, deferring to the existing one. Also gated by a re-entry sentinel (idempotent re-source) and a new `shell_integration` setting (on by default; mirrors the `TREX_SHELL_INTEGRATION=0` env opt-out).
 
-Gates: `cargo test --workspace --no-fail-fast` green (2433 pass / 0 fail, incl. generator + guard + settings tests); zsh/bash overlays pass `zsh -n` / `bash -n`; real-pty functional runs confirmed both the full `A / C / D;exit` stream when OxiMux is the sole integrator AND a clean skip (single `A` marks) when another emitter is present. **GUI-verified** on a machine whose `~/.zshrc` already ships an integration: OxiMux correctly deferred to it and "Send Last Output to Agent" landed the full multi-line output band in the agent composer. On `feat/terminal-rich-stable-fixes`; fish unverified locally (not installed). Deferred: when deferring to an integration that emits `A` but no `D` (no exit code), the exit-code gutter badges stay dark for that session — could add a D-only hook in future.
+Gates: `cargo test --workspace --no-fail-fast` green (2433 pass / 0 fail, incl. generator + guard + settings tests); zsh/bash overlays pass `zsh -n` / `bash -n`; real-pty functional runs confirmed both the full `A / C / D;exit` stream when TREX is the sole integrator AND a clean skip (single `A` marks) when another emitter is present. **GUI-verified** on a machine whose `~/.zshrc` already ships an integration: TREX correctly deferred to it and "Send Last Output to Agent" landed the full multi-line output band in the agent composer. On `feat/terminal-rich-stable-fixes`; fish unverified locally (not installed). Deferred: when deferring to an integration that emits `A` but no `D` (no exit code), the exit-code gutter badges stay dark for that session — could add a D-only hook in future.
 
 ---
 
@@ -2060,7 +2060,7 @@ Gates: `cargo test --workspace --no-fail-fast` green (2433 pass / 0 fail, incl. 
 
 **Touches**: `crates/app/src/shell/terminal/terminal_context_menu.rs` (new), `crates/app/src/shell/terminal/terminal_view/{input,render,mod,lifecycle,state}.rs`, `crates/app/src/shell/terminal/terminal_links.rs`, `crates/app/src/shell/pane_group/render.rs`, `crates/app/src/actions.rs`, `crates/app/src/workspace_root/{mod,ops,render}.rs`, `crates/app/src/shell/{project_panes/ops,workspace/workspace_ops}.rs`, `crates/app/src/shell/settings_modal/pane_terminal.rs`, `crates/pty/src/{state,backend,portable_pty_backend}.rs`, `crates/relay-client/src/backend.rs`, `crates/settings/src/terminal.rs`
 
-Closes the terminal surface/polish gaps + the stability red flags from the 2026-06-29 terminal research (`plans/260630-0004-oximux-terminal-rich-stable-fixes/`). The engine was already strong; this is surface + a handful of real bugs.
+Closes the terminal surface/polish gaps + the stability red flags from the 2026-06-29 terminal research (`plans/260630-0004-trex-terminal-rich-stable-fixes/`). The engine was already strong; this is surface + a handful of real bugs.
 
 - **Right-click context menu (the headline gap).** The terminal grid had NO context menu — right-click was dropped unless a mouse-reporting app consumed it. New `TerminalContextMenu` (mirrors `tab_context_menu.rs`: one entity owned by `WorkspaceRoot`, opened via `OpenTerminalContextMenuAt`) holds a `WeakEntity<TerminalView>` and calls view methods directly for grid ops (Copy / Paste / Paste Text / Select All / Clear / Open-Copy Link / Search / Send Selection·Last-Output to Agent), dispatching root-level actions for Split / Set Title / Close Tab. Right-click auto-selects the word under the cursor when nothing is selected, so Copy is never a no-op. The card is edge-aware: it opens down-right from the cursor but flips UP near the bottom and LEFT near the right edge so it's never clipped off-screen. Still forwards to vim/tmux when they're reporting.
 - **Standard terminal behaviors.** `Clear` wipes grid + scrollback (new `TerminalBackend::clear()` → `ESC[H ESC[2J ESC[3J`). **`Cmd+A` now selects the FULL scrollback** (behavior change — was viewport-only; Copy yields everything retained). Middle-click pastes the clipboard (gated off inside mouse-reporting apps). New `copy_on_select` setting (off by default) + Settings → Terminal toggle. A program's OSC 2 window title now drives the terminal tab label (a manual "Set Title…" still wins and pins it). Send-last-output-to-agent reads the full command output from the history grid (OSC 133/633 marks) instead of clamping to the viewport. Both send-to-agent paths now **bracketed-paste-wrap** the payload (`agent_paste_bytes` / `CliRuntime::send_agent_paste`) when the target agent has DECSET 2004 on, so a multi-line selection/output lands as one reviewable block instead of the agent's readline executing each line; `\n`-terminated auto-submit commands stay raw. Double-click word selection was already Unicode-aware (`char::is_alphanumeric()` spans CJK/accented) — added a regression test rather than a redundant predicate change.
@@ -2070,17 +2070,17 @@ Gates: `cargo check --workspace` clean; `cargo test --workspace --no-fail-fast` 
 
 ---
 
-### 2026-06-27 — Refactor: Tier-1 reorg + extract `oximux-ui` (zero behavior change)
+### 2026-06-27 — Refactor: Tier-1 reorg + extract `trex-ui` (zero behavior change)
 
-**Touches**: `xtask/src/main.rs`, `xtask/file-size-allow.txt` (new), `crates/app/src/lib.rs`, `crates/app/src/shell/mod.rs`, `crates/app/src/{app_settings,agent_glue,session_restore,platform,loaders}/` (new folders), `crates/app/src/shell/terminal/` (new cluster), `crates/app/src/shell/diff_view/{mod,paint}.rs`, `crates/ui/` (new crate `oximux-ui`), `Cargo.toml`, `docs/*`
+**Touches**: `xtask/src/main.rs`, `xtask/file-size-allow.txt` (new), `crates/app/src/lib.rs`, `crates/app/src/shell/mod.rs`, `crates/app/src/{app_settings,agent_glue,session_restore,platform,loaders}/` (new folders), `crates/app/src/shell/terminal/` (new cluster), `crates/app/src/shell/diff_view/{mod,paint}.rs`, `crates/ui/` (new crate `trex-ui`), `Cargo.toml`, `docs/*`
 
 De-bulk the ~93k-LOC `app` crate for navigability — a pure refactor, full suite green and matching baseline (2382 pass / 0 fail / 2 ignored), clippy/debug/release clean.
 
 - **Tier-1 in-crate reorg.** 31 loose top-level modules grouped into five concern folders (`app_settings/`, `agent_glue/`, `session_restore/`, `platform/`, `loaders/`); ~17 terminal modules clustered under `shell/terminal/`. All via `git mv` + crate-root re-exports, so every `crate::<name>::…` call site resolves unchanged.
-- **`oximux-ui` crate.** The most-shared widget surface (`app/src/ui/` — FloatingSurface, buttons, danger_ghost — used by 21 modules) + the generic `ConfirmDialog` move into a new `crates/ui`. Depends only downward (gpui, gpui-component, oximux-settings) with zero path back to `oximux-app` (cargo-tree verified); host re-exports it as `crate::ui`. `toast`/`divider` stayed in `app` (they reach host state — moving them would create a forbidden back-edge).
+- **`trex-ui` crate.** The most-shared widget surface (`app/src/ui/` — FloatingSurface, buttons, danger_ghost — used by 21 modules) + the generic `ConfirmDialog` move into a new `crates/ui`. Depends only downward (gpui, gpui-component, trex-settings) with zero path back to `trex-app` (cargo-tree verified); host re-exports it as `crate::ui`. `toast`/`divider` stayed in `app` (they reach host state — moving them would create a forbidden back-edge).
 - **diff_view slim.** `impl Render for DiffView` moved out of `mod.rs` (2546→1737 LOC) into its `paint.rs` rendering sibling.
 - **File-size lint relaxed to GPUI reality.** Warn 1500 / fail 3000 (was 500/800), plus a ratchet allowlist (`xtask/file-size-allow.txt`) that grandfathers the 3 remaining over-cap files and can only shrink.
-- **Deferred (parked w/ design record):** `oximux-contract` (33-module action floor) + all `*-ui` feature crates — see `docs/adr/006-tier1-reorg-and-oximux-ui.md`.
+- **Deferred (parked w/ design record):** `trex-contract` (33-module action floor) + all `*-ui` feature crates — see `docs/adr/006-tier1-reorg-and-trex-ui.md`.
 
 Gates: `cargo build --workspace` (debug + `--release`), `cargo test --workspace --all-targets` (2382 pass), `cargo clippy --workspace --all-targets` (0 warnings), `cargo run -p xtask -- file-size-lint` (ok). On a refactor branch; per-phase commits; pending GUI smoke + merge to main.
 
@@ -2098,7 +2098,7 @@ Hand-launched agent CLIs in normal terminal tabs now participate in the same per
 - **Rail repaint perf.** `set_sidebar_data` dirty-checks its render inputs and repaints only on a real change; the per-workspace agent merge (150+ rows) is cached and rebuilt only on a session/live-agent change — killing the per-output-byte whole-rail rebuild that caused hover/scroll jank.
 - **Active styling.** A multi-agent active workspace wraps the card and its agent rows in one container sharing the active surface fill; child hover fills are suppressed while active. Workspace summary label precedence matches status precedence (active tracked sessions stay authoritative).
 
-Gates: `cargo build -p oximux-app`; `cargo clippy -p oximux-app -p oximux-agents` (0 warnings); `cargo test -p oximux-app --lib` (1014 pass); `cargo test -p oximux-agents --lib` (279 pass). Live verify: run `OXIMUX_STATUS_HOOKS=1 RUST_LOG=oximux_app=debug,oximux_agents=debug cargo run -p oximux-app`, type `claude` in a plain terminal, prompt it, and watch for `ambient agent OSC-9999 sideband decoded` + the grouped rail row.
+Gates: `cargo build -p trex-app`; `cargo clippy -p trex-app -p trex-agents` (0 warnings); `cargo test -p trex-app --lib` (1014 pass); `cargo test -p trex-agents --lib` (279 pass). Live verify: run `TREX_STATUS_HOOKS=1 RUST_LOG=TREX_app=debug,TREX_agents=debug cargo run -p trex-app`, type `claude` in a plain terminal, prompt it, and watch for `ambient agent OSC-9999 sideband decoded` + the grouped rail row.
 
 ---
 
@@ -2145,8 +2145,8 @@ A Cmd+I composer bar docks over the active agent pane. Multi-line draft input wi
 
 Two connected changes that make the OSC-9999 producer path reliable and user-controllable.
 
-- **Relay RPC emission** (`c8a3de3`): Claude Code runs hook commands in a detached session (no controlling terminal), so the previous `/dev/tty` emitter never reached the agent PTY. Status now routes through the relay: a new `oximux agent-status` CLI (invoked by the hook) reads `OXIMUX_PTY_ID` and sends `Request::AgentStatus` to the daemon, which frames the payload as OSC-9999 on the PTY's output stream where the existing scanner decodes it. Registry fans the packet to live subscribers only. Shell emitter removed. Protocol bumped v5 → v6 (`relay-v6.sock`).
-- **Settings toggle** (`d6ea6bf`): the `OXIMUX_STATUS_HOOKS` env-var gate replaced by a persistent toggle in Settings → Agents ("Status hooks"). Stored as `status_hooks_enabled` in `agent_launch.toml`; read at spawn and OR-combined with the env var (debug escape hatch retained).
+- **Relay RPC emission** (`c8a3de3`): Claude Code runs hook commands in a detached session (no controlling terminal), so the previous `/dev/tty` emitter never reached the agent PTY. Status now routes through the relay: a new `TREX agent-status` CLI (invoked by the hook) reads `TREX_PTY_ID` and sends `Request::AgentStatus` to the daemon, which frames the payload as OSC-9999 on the PTY's output stream where the existing scanner decodes it. Registry fans the packet to live subscribers only. Shell emitter removed. Protocol bumped v5 → v6 (`relay-v6.sock`).
+- **Settings toggle** (`d6ea6bf`): the `TREX_STATUS_HOOKS` env-var gate replaced by a persistent toggle in Settings → Agents ("Status hooks"). Stored as `status_hooks_enabled` in `agent_launch.toml`; read at spawn and OR-combined with the env var (debug escape hatch retained).
 
 ---
 
@@ -2166,15 +2166,15 @@ Line 2 of each dashboard agent card now renders the live tool step from the OSC-
 ### 2026-06-21 — Agents: opt-in OSC-9999 status hooks for Claude Code (makes the sideband live)
 
 **Commits**: _(local, pending; branch `feat/agent-sideband-phase1`)_
-**Touches**: `crates/app` (new `agent_status_hooks.rs`, `assets/hooks/oximux-status-emit.sh`), `crates/agents` (debug log)
+**Touches**: `crates/app` (new `agent_status_hooks.rs`, `assets/hooks/trex-status-emit.sh`), `crates/agents` (debug log)
 
-The producer side of the OSC-9999 status sideband. With `OXIMUX_STATUS_HOOKS=1`, launching a Claude Code agent injects a `--settings` hooks block so Claude emits structured status into its PTY, which the existing scanner reads — closing the gap where the regex status machine can't see the agent's internal tool steps.
+The producer side of the OSC-9999 status sideband. With `TREX_STATUS_HOOKS=1`, launching a Claude Code agent injects a `--settings` hooks block so Claude emits structured status into its PTY, which the existing scanner reads — closing the gap where the regex status machine can't see the agent's internal tool steps.
 
 - A small POSIX-sh hook script writes `ESC]9999;{"v":1,"state":"working","tool":"Edit"}BEL` to the controlling terminal (`/dev/tty`) on `PreToolUse` (working), `PermissionRequest` (needs_approval), and `Stop` (idle). Hook stdout is captured by Claude, so the packet must go to the tty; tool name is extracted with `sed` (no `jq`/`python` dependency).
 - The hooks are passed as a `claude --settings <json-string>` at spawn — app-owned, never written into `~/.claude`. Because `--settings` replaces the `hooks` key, the user's existing global hooks are read and merged in so they keep firing. Hooks run `async` so they never slow the agent.
-- **Opt-in, default off** (`OXIMUX_STATUS_HOOKS=1`). Claude Code only for now.
+- **Opt-in, default off** (`TREX_STATUS_HOOKS=1`). Claude Code only for now.
 
-Tests: `cargo test -p oximux-app --lib` = 927 passed. A round-trip test runs the real hook script in a subprocess and feeds its bytes through the Phase-1 scanner, proving the emit→decode format end-to-end. The live link (Claude fires the hook → `/dev/tty` → PTY → scanner) needs a running Claude session to confirm; `RUST_LOG=oximux_agents=debug` logs each decoded packet.
+Tests: `cargo test -p trex-app --lib` = 927 passed. A round-trip test runs the real hook script in a subprocess and feeds its bytes through the Phase-1 scanner, proving the emit→decode format end-to-end. The live link (Claude fires the hook → `/dev/tty` → PTY → scanner) needs a running Claude session to confirm; `RUST_LOG=TREX_agents=debug` logs each decoded packet.
 
 ---
 
@@ -2190,7 +2190,7 @@ Phase 2a of the agent-CLI cockpit rebuild — a status-driven dashboard upgrade.
 - **Recency secondary sort**: within an attention tier, the most-recently-active session floats to the top. The key is the latest session's `ended_at` (else `started_at`) as the raw RFC-3339 string — storage stamps one consistent format, so lexicographic ordering matches chronological (no `chrono` needed in the app crate). Sourced from SQLite in `gather_rail_db_data` and threaded like the existing adapter map.
 - **`row_builder.rs`** (new): `build_agent_rows` / `widest_row_index` extracted from `model.rs`, which drops back under the size warning. The agent icon is resolved once per row in the builder, never in the `uniform_list` render closure.
 
-Tests: `cargo test -p oximux-app --lib` = 922 passed (+5 new: recency-descending, tier-0-beats-newer-running, icon-path population). Code-reviewed (APPROVE_WITH_NITS). GUI-visual verification is environment-blocked; correctness is headless-tested.
+Tests: `cargo test -p trex-app --lib` = 922 passed (+5 new: recency-descending, tier-0-beats-newer-running, icon-path population). Code-reviewed (APPROVE_WITH_NITS). GUI-visual verification is environment-blocked; correctness is headless-tested.
 
 ---
 
@@ -2206,7 +2206,7 @@ Phase 1 of the agent-CLI cockpit rebuild (`plans/260620-agent-cli-cockpit-rebuil
 - **`StatusMachine::feed_sideband`** maps the sideband state and drives it through `force()`, inheriting the terminal-state guard and blocking-entry ring wipe.
 - **`poll_helpers.rs`** extracts the per-poll event processing; `runtime_impl.rs` dropped 891 → 527 LOC (cleared the 800 hard cap; its test module moved to `runtime_impl_tests.rs` via `#[path]`).
 
-Tests: 239 `oximux-agents` (15 scanner + 8 poll-helper + 3 feed_sideband new) + 917 `oximux-app` lib, all green; `clippy -D warnings` clean on core + agents. Code-reviewed (APPROVE_WITH_NITS, nits applied). OSC number = 9999.
+Tests: 239 `trex-agents` (15 scanner + 8 poll-helper + 3 feed_sideband new) + 917 `trex-app` lib, all green; `clippy -D warnings` clean on core + agents. Code-reviewed (APPROVE_WITH_NITS, nits applied). OSC number = 9999.
 
 Deferred (by design): no agent emits OSC-9999 yet — that needs the hook installer (later phase). The `LatestStatusMap` → `AgentSnapshot` upgrade is deferred to Phase 2b (it is SQLite-sourced, independent of the watch channel).
 
@@ -2230,14 +2230,14 @@ Live restored Claude Code verification: 100 type→Ctrl+U trials, zero samples o
 **Commits**: _(local, pending)_
 **Touches**: `crates/app/src/main.rs`, `crates/pty/src/backend.rs`, `crates/relay-client/src/backend.rs`, `crates/app/src/shell/terminal_view.rs`
 
-Root-caused and fixed the post-restore typing lag with a microsecond input→echo→frame trace driven into the live app. Findings: input handling ~0.4ms and the relay transport ~0.04ms were never the problem — the GPUI **run loop / foreground executor was serviced ~75ms–1s late**, so the PTY-output drain ran long after the bytes arrived. Cause: **macOS App Nap** throttling. OxiMux only suppressed App Nap during *scoped* daemon round-trips, and it runs as a bare binary (not an `.app`), which makes App Nap apply even while frontmost.
+Root-caused and fixed the post-restore typing lag with a microsecond input→echo→frame trace driven into the live app. Findings: input handling ~0.4ms and the relay transport ~0.04ms were never the problem — the GPUI **run loop / foreground executor was serviced ~75ms–1s late**, so the PTY-output drain ran long after the bytes arrived. Cause: **macOS App Nap** throttling. TREX only suppressed App Nap during *scoped* daemon round-trips, and it runs as a bare binary (not an `.app`), which makes App Nap apply even while frontmost.
 
 **Fixes:**
 - **Global App-Nap suppression for the whole process lifetime** (`main.rs`) — the key fix. Drain latency dropped from p50 75ms to p50 12ms.
 - **Event-driven output drain** — the relay pump wakes the view (via a new `TerminalBackend::set_output_waker`) the instant output is enqueued, instead of waiting on a (throttled) poll timer. Poll remains a fallback for hidden tabs.
 - **Post-input frame persistence** — a keystroke (and IME composition) keeps the render loop self-scheduling for ~10 frames so a straggler echo paints within one frame.
 
-**Verified on the live app** (keystroke trace): typing into a **plain shell** is now **p50 2.3ms, max 20ms, zero keystrokes >50ms** — sub-frame, native-class (was 75ms+ with 100–600ms outliers). Residual lag seen when typing into a busy **Claude Code agent** is the agent's own redraw latency (measured up to 2.2s while "crunching") — inherent to the program, not the terminal. Debug trace gated behind `OXIMUX_INPUT_TRACE`.
+**Verified on the live app** (keystroke trace): typing into a **plain shell** is now **p50 2.3ms, max 20ms, zero keystrokes >50ms** — sub-frame, native-class (was 75ms+ with 100–600ms outliers). Residual lag seen when typing into a busy **Claude Code agent** is the agent's own redraw latency (measured up to 2.2s while "crunching") — inherent to the program, not the terminal. Debug trace gated behind `TREX_INPUT_TRACE`.
 
 ---
 
@@ -2386,7 +2386,7 @@ Verified: clean build (zero warnings), clippy clean (touched files), 31 agent + 
 
 The inline browser sent no explicit User-Agent, so `wry`/WKWebView used its bare default — which omits the trailing `Version/<n> Safari/<build>` token. Major sites (Google especially) read that absence as an unknown/legacy browser and fall back to a stripped-down page that also ignores `prefers-color-scheme` (why Google rendered the old light-only results layout instead of the modern SPA). The webview now sends a current desktop **Safari** UA (`…AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15`).
 
-- **Safari, not Chrome.** The reference cockpit spoofs a Chrome UA because it *is* Chromium; OxiMux's engine is WebKit, so a Safari UA is honest to the engine. A Chrome UA on WebKit would invite Blink-only code paths and `sec-ch-ua` client-hint mismatches the engine can't satisfy. The `Intel Mac OS X 10_15_7` platform token is what real Safari reports on every Mac (incl. Apple Silicon) by design.
+- **Safari, not Chrome.** The reference cockpit spoofs a Chrome UA because it *is* Chromium; TREX's engine is WebKit, so a Safari UA is honest to the engine. A Chrome UA on WebKit would invite Blink-only code paths and `sec-ch-ua` client-hint mismatches the engine can't satisfy. The `Intel Mac OS X 10_15_7` platform token is what real Safari reports on every Mac (incl. Apple Silicon) by design.
 - Applied at build time for every profile/webview; bump the `Version/` number as Safari advances.
 
 ---
@@ -2420,7 +2420,7 @@ The inline browser can now import session cookies from installed browsers into t
 - A confirmation toast floats over the page after import ("Imported N cookies from `<Browser>` — reload to apply"); failures (Keychain denied, no DB) surface as a toast too. The read+decrypt runs on a background thread; only the WebKit cookie write runs on the main thread.
 - **Infrastructure:** `native_menu` gained nested-submenu support (a `MenuEntry` tree whose leaves carry caller ids; `popup_tree` returns the chosen id) shared with the flat menu via a new `present` helper. macOS-only (Keychain + `WKWebsiteDataStore`); the cascade is omitted off-platform.
 
-Verified: clean build (zero warnings), clippy clean (new code), 884 app lib tests incl. 13 new cookie-import tests (decrypt v10 round-trip + 127-HMAC strip, Local-State profile parse, Chromium/Firefox readers, expired-drop, Google integrity filter, JSON-export parse). **Live GUI run confirmed end-to-end**: the profile menu's 3-level cascade opens without crash (Profiles → Import Cookies → From Google Chrome → every Chrome profile enumerated by name; Brave + Comet also detected), and importing a Chrome profile's cookies into the active OxiMux profile then navigating to Gmail logged straight in as that account — no re-auth, Keychain decryption path working, even Google's session surviving the integrity-cookie filter. The earlier latent double-borrow risk (NSMenu modal loop pumping a queued GPUI task) did not fire — the `cx.spawn` deferral opens the menu outside the event-handler borrow, and the longer-open cascade did not reproduce it.
+Verified: clean build (zero warnings), clippy clean (new code), 884 app lib tests incl. 13 new cookie-import tests (decrypt v10 round-trip + 127-HMAC strip, Local-State profile parse, Chromium/Firefox readers, expired-drop, Google integrity filter, JSON-export parse). **Live GUI run confirmed end-to-end**: the profile menu's 3-level cascade opens without crash (Profiles → Import Cookies → From Google Chrome → every Chrome profile enumerated by name; Brave + Comet also detected), and importing a Chrome profile's cookies into the active TREX profile then navigating to Gmail logged straight in as that account — no re-auth, Keychain decryption path working, even Google's session surviving the integrity-cookie filter. The earlier latent double-borrow risk (NSMenu modal loop pumping a queued GPUI task) did not fire — the `cx.spawn` deferral opens the menu outside the event-handler borrow, and the longer-open cascade did not reproduce it.
 
 ---
 
@@ -2439,7 +2439,7 @@ The fix keeps the meter on the exact number and is strictly **account-safe** —
 - **30-minute staleness cap** on the last-known-good reading, so a very old exact value isn't presented as current — past the window the meter drops to the marked estimate.
 - **Freshness disclosed in the popover** (following the Electron cockpit's status pattern). A cached exact reading now carries a capture time (`UsageSnapshot.captured_at_ms`); the popover keeps the real numbers but its footer reads "Showing cached usage · updated *N* ago" (`just now` / `Nm ago` / `Nh ago`) instead of passing the reading off as live. Fresh readings and the estimate keep their existing captions. The capture time is deliberately kept out of the per-tick change-detection path (it only flips when freshness actually changes) so the meter doesn't repaint every tick.
 
-Refresh of an expired token is **delegated to the official `claude` CLI** (which the user runs constantly in this cockpit) — OxiMux reads the CLI credential read-only and never writes it, mints, or rotates it. This matches what two mature reference tools actually ship: a menubar tool (owner-aware read-only + delegated refresh) and an Electron cockpit (read-only API + last-known-good "stale" bars ≤30 min, passive refresh, no background CLI spawn). Neither direct-refreshes the CLI's token; this design follows the latter. Validated endpoint/flow facts and the account-ban rationale are recorded in project memory.
+Refresh of an expired token is **delegated to the official `claude` CLI** (which the user runs constantly in this cockpit) — TREX reads the CLI credential read-only and never writes it, mints, or rotates it. This matches what two mature reference tools actually ship: a menubar tool (owner-aware read-only + delegated refresh) and an Electron cockpit (read-only API + last-known-good "stale" bars ≤30 min, passive refresh, no background CLI spawn). Neither direct-refreshes the CLI's token; this design follows the latter. Validated endpoint/flow facts and the account-ban rationale are recorded in project memory.
 
 Verified: clean build, clippy clean, 230 agents lib tests + 871 app lib tests, incl. 6 new (`last_known_good_exact_beats_local_estimate`, `local_estimate_used_when_no_prior_exact_reading`, `stale_exact_reading_falls_through_to_estimate`, `scoped_keychain_service_matches_cli_derivation`, `format_time_ago_buckets`, `popover_caption_discloses_cached_reading`). Live: confirmed the read-only usage GET returns the real windows (5 h 26 %, 7 d 27 %) once the token is valid; confirmed this machine carries both a plain and a scoped Keychain item.
 
@@ -2697,7 +2697,7 @@ Verified: clicking "Claude Code" in the `+` menu spawns `claude` straight into a
 **Commits**: _(local, pending)_  
 **Touches**: `crates/agents/src/agent_title.rs`, `crates/agents/src/lib.rs`, `crates/app/src/shell/agent_presentation.rs`, `crates/app/src/shell/pane_group/` (mod.rs, render.rs), `crates/app/src/shell/project_panes/mod.rs`, `crates/app/src/shell/workspace_ops.rs`, `crates/app/src/shell/left_rail/` (mod.rs, project_group.rs, workspace_row.rs, workspace_card.rs), `crates/app/src/workspace_root.rs`
 
-Building on the ambient-status work below: the worktree card and the tab chip now show the detected agent's NAME, and a hand-launched agent counts in the status-bar total — closer to the reference app's per-worktree agent listing, kept compact to fit OxiMux.
+Building on the ambient-status work below: the worktree card and the tab chip now show the detected agent's NAME, and a hand-launched agent counts in the status-bar total — closer to the reference app's per-worktree agent listing, kept compact to fit TREX.
 
 - **`agent_label_from_title`** resolves a display name from the OSC title (Claude Code / Codex / Gemini CLI / Aider / OpenCode / Cursor / …), whole-token matched with a `[\w./\\-]` boundary so `opencode-helper` doesn't match.
 - **Card status line** renders `"Claude Code · Running"` — the name comes from a hand-launched agent's title (`AmbientAgent.label`) or, for a spawned session, the tracked adapter id mapped via `adapter_display_name`. No name resolved → the line shows the verb alone as before.
@@ -2752,7 +2752,7 @@ Verified live (auto-close, crash banner, split-leaf close, dead-corpse drop on r
 
 The status-bar meter now shows the account's REAL rate-limit numbers instead of a local estimate. The OAuth deployment behind the primary CLI exposes `GET /api/oauth/usage` — the same window utilization its own usage panel renders, exact percentages and reset timestamps, account-wide across devices. Verified side by side: chip `16% 5h · 5% wk` and popover reset countdowns match the CLI's panel and the account settings page exactly.
 
-- **Auth + transport**: bearer token from the CLI's Keychain credentials item (on-disk file fallback); `curl` with its config fed via stdin so the token never appears in process arguments. Ad-hoc dev bundles may re-prompt Keychain access per reseal (stable `OXIMUX_SIGN_ID` makes "Always Allow" stick); a decline backs off for 15 minutes and falls to the estimate.
+- **Auth + transport**: bearer token from the CLI's Keychain credentials item (on-disk file fallback); `curl` with its config fed via stdin so the token never appears in process arguments. Ad-hoc dev bundles may re-prompt Keychain access per reseal (stable `TREX_SIGN_ID` makes "Always Allow" stick); a decline backs off for 15 minutes and falls to the estimate.
 - **Strategy order**: account API first, deduplicated JSONL tally as the offline/unauthenticated fallback. `UsageSnapshot` carries its source: exact numbers render without the `~` prefix, the popover drops token counts for plain percentages, the weekly line gains the real reset countdown, and reset formatting learns day spans ("6d 21h").
 
 ---
@@ -2853,7 +2853,7 @@ Replaces the deprecated `NSUserNotification` backend and wires a full notificati
 - **Notification click navigation**. Cross-project: switches to the owning project, selects and scroll-locates the workspace in the left rail, focuses the exact agent tab, raises the window. Stale clicks are ignored.
 - **Agent-awake service** (`agent_awake.rs`). Ref-counted `IOPMAssertion` (`PreventUserIdleSystemSleep`) held while any agent session is Running. Settings toggle (default on). Unit-tested via a backend seam.
 - **Notifications settings pane**. Master / source / kind / sound / focus / agent-awake toggles plus a "Send test notification" button with availability hints. Notification rows moved out of the Agents pane.
-- **Bundle codesigning** (`scripts/bundle-macos.sh`). Ad-hoc by default; `OXIMUX_SIGN_ID` env override. Sealed code identity required for UNUserNotification delivery.
+- **Bundle codesigning** (`scripts/bundle-macos.sh`). Ad-hoc by default; `TREX_SIGN_ID` env override. Sealed code identity required for UNUserNotification delivery.
 - Boot-infrastructure banners (relay version mismatch / respawn) routed through the same backend.
 
 Tests: 1 898 workspace tests green; new unit coverage for gating matrix, burst gate, identifier parsing, and awake refcount.
@@ -2871,7 +2871,7 @@ Five features shipped as a batch:
 
 - **Quick Open file index** (`Cmd+P`). `file_index.rs` shells out `rg --files` asynchronously, caps at 20 000 results, ranks and trims to 50, then opens the selected path as an editor tab. Shows an install hint if `rg` is absent. Per-project cache is invalidated on project switch. Replaces 3 hardcoded stubs in the palette.
 
-- **Per-repo lifecycle scripts**. `ProjectScripts` + `ScriptKind` in `crates/settings/src/project_scripts.rs`; loader reads `.oximux/scripts.toml` per project (keys: `setup`, `run`, `cleanup`, `auto_setup` bool). Left-rail workspace "…" menu surfaces "Run setup / Run / Run cleanup" for defined script kinds — each spawns an interactive PTY tab at the worktree cwd (script fed via stdin, matching the relay spawn path). `auto_setup = true` triggers setup automatically after worktree create. Cleanup runs awaited before worktree delete, bounded 30 s with `kill_on_drop` force-escape.
+- **Per-repo lifecycle scripts**. `ProjectScripts` + `ScriptKind` in `crates/settings/src/project_scripts.rs`; loader reads `.trex/scripts.toml` per project (keys: `setup`, `run`, `cleanup`, `auto_setup` bool). Left-rail workspace "…" menu surfaces "Run setup / Run / Run cleanup" for defined script kinds — each spawns an interactive PTY tab at the worktree cwd (script fed via stdin, matching the relay spawn path). `auto_setup = true` triggers setup automatically after worktree create. Cleanup runs awaited before worktree delete, bounded 30 s with `kill_on_drop` force-escape.
 
 - **One-click Create PR + CI checks** (Source Control panel). New `crates/git/src/gh.rs` wraps `gh` CLI: `GhCmd`, `available`, `is_github_remote`, `has_open_pr`, `pr_create`, `pr_checks`, `CheckRun`. SCM primary-action gains a `CreatePR` rung gated on: branch in-sync + GitHub upstream + no open PR; Push/Sync-ahead rungs remain. `pr_ops.rs` is the tokio→GPUI bridge. `ci_status.rs` renders a compact `CI passing/running/failing ✓N ✗N ●N` row from `gh pr checks`, refreshed on a 30 s throttle inside the SCM state observer (only while a PR is open). `serde` + `serde_json` added to the `git` crate.
 
@@ -2887,7 +2887,7 @@ Five features shipped as a batch:
 Two parts:
 
 - **Command palette is now interactive.** Previously a display-only mockup; it now has type-to-filter, ↑/↓ navigation, Enter/click dispatch (built-in actions and custom commands), and Esc to close — modelled on the project picker's focus/key handling. Click and keyboard share one `activate_item` path (dispatch + close).
-- **Custom commands.** Reusable prompt snippets defined in TOML, loaded from a global config (`~/Library/Application Support/dev.nhtera.oximux/commands.toml`) and a committable per-project `.oximux/commands.toml`, merged with name-keyed precedence (`load_and_merge`, pure + unit-tested). They appear in the palette under a "Custom" group; selecting one sends its prompt to the active agent via the existing `SendTextToActiveAgent` path (newline appended to auto-submit). Malformed config is skipped with a warning, never crashes load. A "Reload Custom Commands" entry and per-project-switch reload keep them fresh. No file watcher (intentional).
+- **Custom commands.** Reusable prompt snippets defined in TOML, loaded from a global config (`~/Library/Application Support/dev.tiraci.trex/commands.toml`) and a committable per-project `.trex/commands.toml`, merged with name-keyed precedence (`load_and_merge`, pure + unit-tested). They appear in the palette under a "Custom" group; selecting one sends its prompt to the active agent via the existing `SendTextToActiveAgent` path (newline appended to auto-submit). Malformed config is skipped with a warning, never crashes load. A "Reload Custom Commands" entry and per-project-switch reload keep them fresh. No file watcher (intentional).
 
 ---
 
@@ -2962,7 +2962,7 @@ Replaces single-line workspace rows in the left rail with two-line rich cards:
 **Plan**: `plans/260529-2042-terminal-emulator-richness/`
 
 Closes the emulator-quality gap with the reference GPUI terminals that
-share OxiMux's `alacritty_terminal` + `portable-pty` backend.
+share TREX's `alacritty_terminal` + `portable-pty` backend.
 
 #### Sprint A — base feels real
 - **P1 SGR text attributes** — bold/italic/underline/strikethrough/dim now propagate from alacritty to the canvas paint via per-cell flags + per-run font weight/style overrides.
@@ -2977,7 +2977,7 @@ share OxiMux's `alacritty_terminal` + `portable-pty` backend.
 #### Sprint C — cockpit value
 - **P7 hyperlinks + path-to-editor** — OSC 8 explicit + plain-text URL/file:line detection; Cmd-click opens via editor host's new `open(path, line, col)`.
 - **P8 shell integration** — OSC 7 cwd updates; OSC 133/633 prompt+command marks with green/red gutter badges; OSC 52 clipboard write (gated by setting); OSC 9;4 progress capture; ColorRequest replies; DSR cursor-position replies.
-- **P9 terminal settings** — `terminal.toml` in `~/Library/Application Support/dev.nhtera.oximux/` with FSEvents-backed live reload (debounced; filtered to the settings file to skip sqlite WAL churn); knobs for scrollback, scroll multiplier, blink, dim/unfocused alphas, OSC 52 toggle, option-as-meta, bell style.
+- **P9 terminal settings** — `terminal.toml` in `~/Library/Application Support/dev.tiraci.trex/` with FSEvents-backed live reload (debounced; filtered to the settings file to skip sqlite WAL churn); knobs for scrollback, scroll multiplier, blink, dim/unfocused alphas, OSC 52 toggle, option-as-meta, bell style.
 
 #### Tier-3 — depth + north-star
 - **P10 CJK wide-character layout** — `Cell.wide` / `wide_spacer` flags; canvas advances columns by 2 for wide cells; per-row `force_width` hedge keeps mono crispness on rows with no wide chars.
@@ -3004,7 +3004,7 @@ share OxiMux's `alacritty_terminal` + `portable-pty` backend.
 
 #### feat(app): shell context env (`SurfaceIds`)
 
-- Every spawned terminal carries `OXIMUX_WORKSPACE_ID` (project root path), `OXIMUX_SURFACE_ID`, `OXIMUX_TAB_ID` (minted UUIDs), `OXIMUX_SOCKET_PATH`, plus the daemon-injected `OXIMUX_PTY_ID`
+- Every spawned terminal carries `TREX_WORKSPACE_ID` (project root path), `TREX_SURFACE_ID`, `TREX_TAB_ID` (minted UUIDs), `TREX_SOCKET_PATH`, plus the daemon-injected `TREX_PTY_ID`
 - New module `crates/app/src/shell/context_env.rs` (`SurfaceIds` struct); ids persist in the per-pane layout blob and are re-injected on dormant respawn
 - Agent CLI PTYs not yet threaded with context env; per-pane-tab relay reattach + cross-group multi-tab-drag repaint deferred to a follow-on
 
@@ -3057,7 +3057,7 @@ share OxiMux's `alacritty_terminal` + `portable-pty` backend.
 
 #### feat(app): phase-05 step 4 — file tree UI (FileTreeView + --file-tree-spike)
 
-- **`FileTreeView`** GPUI entity subscribing to `Entity<FileTree>` (from `oximux-editor`) via `cx.subscribe_in`; `expanded_ids: HashSet<TreeNodeId>` tracks UI expand state independently of walker-visited flag
+- **`FileTreeView`** GPUI entity subscribing to `Entity<FileTree>` (from `trex-editor`) via `cx.subscribe_in`; `expanded_ids: HashSet<TreeNodeId>` tracks UI expand state independently of walker-visited flag
 - **Lazy expand**: dir click → `tree.expand(id)` + `RowKind::Placeholder` sentinel rendered immediately; `Loaded(id)` event triggers `rebuild_rows()` swapping sentinel for real children
 - **Click flow**: dir click toggles expand; file click fires `on_open: Arc<dyn Fn(PathBuf, …)>` callback
 - **Raw `uniform_list`** (not `gpui-component::Tree`) — follows `FileExplorer` precedent to avoid auto-expand-on-click conflict with lazy walker model
@@ -3092,7 +3092,7 @@ share OxiMux's `alacritty_terminal` + `portable-pty` backend.
 #### feat(editor): user-facing
 
 - **Cmd+S** saves the buffer to disk (UTF-8, `std::fs::write`); reports error via `tracing::error` if write fails, dirty flag stays set so user can retry
-- **Dirty badge**: window title shows ` •` suffix (`"OxiMux — main.rs •"`) when buffer diverges from disk; clears on successful save
+- **Dirty badge**: window title shows ` •` suffix (`"TREX — main.rs •"`) when buffer diverges from disk; clears on successful save
 - **Undo/redo with LSP sync**: Cmd+Z / Cmd+Shift+Z (gpui-component built-in) now keeps rust-analyzer in sync — `cx.observe` pattern catches silent undo/redo edits that bypass `InputEvent::Change`
 - **LSP live edits**: rust-analyzer receives `textDocument/didChange` on every text change (squiggles update before save); `textDocument/didSave` on Cmd+S; `textDocument/didClose` when editor window closes
 
@@ -3101,7 +3101,7 @@ share OxiMux's `alacritty_terminal` + `portable-pty` backend.
 - **New module `crates/editor/src/lsp_bridge.rs`** (145 LOC): `spawn_attach_lsp` extracted from `editor_view.rs` to stay under file-size lint; handles handshake-completion catch-up `didChange` when buffer drifted during handshake window
 - **LSP client API**: `did_change` / `did_save` / `did_close` accept `&lsp_types::Uri` (parse-once; eliminates per-keystroke URI allocation — H1 fix from code review)
 - **`decide_change_propagation` pure fn**: extracted from observe callback; 3 unit tests; guards cursor-move no-ops and computes version increment
-- **`SaveFile` action** declared in `oximux-editor` crate (crate-cycle workaround; bound in `app/src/main.rs`)
+- **`SaveFile` action** declared in `trex-editor` crate (crate-cycle workaround; bound in `app/src/main.rs`)
 - **New integration tests** (`tests/lsp_notification_serialization.rs`, 4 tests): `didChange` full-sync JSON shape, `didSave`, `didClose`, version monotonic; no GPUI runtime needed
 
 #### Known limitations (non-blocking for step 2)
@@ -3127,7 +3127,7 @@ share OxiMux's `alacritty_terminal` + `portable-pty` backend.
 
 **Manual smoke** (go/no-go gate — requires interactive macOS session):
 ```bash
-cargo run -p oximux-app -- --editor-spike
+cargo run -p trex-app -- --editor-spike
 ```
 
 ---
@@ -3139,9 +3139,9 @@ cargo run -p oximux-app -- --editor-spike
 
 - **Graceful shutdown**: `Notify`-based SIGTERM/SIGINT handler in `server.rs`; `Request::Shutdown` wired to same `Notify`; `PidGuard` cleans up pid file on drop (mirrors `SocketGuard`).
 - **Idle GC + Stats**: `spawn_idle_gc` task reaps sessions idle past `ServerConfig::idle_timeout`; `PtyRegistry` gains per-entry `AtomicU64` byte counters + `started_at`; new `Request::Stats` / `Response::StatsOk(Vec<PtyStats>)` proto messages expose live PTY metrics.
-- **Structured logging + log rotation**: layered tracing subscriber — stderr text + daily-rolled JSON via `tracing-appender` + macOS oslog mirror; `OXIMUX_RELAY_TRACE=1` opens trace level; `purge_old_logs` sweeps `relay.log.YYYY-MM-DD` files older than 7 days at startup; `--pid-file` and `--log-dir` CLI flags.
+- **Structured logging + log rotation**: layered tracing subscriber — stderr text + daily-rolled JSON via `tracing-appender` + macOS oslog mirror; `TREX_RELAY_TRACE=1` opens trace level; `purge_old_logs` sweeps `relay.log.YYYY-MM-DD` files older than 7 days at startup; `--pid-file` and `--log-dir` CLI flags.
 - **Crash heartbeat + version guard**: `relay_supervisor.rs` adds `SupervisorError::VersionMismatch`; 1Hz `watch_pid` loop; on relay death calls `on_relay_died` (sqlite orphan cleanup + AppKit banner); `VersionMismatch` shows macOS notification and parks in degraded mode — no auto-respawn.
-- **Install scripts**: `scripts/oximux-launchd-install.sh` (opt-in launchd agent; `plutil`-lints plist; refuses if token absent) + `scripts/oximux-uninstall.sh` (full hygiene).
+- **Install scripts**: `scripts/trex-launchd-install.sh` (opt-in launchd agent; `plutil`-lints plist; refuses if token absent) + `scripts/trex-uninstall.sh` (full hygiene).
 
 ---
 
@@ -3352,7 +3352,7 @@ worktree_panel/ mod.rs + list_render.rs
 
 ## 2026-05-17 — Phase 2 steps 1-8
 
-**Commits**: see `plans/260515-2012-oximux-v1-build/plan.md` step notes  
+**Commits**: see `plans/260515-2012-trex-v1-build/plan.md` step notes  
 **Tests**: 234 at end of step 8
 
 Steps 1-8 landed the full git backend: `Repository::open`, porcelain-v2 parser, `StatusPoller`, unified diff parser, file+hunk staging, stash/branch/worktree/merge wrappers, commit, and the `GitPanel` changed-files skeleton.

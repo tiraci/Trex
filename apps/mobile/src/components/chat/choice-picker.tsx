@@ -1,5 +1,5 @@
-import { Check } from 'lucide-react-native';
-import type { Choice } from 'oximux-core';
+﻿import { Check } from 'lucide-react-native';
+import type { Choice } from 'trex-core';
 import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';

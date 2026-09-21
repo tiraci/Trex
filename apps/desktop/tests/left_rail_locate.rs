@@ -1,4 +1,4 @@
-//! "Scroll to current workspace" against a REAL layout.
+﻿//! "Scroll to current workspace" against a REAL layout.
 //!
 //! The rail's scroll container is the workspace-list column, whose direct
 //! children are project groups. `ScrollHandle::scroll_to_item` can only
@@ -13,7 +13,7 @@ use gpui::{
     Bounds, Context, InteractiveElement, IntoElement, ParentElement, Pixels, Render, ScrollHandle,
     StatefulInteractiveElement, Styled, TestAppContext, Window, div, px,
 };
-use oximux_app::shell::left_rail::locate_anchor::{
+use trex_app::shell::left_rail::locate_anchor::{
     LocateAnchor, locate_anchor_canvas, new_anchor, reveal_offset,
 };
 

@@ -1,4 +1,4 @@
-//! The composer's live context-usage meter: a compact bar-in-pill showing how
+﻿//! The composer's live context-usage meter: a compact bar-in-pill showing how
 //! full the model's context window is for the current turn.
 //!
 //! Follows the rate-limit meter's fill-in-a-track pattern
@@ -10,7 +10,7 @@
 //! color (a designed state, not a missing feature).
 
 use gpui::{div, px, relative, Hsla, InteractiveElement, IntoElement, ParentElement, Styled};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Threshold color for the fraction of the context window USED (the inverse of
 /// the rate-limit meter's headroom coloring): >90% error, ≥70% warn, else a
@@ -122,7 +122,7 @@ pub fn context_meter(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_settings::Theme;
+    use trex_settings::Theme;
 
     #[test]
     fn thresholds_match_used_context_bands() {

@@ -1,4 +1,4 @@
-# OxiMux — Design Guidelines (v1)
+﻿# TREX — Design Guidelines (v1)
 
 This document is the source of truth for visual identity, palette, density, typography,
 and composition patterns. It drives `crates/settings/src/theme.rs`, `density.rs`, and
@@ -11,7 +11,7 @@ below first — every shipped surface routes through them.
 
 ## Brand
 
-**Name**: OxiMux.
+**Name**: TREX.
 **One-line**: Rust-native, multi-agent development cockpit for macOS.
 **Tone**: Quiet, technical, terminal-first. Not playful. Not "AI".
 
@@ -221,13 +221,13 @@ and would slip off the ratchet on the way.
 
 **How a change reaches the screen.** Views cache their tokens, so the refresh is
 a pull: every `Render` impl that caches a `Density`/`Typography` calls
-`oximux_settings::appearance::sync` at the top of its `render`, and the setter
+`TREX_settings::appearance::sync` at the top of its `render`, and the setter
 calls `refresh_windows()`. A view that forgets renders at the old size forever
 with nothing failing, so `xtask appearance-lint` fails CI on any that does. The
 same lint rejects `Typography::for_appearance` outside the settings crate: it
 sizes the scale and leaves the faces at the platform default, so a surface built
 that way ignores a chosen font while everything around it obeys. The whole
-answer is `oximux_settings::appearance::typography(cx)`.
+answer is `TREX_settings::appearance::typography(cx)`.
 
 **Radius scale.** Every radius derives from a 10px base with the ratio steps
 xs `0.2×` (2) / sm `0.6×` (6) / md `0.8×` (8) / lg `1×` (10) / xl `1.4×` (14).
@@ -242,7 +242,7 @@ one. `xtask literal-lint` enforces this at the call site: a raw
 token, so a new row there is a regression rather than a checkpoint.
 
 This scale is deliberately the same one shadcn/ui's `new-york` theme uses,
-which is what the reference cockpit is built on — matching it is why OxiMux's
+which is what the reference cockpit is built on — matching it is why TREX's
 chrome reads as the same family rather than an approximation of it.
 
 **Hover-only scrollbar (reference spec).** Scroll surfaces that grow custom
@@ -268,7 +268,7 @@ Single font family. Numbers tabular everywhere for diff alignment and counters.
 | `t_display` | 21 | 600 | The one heading in the app — the onboarding welcome line. Nothing else is a landing page. |
 
 **Font stack**: per-platform, because the *primary* family has to be one the OS
-is guaranteed to ship. Defined in `oximux-settings::fonts::platform`.
+is guaranteed to ship. Defined in `trex-settings::fonts::platform`.
 
 | | macOS | Windows |
 |---|---|---|
@@ -614,7 +614,7 @@ panel** as a pane tab (see below).
   (names `gh auth login`) or an absent one (names install), and a reachable but
   empty repo.
 - **Create workspace from a task** — reuses `create_workspace_async`; the branch
-  is `oximux/<slug>` derived from `"{issue|pr} {n} {title}"` so the number is
+  is `TREX/<slug>` derived from `"{issue|pr} {n} {title}"` so the number is
   legible. The workspace persists a `linked_issue` (`#<n>`, V011 column) shown as
   a `status_info`-tinted badge on its card after the branch chip, and the rail
   auto-activates it (selects + returns home, which also leaves the Tasks tab in
@@ -690,7 +690,7 @@ be misled by the mismatch.
 ## Motion
 
 Disciplined, sub-200ms easing on **state changes** — enough to read as "alive,"
-never enough to read as lag. Source of truth: `oximux_settings::Motion`
+never enough to read as lag. Source of truth: `TREX_settings::Motion`
 (`crates/settings/src/motion.rs`); every animated surface reads the same tokens,
 so reduced-motion is a single switch.
 
@@ -706,12 +706,12 @@ so reduced-motion is a single switch.
 **Easing vocabulary (two curves, split by direction):**
 
 - **OPENs** (overlay/palette/toast ENTER) use
-  `oximux_settings::ease_out_spring()` — exact `cubic-bezier(0.16, 1, 0.3, 1)`:
+  `TREX_settings::ease_out_spring()` — exact `cubic-bezier(0.16, 1, 0.3, 1)`:
   faster out of the gate than quint with a longer settle tail, so an opening
   surface reads "snapped into place, then settled". Monotonic, never
   overshoots (unit-test pinned).
 - **EXITs adopting the accelerate-out read** use
-  `oximux_settings::ease_in_exit()` — exact `cubic-bezier(0.7, 0, 0.84, 0)`
+  `TREX_settings::ease_in_exit()` — exact `cubic-bezier(0.7, 0, 0.84, 0)`
   @ `m_exit` (200ms): the surface lingers a beat then accelerates away, the
   mirror image of the spring open. Adopted opportunistically as exit
   animations get touched; monotonic, unit-test pinned.
@@ -726,7 +726,7 @@ so reduced-motion is a single switch.
   animation each tick re-arms it and pins the CPU. Surfaces that unmount while
   inactive (palette while closed, section body while collapsed, toast before
   push) replay automatically on re-mount with a stable id.
-- **Reduced motion is required, not optional.** Set `OXIMUX_REDUCE_MOTION=1` (the
+- **Reduced motion is required, not optional.** Set `TREX_REDUCE_MOTION=1` (the
   seam a future OS `accessibilityDisplayShouldReduceMotion` query or settings
   toggle plugs into) → the `Motion` global resolves to `Motion::reduced()`, which
   collapses every duration to a 1ms floor (instant, but not `Duration::ZERO` — a

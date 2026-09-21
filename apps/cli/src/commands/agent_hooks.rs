@@ -1,4 +1,4 @@
-//! `oximux agent hooks` — install, remove, and inspect the status hooks that
+﻿//! `TREX agent hooks` — install, remove, and inspect the status hooks that
 //! let an agent CLI say what it is doing.
 //!
 //! Entirely offline. Every verb here reads or writes files in the agents' own
@@ -9,9 +9,9 @@
 
 use std::path::PathBuf;
 
-use oximux_agent_hooks::agent_hook_dialects::{self, DIALECTS, HookDialect};
-use oximux_agent_hooks::agent_hooks_global::{Applied, apply};
-use oximux_agent_hooks::inspect::{self, HookState};
+use trex_agent_hooks::agent_hook_dialects::{self, DIALECTS, HookDialect};
+use trex_agent_hooks::agent_hooks_global::{Applied, apply};
+use trex_agent_hooks::inspect::{self, HookState};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -67,7 +67,7 @@ pub fn status(agent: Option<&str>) -> Result<(Value, String), Failure> {
             "installed": r.state.is_installed(),
             "foreign": r.state.foreign(),
             // Always present, even when nothing was found there: knowing where
-            // OxiMux looked is most of the value when the answer is "nothing".
+            // TREX looked is most of the value when the answer is "nothing".
             "path": r.path.as_ref().map(|p| p.to_string_lossy().into_owned()),
         })).collect::<Vec<_>>(),
     });
@@ -92,7 +92,7 @@ pub fn status(agent: Option<&str>) -> Result<(Value, String), Failure> {
         ));
     }
     if rows.iter().all(|r| r.state == HookState::AgentAbsent) {
-        human.push_str("\nNo agent config directories found — OxiMux adds to an agent's own\nhome and never creates one, so run an agent once first.\n");
+        human.push_str("\nNo agent config directories found — TREX adds to an agent's own\nhome and never creates one, so run an agent once first.\n");
     }
     Ok((data, human))
 }
@@ -173,7 +173,7 @@ fn outcome_line(outcome: &Applied, dialect: &HookDialect) -> String {
         Applied::Unchanged => "already in that state".into(),
         Applied::AgentAbsent => "not installed on this machine — skipped".into(),
         Applied::KeptForeign => format!(
-            "left alone: {} holds hooks OxiMux did not write",
+            "left alone: {} holds hooks TREX did not write",
             dialect
                 .path()
                 .map(|p| p.to_string_lossy().into_owned())

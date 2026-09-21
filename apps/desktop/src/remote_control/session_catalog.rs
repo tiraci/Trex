@@ -1,4 +1,4 @@
-//! The desktop's answer to "what sessions exist, and can you open one?".
+﻿//! The desktop's answer to "what sessions exist, and can you open one?".
 //!
 //! The registry only holds sessions whose chat views have been built, and the
 //! desktop builds a project's views the first time that project is shown. So a
@@ -20,8 +20,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use futures::channel::oneshot;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::catalog::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::catalog::{
     DormantChoice, DormantChoices, DormantSession, DormantTranscript, OpenGate, SessionCatalog,
 };
 
@@ -38,8 +38,8 @@ pub struct DesktopSessionCatalog {
     /// Live sessions, so a dormant row is never emitted for one already running.
     registry: Arc<SessionRegistry>,
     /// Where the persisted layout is read from, and the window whose layout it is.
-    settings: Arc<oximux_storage::SettingsRepo>,
-    projects: Arc<oximux_storage::ProjectRepo>,
+    settings: Arc<trex_storage::SettingsRepo>,
+    projects: Arc<trex_storage::ProjectRepo>,
     window_id: String,
     /// Hands `open` requests to the UI thread, which owns pane construction.
     tx: tokio::sync::mpsc::Sender<OpenRequest>,
@@ -50,8 +50,8 @@ pub struct DesktopSessionCatalog {
 impl DesktopSessionCatalog {
     pub fn new(
         registry: Arc<SessionRegistry>,
-        settings: Arc<oximux_storage::SettingsRepo>,
-        projects: Arc<oximux_storage::ProjectRepo>,
+        settings: Arc<trex_storage::SettingsRepo>,
+        projects: Arc<trex_storage::ProjectRepo>,
         window_id: String,
         tx: tokio::sync::mpsc::Sender<OpenRequest>,
     ) -> Self {
@@ -147,8 +147,8 @@ impl DesktopSessionCatalog {
 /// safety net: a false "exists" merely defers to the fire path's own error,
 /// while a false "gone" silently disables a working schedule.
 pub fn session_known_in_storage(
-    settings: &oximux_storage::SettingsRepo,
-    projects: &oximux_storage::ProjectRepo,
+    settings: &trex_storage::SettingsRepo,
+    projects: &trex_storage::ProjectRepo,
     window_id: &str,
     session_id: &str,
 ) -> bool {
@@ -179,13 +179,13 @@ pub fn session_known_in_storage(
     })
 }
 
-fn model_choice(choice: oximux_agents::thread::ModelChoice) -> DormantChoice {
+fn model_choice(choice: trex_agents::thread::ModelChoice) -> DormantChoice {
     DormantChoice { id: choice.wire, label: choice.label, description: choice.description }
 }
 
 /// A mode has no description — the wire carries one for symmetry with models, and
 /// the picker renders a single-line row without it.
-fn mode_choice(choice: oximux_agents::thread::ModeChoice) -> DormantChoice {
+fn mode_choice(choice: trex_agents::thread::ModeChoice) -> DormantChoice {
     DormantChoice { id: choice.wire, label: choice.label, description: None }
 }
 
@@ -366,7 +366,7 @@ fn registration_outcome(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::thread::{AgentConnection, ModeChoice, ModelChoice, PermissionDecision};
+    use trex_agents::thread::{AgentConnection, ModeChoice, ModelChoice, PermissionDecision};
 
     use crate::persisted_chat::{PersistedChatTranscript, PersistedChoices};
     use crate::session_restore::persisted_terminals::{PersistedTab, PersistedTabs};
@@ -377,9 +377,9 @@ mod tests {
     /// storage — the layout read is the whole point of these tests, so nothing
     /// about it is stubbed.
     fn catalog_over(transcript: PersistedChatTranscript) -> DesktopSessionCatalog {
-        let db = oximux_storage::open_memory().expect("memory db");
-        let settings = Arc::new(oximux_storage::SettingsRepo::new(db.clone()));
-        let projects = Arc::new(oximux_storage::ProjectRepo::new(db));
+        let db = trex_storage::open_memory().expect("memory db");
+        let settings = Arc::new(trex_storage::SettingsRepo::new(db.clone()));
+        let projects = Arc::new(trex_storage::ProjectRepo::new(db));
         let project = projects.insert("thing", "/repo/thing", "main").expect("project");
 
         let snapshot = PersistedTabs {
@@ -419,7 +419,7 @@ mod tests {
         PersistedChatTranscript {
             session_id: "cold-1".into(),
             model: Some("sonnet".into()),
-            entries: vec![oximux_agents::thread::ThreadEntry::User {
+            entries: vec![trex_agents::thread::ThreadEntry::User {
                 text: "what did you change?".into(),
                 images: vec![],
                 checkpoint: None,
@@ -427,7 +427,7 @@ mod tests {
             slash_commands: vec![],
             session_meta: Default::default(),
             thinking_level: Default::default(),
-            provider: oximux_agents::thread::Transport::StreamJson,
+            provider: trex_agents::thread::Transport::StreamJson,
             acp_command: None,
             acp_args: vec![],
             adapter_id: None,
@@ -539,9 +539,9 @@ mod tests {
     /// data dir). Only a session with neither is gone.
     #[test]
     fn session_known_covers_tab_only_and_blob_only_sessions() {
-        let db = oximux_storage::open_memory().expect("memory db");
-        let settings = oximux_storage::SettingsRepo::new(db.clone());
-        let projects = oximux_storage::ProjectRepo::new(db);
+        let db = trex_storage::open_memory().expect("memory db");
+        let settings = trex_storage::SettingsRepo::new(db.clone());
+        let projects = trex_storage::ProjectRepo::new(db);
         let project = projects.insert("thing", "/repo/thing", "main").expect("project");
 
         // Tab-only: names a session id, saves no transcript beside it.

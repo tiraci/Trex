@@ -1,4 +1,4 @@
-# Memory plan — measured, not assumed
+﻿# Memory plan — measured, not assumed
 
 Baseline established 2026-08-18, phase 1 of the transcript-rendering and
 memory work.
@@ -14,7 +14,7 @@ about it. Section 3 is what happens when that distinction is taken seriously.
 
 ## 1. What is measured, and what is not
 
-`scripts/mem-smoke.sh` boots a real `oximux serve` host, streams real agent
+`scripts/mem-smoke.sh` boots a real `TREX serve` host, streams real agent
 partials at it through `scripts/mem-smoke-agent.sh`, and samples the **host
 process's** RSS at four checkpoints. The host is the subject because it owns the
 transcript fold, which is where this plan's allocations live; the CLI driving it
@@ -44,7 +44,7 @@ Idle window 60s with all 16 sessions open.
 | Steady state, after 60s idle | **73–78 MB** | 96 MB |
 | Steady-state retention / raw text | **8.35× – 9.15×** | 9.55× |
 | Idle delta (steady − peak) | **+1.6 – +2.3 MB** | +2.3 MB |
-| `oximux transcript` (reopen) | **14–17 ms** | 42 ms |
+| `TREX transcript` (reopen) | **14–17 ms** | 42 ms |
 
 Observed variance across n=3 release runs: boot ±3.5%, retention 8.10×–9.47×,
 reopen 14–17 ms. The CI thresholds are set well outside this band on purpose
@@ -80,7 +80,7 @@ claim *about that program*; whether it holds here is a separate question, and
 the only way to answer it is to run it here.
 
 Same harness, same workload, the only difference being `#[global_allocator]`
-wired into `oximux-cli` (the binary `oximux serve` runs):
+wired into `trex-cli` (the binary `TREX serve` runs):
 
 | Configuration | boot | retention (peak-sampled) | multiple |
 |---|---|---|---|
@@ -208,7 +208,7 @@ at all and must not wait.
 
 **Not measurable by `scripts/mem-smoke.sh`, structurally.** Both of Phase 2's
 defects live in `apps/desktop`, which links GPUI; the harness measures
-`oximux serve`, which is `oximux-cli`, which a CI gate explicitly forbids from
+`TREX serve`, which is `trex-cli`, which a CI gate explicitly forbids from
 linking GPUI. There is no workload the harness can run that reaches this code.
 What Phase 2 changes is bounded analytically instead: the image cache moves from
 *unbounded* (no `remove`, `clear` or `retain` existed anywhere in the crate) to a

@@ -1,4 +1,4 @@
-//! Vietnamese WER benchmark for the CURRENT (sherpa) stack.
+﻿//! Vietnamese WER benchmark for the CURRENT (sherpa) stack.
 //!
 //! On-demand (`#[ignore]`d): needs downloaded models + a real-speech eval set,
 //! neither of which belongs in `cargo test`. Exists to give the phase-06 GPU/GGUF
@@ -7,15 +7,15 @@
 //! WER math as the GGUF harness.
 //!
 //! ```text
-//! OXIMUX_STT_MODEL_DIR=… OXIMUX_VI_EVAL=… \
-//!   cargo test -p oximux-dictation --test vi_wer_bench -- --ignored --nocapture
+//! trex_STT_MODEL_DIR=… trex_VI_EVAL=… \
+//!   cargo test -p trex-dictation --test vi_wer_bench -- --ignored --nocapture
 //! ```
-//! `OXIMUX_VI_EVAL` holds `manifest.json` ([{file,text}]) + `wav16/*.wav` at 16 kHz mono.
+//! `trex_VI_EVAL` holds `manifest.json` ([{file,text}]) + `wav16/*.wav` at 16 kHz mono.
 
 use std::path::{Path, PathBuf};
 
-use oximux_dictation::engine::{Engine, EngineKind, ModelPaths};
-use oximux_dictation::resample;
+use trex_dictation::engine::{Engine, EngineKind, ModelPaths};
+use trex_dictation::resample;
 
 /// Vietnamese-safe normalization: lowercase, drop punctuation, collapse spaces.
 /// Diacritics are MEANINGFUL in Vietnamese and are deliberately preserved.
@@ -58,23 +58,23 @@ fn load_16k(path: &Path) -> Vec<f32> {
 }
 
 fn model_root() -> PathBuf {
-    std::env::var("OXIMUX_STT_MODEL_DIR")
+    std::env::var("TREX_STT_MODEL_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| {
             PathBuf::from(std::env::var("HOME").unwrap_or_default())
-                .join("Library/Application Support/dev.nhtera.oximux/speech-models")
+                .join("Library/Application Support/dev.tiraci.trex/speech-models")
         })
 }
 
 /// Build ModelPaths for a catalog model by id, or None if not downloaded.
 fn paths_for(root: &Path, id: &str, language: Option<String>) -> Option<ModelPaths> {
-    let spec = oximux_dictation::spec_for(id)?;
+    let spec = trex_dictation::spec_for(id)?;
     let dir = root.join(id);
     let kind = match spec.family {
-        oximux_dictation::Family::Whisper => EngineKind::Whisper { language },
-        oximux_dictation::Family::Zipformer => EngineKind::Zipformer,
-        oximux_dictation::Family::Transducer => EngineKind::Transducer,
-        oximux_dictation::Family::SenseVoice => EngineKind::SenseVoice,
+        trex_dictation::Family::Whisper => EngineKind::Whisper { language },
+        trex_dictation::Family::Zipformer => EngineKind::Zipformer,
+        trex_dictation::Family::Transducer => EngineKind::Transducer,
+        trex_dictation::Family::SenseVoice => EngineKind::SenseVoice,
     };
     let p = ModelPaths {
         id: id.to_string(),
@@ -96,7 +96,7 @@ fn paths_for(root: &Path, id: &str, language: Option<String>) -> Option<ModelPat
 /// Trim silence with a freshly-built Silero VAD, matching the production
 /// single-use lifecycle and its fall-back-to-untrimmed safety net.
 fn vad_trim(model_root: &Path, samples: Vec<f32>) -> Vec<f32> {
-    use oximux_dictation::vad::{self, Vad};
+    use trex_dictation::vad::{self, Vad};
     let Ok(path) = vad::ensure_downloaded(model_root) else {
         return samples;
     };
@@ -104,7 +104,7 @@ fn vad_trim(model_root: &Path, samples: Vec<f32>) -> Vec<f32> {
         return samples;
     };
     let trimmed = v.keep_speech(&samples);
-    if trimmed.is_empty() && !oximux_dictation::engine::is_silent(&samples) {
+    if trimmed.is_empty() && !trex_dictation::engine::is_silent(&samples) {
         return samples;
     }
     trimmed
@@ -119,8 +119,8 @@ struct Item {
 #[test]
 #[ignore = "needs downloaded models + a real-speech eval set; run manually with --ignored"]
 fn vietnamese_wer_of_current_stack() {
-    let Ok(eval) = std::env::var("OXIMUX_VI_EVAL") else {
-        eprintln!("SKIP: set OXIMUX_VI_EVAL to the eval-set dir (manifest.json + wav16/)");
+    let Ok(eval) = std::env::var("TREX_VI_EVAL") else {
+        eprintln!("SKIP: set trex_VI_EVAL to the eval-set dir (manifest.json + wav16/)");
         return;
     };
     let eval = PathBuf::from(eval);
@@ -133,10 +133,10 @@ fn vietnamese_wer_of_current_stack() {
     println!("\n=== Vietnamese WER — current (sherpa, CPU) ===");
     println!("eval: {} clips from {}\n", items.len(), eval.display());
 
-    // `OXIMUX_VI_EVAL_VAD=1` trims with Silero first, mirroring the shipped
+    // `trex_VI_EVAL_VAD=1` trims with Silero first, mirroring the shipped
     // default (`vad_enabled` is on) — so the bench can measure the config users
     // actually run, not just a raw decode.
-    let use_vad = std::env::var("OXIMUX_VI_EVAL_VAD").is_ok_and(|v| v == "1");
+    let use_vad = std::env::var("TREX_VI_EVAL_VAD").is_ok_and(|v| v == "1");
     println!("VAD trim: {}\n", if use_vad { "ON" } else { "off" });
 
     // Pin whisper to `vi`; zipformer-vi is Vietnamese-only and ignores language.

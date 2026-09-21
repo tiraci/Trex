@@ -1,4 +1,4 @@
-//! The scrolling transcript: how a `Vec<ThreadEntry>` becomes rows on screen,
+﻿//! The scrolling transcript: how a `Vec<ThreadEntry>` becomes rows on screen,
 //! and every scroll primitive the rest of the chat drives it with.
 //!
 //! Split out of `mod.rs` unchanged. The three consumers that jump around the
@@ -51,12 +51,12 @@ const REVEAL_ATTEMPTS: u8 = 4;
 ///
 /// An escape hatch, not a feature. Virtualizing rewrites how every jump, the
 /// rail, the find bar and auto-follow address the transcript, and
-/// `OXIMUX_LEGACY_TRANSCRIPT=1` is the way back without waiting for a release.
+/// `trex_LEGACY_TRANSCRIPT=1` is the way back without waiting for a release.
 /// Read once per process: the two paths keep their scroll position in different
 /// places, so flipping mid-session would land the user somewhere arbitrary.
 pub(super) fn virtualized() -> bool {
     static ON: OnceLock<bool> = OnceLock::new();
-    *ON.get_or_init(|| std::env::var_os("OXIMUX_LEGACY_TRANSCRIPT").is_none())
+    *ON.get_or_init(|| std::env::var_os("TREX_LEGACY_TRANSCRIPT").is_none())
 }
 
 /// A jump that has been issued and is still converging.
@@ -618,7 +618,7 @@ impl AgentChatView {
 
         // Park the moment the lag is closed. A spring that never says so
         // repaints forever, which on this platform is not merely wasted work —
-        // see `oximux-macos-freeze-appnap-relay-runtime`. Nothing is lost by
+        // see `trex-macos-freeze-appnap-relay-runtime`. Nothing is lost by
         // parking mid-stream: the next delta repaints the transcript by itself.
         if self.scroll.lag > 0.0 {
             self.schedule_follow_frame(window, cx);
@@ -1594,8 +1594,8 @@ fn usage_footer(usage: &TurnUsage, theme: Theme, typo: &Typography) -> AnyElemen
 mod tests {
     use super::*;
     use gpui::{size, TestAppContext, VisualTestContext};
-    use oximux_agents::thread::ThreadEvent;
-    use oximux_agents::thread::StubConnection;
+    use trex_agents::thread::ThreadEvent;
+    use trex_agents::thread::StubConnection;
 
     fn user(text: &str) -> ThreadEntry {
         ThreadEntry::User { text: text.into(), images: Vec::new(), checkpoint: None }
@@ -1621,7 +1621,7 @@ mod tests {
     /// renderer that split nothing — which is precisely the failure this
     /// callback exists to make visible.
     fn real_blocks(_idx: usize, text: &str) -> usize {
-        oximux_markdown::parse_full(text).blocks.len()
+        trex_markdown::parse_full(text).blocks.len()
     }
 
     /// The head row an assistant entry always gets, followed by one row per

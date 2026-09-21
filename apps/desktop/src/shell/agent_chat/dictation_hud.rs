@@ -1,4 +1,4 @@
-//! The global "Listening…" HUD — voice dictation for any focused text pane.
+﻿//! The global "Listening…" HUD — voice dictation for any focused text pane.
 //!
 //! Dictation is no longer chat-only. When ⌘E is pressed with a terminal or code
 //! editor focused, the workspace root resolves a [`HudSink`] for that pane and
@@ -21,8 +21,8 @@ use gpui::{
 };
 use gpui_component::WindowExt as _;
 use gpui_component::input::EditorState;
-use oximux_dictation::DictationEvent;
-use oximux_settings::{Density, Theme, Typography};
+use trex_dictation::DictationEvent;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::terminal_view::TerminalView;
 use crate::ui::FloatingSurface;
@@ -117,7 +117,7 @@ impl DictationHud {
     fn begin(
         &mut self,
         sink: HudSink,
-        paths: oximux_dictation::ModelPaths,
+        paths: trex_dictation::ModelPaths,
         device: Option<String>,
         cx: &mut Context<Self>,
     ) {
@@ -258,7 +258,7 @@ impl DictationHud {
 
 impl Render for DictationHud {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Insert any finished transcript first (window in hand).
         self.apply_pending(window, cx);
 

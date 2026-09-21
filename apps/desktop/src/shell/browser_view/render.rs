@@ -1,4 +1,4 @@
-//! `BrowserView` render: a compact toolbar (back / forward / reload +
+﻿//! `BrowserView` render: a compact toolbar (back / forward / reload +
 //! address bar) above an anchor canvas. The canvas paint pins the native
 //! webview's frame to the laid-out body bounds each frame — the webview
 //! draws there natively, above the GPU canvas.
@@ -20,7 +20,7 @@ use super::{BrowserView, CopyKind, PageAppearance, ShotDest};
 
 impl Render for BrowserView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         // Cloned (not borrowed) so the deferred profile-apply below can take a

@@ -1,4 +1,4 @@
-//! Audible start/stop cues for a dictation press.
+﻿//! Audible start/stop cues for a dictation press.
 //!
 //! A tactile confirmation that capture went live (and ended) without looking at
 //! the mic pill. Deliberately **dependency-free**: rather than pull in an audio
@@ -7,7 +7,7 @@
 //! dependency surface unchanged and means there are no binary assets to ship or
 //! license.
 //!
-//! Non-macOS targets compile to a no-op — OxiMux is macOS-only today, and a
+//! Non-macOS targets compile to a no-op — TREX is macOS-only today, and a
 //! missing cue must never be a build error.
 //!
 //! Playback is fire-and-forget: [`play`] returns immediately and must never
@@ -47,7 +47,7 @@ impl Cue {
 pub fn play(cue: Cue) {
     let path = cue.sound_path();
     let spawned = std::thread::Builder::new()
-        .name("oximux-dictation-cue".into())
+        .name("trex-dictation-cue".into())
         .spawn(move || {
             let _ = std::process::Command::new("/usr/bin/afplay")
                 .arg(path)

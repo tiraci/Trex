@@ -1,4 +1,4 @@
-//! The per-session event pump — serve's stand-in for the desktop's chat view.
+﻿//! The per-session event pump — serve's stand-in for the desktop's chat view.
 //!
 //! On the desktop, a view drains the agent's event receiver, feeds the
 //! registry (so remote subscribers see the stream), folds the transcript, and
@@ -9,10 +9,10 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use oximux_agent_core::thread::ThreadEvent;
-use oximux_agents::session_registry::{RemotePrompt, SessionHandle, SessionMeta, SessionRegistry};
-use oximux_agents::thread::ChatThread;
-use oximux_storage::SettingsRepo;
+use trex_agent_core::thread::ThreadEvent;
+use trex_agents::session_registry::{RemotePrompt, SessionHandle, SessionMeta, SessionRegistry};
+use trex_agents::thread::ChatThread;
+use trex_storage::SettingsRepo;
 
 use super::blob::{self, ChatBlob};
 use super::catalog::SessionIndex;
@@ -296,7 +296,7 @@ fn apply(
     //
     // `UserMessage` is in the list because it is what makes a title derivable:
     // these backends never send `TitleUpdated`, so without it `fold.title` stays
-    // `None` for the whole life of a live session and `oximux ls` falls back to
+    // `None` for the whole life of a live session and `TREX ls` falls back to
     // printing the session's own UUID as its title — for every row, which is
     // precisely when a list stops being usable. A resumed session emits no
     // `SessionInit` either, so this is also the only trigger it has — but a
@@ -317,7 +317,7 @@ fn apply(
 /// Publish the fold's list-row metadata to the registry. One function for every
 /// path that can make a title derivable — the event path (`apply`) and the two
 /// protocol-prompt arms in the pump loop — because applying the derived-title
-/// fallback on only some of them is exactly the bug that made `oximux ls` show
+/// fallback on only some of them is exactly the bug that made `TREX ls` show
 /// a live session as its own UUID whenever the backend announced before the
 /// first prompt landed (and always, for a resumed session).
 fn refresh_meta(handle: &SessionHandle, fold: &ChatThread) {
@@ -381,7 +381,7 @@ impl Persist {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::thread::StubConnection;
+    use trex_agents::thread::StubConnection;
 
     fn wait_until(deadline_ms: u64, mut probe: impl FnMut() -> bool) -> bool {
         let deadline = std::time::Instant::now() + std::time::Duration::from_millis(deadline_ms);
@@ -403,7 +403,7 @@ mod tests {
     async fn a_dead_agent_returns_its_session_to_dormant() {
         let registry = Arc::new(SessionRegistry::new());
         let handle = registry.register("s-1".into(), Arc::new(StubConnection::default()));
-        let db = oximux_storage::open_memory().unwrap();
+        let db = trex_storage::open_memory().unwrap();
         let settings = SettingsRepo::new(db);
         let index = Arc::new(SessionIndex::default());
         let pumps = PumpSet::new();
@@ -461,7 +461,7 @@ mod tests {
 
     /// A LIVE session lists by its prompt, not by its own UUID.
     ///
-    /// The registry row is what `oximux ls` reads while a session is running,
+    /// The registry row is what `TREX ls` reads while a session is running,
     /// and it used to publish `fold.title` alone. These backends never send
     /// `TitleUpdated`, so that stayed `None` for the session's whole life and
     /// the wire fell back to the session id — every row reading
@@ -473,7 +473,7 @@ mod tests {
     async fn a_live_session_lists_by_its_prompt_rather_than_its_own_id() {
         let registry = Arc::new(SessionRegistry::new());
         let handle = registry.register("s-2".into(), Arc::new(StubConnection::default()));
-        let db = oximux_storage::open_memory().unwrap();
+        let db = trex_storage::open_memory().unwrap();
         let settings = SettingsRepo::new(db);
         let index = Arc::new(SessionIndex::default());
         let pumps = PumpSet::new();
@@ -520,7 +520,7 @@ mod tests {
     async fn a_prompt_injected_over_the_protocol_still_titles_the_live_row() {
         let registry = Arc::new(SessionRegistry::new());
         let handle = registry.register("s-3".into(), Arc::new(StubConnection::default()));
-        let db = oximux_storage::open_memory().unwrap();
+        let db = trex_storage::open_memory().unwrap();
         let settings = SettingsRepo::new(db);
         let index = Arc::new(SessionIndex::default());
         let pumps = PumpSet::new();

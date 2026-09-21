@@ -1,4 +1,4 @@
-//! Exact usage from the primary CLI's account usage API.
+﻿//! Exact usage from the primary CLI's account usage API.
 //!
 //! The CLI's OAuth deployment exposes `GET /api/oauth/usage` returning the
 //! account's REAL rate-limit window utilization (the same numbers its own
@@ -20,7 +20,7 @@
 //! Keychain ACL caveat: reading another app's Keychain item prompts the
 //! user unless this binary's signing identity was previously allowed. An
 //! ad-hoc-signed dev bundle gets a NEW identity every reseal, so the
-//! prompt returns after each rebuild; a stable `OXIMUX_SIGN_ID` identity
+//! prompt returns after each rebuild; a stable `trex_SIGN_ID` identity
 //! makes "Always Allow" stick. A decline simply fails the fetch and the
 //! caller surfaces "unavailable".
 
@@ -80,7 +80,7 @@ pub enum FetchError {
 /// `GET /api/oauth/usage` using the token the official CLI already minted —
 /// it never mints, refreshes, or rotates credentials, and never writes the
 /// Keychain. Refreshing an expired token is delegated to the official CLI
-/// (which the user runs normally); OxiMux must never call the OAuth token
+/// (which the user runs normally); TREX must never call the OAuth token
 /// endpoint itself.
 pub fn fetch(home: &Path) -> Result<OauthUsage, FetchError> {
     let Some(token) = read_oauth_token(home) else {
@@ -234,7 +234,7 @@ fn curl_usage_endpoint(token: &str) -> Option<(u16, String)> {
          header = \"User-Agent: {USER_AGENT}\"\n"
     );
     let mut child = {
-        use oximux_no_window::NoWindow as _;
+        use trex_no_window::NoWindow as _;
         Command::new(curl_binary())
             .args(["-K", "-"])
             .stdin(Stdio::piped())

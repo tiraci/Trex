@@ -1,4 +1,4 @@
-//! Headless end-to-end verification of the ACP embedded-terminal path.
+﻿//! Headless end-to-end verification of the ACP embedded-terminal path.
 //!
 //! Installs a fake [`AcpTerminalHost`], spawns the sibling `mock_acp_terminal_agent`
 //! over a real `AcpConnection`, sends one prompt, and asserts the client:
@@ -9,19 +9,19 @@
 //! Exits non-zero if the flow doesn't complete — a real regression guard for the
 //! agents-side wiring (the app's real host + inline render is verified in-GUI).
 //!
-//! Run: `cargo run -p oximux-agents --example acp_terminal_smoke`
+//! Run: `cargo run -p trex-agents --example acp_terminal_smoke`
 
 use std::sync::Arc;
 use std::sync::mpsc::RecvTimeoutError;
 use std::time::{Duration, Instant};
 
 use futures::channel::oneshot;
-use oximux_agents::thread::acp::{
+use trex_agents::thread::acp::{
     AcpConnection, AcpTerminalHost, TerminalExitLite, TerminalOutputLite, TerminalSpawnSpec,
     install_terminal_host,
 };
-use oximux_agents::thread::connection::AgentConnection;
-use oximux_agents::thread::event::ThreadEvent;
+use trex_agents::thread::connection::AgentConnection;
+use trex_agents::thread::event::ThreadEvent;
 
 /// A host that never touches a real PTY: it hands back a canned id, canned
 /// output, and an already-exited status — enough to prove the client serves
@@ -64,7 +64,7 @@ fn main() {
         .expect("locate mock_acp_terminal_agent");
     if !agent_bin.exists() {
         eprintln!(
-            "FAIL: {} not built — run `cargo build -p oximux-agents --example mock_acp_terminal_agent` first",
+            "FAIL: {} not built — run `cargo build -p trex-agents --example mock_acp_terminal_agent` first",
             agent_bin.display()
         );
         std::process::exit(1);

@@ -1,4 +1,4 @@
-//! Breadcrumb header for `EditorView`: a clickable copy-path label and a single
+﻿//! Breadcrumb header for `EditorView`: a clickable copy-path label and a single
 //! "⋯" overflow menu holding every file action (copy contents, reveal in
 //! Finder, open in an external editor).
 //!
@@ -120,8 +120,8 @@ pub fn actions_overlay(path: &Path, has_text: bool, cx: &Context<EditorView>) ->
     let fg = theme.foreground;
     // Per render, like the rest of this overlay: the editor keeps no token
     // snapshot of its own.
-    let corner = oximux_settings::appearance::density(cx).r_xs;
-    let text_size = oximux_settings::appearance::typography(cx).t_body_base;
+    let corner = trex_settings::appearance::density(cx).r_xs;
+    let text_size = trex_settings::appearance::typography(cx).t_body_base;
 
     let mut card = v_flex()
         // Definite width (not `min_w`): a shrink-wrapped card sizes to its
@@ -172,7 +172,7 @@ pub fn actions_overlay(path: &Path, has_text: bool, cx: &Context<EditorView>) ->
         }),
     ));
 
-    // Reveal in OxiMux's own file-tree sidebar (expand ancestors + scroll to
+    // Reveal in TREX's own file-tree sidebar (expand ancestors + scroll to
     // the row). The editor crate doesn't own the tree, so dispatch an action
     // the host shell handles.
     let explorer_target = path.to_path_buf();

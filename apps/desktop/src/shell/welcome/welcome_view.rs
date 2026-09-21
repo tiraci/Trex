@@ -1,4 +1,4 @@
-//! Welcome screen — empty-state center pane shown when no project panes
+﻿//! Welcome screen — empty-state center pane shown when no project panes
 //! are mounted.
 //!
 //! Borderless, centered directly on the workspace background. Logo tile,
@@ -6,7 +6,7 @@
 //! marketing hero. `should_show_welcome` is the pure predicate used in tests.
 
 use gpui::{IntoElement, ParentElement, Styled, div, px, svg};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::welcome_actions;
 
@@ -88,7 +88,7 @@ fn wordmark(theme: Theme, typography: &Typography) -> impl IntoElement {
         .text_size(px(typography.t_brand * 2.0))
         .font_weight(typography.w_semibold)
         .text_color(theme.fg_base)
-        .child("OxiMux")
+        .child("TREX")
 }
 
 fn tagline(theme: Theme, typography: &Typography) -> impl IntoElement {

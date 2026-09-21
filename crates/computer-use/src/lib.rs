@@ -1,4 +1,4 @@
-//! Screen control for agents, backed by an external `cua-driver` daemon.
+﻿//! Screen control for agents, backed by an external `cua-driver` daemon.
 //!
 //! # What this crate owns — and what it deliberately does not
 //!
@@ -6,7 +6,7 @@
 //! machine-wide daemon shared with every other MCP client, and it starts that
 //! daemon on demand by itself. So this crate:
 //!
-//! - **verifies** the binary before OxiMux will declare it to any agent,
+//! - **verifies** the binary before TREX will declare it to any agent,
 //! - **declares** it as an MCP server ([`mcp::server_spec`]),
 //! - **reads** daemon state ([`daemon::status`]) without managing it,
 //! - **cleans up its own sessions** ([`session::reconcile`]).
@@ -50,7 +50,7 @@
 //!    input synthesis on Windows needs no permission at all.
 //! 3. **No trust anchor.** [`verify`]'s model is Apple code signing and the
 //!    Windows artifacts are unsigned. Answered by [`trust`]: the user approves
-//!    the exact bytes and OxiMux refuses if they change. A weaker anchor than a
+//!    the exact bytes and TREX refuses if they change. A weaker anchor than a
 //!    signature, deliberately — it establishes **continuity, not identity**.
 //!    Read that module before describing it to a user as verification.
 //! 4. **No way to say yes.** An anchor whose approval step has no UI refuses
@@ -91,13 +91,13 @@ pub mod version;
 use std::path::PathBuf;
 use std::time::Duration;
 
-/// OxiMux's own bundle identifier.
+/// TREX's own bundle identifier.
 ///
 /// Used two ways that must not drift apart: as the driver's advisory host label
 /// (so `check_permissions` names who asked), and as the identity an agent is
 /// never allowed to drive. Must track `CFBundleIdentifier` in
 /// `assets/Info.plist`.
-pub const HOST_BUNDLE_ID: &str = "dev.nhtera.oximux";
+pub const HOST_BUNDLE_ID: &str = "dev.tiraci.trex";
 
 /// The enforcing hook's binary, which ships beside the app executable.
 ///
@@ -106,13 +106,13 @@ pub const HOST_BUNDLE_ID: &str = "dev.nhtera.oximux";
 /// three spellings of one string, and the two that are not Rust cannot be
 /// checked by anything. Keep them in step with
 /// `scripts/bundle-macos.sh`.
-pub const GATE_BINARY_NAME: &str = "oximux-screen-gate";
+pub const GATE_BINARY_NAME: &str = "trex-screen-gate";
 
 /// [`GATE_BINARY_NAME`] with the platform's executable extension.
 ///
 /// The constant is the `[[bin]]` name and the name the bundle script copies in
 /// under; this is what is actually on disk. They differ only on Windows, where
-/// the file is `oximux-screen-gate.exe` — and a lookup for the extensionless
+/// the file is `trex-screen-gate.exe` — and a lookup for the extensionless
 /// name there finds nothing, which reads as "no gate installed" and silently
 /// runs chats unenforced.
 ///
@@ -144,18 +144,18 @@ pub use mcp::{bare_tool_name, is_computer_use_tool, SERVER_NAME};
 #[cfg(any(not(windows), feature = "windows-screen-control"))]
 pub use mcp::server_spec;
 pub use policy::{decide, Decision, PolicyContext};
-// Screenshot scrubbing moved to `oximux-agent-core` so it keeps compiling on
+// Screenshot scrubbing moved to `trex-agent-core` so it keeps compiling on
 // platforms this crate does not build for (see that crate's `redact` module).
 // Re-exported under the old path because this crate is where callers expect
 // anything screen-control-shaped to live.
-pub use oximux_agent_core::redact::{scrub_transcript, ScreenshotFilter};
+pub use trex_agent_core::redact::{scrub_transcript, ScreenshotFilter};
 pub use session::{Reconciliation, SessionId, SessionLedger};
 pub use target::{Category, TargetApp};
 pub use trust::{Trust, TrustStore};
 pub use verify::{TrustBasis, VerifiedDriver};
 pub use version::Version;
 
-/// Everything that can stop OxiMux from offering screen control.
+/// Everything that can stop TREX from offering screen control.
 ///
 /// Each variant names a distinct cause because these surface to the user in
 /// settings: "not installed" and "signed by someone else" call for very

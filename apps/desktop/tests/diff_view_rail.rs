@@ -1,15 +1,15 @@
-//! Pure-unit tests for the file rail's jump-target index.
+﻿//! Pure-unit tests for the file rail's jump-target index.
 //!
 //! `build_first_row_of_file` is the rail's click-to-jump map: file_idx →
 //! the prepared-row index of that file's `FileHeader`. Every entry must
 //! land on the matching header so a rail click scrolls the body to the
 //! right file. No GPUI, no tokio.
 
-use oximux_app::shell::diff_view::file_header::build_first_row_of_file;
-use oximux_app::shell::diff_view::paint::{PreparedRow, prepare};
-use oximux_app::shell::diff_view::render::{Highlight, RenderCtx, build_render_plan};
-use oximux_core::{DiffHunk, DiffLine, DiffLineKind, DiffStatus, FileDiff};
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::diff_view::file_header::build_first_row_of_file;
+use trex_app::shell::diff_view::paint::{PreparedRow, prepare};
+use trex_app::shell::diff_view::render::{Highlight, RenderCtx, build_render_plan};
+use trex_core::{DiffHunk, DiffLine, DiffLineKind, DiffStatus, FileDiff};
+use trex_settings::{Density, Theme, Typography};
 use std::collections::HashSet;
 use std::path::PathBuf;
 
@@ -39,7 +39,7 @@ fn one_change_file(path: &str) -> FileDiff {
 
 fn prepared(files: &[FileDiff]) -> Vec<PreparedRow> {
     let plan = build_render_plan(files, false, Highlight::On { light: false });
-    let regions: Vec<_> = files.iter().map(oximux_core::change_regions).collect();
+    let regions: Vec<_> = files.iter().map(trex_core::change_regions).collect();
     let typography = Typography::default();
     let rctx = RenderCtx {
         theme: Theme::charcoal(),

@@ -1,4 +1,4 @@
-//! Right-sidebar drag-resize handle (Phase 13).
+﻿//! Right-sidebar drag-resize handle (Phase 13).
 //!
 //! The handle lives on the LEFT edge of the panel column. Dragging
 //! it towards the main pane (cursor moves left) GROWS the sidebar;
@@ -70,7 +70,7 @@ impl Render for SidebarResizeGhost {
 /// hitbox paints a wider `border_active` bar over it — an absolute
 /// overlay so the highlight widens without any layout shift, and the
 /// edge never reads as two offset lines.
-pub fn build_handle(window_width: f32, resizing: bool, theme: oximux_settings::Theme) -> AnyElement {
+pub fn build_handle(window_width: f32, resizing: bool, theme: trex_settings::Theme) -> AnyElement {
     let stripe = div()
         .h_full()
         .w(px(HANDLE_STRIPE_PX))

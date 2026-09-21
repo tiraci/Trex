@@ -1,4 +1,4 @@
-//! Pure (cx-free) renderer for the inline turn-error card.
+﻿//! Pure (cx-free) renderer for the inline turn-error card.
 //!
 //! When a turn ends in error *after* the transcript is non-empty, the empty-
 //! state hint (which only paints on a blank transcript) never surfaces it, so
@@ -9,7 +9,7 @@
 //! owns it while this stays pure).
 
 use gpui::{AnyElement, IntoElement, ParentElement, SharedString, Styled, div, px};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::bubble::elide;
 

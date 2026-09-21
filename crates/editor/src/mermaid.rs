@@ -1,4 +1,4 @@
-//! Mermaid fence rendering for the markdown preview.
+﻿//! Mermaid fence rendering for the markdown preview.
 //!
 //! ```mermaid fences are rendered to diagrams headlessly via `merman` (no
 //! browser, no Node): each fence's source is rendered to an SVG file in a
@@ -148,7 +148,7 @@ fn fence_key(contents: &str) -> u64 {
 /// file.
 fn cache_path(key: u64) -> PathBuf {
     std::env::temp_dir()
-        .join("oximux-mermaid")
+        .join("trex-mermaid")
         .join(format!("m{key:016x}.svg"))
 }
 

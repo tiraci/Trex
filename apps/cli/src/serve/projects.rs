@@ -1,11 +1,11 @@
-//! The headless [`ProjectProvider`]: the roots `--project` named plus a
+﻿//! The headless [`ProjectProvider`]: the roots `--project` named plus a
 //! `projects.toml` beside the database — a server's project list is
 //! configuration, not discovery.
 
 use std::path::PathBuf;
 
-use oximux_remote_host::ProjectProvider;
-use oximux_remote_proto::messages::ProjectSummaryWire;
+use trex_remote_host::ProjectProvider;
+use trex_remote_proto::messages::ProjectSummaryWire;
 
 pub struct StaticProjects {
     roots: Vec<PathBuf>,

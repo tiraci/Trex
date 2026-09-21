@@ -1,4 +1,4 @@
-//! App-side backing for ACP embedded terminals — the concrete
+﻿//! App-side backing for ACP embedded terminals — the concrete
 //! [`AcpTerminalHost`] the domain crate delegates its `terminal/*` handlers to.
 //!
 //! An ACP agent asks the client (us) to spawn a command, poll its output, wait
@@ -24,11 +24,11 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use futures::channel::oneshot;
-use oximux_agents::SharedBackend;
-use oximux_agents::thread::acp::{
+use trex_agents::SharedBackend;
+use trex_agents::thread::acp::{
     AcpTerminalHost, TerminalExitLite, TerminalOutputLite, TerminalSpawnSpec,
 };
-use oximux_pty::{TerminalEvent, TerminalSessionId};
+use trex_pty::{TerminalEvent, TerminalSessionId};
 
 use crate::shell::terminal_view::spawn_embedded_command;
 
@@ -257,7 +257,7 @@ static HOST: OnceLock<Arc<EmbeddedTerminalHost>> = OnceLock::new();
 pub fn install() {
     let host = Arc::new(EmbeddedTerminalHost::default());
     if HOST.set(host.clone()).is_ok() {
-        oximux_agents::thread::acp::install_terminal_host(host);
+        trex_agents::thread::acp::install_terminal_host(host);
     }
 }
 

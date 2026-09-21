@@ -1,4 +1,4 @@
-//! Opt-in in-diff file navigator for the combined / multi-file diff.
+﻿//! Opt-in in-diff file navigator for the combined / multi-file diff.
 //!
 //! The persistent external SCM panel stays the PRIMARY file list; this rail
 //! is the in-scroll navigator shown alongside the combined diff. Files render
@@ -15,8 +15,8 @@ use gpui::{
     StatefulInteractiveElement as _, Styled, WeakEntity, div, px,
 };
 use gpui_component::{Icon, Sizable as _};
-use oximux_core::FileGroup;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::FileGroup;
+use trex_settings::{Density, Theme, Typography};
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 

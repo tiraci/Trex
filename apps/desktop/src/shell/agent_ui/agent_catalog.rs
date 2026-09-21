@@ -1,4 +1,4 @@
-//! The one answer to "which agents does this app know about".
+﻿//! The one answer to "which agents does this app know about".
 //!
 //! Two surfaces need that answer and used to compute it separately: the
 //! launcher's adapter picker walked the registry and `ACP_PRESETS` inline, and
@@ -13,8 +13,8 @@
 //! — but neither decides membership any more.
 
 use gpui::SharedString;
-use oximux_agents::registry::RegistryEntry;
-use oximux_settings::{AgentLaunchSettings, Transport};
+use trex_agents::registry::RegistryEntry;
+use trex_settings::{AgentLaunchSettings, Transport};
 
 /// The adapter list, and whether its `available` flags mean anything yet.
 ///
@@ -55,7 +55,7 @@ pub enum AgentOrigin {
     /// A registered `CliAgentAdapter` — the built-in four plus `Custom`.
     /// Launches with `args_for_in` / `model_for_in` applied.
     Builtin,
-    /// A zero-config entry from [`oximux_settings::ACP_PRESETS`].
+    /// A zero-config entry from [`trex_settings::ACP_PRESETS`].
     AcpPreset,
     /// An `[agents.<id>]` block the user wrote with `transport = "acp"`, for an
     /// id that is neither a built-in nor a preset.
@@ -93,7 +93,7 @@ pub struct CatalogAgent {
 /// Compose the full agent set: registry adapters, then the ACP presets, then
 /// any ACP agent the user configured by hand.
 ///
-/// `preset_available` is parallel to [`oximux_settings::ACP_PRESETS`], the same
+/// `preset_available` is parallel to [`trex_settings::ACP_PRESETS`], the same
 /// convention the launcher's picker uses; `None` before its detection has run.
 ///
 /// Order is stable and meaningful: registration order for the built-ins (which
@@ -117,7 +117,7 @@ pub fn agent_catalog(
     }
 
     // Built-in ACP presets.
-    for (ix, preset) in oximux_settings::ACP_PRESETS.iter().enumerate() {
+    for (ix, preset) in trex_settings::ACP_PRESETS.iter().enumerate() {
         // A preset id that a registered adapter already claims is that
         // adapter, not a preset — membership is decided once, by the first
         // source that claims the id.
@@ -158,8 +158,8 @@ pub fn agent_catalog(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::registry::AdapterRegistry;
-    use oximux_settings::PerAgentLaunch;
+    use trex_agents::registry::AdapterRegistry;
+    use trex_settings::PerAgentLaunch;
 
     fn registry() -> AdapterRegistry {
         AdapterRegistry::with_builtin_adapters()
@@ -183,7 +183,7 @@ mod tests {
             );
         }
         // Every ACP preset.
-        for p in oximux_settings::ACP_PRESETS {
+        for p in trex_settings::ACP_PRESETS {
             let found = cat.iter().find(|a| a.id == p.id).expect("preset in catalog");
             assert_eq!(found.origin, AgentOrigin::AcpPreset);
         }
@@ -251,10 +251,10 @@ mod tests {
         let reg = registry();
         let launch = AgentLaunchSettings::default();
         let avail: Vec<bool> =
-            (0..oximux_settings::ACP_PRESETS.len()).map(|i| i % 2 == 0).collect();
+            (0..trex_settings::ACP_PRESETS.len()).map(|i| i % 2 == 0).collect();
         let registered = reg.entries_without_detection();
         let cat = agent_catalog(AdapterDetection::Pending(&registered), Some(&avail), &launch);
-        for (ix, p) in oximux_settings::ACP_PRESETS.iter().enumerate() {
+        for (ix, p) in trex_settings::ACP_PRESETS.iter().enumerate() {
             let found = cat.iter().find(|a| a.id == p.id).expect("preset");
             assert_eq!(found.available, Some(avail[ix]), "{} availability", p.id);
         }
@@ -296,7 +296,7 @@ mod tests {
                 row.adapter_id,
             );
         }
-        for preset in oximux_settings::ACP_PRESETS {
+        for preset in trex_settings::ACP_PRESETS {
             assert!(
                 catalog.iter().any(|c| c.id == preset.id),
                 "the launcher can start the {} preset but settings cannot configure it",

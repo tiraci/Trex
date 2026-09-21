@@ -1,4 +1,4 @@
-//! On-disk store for recent dictation transcripts (the Voice-pane "History").
+﻿//! On-disk store for recent dictation transcripts (the Voice-pane "History").
 //!
 //! One JSONL file in the app data dir (next to `dictation.toml` + the model
 //! store), newest-first, capped to [`HISTORY_CAP`] entries. Every completed
@@ -113,7 +113,7 @@ mod tests {
     use super::*;
 
     fn tmp_path(name: &str) -> PathBuf {
-        std::env::temp_dir().join(format!("oximux-dict-hist-{name}.jsonl"))
+        std::env::temp_dir().join(format!("trex-dict-hist-{name}.jsonl"))
     }
 
     #[test]

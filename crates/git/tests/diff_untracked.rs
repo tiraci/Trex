@@ -1,12 +1,12 @@
-//! Unit tests for `Repository::diff_for_untracked` — synthesizes an
+﻿//! Unit tests for `Repository::diff_for_untracked` — synthesizes an
 //! "all-additions" diff for files that git's normal `diff` ignores.
 //!
 //! Each test creates a fresh git repo under a `TempDir`, writes the
 //! requested file (or omits it), then calls `diff_for_untracked` and
 //! asserts the shape of the returned `FileDiff`.
 
-use oximux_core::{DiffLineKind, DiffStatus};
-use oximux_git::Repository;
+use trex_core::{DiffLineKind, DiffStatus};
+use trex_git::Repository;
 use std::path::Path;
 use tempfile::TempDir;
 

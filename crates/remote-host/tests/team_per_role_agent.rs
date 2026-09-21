@@ -1,4 +1,4 @@
-//! The v22 team surface: each role picks its own agent and model, and the
+﻿//! The v22 team surface: each role picks its own agent and model, and the
 //! board says which one worked it.
 //!
 //! What these hold the host to, in order:
@@ -23,16 +23,16 @@ use std::sync::{Arc, Mutex};
 
 use futures::executor::block_on;
 use futures::future::join;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::team::TeamStore;
-use oximux_agents::thread::StubConnection;
-use oximux_remote_host::{AuthStore, Dispatcher, LaunchError, LocalScope, SessionLauncher};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::team::TeamStore;
+use trex_agents::thread::StubConnection;
+use trex_remote_host::{AuthStore, Dispatcher, LaunchError, LocalScope, SessionLauncher};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::{
     TeamRoleSpecV2Wire, TeamRoleSpecWire, TeamRoleStatusWire, TeamRunCreateReq, TeamRunCreateV2Req,
 };
-use oximux_remote_proto::proto::{Request, Response};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_remote_proto::proto::{Request, Response};
+use trex_remote_proto::testing::duplex_pair;
 
 async fn call(client: &dyn Transport, req: Request) -> Response {
     client.send(req.to_bytes().unwrap()).await.unwrap();
@@ -95,7 +95,7 @@ struct Fixture {
     teams: TeamStore,
     launched: Launched,
     /// Held so the in-memory database outlives the stores built on it.
-    _db: oximux_storage::Db,
+    _db: trex_storage::Db,
 }
 
 fn host() -> Fixture {
@@ -109,7 +109,7 @@ fn host_refusing_models() -> Fixture {
 }
 
 fn host_with(refuses_model: bool) -> Fixture {
-    let db = oximux_storage::db::open_memory().expect("open in-memory db");
+    let db = trex_storage::db::open_memory().expect("open in-memory db");
     let registry = Arc::new(SessionRegistry::new());
     let teams = TeamStore::new(db.conn());
     let launched = Arc::new(Mutex::new(Vec::new()));
@@ -127,7 +127,7 @@ fn host_with(refuses_model: bool) -> Fixture {
 
 fn talk<F, Fut>(dispatcher: &Arc<Dispatcher>, script: F)
 where
-    F: FnOnce(oximux_remote_proto::testing::DuplexTransport) -> Fut,
+    F: FnOnce(trex_remote_proto::testing::DuplexTransport) -> Fut,
     Fut: std::future::Future<Output = ()>,
 {
     let (server, client) = duplex_pair();

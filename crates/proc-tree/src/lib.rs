@@ -1,4 +1,4 @@
-//! Walk the descendants of a process, by pid.
+﻿//! Walk the descendants of a process, by pid.
 //!
 //! A terminal's PTY child is a *shell*; whatever the user typed into it —
 //! `codex`, `gemini`, a build — runs as that shell's descendant. Asking the
@@ -8,7 +8,7 @@
 //! it exists while the program runs, whether or not the program is producing
 //! output, and it is gone the moment the program exits.
 //!
-//! Sibling of [`oximux-proc-cwd`](../../proc-cwd), and its own crate for the
+//! Sibling of [`trex-proc-cwd`](../../proc-cwd), and its own crate for the
 //! same reason: dependency-light kernel introspection that the app and the
 //! relay both reach for, sharing nothing else.
 //!
@@ -190,7 +190,7 @@ mod tests {
     #[test]
     fn a_grandchild_appears_in_our_descendants() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let link = dir.path().join("oximux-proc-tree-grandchild");
+        let link = dir.path().join("trex-proc-tree-grandchild");
         std::os::unix::fs::symlink("/bin/sleep", &link).expect("symlink sleep");
         let mut child = std::process::Command::new("/bin/sh")
             .arg("-c")

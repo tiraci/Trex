@@ -1,7 +1,7 @@
-//! Compact project -> workspace -> agent flow strip for the welcome view.
+﻿//! Compact project -> workspace -> agent flow strip for the welcome view.
 
 use gpui::{IntoElement, ParentElement, Styled, div, px};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 const FLOW_DOT_SIZE: f32 = 6.0;
 const FLOW_LABELS: &[&str] = &["Project", "Workspace", "Agent", "Review"];

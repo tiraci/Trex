@@ -1,8 +1,8 @@
-//! Codex `app-server` (v2) wire protocol — the minimal slice OxiMux drives.
+﻿//! Codex `app-server` (v2) wire protocol — the minimal slice TREX drives.
 //!
 //! Verified against the local binary `codex-cli 0.144.1` via
 //! `codex app-server generate-json-schema` / `generate-ts` (NOT reverse-engineered).
-//! Only the fields OxiMux actually sends/reads are modeled; everything is built as
+//! Only the fields TREX actually sends/reads are modeled; everything is built as
 //! `serde_json::Value` so unknown/added fields on the wire are tolerated. Framing is
 //! newline-delimited JSON (one value per `\n`), NOT Content-Length.
 //!
@@ -72,7 +72,7 @@ fn sandbox_policy_json(sandbox: &str) -> Value {
 /// methods/fields the chat relies on. `version` is the agents crate version.
 pub fn initialize_params() -> Value {
     json!({
-        "clientInfo": { "name": "oximux", "title": null, "version": env!("CARGO_PKG_VERSION") },
+        "clientInfo": { "name": "TREX", "title": null, "version": env!("CARGO_PKG_VERSION") },
         "capabilities": { "experimentalApi": true, "requestAttestation": false }
     })
 }

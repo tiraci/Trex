@@ -1,9 +1,9 @@
-//! Git & Source Control settings — how OxiMux names the branches it creates,
+﻿//! Git & Source Control settings — how TREX names the branches it creates,
 //! where it puts the worktrees, and whether it freshens the default branch
 //! first.
 //!
-//! Every worktree OxiMux has ever created is on a branch called
-//! `oximux/<slug>`, hardcoded at five sites. That prefix is a reasonable
+//! Every worktree TREX has ever created is on a branch called
+//! `TREX/<slug>`, hardcoded at five sites. That prefix is a reasonable
 //! default and a poor requirement: a shared repository shows one contributor's
 //! branches under a tool's name rather than under theirs, which is backwards
 //! from how every other client names a branch.
@@ -11,13 +11,13 @@
 //! **The serde shape lives here; the resolution does not.** Turning
 //! [`BranchPrefixMode::GitUsername`] into an actual prefix means reading
 //! `git config user.name`, and this crate has no git dependency on purpose —
-//! see `oximux_worktree_ops::branch_name`, which owns that half.
+//! see `trex_worktree_ops::branch_name`, which owns that half.
 
 #[cfg(feature = "gpui")]
 use gpui::Global;
 
-/// The prefix OxiMux has always used, and still uses until someone changes it.
-pub const DEFAULT_PREFIX: &str = "oximux";
+/// The prefix TREX has always used, and still uses until someone changes it.
+pub const DEFAULT_PREFIX: &str = "TREX";
 
 /// Where the branch prefix comes from.
 ///
@@ -31,7 +31,7 @@ pub enum BranchPrefixMode {
     /// Slugified `git config user.name`, resolved fresh each time.
     GitUsername,
     /// The literal text in [`GitSettings::custom_prefix`]. The default, which
-    /// is how an absent `git.toml` reproduces today's `oximux/` behaviour.
+    /// is how an absent `git.toml` reproduces today's `TREX/` behaviour.
     #[default]
     Custom,
     /// No prefix at all — the branch is the bare slug.
@@ -87,13 +87,13 @@ pub struct GitSettings {
     pub custom_prefix: String,
     /// Where the desktop creates new worktrees, laid out as
     /// `<dir>/<project>/<slug>`. `None` means the default,
-    /// `~/OxiMux/worktrees`. A leading `~` is expanded.
+    /// `~/TREX/worktrees`. A leading `~` is expanded.
     ///
     /// Validated when it is *used*, not only when the pane saved it — the
     /// file is meant to be hand-edited — and refused with a reason when it
     /// points inside a git working tree, inside the app's data directory, or
     /// somewhere unwritable. Existing worktrees are never moved by changing
-    /// it. The headless host ignores it: `oximux serve` keeps the host-derived
+    /// it. The headless host ignores it: `TREX serve` keeps the host-derived
     /// scheme under its own data directory.
     pub worktree_dir: Option<String>,
     /// On worktree create, fetch and fast-forward the local default branch so
@@ -123,7 +123,7 @@ impl GitSettings {
     /// File this is persisted to, beside the other per-app settings.
     pub const FILE_NAME: &'static str = "git.toml";
 
-    /// The shipped default: `oximux/<slug>` branches, the default worktree
+    /// The shipped default: `TREX/<slug>` branches, the default worktree
     /// directory, no fetching on create.
     pub fn shipped() -> Self {
         Self {
@@ -146,7 +146,7 @@ impl GitSettings {
     /// Read `git.toml` from an app data directory, degrading to the shipped
     /// default.
     ///
-    /// **Shared with the headless host on purpose.** `oximux serve` creates
+    /// **Shared with the headless host on purpose.** `TREX serve` creates
     /// the same worktrees the sidebar does, so it has to name their branches
     /// the same way — and a second reader would be a second place for the
     /// fallback behaviour, the log line, and the file name to drift. This is
@@ -184,7 +184,7 @@ mod tests {
     fn the_shipped_default_reproduces_todays_branch_names() {
         let s = GitSettings::shipped();
         assert_eq!(s.branch_prefix, BranchPrefixMode::Custom);
-        assert_eq!(s.custom_prefix, "oximux");
+        assert_eq!(s.custom_prefix, "TREX");
         assert_eq!(s.worktree_dir, None);
         assert!(!s.keep_default_up_to_date);
         assert!(s.open_in.is_empty(), "empty = the built-in Open-in list");
@@ -219,7 +219,7 @@ mod tests {
         let s = GitSettings::from_toml_str("keep_default_up_to_date = true").expect("parses");
         assert!(s.keep_default_up_to_date);
         assert_eq!(s.branch_prefix, BranchPrefixMode::Custom);
-        assert_eq!(s.custom_prefix, "oximux");
+        assert_eq!(s.custom_prefix, "TREX");
     }
 
     /// Tolerant parsing, matching `project_scripts.rs`: a key this build does

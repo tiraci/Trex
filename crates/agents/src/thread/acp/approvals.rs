@@ -1,4 +1,4 @@
-//! ACP permission requests ↔ OxiMux's permission card.
+﻿//! ACP permission requests ↔ TREX's permission card.
 //!
 //! An agent's `session/request_permission` carries a tool call plus an
 //! agent-defined `options` list (each with an `option_id` + a `kind`:

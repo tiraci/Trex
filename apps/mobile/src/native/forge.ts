@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Presentation logic for the forge surface — issue/PR rows, CI check status,
  * and the prompt text an item is attached with.
  *
@@ -13,7 +13,7 @@
  * testable without rendering.
  */
 
-import type { CheckRun, ForgeItem } from 'oximux-core';
+import type { CheckRun, ForgeItem } from 'trex-core';
 
 /** How a check row should read, collapsed from the forge's own bucket string. */
 export type CheckStatus = 'pass' | 'fail' | 'pending' | 'skipped' | 'unknown';

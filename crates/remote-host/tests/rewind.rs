@@ -1,4 +1,4 @@
-//! The rewind RPC (v8): dropping a session back to an earlier turn.
+﻿//! The rewind RPC (v8): dropping a session back to an earlier turn.
 //!
 //! Rewinding is the most destructive call on this protocol after terminal
 //! input — it removes conversation the user may not be able to reconstruct —
@@ -7,14 +7,14 @@
 
 use std::sync::Arc;
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{
     AuthStore, Dispatcher, PairingSlot, RewindError, RewindService, registration_proof,
 };
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::RegisterReq;
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::RegisterReq;
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {

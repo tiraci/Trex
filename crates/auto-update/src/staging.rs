@@ -1,4 +1,4 @@
-//! Staged-update bookkeeping: where verified bundles wait for the quit-time
+﻿//! Staged-update bookkeeping: where verified bundles wait for the quit-time
 //! swap, and the boot sweep that cleans up after crashes.
 
 use std::fs;
@@ -12,8 +12,8 @@ use crate::UpdateError;
 
 /// Staged bundles are hidden siblings of the installed app: same directory so
 /// the eventual `renamex_np` swap stays on one volume, dot-prefixed so Finder
-/// does not show a second OxiMux.
-const STAGING_PREFIX: &str = ".OxiMux.update-";
+/// does not show a second TREX.
+const STAGING_PREFIX: &str = ".TREX.update-";
 
 /// A verified update waiting on disk for the quit-time swap.
 ///
@@ -125,7 +125,7 @@ pub fn apply_pending(
         return SwapOutcome::Nothing;
     };
 
-    if oximux_macos_trust::verify_signed(&pending.staged_path, &config.app.pin).is_err() {
+    if trex_macos_trust::verify_signed(&pending.staged_path, &config.app.pin).is_err() {
         tracing::warn!("staged update failed re-verification at quit; discarding");
         pending.discard(&config.manifest_path);
         return SwapOutcome::Refused;
@@ -145,7 +145,7 @@ pub fn apply_pending(
 
     let installed = config.app.bundle_root.clone();
     let staged = pending.staged_path.clone();
-    if oximux_macos_trust::exchange(&staged, &installed).is_err() {
+    if trex_macos_trust::exchange(&staged, &installed).is_err() {
         tracing::warn!("could not swap in the staged update; keeping the current version");
         clear_sentinel();
         pending.discard(&config.manifest_path);
@@ -154,9 +154,9 @@ pub fn apply_pending(
 
     // `staged` now holds the OLD bundle. Confirm the new one before letting
     // go of it.
-    if oximux_macos_trust::verify_signed(&installed, &config.app.pin).is_err() {
+    if trex_macos_trust::verify_signed(&installed, &config.app.pin).is_err() {
         tracing::error!("swapped-in update failed verification; rolling back");
-        let _ = oximux_macos_trust::exchange(&staged, &installed);
+        let _ = trex_macos_trust::exchange(&staged, &installed);
         clear_sentinel();
         pending.discard(&config.manifest_path);
         return SwapOutcome::Refused;
@@ -182,7 +182,7 @@ pub fn recover_interrupted_swap(
     if !sentinel_path.exists() {
         return Ok(());
     }
-    match oximux_macos_trust::verify_signed(&config.app.bundle_root, &config.app.pin) {
+    match trex_macos_trust::verify_signed(&config.app.bundle_root, &config.app.pin) {
         Ok(_) => {
             tracing::info!("interrupted update swap verified clean at boot");
             let _ = fs::remove_file(sentinel_path);
@@ -205,7 +205,7 @@ pub fn boot_sweep(cache_dir: &Path, bundle_root: &Path, manifest_path: &Path) {
         for entry in entries.flatten() {
             let mountpoint = entry.path();
             // Harmlessly errors when the dir is not actually a live mount.
-            let _ = oximux_macos_trust::run_bounded(
+            let _ = trex_macos_trust::run_bounded(
                 Path::new("/usr/bin/hdiutil"),
                 &["detach", "-force", &mountpoint.display().to_string()],
                 Duration::from_secs(30),
@@ -249,7 +249,7 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let manifest = dir.path().join("pending-update.json");
         let pending = PendingUpdate {
-            staged_path: dir.path().join(".OxiMux.update-abc.app"),
+            staged_path: dir.path().join(".TREX.update-abc.app"),
             version: "0.2.0".into(),
             notes: "notes".into(),
         };
@@ -263,7 +263,7 @@ mod tests {
         // impractical — instead prove the claim itself is create_dir-atomic:
         // two claims yield two distinct dirs, and both really exist.
         let dir = tempfile::tempdir().expect("tempdir");
-        let bundle = dir.path().join("OxiMux.app");
+        let bundle = dir.path().join("trex.app");
         fs::create_dir(&bundle).expect("mkdir");
         let a = claim_staging_dir(&bundle).expect("first claim");
         let b = claim_staging_dir(&bundle).expect("second claim");
@@ -274,10 +274,10 @@ mod tests {
     #[test]
     fn boot_sweep_removes_unreferenced_staging_dirs_and_keeps_the_manifest_one() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let bundle = dir.path().join("OxiMux.app");
+        let bundle = dir.path().join("trex.app");
         fs::create_dir(&bundle).expect("mkdir");
-        let kept = dir.path().join(".OxiMux.update-keepme.app");
-        let orphan = dir.path().join(".OxiMux.update-orphan.app");
+        let kept = dir.path().join(".TREX.update-keepme.app");
+        let orphan = dir.path().join(".TREX.update-orphan.app");
         fs::create_dir(&kept).expect("mkdir");
         fs::create_dir(&orphan).expect("mkdir");
 
@@ -307,7 +307,7 @@ mod tests {
     #[test]
     fn discard_removes_both_manifest_and_staged_bundle() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let staged = dir.path().join(".OxiMux.update-x.app");
+        let staged = dir.path().join(".TREX.update-x.app");
         fs::create_dir(&staged).expect("mkdir");
         let manifest = dir.path().join("pending-update.json");
         let pending = PendingUpdate {

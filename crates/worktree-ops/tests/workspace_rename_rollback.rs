@@ -1,4 +1,4 @@
-//! Integration tests for `rename_with_rollback` — real `git` binary in a
+﻿//! Integration tests for `rename_with_rollback` — real `git` binary in a
 //! tempdir plus an in-memory storage DB, matching the style of
 //! `apps/desktop/tests/workspace_create_rollback.rs`.
 //!
@@ -11,9 +11,9 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use oximux_git::Repository;
-use oximux_storage::{ProjectRepo, WorkspaceRepo, open_memory};
-use oximux_worktree_ops::{RenameOutcome, RenameRefusal, rename_with_rollback};
+use trex_git::Repository;
+use trex_storage::{ProjectRepo, WorkspaceRepo, open_memory};
+use trex_worktree_ops::{RenameOutcome, RenameRefusal, rename_with_rollback};
 
 fn run_git(cwd: &Path, args: &[&str]) {
     let status = Command::new("git")
@@ -44,10 +44,10 @@ struct Fixture {
     project_root: PathBuf,
     wt_path: PathBuf,
     workspace_repo: WorkspaceRepo,
-    workspace: oximux_core::Workspace,
+    workspace: trex_core::Workspace,
 }
 
-/// A repo with one linked worktree at `oximux/<slug>` and a matching row.
+/// A repo with one linked worktree at `TREX/<slug>` and a matching row.
 async fn fixture(slug: &str) -> Fixture {
     let tmp = tempfile::tempdir().expect("tempdir");
     let project_root = tmp.path().to_path_buf();
@@ -56,7 +56,7 @@ async fn fixture(slug: &str) -> Fixture {
     let wt_root = tempfile::tempdir().expect("wt tempdir");
     let wt_path = wt_root.path().join(slug);
     let repo = Repository::open(&project_root).await.expect("open repo");
-    repo.add_worktree(&wt_path, &format!("oximux/{slug}")).await.expect("add worktree");
+    repo.add_worktree(&wt_path, &format!("TREX/{slug}")).await.expect("add worktree");
 
     let db = open_memory().expect("open memory");
     let project = ProjectRepo::new(db.clone())
@@ -68,9 +68,9 @@ async fn fixture(slug: &str) -> Fixture {
             &project.id,
             slug,
             slug,
-            &format!("oximux/{slug}"),
+            &format!("TREX/{slug}"),
             &wt_path.to_string_lossy(),
-            // Minted: these tests are about renaming a worktree OxiMux made.
+            // Minted: these tests are about renaming a worktree TREX made.
             true,
         )
         .expect("workspace row");
@@ -123,8 +123,8 @@ async fn rename_moves_directory_branch_and_row_together() {
     assert!(new_path.join("a.txt").exists(), "content must have moved");
     // 2. Branch — only the new name, not both.
     let names = branch_names(&f.project_root).await;
-    assert!(names.iter().any(|n| n == "oximux/fix-login"));
-    assert!(!names.iter().any(|n| n == "oximux/fix-lgoin"));
+    assert!(names.iter().any(|n| n == "TREX/fix-login"));
+    assert!(!names.iter().any(|n| n == "TREX/fix-lgoin"));
     // 3. Row, re-read from the DB rather than trusting the return value.
     let row = f
         .workspace_repo
@@ -133,12 +133,12 @@ async fn rename_moves_directory_branch_and_row_together() {
         .expect("row present");
     assert_eq!(row.name, "fix-login");
     assert_eq!(row.slug, "fix-login");
-    assert_eq!(row.branch, "oximux/fix-login");
+    assert_eq!(row.branch, "TREX/fix-login");
     assert_eq!(row.worktree_path, new_path.to_string_lossy());
     assert_eq!(row, renamed);
     // `slug` and the branch suffix must agree after every successful rename —
     // their silent divergence is what a cosmetic rename produced.
-    assert_eq!(format!("oximux/{}", row.slug), row.branch);
+    assert_eq!(format!("TREX/{}", row.slug), row.branch);
 }
 
 #[tokio::test]
@@ -153,7 +153,7 @@ async fn rename_is_refused_when_the_branch_has_an_upstream() {
     );
     run_git(
         &f.project_root,
-        &["push", "-q", "-u", "origin", "oximux/feat-a"],
+        &["push", "-q", "-u", "origin", "TREX/feat-a"],
     );
 
     let new_path = f.wt_path.with_file_name("feat-b");
@@ -170,7 +170,7 @@ async fn rename_is_refused_when_the_branch_has_an_upstream() {
 
     match outcome {
         RenameOutcome::Refused(RenameRefusal::Pushed { upstream }) => {
-            assert_eq!(upstream, "origin/oximux/feat-a");
+            assert_eq!(upstream, "origin/TREX/feat-a");
         }
         other => panic!("expected Pushed refusal, got {other:?}"),
     }
@@ -178,7 +178,7 @@ async fn rename_is_refused_when_the_branch_has_an_upstream() {
     assert!(f.wt_path.join("a.txt").exists());
     assert!(!new_path.exists());
     let row = f.workspace_repo.get_by_id(&f.workspace.id).unwrap().unwrap();
-    assert_eq!(row.branch, "oximux/feat-a");
+    assert_eq!(row.branch, "TREX/feat-a");
     assert_eq!(row.worktree_path, f.wt_path.to_string_lossy());
 }
 
@@ -276,7 +276,7 @@ async fn rename_is_refused_when_the_target_branch_exists() {
     Repository::open(&f.project_root)
         .await
         .unwrap()
-        .create_branch("oximux/feat-b", None)
+        .create_branch("TREX/feat-b", None)
         .await
         .unwrap();
 
@@ -294,7 +294,7 @@ async fn rename_is_refused_when_the_target_branch_exists() {
 
     match outcome {
         RenameOutcome::Refused(RenameRefusal::BranchExists { branch }) => {
-            assert_eq!(branch, "oximux/feat-b");
+            assert_eq!(branch, "TREX/feat-b");
         }
         other => panic!("expected BranchExists refusal, got {other:?}"),
     }
@@ -349,7 +349,7 @@ async fn a_failure_at_the_branch_step_moves_the_directory_back() {
     // there is no upstream for a branch that does not exist, and the TARGET
     // name is genuinely free.
     let mut desynced = f.workspace.clone();
-    desynced.branch = "oximux/branch-that-git-does-not-have".to_string();
+    desynced.branch = "TREX/branch-that-git-does-not-have".to_string();
 
     let outcome = rename_with_rollback(
         &f.project_root,
@@ -376,11 +376,11 @@ async fn a_failure_at_the_branch_step_moves_the_directory_back() {
     );
     assert!(!new_path.exists(), "the destination must be left empty");
     let names = branch_names(&f.project_root).await;
-    assert!(names.iter().any(|n| n == "oximux/fix-lgoin"));
-    assert!(!names.iter().any(|n| n == "oximux/fix-login"));
+    assert!(names.iter().any(|n| n == "TREX/fix-lgoin"));
+    assert!(!names.iter().any(|n| n == "TREX/fix-login"));
     let row = f.workspace_repo.get_by_id(&f.workspace.id).unwrap().unwrap();
     assert_eq!(row.worktree_path, f.wt_path.to_string_lossy());
-    assert_eq!(row.branch, "oximux/fix-lgoin");
+    assert_eq!(row.branch, "TREX/fix-lgoin");
 }
 
 /// A branch-name collision is caught in pre-flight and never reaches the
@@ -392,7 +392,7 @@ async fn a_branch_collision_never_reaches_the_mutation_phase() {
     Repository::open(&f.project_root)
         .await
         .unwrap()
-        .create_branch("oximux/fix-login", None)
+        .create_branch("TREX/fix-login", None)
         .await
         .unwrap();
 
@@ -452,7 +452,7 @@ async fn a_worktree_git_will_not_move_is_refused_not_rolled_back() {
     assert!(f.wt_path.join("a.txt").exists());
     assert!(!new_path.exists());
     let names = branch_names(&f.project_root).await;
-    assert!(names.iter().any(|n| n == "oximux/feat-a"));
+    assert!(names.iter().any(|n| n == "TREX/feat-a"));
 }
 
 /// The row-update arm: the only failure path that walks back TWO steps, and the
@@ -478,7 +478,7 @@ async fn a_failure_at_the_row_step_walks_back_both_earlier_steps() {
             &f.workspace.project_id,
             "Fix login",
             "fix-login",
-            "oximux/already-taken",
+            "TREX/already-taken",
             &new_path.to_string_lossy(),
             true,
         )
@@ -507,7 +507,7 @@ async fn a_failure_at_the_row_step_walks_back_both_earlier_steps() {
     // everything was walked back — never one of the two git steps alone.
     let names = branch_names(&f.project_root).await;
     let dir_moved = new_path.join("a.txt").exists();
-    let branch_moved = names.iter().any(|n| n == "oximux/fix-login");
+    let branch_moved = names.iter().any(|n| n == "TREX/fix-login");
     assert_eq!(
         dir_moved, branch_moved,
         "directory and branch must never disagree after {outcome:?}"
@@ -517,7 +517,7 @@ async fn a_failure_at_the_row_step_walks_back_both_earlier_steps() {
             f.wt_path.join("a.txt").exists(),
             "walked back, so the original directory must be restored"
         );
-        assert!(names.iter().any(|n| n == "oximux/fix-lgoin"));
+        assert!(names.iter().any(|n| n == "TREX/fix-lgoin"));
     }
 }
 

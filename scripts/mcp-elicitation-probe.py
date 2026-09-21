@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Minimal stdio MCP server that elicits consent on every tool call.
 
 Purpose: exercise the agent-chat MCP-elicitation card end-to-end. Wire it into a
@@ -12,7 +12,7 @@ Codex config (~/.codex/config.toml):
     command = "python3"
     args = ["/ABS/PATH/scripts/mcp-elicitation-probe.py"]
 
-Then, in an OxiMux Codex chat, ask the agent to call the `confirm_action` tool.
+Then, in an TREX Codex chat, ask the agent to call the `confirm_action` tool.
 
 No third-party deps — line-delimited JSON-RPC 2.0 over stdio. Deliberately tiny;
 not a general-purpose server.

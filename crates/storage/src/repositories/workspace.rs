@@ -1,8 +1,8 @@
-//! `WorkspaceRepo` — typed CRUD over the `workspaces` table. The
+﻿//! `WorkspaceRepo` — typed CRUD over the `workspaces` table. The
 //! `(project_id, slug)` UNIQUE constraint is the foot-gun guard for the
 //! step-6 worktree-add rollback flow.
 
-use oximux_core::Workspace;
+use trex_core::Workspace;
 use rusqlite::{OptionalExtension, params};
 
 use super::{classify_unique, new_id, now};
@@ -206,7 +206,7 @@ impl WorkspaceRepo {
     /// **Stores `phase` verbatim and validates nothing** — the closed
     /// vocabulary is enforced at the write edges (the CLI argument, the RPC
     /// handler) so that a value from a newer peer is preserved rather than
-    /// rejected by an older store. See [`oximux_core::WorkPhase`].
+    /// rejected by an older store. See [`trex_core::WorkPhase`].
     ///
     /// Returns whether a row matched, for the reason given on
     /// [`set_comment`](Self::set_comment).
@@ -444,7 +444,7 @@ impl WorkspaceRepo {
     }
 
     /// Whether this row was adopted from an existing worktree (see
-    /// [`adopt`](Self::adopt)). A row OxiMux provisioned itself is never
+    /// [`adopt`](Self::adopt)). A row TREX provisioned itself is never
     /// adopted; a missing id reads as not adopted.
     pub fn is_adopted(&self, id: &str) -> Result<bool, StorageError> {
         let n: i64 = self.db.with_conn(|c| {

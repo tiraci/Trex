@@ -1,4 +1,4 @@
-//! Legible per-tool body renderers for the transcript, so common tools read
+﻿//! Legible per-tool body renderers for the transcript, so common tools read
 //! like a chat instead of a raw-JSON log dump. Only Edit/Write/MultiEdit have a
 //! diff (see `diff_card`); this covers Bash/Read/Grep/Glob, Agent/Task, the web
 //! tools (WebFetch/WebSearch), screen control (see `screen_card`), and any other
@@ -10,8 +10,8 @@
 //! can't blow up layout.
 
 use gpui::{AnyElement, Hsla, IntoElement, ParentElement, SharedString, Styled, div, px};
-use oximux_agents::thread::{ToolCall, ToolDetail};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::{ToolCall, ToolDetail};
+use trex_settings::{Density, Theme, Typography};
 use serde_json::Value;
 
 use super::bubble;
@@ -261,7 +261,7 @@ pub(super) const SUBAGENT_LOG_VISIBLE: usize = 3;
 /// first — the log is already capped at the source ([`MAX_SUBAGENT_LOG`]), so
 /// this can never be unbounded.
 ///
-/// [`MAX_SUBAGENT_LOG`]: oximux_agents::thread::tool_call::MAX_SUBAGENT_LOG
+/// [`MAX_SUBAGENT_LOG`]: trex_agents::thread::tool_call::MAX_SUBAGENT_LOG
 fn subagent_log_text(log: &[String], full: bool) -> String {
     if full {
         return log.join("\n");
@@ -583,7 +583,7 @@ mod tests {
         let (theme, density, typo) = (Theme::default(), Density::default(), Typography::default());
         let mut typed = ToolCall::new(
             "t",
-            "mcp__oximux-computer-use__type_text",
+            "mcp__trex-computer-use__type_text",
             json!({"pid": 4321, "text": "hello"}),
         );
         typed.result = Some(
@@ -593,16 +593,16 @@ mod tests {
         // A capture whose reply is terse still says the pixels arrived.
         let mut shot = ToolCall::new(
             "t",
-            "mcp__oximux-computer-use__get_window_state",
+            "mcp__trex-computer-use__get_window_state",
             json!({"pid": 4321}),
         );
-        shot.images = vec![oximux_agents::thread::ChatImage {
+        shot.images = vec![trex_agents::thread::ChatImage {
             media_type: "image/png".into(),
             data: "iVBORw0KGgo=".into(),
         }];
         assert!(render_tool_body(&shot, false, theme, density, &typo).is_some());
         // A refused call has no result at all and must still build.
-        let refused = ToolCall::new("t", "mcp__oximux-computer-use__click", json!({}));
+        let refused = ToolCall::new("t", "mcp__trex-computer-use__click", json!({}));
         assert!(render_tool_body(&refused, false, theme, density, &typo).is_some());
         // Another server's tools are untouched by any of this.
         let other = ToolCall::new("t", "mcp__computer-use__left_click", json!({"coordinate": [1, 2]}));

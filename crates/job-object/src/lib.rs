@@ -1,4 +1,4 @@
-//! Killing a child *and everything it started*, on Windows.
+﻿//! Killing a child *and everything it started*, on Windows.
 //!
 //! On unix every process the app spawns for an agent or a terminal is put in its
 //! own process group, so one `kill(-pgid, …)` reaches the child, the shell it
@@ -207,7 +207,7 @@ mod tests {
 
     /// A private directory for one test's script + marker.
     fn scratch(tag: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("oximux-job-{}-{}", std::process::id(), tag));
+        let dir = std::env::temp_dir().join(format!("trex-job-{}-{}", std::process::id(), tag));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("scratch dir");
         dir

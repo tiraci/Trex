@@ -1,4 +1,4 @@
-//! Codex server → client approval requests → OxiMux permission cards, and the
+﻿//! Codex server → client approval requests → TREX permission cards, and the
 //! `PermissionDecision` → Codex-decision translation for the reply.
 //!
 //! Codex (v2) asks the client to approve tool execution via JSON-RPC *requests*
@@ -149,7 +149,7 @@ pub fn map_server_request(
     }
 }
 
-/// Map an OxiMux [`PermissionDecision`] to the MCP elicitation reply shape
+/// Map an TREX [`PermissionDecision`] to the MCP elicitation reply shape
 /// (`{action}`, distinct from an approval's `{decision}`): an allow becomes
 /// `accept`, a deny becomes `decline`. Accept carries an empty `content` object
 /// (a consent card supplies no typed fields); decline omits content, matching the
@@ -255,7 +255,7 @@ fn str_field(v: &Value, key: &str) -> String {
     v.get(key).and_then(Value::as_str).unwrap_or_default().to_string()
 }
 
-/// Map an OxiMux [`PermissionDecision`] to Codex's decision string.
+/// Map an TREX [`PermissionDecision`] to Codex's decision string.
 /// `Allow` → run; `AllowWithSuggestion` (allow-always) → run for the session;
 /// `Deny` → refuse.
 pub fn to_codex_decision(decision: &PermissionDecision) -> &'static str {

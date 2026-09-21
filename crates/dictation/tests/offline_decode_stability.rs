@@ -1,4 +1,4 @@
-//! End-to-end offline-decode stability check across many languages.
+﻿//! End-to-end offline-decode stability check across many languages.
 //!
 //! This is an on-demand smoke test (marked `#[ignore]`) because it needs the
 //! real downloaded Whisper model (hundreds of MB) and speech fixtures — neither
@@ -8,9 +8,9 @@
 //!
 //! Run it with:
 //! ```text
-//! OXIMUX_STT_MODEL_DIR="$HOME/Library/Application Support/dev.nhtera.oximux/speech-models" \
-//! OXIMUX_STT_FIXTURES=/path/to/stt_fixtures \
-//! cargo test -p oximux-dictation --test offline_decode_stability -- --ignored --nocapture
+//! trex_STT_MODEL_DIR="$HOME/Library/Application Support/dev.tiraci.trex/speech-models" \
+//! trex_STT_FIXTURES=/path/to/stt_fixtures \
+//! cargo test -p trex-dictation --test offline_decode_stability -- --ignored --nocapture
 //! ```
 //!
 //! Model dir defaults to the macOS app-support location; fixtures dir has no
@@ -25,8 +25,8 @@
 
 use std::path::{Path, PathBuf};
 
-use oximux_dictation::engine::{is_silent, Engine, EngineKind, ModelPaths};
-use oximux_dictation::resample;
+use trex_dictation::engine::{is_silent, Engine, EngineKind, ModelPaths};
+use trex_dictation::resample;
 
 /// A speech fixture: `<stem>.wav` plus the language and a lowercased substring
 /// we expect to appear in the transcript (soft-checked — printed, not asserted,
@@ -49,15 +49,15 @@ const FIXTURES: &[Fixture] = &[
 ];
 
 fn model_dir() -> PathBuf {
-    if let Ok(p) = std::env::var("OXIMUX_STT_MODEL_DIR") {
+    if let Ok(p) = std::env::var("TREX_STT_MODEL_DIR") {
         return PathBuf::from(p);
     }
     let home = std::env::var("HOME").unwrap_or_default();
-    PathBuf::from(home).join("Library/Application Support/dev.nhtera.oximux/speech-models")
+    PathBuf::from(home).join("Library/Application Support/dev.tiraci.trex/speech-models")
 }
 
 fn fixtures_dir() -> Option<PathBuf> {
-    std::env::var("OXIMUX_STT_FIXTURES").ok().map(PathBuf::from)
+    std::env::var("TREX_STT_FIXTURES").ok().map(PathBuf::from)
 }
 
 /// Build ModelPaths for the whisper-base model (int8 graphs) if present.
@@ -104,7 +104,7 @@ fn load_wav_16k_mono(path: &Path) -> (Vec<f32>, u32) {
 /// Trim silence with a freshly-built Silero VAD (matches the production
 /// single-use lifecycle), with the same safety net the controller uses.
 fn vad_trim(model_root: &Path, samples: Vec<f32>) -> Vec<f32> {
-    use oximux_dictation::vad::{self, Vad};
+    use trex_dictation::vad::{self, Vad};
     let path = match vad::ensure_downloaded(model_root) {
         Ok(p) => p,
         Err(e) => {
@@ -133,7 +133,7 @@ fn offline_decode_is_stable_across_languages() {
     let model_root = model_dir();
     let Some(fx_dir) = fixtures_dir() else {
         eprintln!(
-            "SKIP: set OXIMUX_STT_FIXTURES to the speech-fixtures dir to run this test.\n\
+            "SKIP: set trex_STT_FIXTURES to the speech-fixtures dir to run this test.\n\
              (generate with `say -v <voice> -o <lang>.wav --data-format=LEI16@22050 \"...\"`)"
         );
         return;

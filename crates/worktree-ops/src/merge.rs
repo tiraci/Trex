@@ -1,8 +1,8 @@
-//! Landing a worktree's branch in the project's default branch.
+﻿//! Landing a worktree's branch in the project's default branch.
 //!
 //! **`merge_branch(x)` merges `x` into the repository it is called on.** So
 //! landing worktree `feat-x` means opening a `Repository` at the *project
-//! root* and merging `oximux/feat-x` into it. Opening the worktree instead
+//! root* and merging `TREX/feat-x` into it. Opening the worktree instead
 //! would merge main into the feature branch — plausible, silent and backwards.
 //! That is why [`preflight_merge`] takes the project root explicitly and this
 //! module never derives a repository from a workspace row.
@@ -22,8 +22,8 @@
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-use oximux_core::{GitOperation, MergeOutcome, Workspace};
-use oximux_git::Repository;
+use trex_core::{GitOperation, MergeOutcome, Workspace};
+use trex_git::Repository;
 
 use crate::paths::{path_is_within, paths_equal};
 
@@ -366,7 +366,7 @@ async fn count_auto_stashes(repo: &Repository) -> Option<usize> {
         .map(|entries| {
             entries
                 .iter()
-                .filter(|e| e.message == oximux_git::AUTO_STASH_MESSAGE)
+                .filter(|e| e.message == trex_git::AUTO_STASH_MESSAGE)
                 .count()
         })
 }
@@ -402,24 +402,24 @@ mod tests {
             on: Some("release".into()),
             default: "main".into(),
         }
-        .message("oximux/feat");
+        .message("TREX/feat");
         assert!(on_other.contains("release"), "{on_other}");
         assert!(on_other.contains("main"), "{on_other}");
 
         let paused = MergeRefusal::OperationInProgress {
             operation: GitOperation::Rebase,
         }
-        .message("oximux/feat");
+        .message("TREX/feat");
         assert!(paused.contains("rebase"), "{paused}");
 
         let held = MergeRefusal::RootHeld {
             holder: PathBuf::from("/repos/app/src"),
         }
-        .message("oximux/feat");
+        .message("TREX/feat");
         assert!(held.contains("/repos/app/src"), "{held}");
 
-        let nothing = MergeRefusal::NothingToMerge.message("oximux/feat");
-        assert!(nothing.contains("oximux/feat"), "{nothing}");
+        let nothing = MergeRefusal::NothingToMerge.message("TREX/feat");
+        assert!(nothing.contains("TREX/feat"), "{nothing}");
         // Naming the branch is not enough — this one shipped as "…has nothing
         // the default branch is missing", which parses only on the second read.
         // Live verification caught it; the assertion now pins the phrasing that
@@ -435,7 +435,7 @@ mod tests {
             on: None,
             default: "main".into(),
         }
-        .message("oximux/feat");
+        .message("TREX/feat");
         assert!(msg.contains("detached"), "{msg}");
         assert!(msg.contains("main"), "{msg}");
     }

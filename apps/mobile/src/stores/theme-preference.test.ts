@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useThemePreference } from '@/stores/theme-preference';
 
@@ -27,7 +27,7 @@ describe('useThemePreference', () => {
     // Applied synchronously: the toggle must feel instant, so the write is not
     // awaited before the UI reflects the change.
     expect(useThemePreference.getState().preference).toBe('dark');
-    expect(setItem).toHaveBeenCalledWith('@oximux:theme-preference', 'dark');
+    expect(setItem).toHaveBeenCalledWith('@TREX:theme-preference', 'dark');
   });
 
   it('restores a stored choice on load', async () => {

@@ -1,4 +1,4 @@
-//! `LspClient` — async JSON-RPC client for one language server child.
+﻿//! `LspClient` — async JSON-RPC client for one language server child.
 //!
 //! Responsibilities:
 //!   - Spawn the server binary as a tokio child process with
@@ -24,7 +24,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow, bail};
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 use lsp_types::{
     ClientCapabilities, CompletionContext, CompletionParams, CompletionResponse,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -171,7 +171,7 @@ impl LspClient {
             trace: None,
             workspace_folders: None,
             client_info: Some(lsp_types::ClientInfo {
-                name: "oximux".into(),
+                name: "TREX".into(),
                 version: Some(env!("CARGO_PKG_VERSION").into()),
             }),
             locale: None,

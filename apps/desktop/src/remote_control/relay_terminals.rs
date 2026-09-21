@@ -1,18 +1,18 @@
-//! The desktop's handle on the shared relay-backed [`TerminalSource`].
+﻿//! The desktop's handle on the shared relay-backed [`TerminalSource`].
 //!
-//! The implementation lives in `oximux-relay-terminals` (extracted so
-//! `oximux serve` exposes the same terminals the same way); what stays here is
+//! The implementation lives in `trex-relay-terminals` (extracted so
+//! `TREX serve` exposes the same terminals the same way); what stays here is
 //! the desktop's install pattern — a `OnceLock` published from the relay boot,
 //! because the relay comes up before the `RemoteControl` global exists and the
 //! two are installed in different scopes. This mirrors
 //! `install_shared_backend`, which publishes the terminal backend from the
 //! same boot step for the same reason.
 //!
-//! [`TerminalSource`]: oximux_remote_host::TerminalSource
+//! [`TerminalSource`]: trex_remote_host::TerminalSource
 
 use std::sync::Arc;
 
-pub use oximux_relay_terminals::RelayTerminals;
+pub use trex_relay_terminals::RelayTerminals;
 
 /// The process-wide terminal source, published by the relay boot.
 static INSTALLED: std::sync::OnceLock<Arc<RelayTerminals>> = std::sync::OnceLock::new();

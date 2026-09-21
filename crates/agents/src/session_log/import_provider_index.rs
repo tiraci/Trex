@@ -1,4 +1,4 @@
-//! Session indexing for ACP-preset / import-only providers whose CLIs keep
+﻿//! Session indexing for ACP-preset / import-only providers whose CLIs keep
 //! their own on-disk stores, surfaced in the history/import picker alongside
 //! Claude/Codex. Three providers, three store shapes:
 //!
@@ -31,7 +31,7 @@
 //! Copilot does not: a spike of a live `~/.copilot/session-store.db` found its
 //! `turns.user_message`/`assistant_response` columns *are* populated (readable
 //! prose, not empty — [`copilot_preview`] already renders a picker blurb from
-//! them), but Copilot has no ACP/live-chat backend in OxiMux at all — it only
+//! them), but Copilot has no ACP/live-chat backend in TREX at all — it only
 //! ever reopens as a terminal resume (`copilot --resume=<id>`), so there is no
 //! consumer for a full transcript today. Copilot stays resume-only for
 //! [`load_import_provider_transcript`] until a chat surface exists to seed.
@@ -39,7 +39,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use oximux_core::AgentAdapter;
+use trex_core::AgentAdapter;
 use rusqlite::types::Value as SqlValue;
 use rusqlite::{Connection, OpenFlags};
 use serde_json::Value;

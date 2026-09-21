@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+﻿import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
@@ -51,7 +51,7 @@ export default function RootLayout() {
                 from every primary screen's header, matching the desktop's sidebar. */}
             <AppDrawerProvider>
               <Stack screenOptions={{ contentStyle: { backgroundColor: theme.background } }}>
-                <Stack.Screen name="index" options={{ title: 'OxiMux' }} />
+                <Stack.Screen name="index" options={{ title: 'TREX' }} />
                 <Stack.Screen name="pair-scan" options={{ title: 'Scan pairing code' }} />
                 {/* The four primary destinations carry the hamburger and switch with
                     no slide — they are drawer siblings, not a push stack, so the new

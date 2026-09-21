@@ -1,4 +1,4 @@
-//! The client dial seam: an [`IrohConnector`] that resolves the host by its iroh
+﻿//! The client dial seam: an [`IrohConnector`] that resolves the host by its iroh
 //! [`EndpointId`] (from the scanned pairing ticket) and opens a framed bi-stream.
 //!
 //! It implements [`Connector`], so `remote_session::maintain_connection` drives it
@@ -12,11 +12,11 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use iroh::{Endpoint, EndpointAddr, EndpointId};
-use oximux_remote_proto::transport::Transport;
-use oximux_remote_session::{ConnectError, Connector};
+use trex_remote_proto::transport::Transport;
+use trex_remote_session::{ConnectError, Connector};
 
 use crate::transport::IrohTransport;
-use crate::OXIMUX_ALPN;
+use crate::TREX_ALPN;
 
 /// Dials the host over iroh. Reuses one bound [`Endpoint`] across every reconnect
 /// attempt (re-binding would churn the relay handshake and pkarr record).
@@ -55,7 +55,7 @@ impl Connector for IrohConnector {
         }
         let conn = self
             .endpoint
-            .connect(addr, OXIMUX_ALPN)
+            .connect(addr, TREX_ALPN)
             .await
             .map_err(|e| ConnectError::Unreachable(e.to_string()))?;
         let (send, recv) =

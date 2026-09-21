@@ -1,4 +1,4 @@
-//! Voice-dictation settings, loaded from `dictation.toml` in the app data dir
+﻿//! Voice-dictation settings, loaded from `dictation.toml` in the app data dir
 //! and held as a GPUI [`Global`] so the composer mic button and the Voice
 //! settings pane read one source of truth.
 //!
@@ -135,7 +135,7 @@ pub struct DictationSettings {
     /// plain silence gate.
     pub vad_enabled: bool,
     /// Dictionary of proper nouns / brand / command names the transcript is
-    /// fuzzy-corrected toward (e.g. "OxiMux", "ChargeBee"). Empty = no correction.
+    /// fuzzy-corrected toward (e.g. "TREX", "ChargeBee"). Empty = no correction.
     pub custom_words: Vec<String>,
     /// Acceptance threshold for custom-word correction (lower = stricter). `0`
     /// disables it even with a non-empty dictionary.
@@ -271,7 +271,7 @@ mod tests {
             input_device: Some("MacBook Pro Microphone".into()),
             mode: DictationMode::Hold,
             vad_enabled: false,
-            custom_words: vec!["OxiMux".into(), "ChargeBee".into()],
+            custom_words: vec!["TREX".into(), "ChargeBee".into()],
             word_correction_threshold: 0.2,
             filler_filter_enabled: false,
             model_unload_timeout: ModelUnloadTimeout::Immediately,

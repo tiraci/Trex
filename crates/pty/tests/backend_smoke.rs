@@ -1,6 +1,6 @@
-//! Phase 1 step 1-2 smoke test.
+﻿//! Phase 1 step 1-2 smoke test.
 //!
-//! Spawns `/bin/sh -c 'echo OXIMUX_HELLO'` through the portable-pty backend,
+//! Spawns `/bin/sh -c 'echo trex_HELLO'` through the portable-pty backend,
 //! drains events until we see the marker in an `Output` chunk or the
 //! deadline expires, then asserts both the marker AND a subsequent `Exit`
 //! event. Catches three regressions cheaply:
@@ -8,16 +8,16 @@
 //!   2. Bounded channel deadlock (we'd time out before the marker).
 //!   3. Exit detection broken (we'd see Output but never Exit).
 
-use oximux_shell_env::test_support::{
+use trex_shell_env::test_support::{
     echo_if_var_set, echo_var, lines, run_script, test_cwd, test_shell,
 };
-use oximux_pty::{PortablePtyBackend, SpawnConfig, TerminalBackend, TerminalEvent};
+use trex_pty::{PortablePtyBackend, SpawnConfig, TerminalBackend, TerminalEvent};
 // Only the `#[cfg(unix)]` OSC 7 test below constructs a PathBuf.
 #[cfg(unix)]
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
-const MARKER: &str = "OXIMUX_HELLO";
+const MARKER: &str = "TREX_HELLO";
 const TEST_TIMEOUT: Duration = Duration::from_secs(5);
 const POLL_INTERVAL: Duration = Duration::from_millis(20);
 
@@ -27,13 +27,13 @@ const POLL_INTERVAL: Duration = Duration::from_millis(20);
 /// ESC byte, and routing this one case through PowerShell would mean quoting an
 /// escape through two parsers to test a code path that is platform-neutral once
 /// the bytes exist. What IS Windows-specific here — decoding `file:///C:/...`
-/// into an absolute path — is covered by unit tests in `oximux_pty::osc7` that
+/// into an absolute path — is covered by unit tests in `trex_pty::osc7` that
 /// do run there.
 #[cfg(unix)]
 fn osc7_emitter() -> Vec<String> {
     vec![
         "-c".to_string(),
-        "printf '\\033]7;file:///tmp/osc7-test\\007OXIMUX_DONE\\n'".to_string(),
+        "printf '\\033]7;file:///tmp/osc7-test\\007trex_DONE\\n'".to_string(),
     ]
 }
 
@@ -112,8 +112,8 @@ fn spawn_echo_drains_marker_and_exit() {
 ///    GUI-launched app located via the login shell then fails to spawn at all.
 #[test]
 fn caller_env_reaches_the_child_and_wins_over_backend_defaults() {
-    const CUSTOM: &str = "OXIMUX_ENV_PROBE";
-    const OVERRIDE: &str = "oximux-overridden-term";
+    const CUSTOM: &str = "TREX_ENV_PROBE";
+    const OVERRIDE: &str = "trex-overridden-term";
     let mut backend = PortablePtyBackend::new();
     let id = backend
         .spawn(SpawnConfig {
@@ -314,7 +314,7 @@ fn spawn_dormant_prefill_then_promote_to_live() {
     // Prefill with an ANSI marker — restorer feeds these bytes into the
     // grid emulator so the user sees prior scrollback BEFORE the shell
     // produces fresh output.
-    const PREFILL_MARKER: &str = "OXIMUX_RESTORE_BANNER";
+    const PREFILL_MARKER: &str = "TREX_RESTORE_BANNER";
     let prefill = format!("{PREFILL_MARKER}\r\n");
     backend
         .prefill_grid(id, prefill.as_bytes())
@@ -411,7 +411,7 @@ fn promote_to_live_rejects_already_live_session() {
 /// agent CLI / replayer) wrote without going through a PTY child.
 #[test]
 fn write_output_on_dormant_session_lands_in_grid() {
-    const AGENT_MARKER: &str = "OXIMUX_AGENT_STREAM";
+    const AGENT_MARKER: &str = "TREX_AGENT_STREAM";
     let mut backend = PortablePtyBackend::new();
     let id = backend
         .spawn_dormant(80, 24)
@@ -477,7 +477,7 @@ fn osc7_emission_populates_cwd_hint() {
     let mut backend = PortablePtyBackend::new();
     // Shell prints the OSC 7 sequence to stdout. `\033]7;file:///tmp/osc7-test\007`
     // is `ESC ] 7 ; file:///tmp/osc7-test BEL`. We add a final newline +
-    // an OXIMUX_DONE marker so the test knows when the chunk landed.
+    // an trex_DONE marker so the test knows when the chunk landed.
     let cfg = SpawnConfig {
         shell: test_shell(),
         args: osc7_emitter(),
@@ -500,8 +500,8 @@ fn osc7_emission_populates_cwd_hint() {
             {
                 output_acc.extend_from_slice(&bytes);
                 if output_acc
-                    .windows(b"OXIMUX_DONE".len())
-                    .any(|w| w == b"OXIMUX_DONE")
+                    .windows(b"TREX_DONE".len())
+                    .any(|w| w == b"TREX_DONE")
                 {
                     saw_done = true;
                 }
@@ -511,7 +511,7 @@ fn osc7_emission_populates_cwd_hint() {
             std::thread::sleep(POLL_INTERVAL);
         }
     }
-    assert!(saw_done, "shell never produced OXIMUX_DONE marker");
+    assert!(saw_done, "shell never produced trex_DONE marker");
 
     let hint = backend.cwd_hint(id);
     assert_eq!(

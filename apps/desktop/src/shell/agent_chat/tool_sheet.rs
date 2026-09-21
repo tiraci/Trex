@@ -1,4 +1,4 @@
-//! Fullscreen tool-payload sheet: a dimmed backdrop + a large centered panel
+﻿//! Fullscreen tool-payload sheet: a dimmed backdrop + a large centered panel
 //! showing a single tool call's full payload at full height — a big diff
 //! virtualized via `uniform_list`, or a long shell/read/fetch/search body in a
 //! scroll region with the inline row/char caps lifted. Opened from a tool
@@ -14,9 +14,9 @@ use gpui::{
     AnyElement, ClipboardItem, Context, InteractiveElement, IntoElement, MouseButton,
     ParentElement, SharedString, StatefulInteractiveElement, Styled, div, px, uniform_list,
 };
-use oximux_agents::thread::ToolCall;
-use oximux_core::{DiffLine, DiffLineKind};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::ToolCall;
+use trex_core::{DiffLine, DiffLineKind};
+use trex_settings::{Density, Theme, Typography};
 use std::sync::Arc;
 
 use super::bubble;

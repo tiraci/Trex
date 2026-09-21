@@ -1,7 +1,7 @@
-//! Pure-unit tests for the conventional-commit prefix table + message
+﻿//! Pure-unit tests for the conventional-commit prefix table + message
 //! assembly. No GPUI, no tokio.
 
-use oximux_app::shell::commit_dialog::prefix::{
+use trex_app::shell::commit_dialog::prefix::{
     PREFIXES, SUBJECT_WARN_LEN, assemble_message, next_prefix_index, prefix_label,
     subject_over_warn,
 };

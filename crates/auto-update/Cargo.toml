@@ -1,5 +1,5 @@
-[package]
-name = "oximux-auto-update"
+﻿[package]
+name = "trex-auto-update"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -17,7 +17,7 @@ path = "src/lib.rs"
 [dependencies]
 # Codesign/spctl gates and the same-volume copy/swap primitives the driver
 # installer uses — the updater must not fork its own copies of these.
-oximux-macos-trust.workspace = true
+trex-macos-trust.workspace = true
 # Unpredictable staging-dir suffixes; a guessable name in a group-writable
 # /Applications is a symlink pre-plant target.
 rand.workspace = true
@@ -28,7 +28,7 @@ tracing.workspace = true
 # Release feed + artifact download (same sync client as the driver installer).
 ureq.workspace = true
 url.workspace = true
-# The signed-release trust chain, shared with the CLI's `oximux update`:
+# The signed-release trust chain, shared with the CLI's `TREX update`:
 # minisign over the manifest, sha256 over every artifact it names.
 minisign-verify.workspace = true
 sha2.workspace = true
@@ -65,4 +65,4 @@ ed25519-dalek.workspace = true
 # public API, where `testkit` is behind its feature. This self dev-dependency
 # is what turns it on for them; it costs one extra build of this library and
 # is the only way to have a feature-gated testkit its own tests can use.
-oximux-auto-update = { path = ".", features = ["testkit"] }
+trex-auto-update = { path = ".", features = ["testkit"] }

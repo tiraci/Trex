@@ -1,4 +1,4 @@
-//! Does splitting a text run by **colour alone** change how the text is shaped?
+﻿//! Does splitting a text run by **colour alone** change how the text is shaped?
 //!
 //! Phase 7's streaming fade veil rests on the claim that it does not: the veil
 //! paints newly-arrived characters in a fading colour, and that is only safe if
@@ -21,7 +21,7 @@
 //! by two separate paths, neither of which is obviously layout-neutral.
 //!
 //! ```sh
-//! cargo run -p oximux-app --example veil_shaping_probe
+//! cargo run -p trex-app --example veil_shaping_probe
 //! ```
 
 use gpui::{App, Font, FontFeatures, Hsla, Pixels, SharedString, TextRun, WindowTextSystem, hsla, px};
@@ -73,7 +73,7 @@ fn main() {
         // makes the numbers look incomparable when they are not.
         let mut worst: (f32, String) = (0.0, "none".into());
 
-        // The families OxiMux actually ships on macOS: `platform_fonts::UI`
+        // The families TREX actually ships on macOS: `platform_fonts::UI`
         // ("Helvetica Neue", falling back to "Helvetica") for prose and
         // `platform_fonts::MONO` ("Menlo") for code. `.SystemUIFont` is here as
         // a reference point, not because chat uses it.

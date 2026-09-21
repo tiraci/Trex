@@ -1,4 +1,4 @@
-//! The proofs both ends of the relay connection exchange instead of the token.
+﻿//! The proofs both ends of the relay connection exchange instead of the token.
 //!
 //! A unix-domain socket sits in a directory only this account can enter, so
 //! whoever answers it is this account. `\\.\pipe\` is one flat namespace and
@@ -43,8 +43,8 @@ pub type Proof = [u8; PROOF_LEN];
 // made for. Without them both sides would MAC identical input, so a squatter
 // could take the client's proof and replay it as its own server proof on the
 // next connection.
-const CLIENT_DOMAIN: &[u8] = b"oximux-relay/v8/client";
-const SERVER_DOMAIN: &[u8] = b"oximux-relay/v8/server";
+const CLIENT_DOMAIN: &[u8] = b"trex-relay/v8/client";
+const SERVER_DOMAIN: &[u8] = b"trex-relay/v8/server";
 
 /// Proof that the *client* holds the token.
 pub fn client_proof(token: &str, server_nonce: &Nonce, client_nonce: &Nonce) -> Proof {

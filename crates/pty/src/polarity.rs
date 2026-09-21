@@ -1,4 +1,4 @@
-//! Which way round the host window's background reads — and how that gets
+﻿//! Which way round the host window's background reads — and how that gets
 //! told to the programs running inside the terminal.
 //!
 //! A child program asks this question twice, by two unrelated mechanisms,
@@ -23,7 +23,7 @@
 //! the first time a spawn path forgot it.
 //!
 //! Note what this cannot do. A program reads the answer when it starts and
-//! keeps the palette it chose. Switching theme repaints OxiMux's own chrome
+//! keeps the palette it chose. Switching theme repaints TREX's own chrome
 //! immediately, but a shell that is already running has no reason to ask
 //! again — its existing output keeps the colors it picked. New programs, and
 //! anything that re-queries, follow at once.

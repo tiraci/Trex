@@ -1,4 +1,4 @@
-//! Integration tests for `Repository::current_operation()` — drives real
+﻿//! Integration tests for `Repository::current_operation()` — drives real
 //! `git merge` / `rebase` / `cherry-pick` / `revert` / `bisect` flows
 //! against a tempdir repo and verifies the right `GitOperation`
 //! variant surfaces.
@@ -11,8 +11,8 @@
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_core::GitOperation;
-use oximux_git::Repository;
+use trex_core::GitOperation;
+use trex_git::Repository;
 
 /// Init main with one base commit + a feature branch that will conflict
 /// against main on the next commit. Used by every test that needs to

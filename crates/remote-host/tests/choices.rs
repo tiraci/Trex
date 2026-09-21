@@ -1,16 +1,16 @@
-//! The session-control RPCs (v7): listing a backend's model/mode catalog, and
+﻿//! The session-control RPCs (v7): listing a backend's model/mode catalog, and
 //! switching between them.
 
 use std::sync::Arc;
 
 use futures::StreamExt;
-use oximux_agents::session_registry::{ChoiceKind, SessionMeta, SessionRegistry};
-use oximux_agents::thread::{ModeChoice, ModelChoice, StubConnection};
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
-use oximux_remote_proto::messages::RegisterReq;
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
-use oximux_remote_proto::Transport;
+use trex_agents::session_registry::{ChoiceKind, SessionMeta, SessionRegistry};
+use trex_agents::thread::{ModeChoice, ModelChoice, StubConnection};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
+use trex_remote_proto::messages::RegisterReq;
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
+use trex_remote_proto::Transport;
 
 const NOW: u64 = 1_700_000_000;
 fn clock() -> u64 {
@@ -115,7 +115,7 @@ async fn a_device_lists_the_catalog_and_switches_model() {
 ///
 /// Backends accept an unrecognised pick silently — the setter returns `Ok`,
 /// nothing changes — so this used to answer `Ack`:
-/// `oximux mode set <session> nonsense` printed "mode set to nonsense" and
+/// `TREX mode set <session> nonsense` printed "mode set to nonsense" and
 /// exited 0 while the session stayed on its default. Worse than a plain error
 /// for a scripted run, because the next turn then behaves as the OLD value
 /// dictates — parking on a permission request nobody is there to answer.
@@ -510,17 +510,17 @@ struct ScriptedLauncher {
 }
 
 #[async_trait::async_trait]
-impl oximux_remote_host::SessionLauncher for ScriptedLauncher {
+impl trex_remote_host::SessionLauncher for ScriptedLauncher {
     async fn create(
         &self,
         cwd: &str,
         agent_id: Option<&str>,
         _model: Option<&str>,
-    ) -> Result<String, oximux_remote_host::LaunchError> {
+    ) -> Result<String, trex_remote_host::LaunchError> {
         self.calls.lock().unwrap().push((cwd.to_string(), agent_id.map(str::to_string)));
         self.result
             .clone()
-            .map_err(|_| oximux_remote_host::LaunchError::BadWorkingDirectory)
+            .map_err(|_| trex_remote_host::LaunchError::BadWorkingDirectory)
     }
 }
 
@@ -637,17 +637,17 @@ async fn a_read_only_device_cannot_create_a_session() {
 }
 
 /// A project provider whose list the test controls.
-struct ScriptedProjects(Vec<oximux_remote_proto::ProjectSummaryWire>);
+struct ScriptedProjects(Vec<trex_remote_proto::ProjectSummaryWire>);
 
 #[async_trait::async_trait]
-impl oximux_remote_host::ProjectProvider for ScriptedProjects {
-    async fn projects(&self) -> Vec<oximux_remote_proto::ProjectSummaryWire> {
+impl trex_remote_host::ProjectProvider for ScriptedProjects {
+    async fn projects(&self) -> Vec<trex_remote_proto::ProjectSummaryWire> {
         self.0.clone()
     }
 }
 
 fn projects(
-    rows: Vec<oximux_remote_proto::ProjectSummaryWire>,
+    rows: Vec<trex_remote_proto::ProjectSummaryWire>,
 ) -> Arc<ScriptedProjects> {
     Arc::new(ScriptedProjects(rows))
 }
@@ -657,11 +657,11 @@ fn projects(
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn a_full_access_device_lists_the_projects() {
     let rows = vec![
-        oximux_remote_proto::ProjectSummaryWire {
-            name: "OxiMux".into(),
-            path: "/Users/me/Code/OxiMux".into(),
+        trex_remote_proto::ProjectSummaryWire {
+            name: "TREX".into(),
+            path: "/Users/me/Code/TREX".into(),
         },
-        oximux_remote_proto::ProjectSummaryWire { name: "work".into(), path: "/Users/me/work".into() },
+        trex_remote_proto::ProjectSummaryWire { name: "work".into(), path: "/Users/me/work".into() },
     ];
     let auth = Arc::new(AuthStore::new());
     auth.set_pairing(PairingSlot::new(SECRET, None, false));
@@ -691,8 +691,8 @@ async fn a_session_scoped_device_cannot_list_projects() {
     auth.set_pairing(PairingSlot::new(SECRET, Some("sess-1".into()), false));
     let dispatcher = Dispatcher::new(Arc::new(SessionRegistry::new()), auth)
         .with_clock(clock)
-        .with_projects(projects(vec![oximux_remote_proto::ProjectSummaryWire {
-            name: "OxiMux".into(),
+        .with_projects(projects(vec![trex_remote_proto::ProjectSummaryWire {
+            name: "TREX".into(),
             path: "/secret".into(),
         }]));
 

@@ -1,18 +1,18 @@
-//! `oximux team` — open a multi-role run, report a role's outcome, read the
+﻿//! `TREX team` — open a multi-role run, report a role's outcome, read the
 //! board.
 //!
 //! The run lives on the host, which is what makes `team status` meaningful
 //! after the process that started the run is gone. Roles report from inside
-//! their own sessions (`oximux team report …`), so the board converges without
+//! their own sessions (`TREX team report …`), so the board converges without
 //! anything polling the agents.
 
 use std::collections::HashMap;
 
-use oximux_remote_proto::messages::{
+use trex_remote_proto::messages::{
     TeamReportReq, TeamRoleSpecV2Wire, TeamRoleSpecWire, TeamRoleStatusWire, TeamRoleV2Wire,
     TeamRoleWire, TeamRunCreateReq, TeamRunCreateV2Req, TeamRunV2Wire, TeamRunWire,
 };
-use oximux_remote_proto::proto::{Request, Response, TEAM_PER_ROLE_MIN_VERSION};
+use trex_remote_proto::proto::{Request, Response, TEAM_PER_ROLE_MIN_VERSION};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -336,7 +336,7 @@ pub async fn run(client: &Client, args: RunArgs) -> Result<(Value, String), Fail
         Response::Error(e) => return Err(rpc_failure(e)),
         other => return Err(unexpected_reply("TeamRunCreate", &other)),
     };
-    Ok((json, format!("{board}\nwatch it with `oximux team status --run {id}`")))
+    Ok((json, format!("{board}\nwatch it with `TREX team status --run {id}`")))
 }
 
 pub async fn report(

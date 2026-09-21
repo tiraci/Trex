@@ -1,11 +1,11 @@
-//! Renders a `TodoWrite` tool call as a read-only plan checklist instead of a
+﻿//! Renders a `TodoWrite` tool call as a read-only plan checklist instead of a
 //! generic raw-JSON tool card. The item shape (`content` + a three-state status)
 //! mirrors the ACP `Plan`/`PlanEntry` model, so a future ACP `Plan` session
 //! update can reuse this same renderer with no changes.
 
 use gpui::{AnyElement, IntoElement, ParentElement, SharedString, Styled, div, px};
-use oximux_agents::thread::{PlanEntryLite, ToolCall};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::{PlanEntryLite, ToolCall};
+use trex_settings::{Density, Theme, Typography};
 use serde_json::Value;
 
 /// One plan step. `content` is the step text; `status` is its lifecycle.

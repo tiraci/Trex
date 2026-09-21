@@ -1,4 +1,4 @@
-//! Minimal newline-delimited JSON-RPC client over `codex app-server`'s stdio.
+﻿//! Minimal newline-delimited JSON-RPC client over `codex app-server`'s stdio.
 //!
 //! One `\n`-terminated JSON value per message. Three inbound kinds:
 //! - **response** (`id` + `result`/`error`, no `method`) → routed to the pending
@@ -70,7 +70,7 @@ impl RpcClient {
     /// Spawn an already-built command (the real `codex`, or a fake in tests) and
     /// wire its stdout into the reader/router.
     pub fn spawn_command(mut cmd: Command) -> Result<(RpcClient, Receiver<Inbound>, Child)> {
-        use oximux_no_window::NoWindow as _;
+        use trex_no_window::NoWindow as _;
         cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).no_window();
         #[cfg(unix)]
         {

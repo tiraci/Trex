@@ -1,4 +1,4 @@
-//! Integrations pane — the external CLIs OxiMux depends on, and how to fix
+﻿//! Integrations pane — the external CLIs TREX depends on, and how to fix
 //! the ones that are missing.
 //!
 //! **The remediation is the point.** A status list that diagnoses a problem
@@ -19,7 +19,7 @@ use gpui::{
     AnyElement, ClipboardItem, Context, Hsla, IntoElement, ParentElement, SharedString, Styled,
     div, prelude::FluentBuilder as _, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 use super::controls::value_chip;
@@ -79,7 +79,7 @@ pub(super) fn summary(rows: &[IntegrationRow]) -> String {
         return "Checking what this machine has…".to_string();
     }
     match unhealthy_count(rows) {
-        0 => "Everything OxiMux shells out to is present and working.".to_string(),
+        0 => "Everything TREX shells out to is present and working.".to_string(),
         1 => "1 tool needs attention — the surfaces below it will stay quiet until it does."
             .to_string(),
         n => format!(
@@ -155,7 +155,7 @@ fn footnote(theme: Theme, typography: &Typography) -> AnyElement {
         .text_size(px(typography.t_sub_label))
         .text_color(theme.fg_subtle)
         .child(
-            "OxiMux never installs anything on its own. Each button runs the command \
+            "TREX never installs anything on its own. Each button runs the command \
              it names, and nothing else.",
         )
         .into_any_element()
@@ -390,7 +390,7 @@ impl SettingsModal {
                                 idx,
                                 InstallUi::Failed {
                                     message: format!(
-                                        "Installed, but `{}` still is not on PATH.                                          Restarting OxiMux usually picks it up.",
+                                        "Installed, but `{}` still is not on PATH.                                          Restarting TREX usually picks it up.",
                                         row.tool.binary()
                                     ),
                                 },
@@ -627,7 +627,7 @@ mod tests {
             Render, SharedString, StatefulInteractiveElement as _, Styled as _, TestAppContext,
             Window, canvas, div, px, size,
         };
-        use oximux_settings::{Density, Theme, Typography};
+        use trex_settings::{Density, Theme, Typography};
         use std::cell::Cell;
         use std::rc::Rc;
 

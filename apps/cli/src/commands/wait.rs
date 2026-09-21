@@ -1,10 +1,10 @@
-//! `oximux wait` — block until a session reaches a state, bounded by
+﻿//! `TREX wait` — block until a session reaches a state, bounded by
 //! `--timeout` (exit 4). The current state is checked first, so waiting for a
 //! state the session is already in returns immediately instead of hanging on
 //! an event that already happened.
 
-use oximux_agent_core::thread::ThreadEvent;
-use oximux_remote_proto::proto::{Request, Response};
+use trex_agent_core::thread::ThreadEvent;
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use super::attach::{Stop, StreamEnd, StreamOpts, stream_session};
@@ -24,7 +24,7 @@ struct ScanState {
 /// enough: a prompt that aged out of the ring has either ended its turn (a
 /// newer `TurnEnded` is retained or the ring is empty) or is still producing
 /// events (which are retained).
-fn scan(frames: &[oximux_remote_proto::messages::HostEvent]) -> ScanState {
+fn scan(frames: &[trex_remote_proto::messages::HostEvent]) -> ScanState {
     let mut last_user = None;
     let mut last_end = None;
     let mut last_seq = 0;
@@ -127,7 +127,7 @@ pub async fn run(
                     "the turn ended but the session is awaiting a decision",
                 )
                 .with_steps([
-                    format!("`oximux permit ls {session}` shows what is pending"),
+                    format!("`TREX permit ls {session}` shows what is pending"),
                     "decide it, then wait again".into(),
                 ]));
             }
@@ -155,8 +155,8 @@ pub async fn run(
                 ),
             )
             .with_steps([
-                format!("`oximux permit ls {session}` shows what is pending"),
-                format!("decide it with `oximux permit allow|deny|answer {session}`"),
+                format!("`TREX permit ls {session}` shows what is pending"),
+                format!("decide it with `TREX permit allow|deny|answer {session}`"),
                 "raising --timeout alone will not help while nothing is deciding".into(),
             ]))
         }
@@ -165,7 +165,7 @@ pub async fn run(
             exit::TIMEOUT,
             format!("timed out waiting for the session to reach that state ({timeout_secs}s)"),
         )
-        .with_steps(["raise --timeout, or check the session with `oximux attach`".into()])),
+        .with_steps(["raise --timeout, or check the session with `TREX attach`".into()])),
         // Deliberately a different `code` on the same exit. The number is the
         // contract scripts branch on and stays 4 — this is still "gave up on
         // time" — but "stalled" and "timeout" call for different reactions:

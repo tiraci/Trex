@@ -1,7 +1,7 @@
-//! Automatic re-send of a turn that failed on a provider limit.
+﻿//! Automatic re-send of a turn that failed on a provider limit.
 //!
 //! The policy — what counts as retryable, how long to wait, how many times —
-//! lives in `oximux_agents::retry` and is pure. This module holds only the
+//! lives in `trex_agents::retry` and is pure. This module holds only the
 //! per-chat state and the timer, so the decision stays testable without a view.
 //!
 //! The re-send itself reuses `retry_last_turn`, the same path the manual Retry
@@ -11,8 +11,8 @@
 //! disagree about exactly the edge cases that are hard to test.
 
 use gpui::Task;
-use oximux_agents::retry::{RetrySettings as AgentRetryPolicy, classify_failure};
-use oximux_settings::agent_retry::AgentRetrySettings;
+use trex_agents::retry::{RetrySettings as AgentRetryPolicy, classify_failure};
+use trex_settings::agent_retry::AgentRetrySettings;
 
 use crate::persisted_chat::PersistedRetry;
 
@@ -81,8 +81,8 @@ impl ChatRetry {
 }
 
 /// The one-line reason shown on the card for a class.
-pub(super) fn reason_for(class: oximux_agents::retry::RetryClass) -> String {
-    use oximux_agents::retry::RetryClass;
+pub(super) fn reason_for(class: trex_agents::retry::RetryClass) -> String {
+    use trex_agents::retry::RetryClass;
     match class {
         RetryClass::Window { .. } => "Usage limit reached".into(),
         RetryClass::Overload => "Provider overloaded".into(),
@@ -97,7 +97,7 @@ impl AgentChatView {
     /// automatically, and arm a timer if so.
     ///
     /// Everything about *whether* and *when* is delegated to the pure policy in
-    /// `oximux_agents::retry`; this method only supplies the inputs and holds
+    /// `trex_agents::retry`; this method only supplies the inputs and holds
     /// the timer. Three conditions are checked here rather than there because
     /// they are properties of this view, not of the failure: an interrupted
     /// turn is one the user stopped, a disconnected child has nothing to send
@@ -130,7 +130,7 @@ impl AgentChatView {
         std::hash::Hash::hash(&now_ms, &mut hasher);
         let seed = std::hash::Hasher::finish(&hasher);
         let Some(wake_at_ms) =
-            oximux_agents::retry::schedule(class, self.retry.attempt, now_ms, &policy, seed)
+            trex_agents::retry::schedule(class, self.retry.attempt, now_ms, &policy, seed)
         else {
             return;
         };
@@ -207,7 +207,7 @@ impl AgentChatView {
     ///   closed across the whole window, and re-sending a turn the user last
     ///   saw hours or days ago is a surprise, not a resumption;
     /// * the remaining wait exceeds the current `max_automatic_wait` — the user
-    ///   has since shortened how long OxiMux may hold a turn.
+    ///   has since shortened how long TREX may hold a turn.
     ///
     /// The attempt count is restored with it, so the cap of four counts the
     /// attempts a turn has actually cost rather than resetting on every launch.
@@ -416,11 +416,11 @@ mod tests {
     use std::sync::Arc;
 
     use gpui::TestAppContext;
-    use oximux_agents::thread::{
+    use trex_agents::thread::{
         ChatBackend, SessionMeta, StubConnection, ThreadEntry, Transport,
     };
-    use oximux_settings::agent_retry::MaxAutomaticWait;
-    use oximux_settings::{Density, Theme, Typography};
+    use trex_settings::agent_retry::MaxAutomaticWait;
+    use trex_settings::{Density, Theme, Typography};
 
     use super::super::AgentChatView;
     use super::*;

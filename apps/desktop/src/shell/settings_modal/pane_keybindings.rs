@@ -1,4 +1,4 @@
-//! Editable keybindings pane — every registry action grouped by category,
+﻿//! Editable keybindings pane — every registry action grouped by category,
 //! with record-a-chord editing, conflict badges, and per-row + global
 //! reset. The registry inventory is the single source of truth; this pane
 //! renders its effective map (defaults ⊕ the modal's working overrides).
@@ -9,7 +9,7 @@
 //! Delete unbinds.
 
 use gpui::{AnyElement, Focusable as _, IntoElement, ParentElement, Styled, div, px};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::SettingsModal;
 use super::controls::value_chip;

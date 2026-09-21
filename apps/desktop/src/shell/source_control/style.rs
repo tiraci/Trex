@@ -1,4 +1,4 @@
-//! Source Control panel style tokens, resolved from the user's appearance.
+﻿//! Source Control panel style tokens, resolved from the user's appearance.
 //!
 //! The Source Control surface intentionally runs a touch looser than the
 //! global cockpit density: 12px horizontal padding instead of 8, 12px body
@@ -32,7 +32,7 @@
 //!   zoom but deliberately not the preset. See that method for why inventing
 //!   a token nobody else shares would be worse.
 
-use oximux_settings::{Density, Typography};
+use trex_settings::{Density, Typography};
 
 /// Line-height ratio for the panel's body type: 12px text on 16px leading,
 /// which is what `text-xs` means in the reference layout. Used to size the
@@ -152,7 +152,7 @@ impl Default for ScmStyle {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_settings::{Appearance, DensityPreset, UiScale};
+    use trex_settings::{Appearance, DensityPreset, UiScale};
 
     fn resolved(density: DensityPreset, percent: u16) -> ScmStyle {
         let appearance = Appearance {

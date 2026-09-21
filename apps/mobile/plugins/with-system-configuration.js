@@ -1,4 +1,4 @@
-const { withXcodeProject } = require('expo/config-plugins');
+﻿const { withXcodeProject } = require('expo/config-plugins');
 
 /**
  * Link `SystemConfiguration.framework` into the app target.
@@ -8,7 +8,7 @@ const { withXcodeProject } = require('expo/config-plugins');
  * so without this the app fails at link time with undefined
  * `_kSCNetworkProtocolTypeIPv6` / `_kSCPropNetDNSServerAddresses`.
  *
- * This lives in a config plugin rather than in `OximuxCore.podspec` because uBRN
+ * This lives in a config plugin rather than in `TREXCore.podspec` because uBRN
  * regenerates that podspec on every `ubrn build … --and-generate` — an edit there
  * is silently lost, and the symptom is an obscure undefined-symbol error at the
  * very end of a long build. Prebuild re-runs this plugin every time, so the link

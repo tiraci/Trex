@@ -1,6 +1,6 @@
-# Release signing
+﻿# Release signing
 
-`oximux update` replaces the binaries on a user's machine. What makes that safe
+`TREX update` replaces the binaries on a user's machine. What makes that safe
 is one signature, and this document is how that signature is created, stored,
 and — if it ever has to be — replaced.
 
@@ -135,8 +135,8 @@ there is no way to check the signature without minisign installed.
 ## Homebrew
 
 `scripts/gen-homebrew-formula.sh` generates the formula from the signed
-manifest, and `release-manifest` attaches `oximux.rb` to the release.
-`.github/workflows/publish-tap.yml` then commits it to `nhtera/homebrew-tap`.
+manifest, and `release-manifest` attaches `trex.rb` to the release.
+`.github/workflows/publish-tap.yml` then commits it to `tiraci/homebrew-tap`.
 
 **That second workflow fires on `release: published`, not when the release is
 built.** `release.yml` produces a *draft*, and GitHub serves none of a draft's
@@ -149,23 +149,23 @@ It needs a secret `GITHUB_TOKEN` cannot stand in for, because that token is
 scoped to this repository alone:
 
     TAP_PUSH_TOKEN   a fine-grained PAT with Contents: read and write on
-                     nhtera/homebrew-tap ONLY
+                     tiraci/homebrew-tap ONLY
 
 Scope it to that one repository. It exists to commit a single `.rb` file, and
 anything wider is reachable by any workflow run in this repo. Without the
 secret the job warns and succeeds, and the formula stays a manual copy:
 
 ```bash
-gh release download v0.1.9 --pattern oximux.rb   # substitute the tag being shipped
-# then commit oximux.rb to nhtera/homebrew-tap
+gh release download v0.1.9 --pattern trex.rb   # substitute the tag being shipped
+# then commit trex.rb to tiraci/homebrew-tap
 ```
 
 Homebrew has no notion of the minisign signature. What it inherits is that the
 digests in the formula were signed at release time rather than recomputed later
 from whatever the URL currently serves.
 
-`oximux update` refuses to touch a Homebrew-managed install — it detects the
-Cellar path and says `brew upgrade oximux` instead. Two things owning one set of
+`TREX update` refuses to touch a Homebrew-managed install — it detects the
+Cellar path and says `brew upgrade TREX` instead. Two things owning one set of
 files is a state neither can reason about.
 
 ## The macOS team pin

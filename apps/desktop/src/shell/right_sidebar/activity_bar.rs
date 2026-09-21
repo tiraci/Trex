@@ -1,4 +1,4 @@
-//! Activity-bar tab buttons — icon strip hosted by the global top bar.
+﻿//! Activity-bar tab buttons — icon strip hosted by the global top bar.
 //!
 //! Each tab is a 36px-wide button with a centered SVG icon plus a 2px bottom
 //! accent on the active tab. Click handlers mutate the `RightSidebar` entity
@@ -14,7 +14,7 @@ use gpui::{
     StatefulInteractiveElement as _, Styled, Window, div, px, svg,
 };
 use gpui_component::tooltip::Tooltip;
-use oximux_settings::Theme;
+use trex_settings::Theme;
 
 use crate::shell::right_sidebar::RightSidebar;
 use crate::shell::right_sidebar::layout::{ACTIVE_INDICATOR_THICKNESS, TAB_BUTTON_WIDTH};

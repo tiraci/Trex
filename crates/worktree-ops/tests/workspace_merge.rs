@@ -1,4 +1,4 @@
-//! Integration tests for the merge pre-flight and `apply_merge` — real `git`
+﻿//! Integration tests for the merge pre-flight and `apply_merge` — real `git`
 //! binary in a tempdir, same style as `workspace_rename_rollback.rs`.
 //!
 //! Two things are under test and they are different questions:
@@ -16,9 +16,9 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use oximux_core::{MergeOutcome, Workspace};
-use oximux_git::Repository;
-use oximux_worktree_ops::{
+use trex_core::{MergeOutcome, Workspace};
+use trex_git::Repository;
+use trex_worktree_ops::{
     MergeRefusal, MergeResult, apply_merge, merge_into_default, preflight_merge,
 };
 
@@ -114,7 +114,7 @@ impl Fixture {
     }
 }
 
-/// A repo on `main` with one linked worktree on `oximux/<slug>` and a row that
+/// A repo on `main` with one linked worktree on `TREX/<slug>` and a row that
 /// names it. No commits on the branch yet — each test adds what it needs.
 async fn fixture(slug: &str) -> Fixture {
     let tmp = tempfile::tempdir().expect("tempdir");
@@ -126,7 +126,7 @@ async fn fixture(slug: &str) -> Fixture {
     Repository::open(&project_root)
         .await
         .expect("open repo")
-        .add_worktree(&wt_path, &format!("oximux/{slug}"))
+        .add_worktree(&wt_path, &format!("TREX/{slug}"))
         .await
         .expect("add worktree");
 
@@ -135,7 +135,7 @@ async fn fixture(slug: &str) -> Fixture {
         project_id: "p1".into(),
         name: slug.into(),
         slug: slug.into(),
-        branch: format!("oximux/{slug}"),
+        branch: format!("TREX/{slug}"),
         worktree_path: wt_path.to_string_lossy().into_owned(),
         branch_minted: true,
         status: "active".into(),
@@ -322,7 +322,7 @@ async fn a_conflicting_merge_names_the_paths_on_a_clean_root() {
     );
     assert_eq!(
         f.repo().await.current_operation(),
-        Some(oximux_core::GitOperation::Merge),
+        Some(trex_core::GitOperation::Merge),
         "the conflicted merge is left in progress for the user to resolve"
     );
 }
@@ -449,7 +449,7 @@ async fn a_paused_rebase_in_the_project_root_is_refused_by_name() {
     assert_eq!(
         r,
         MergeRefusal::OperationInProgress {
-            operation: oximux_core::GitOperation::Rebase,
+            operation: trex_core::GitOperation::Rebase,
         },
         "the operation gate must fire ahead of the branch check"
     );
@@ -504,7 +504,7 @@ async fn a_hard_merge_failure_pops_its_stash_and_strands_nothing() {
     // Delete the branch out from under the plan: `git merge` now hard-fails
     // with "not something we can merge" AFTER the auto-stash was pushed.
     run_git(&f.project_root, &["worktree", "remove", "--force", &f.wt_path.to_string_lossy()]);
-    run_git(&f.project_root, &["branch", "-D", "oximux/feat"]);
+    run_git(&f.project_root, &["branch", "-D", "TREX/feat"]);
 
     let (error, stranded) = failure(apply_merge(&plan, &HashSet::new()).await);
     assert!(!error.is_empty());
@@ -541,14 +541,14 @@ async fn an_auto_stash_already_on_the_stack_is_not_reported_as_stranded_by_this_
         .await
         .expect("pre-flight passes");
     run_git(&f.project_root, &["worktree", "remove", "--force", &f.wt_path.to_string_lossy()]);
-    run_git(&f.project_root, &["branch", "-D", "oximux/feat"]);
+    run_git(&f.project_root, &["branch", "-D", "TREX/feat"]);
     // A pre-existing auto-stash from an EARLIER merge, already on the stack.
     // A naive "is there an entry with the auto-stash message?" check would call
     // this one stranded by THIS merge and raise a duplicate notice.
     f.dirty_the_root();
     f.repo()
         .await
-        .stash_push(Some(oximux_git::AUTO_STASH_MESSAGE), false)
+        .stash_push(Some(trex_git::AUTO_STASH_MESSAGE), false)
         .await
         .expect("seed an older auto-stash");
     assert_eq!(f.stash_count().await, 1);
@@ -680,7 +680,7 @@ async fn an_operation_started_after_the_preflight_still_stops_the_merge() {
     assert_eq!(
         refusal(apply_merge(&plan, &HashSet::new()).await),
         MergeRefusal::OperationInProgress {
-            operation: oximux_core::GitOperation::Merge,
+            operation: trex_core::GitOperation::Merge,
         },
     );
     assert!(!f.project_root.join("b.txt").exists(), "nothing was merged");

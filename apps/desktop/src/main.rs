@@ -1,4 +1,4 @@
-//! OxiMux — application entry point.
+﻿//! TREX — application entry point.
 //!
 //! Boots GPUI + gpui-component, registers workspace key bindings, opens the
 //! main window, and mounts `WorkspaceRoot`.
@@ -31,28 +31,28 @@ use std::time::Duration;
 use gpui::{
     AnyView, AppContext, Bounds, TitlebarOptions, WindowBounds, WindowOptions, point, px, size,
 };
-// The global keymap lives in `oximux_app::keymap` so the binary and the
+// The global keymap lives in `trex_app::keymap` so the binary and the
 // headless keymap tests install the identical bindings. `NewWindow` is the
 // one action `main` still references directly (its window-level handler).
-use oximux_app::actions::NewWindow;
-use oximux_app::assets::CompositeAssets;
-use oximux_app::relay_supervisor::{RelaySupervisor, SupervisorError};
-use oximux_app::shell::terminal_view::install_shared_backend;
-use oximux_app::state;
-use oximux_app::window_factory::{open_workspace_window, open_workspace_window_with};
-use oximux_pty::TerminalBackend;
-use oximux_relay_client::{RelayBackend, RelayClient};
-use oximux_storage::Db;
+use trex_app::actions::NewWindow;
+use trex_app::assets::CompositeAssets;
+use trex_app::relay_supervisor::{RelaySupervisor, SupervisorError};
+use trex_app::shell::terminal_view::install_shared_backend;
+use trex_app::state;
+use trex_app::window_factory::{open_workspace_window, open_workspace_window_with};
+use trex_pty::TerminalBackend;
+use trex_relay_client::{RelayBackend, RelayClient};
+use trex_storage::Db;
 use tracing_subscriber::EnvFilter;
 
-use oximux_app::app_paths;
-// The hook verb's decision half, shared with `oximux-cli` (see the crate).
-use oximux_agent_hooks::report::StatusArgs;
+use trex_app::app_paths;
+// The hook verb's decision half, shared with `trex-cli` (see the crate).
+use trex_agent_hooks::report::StatusArgs;
 /// Scope for the remote-control host key. The host is process-wide (it serves every
 /// workspace's sessions from one registry), so it uses ONE app-level identity rather
 /// than `HostIdentity`'s per-workspace keying.
 const HOST_IDENTITY_SCOPE: &str = "remote-control-host";
-const DB_FILE_NAME: &str = "oximux.db";
+const DB_FILE_NAME: &str = "trex.db";
 
 fn main() {
     #[cfg(all(windows, debug_assertions))]
@@ -69,7 +69,7 @@ fn main() {
     // and refusing to start would be a worse outcome than a boot that says so.
     // Secrets have their own per-file restriction with its own hard failure, so
     // this degrading does not silently downgrade the token or the host key.
-    if let Err(err) = oximux_app::app_paths::harden_data_dir() {
+    if let Err(err) = trex_app::app_paths::harden_data_dir() {
         tracing::warn!(
             ?err,
             "could not restrict the app data directory to this account; \
@@ -84,7 +84,7 @@ fn main() {
     // or it is simply abandoned — including the screen-control grant store.
     // Move-if-absent, so this is a no-op on every platform where the two
     // directories were the same and on every run after the first.
-    let adopted = oximux_app::app_paths::migrate_legacy_data();
+    let adopted = trex_app::app_paths::migrate_legacy_data();
     if !adopted.is_empty() {
         tracing::info!(
             count = adopted.len(),
@@ -98,13 +98,13 @@ fn main() {
     // browser pane loads its page and renders nothing: GPUI's composited window
     // has no redirection surface for WebView2's child HWND to draw into. See
     // the module for the trade this makes and the two repairs it rejects.
-    oximux_app::platform::direct_composition::prefer_child_window_compositing();
+    trex_app::platform::direct_composition::prefer_child_window_compositing();
 
     // Before the runtime, and before anything spawns: launched from inside a
     // Claude Code session, the process inherits session markers that make
     // every `claude` spawned down-tree disable transcript saving. Must
     // precede the first thread — it writes the environment.
-    oximux_app::platform::claude_session_env::scrub_inherited_claude_session_markers();
+    trex_app::platform::claude_session_env::scrub_inherited_claude_session_markers();
 
     // Before the runtime, and before anything spawns: a GUI launch inherits the
     // session manager's stub PATH on every platform, and every agent CLI
@@ -118,7 +118,7 @@ fn main() {
     // guard every hook invocation would pay for a shell it does not need.
     let subcommand = std::env::args().nth(1);
     if !matches!(subcommand.as_deref(), Some("notify" | "agent-status")) {
-        oximux_app::platform::login_path::adopt_login_shell_path();
+        trex_app::platform::login_path::adopt_login_shell_path();
     }
 
     // Boot the tokio runtime that every git op + status poller relies on.
@@ -138,7 +138,7 @@ fn main() {
     // only cover blocking daemon round-trips; interactive responsiveness needs
     // it held continuously. The activity still allows normal idle *system*
     // sleep — it only keeps our own run loop from being throttled.
-    let _app_nap_guard = oximux_app::app_nap::prevent("interactive terminal cockpit");
+    let _app_nap_guard = trex_app::app_nap::prevent("interactive terminal cockpit");
 
     // Phase 5 step 1 spike: `--editor-spike` short-circuits the normal
     // workspace boot and opens a single editor window on this file
@@ -162,19 +162,19 @@ fn main() {
         return;
     }
 
-    // `oximux notify [--title T] [--body B]` — explicit attention signal for
+    // `TREX notify [--title T] [--body B]` — explicit attention signal for
     // the current pane, invoked by agent hooks (Claude Code `Stop`, Codex
-    // `notify`) or scripts. Reads OXIMUX_PTY_ID from the env (injected by the
+    // `notify`) or scripts. Reads trex_PTY_ID from the env (injected by the
     // daemon at spawn), connects to the relay, and asks it to ring that pane.
     // Short-circuits the GUI/db boot entirely.
     if subcommand.as_deref() == Some("notify") {
         std::process::exit(run_notify_cli(&rt));
     }
 
-    // `oximux agent-status --state <working|needs_approval|idle>` — structured
+    // `TREX agent-status --state <working|needs_approval|idle>` — structured
     // status for the current pane, invoked by agent hooks (Claude Code
     // `PreToolUse`/`PermissionRequest`/`Stop`). Reads the hook event JSON on
-    // stdin (for the tool name), reads OXIMUX_PTY_ID, and asks the relay to
+    // stdin (for the tool name), reads trex_PTY_ID, and asks the relay to
     // emit an OSC-9999 status packet on that PTY's stream. Hooks run with no
     // controlling terminal, so this relay round-trip — not a `/dev/tty` write —
     // is how status reaches the app. Short-circuits the GUI/db boot entirely.
@@ -188,7 +188,7 @@ fn main() {
     // vanishes when the other overwrites the snapshot. If a live instance
     // already holds the lock, this brings it forward and exits. Held for the
     // whole process (released implicitly on exit). Placed AFTER the helper-CLI
-    // short-circuits above so `oximux notify` / `agent-status` — which hooks
+    // short-circuits above so `TREX notify` / `agent-status` — which hooks
     // invoke while the GUI is up — never contend for it.
     let _single_instance = enforce_single_instance();
 
@@ -197,7 +197,7 @@ fn main() {
     // outlives a crash — and a surviving grant would hand a fresh chat an
     // approval nobody gave it. Runs after the single-instance guard so a second
     // launch that bows out cannot wipe the live instance's grants.
-    oximux_app::clear_stale_screen_control_grants();
+    trex_app::clear_stale_screen_control_grants();
 
     // Bring the cached shell PATH up to date for the next launch. Here and not
     // earlier: the helper-CLI short-circuits above must never spawn a login
@@ -205,7 +205,7 @@ fn main() {
     // guard. It writes a file, never this process' environment — see the
     // module for why that distinction is a soundness requirement and not a
     // preference.
-    oximux_app::platform::login_path::refresh_cached_path_in_background();
+    trex_app::platform::login_path::refresh_cached_path_in_background();
 
     // boot: repo open is post-paint. No `Repository::open` here on purpose —
     // it spawns `git`, and on the packaged Windows (GUI-subsystem) build the
@@ -233,14 +233,14 @@ fn main() {
         tokio::task::spawn_blocking(move || state::hydrate(db))
             .await
             .unwrap_or_else(|join_err| {
-                eprintln!("oximux: hydration task panicked: {join_err}");
+                eprintln!("TREX: hydration task panicked: {join_err}");
                 std::process::exit(1);
             })
     });
     let app_state = match app_state {
         Ok(s) => s,
         Err(err) => {
-            eprintln!("oximux: failed to hydrate AppState: {err}");
+            eprintln!("TREX: failed to hydrate AppState: {err}");
             std::process::exit(1);
         }
     };
@@ -282,7 +282,7 @@ fn main() {
     // Install the ACP embedded-terminal host so ACP agents can drive live inline
     // terminals in chat. It spawns through the shared relay backend when present
     // (installed just above), falling back to an in-process PTY otherwise.
-    oximux_app::shell::agent_chat::install_acp_terminal_host();
+    trex_app::shell::agent_chat::install_acp_terminal_host();
 
     // `with_assets` registers our composite SVG source: local app icons
     // (e.g. `icons/git-branch.svg`) first, falling through to gpui-component's
@@ -294,7 +294,7 @@ fn main() {
         // Before anything paints: registers bundled Lilex, which is what stands
         // between a font that fails to resolve and a proportional face pinned to
         // a monospace grid. See `assets::load_fonts`.
-        if let Err(err) = oximux_app::assets::load_fonts(cx) {
+        if let Err(err) = trex_app::assets::load_fonts(cx) {
             tracing::error!(
                 %err,
                 "failed to register embedded fonts; a font miss will now fall back \
@@ -305,26 +305,26 @@ fn main() {
         // file:// reader so markdown-preview images that resolve to local repo
         // paths actually load — the image element fetches every URL through the
         // http client, never the filesystem.
-        cx.set_http_client(oximux_app::file_http_client::FileHttpClient::shared());
+        cx.set_http_client(trex_app::file_http_client::FileHttpClient::shared());
         // Warm the syntect grammar + theme sets (~30 ms) during idle boot
         // so the first diff paint never pays the lazy-init cost.
         cx.background_executor()
             .spawn(async {
-                oximux_app::shell::diff_view::syntax::prewarm();
+                trex_app::shell::diff_view::syntax::prewarm();
             })
             .detach();
         // The user's palette, density, zoom and typefaces, before any window
         // opens: the bridge below copies them into gpui-component's own theme,
         // and a window that opened first would paint one frame at the shipped
         // defaults and then correct itself.
-        oximux_app::appearance_settings::install(cx);
+        trex_app::appearance_settings::install(cx);
         // Everything gpui-component needs to agree with our palette — the
         // light/dark mode it starts in, the input border and focus ring, the
         // corner radii, the two font families. Shared with the settings
         // controls, because the library paints its own widgets and a change
         // that skipped it would leave every `Input` and `Button` in the
         // previous theme.
-        oximux_app::appearance_settings::bridge_component_theme(cx);
+        trex_app::appearance_settings::bridge_component_theme(cx);
         // List scrollbars stay invisible until the pointer enters the scroll
         // region, then reveal thumb-only — quiet at rest, no persistent rail
         // chrome. The library default (`Scrolling`) only shows the bar
@@ -348,31 +348,31 @@ fn main() {
         }
         // Load user terminal settings into a global + start the live-reload
         // watcher BEFORE any window opens so the first pane reads real values.
-        oximux_app::terminal_settings::install(cx);
+        trex_app::terminal_settings::install(cx);
         // Same install pattern for AI commit-message settings — the sparkles
         // button reads the global at click time, so loading here means the
         // first click after launch sees the user's configured mode (heuristic
         // by default; agent when configured).
-        oximux_app::commit_message_ai_settings::install(cx);
+        trex_app::commit_message_ai_settings::install(cx);
         // Browser profiles (cookie/cache-isolated webview stores); the browser
         // toolbar reads this global to enumerate + switch profiles.
-        oximux_app::browser_profiles::install(cx);
+        trex_app::browser_profiles::install(cx);
         // Per-agent launch defaults (extra CLI flags, default model, enabled
         // agents, default agent). The picker + agent runtime read the global
         // at launch time, so installing here means the first launch after
         // boot already honours the user's configured defaults.
-        oximux_app::agent_launch_settings::install(cx);
+        trex_app::agent_launch_settings::install(cx);
         // Voice-dictation settings (enabled/model/language) + the process-wide
         // dictation service (recorder + model manager). The composer mic button
         // reads the settings global at record time and the service global to
         // start/stop, so both install before any window opens.
-        oximux_app::dictation_settings::install(cx);
-        oximux_app::shell::agent_chat::install_dictation_service(cx);
+        trex_app::dictation_settings::install(cx);
+        trex_app::shell::agent_chat::install_dictation_service(cx);
         // Screen-control settings (off by default). Installed before any window
         // so the first chat to spawn reads a real value rather than finding no
         // global and defaulting — the two agree, but only one of them is a
         // decision the user made.
-        oximux_app::computer_use_settings::install(cx);
+        trex_app::computer_use_settings::install(cx);
         // Auto-update settings, and with them the answer to "did this boot
         // follow an update?" — which has to be read before the recorded
         // version is overwritten, so it is settled here and announced once a
@@ -380,9 +380,9 @@ fn main() {
         // The answer is only acted on where there is an updater to have
         // performed the upgrade; the settings install itself still has to run.
         #[cfg_attr(not(any(target_os = "macos", windows)), allow(unused_variables))]
-        oximux_app::agent_retry_settings::install(cx);
-        oximux_app::git_settings::install(cx);
-        let upgraded_this_boot = oximux_app::auto_update_settings::install(cx);
+        trex_app::agent_retry_settings::install(cx);
+        trex_app::git_settings::install(cx);
+        let upgraded_this_boot = trex_app::auto_update_settings::install(cx);
         // The indicator that appears while an agent can drive the screen — a
         // menu-bar item on macOS, a notification-area icon on Windows. Watches
         // the grant table rather than the approval path, because the
@@ -395,11 +395,11 @@ fn main() {
         // correct, and never called, and an agent drove the screen with nothing
         // on display saying so. Nothing failed, which is why it survived a full
         // test run. The predicate now lives once, beside the module.
-        oximux_app::agent_glue::install_screen_control_watch(cx);
+        trex_app::agent_glue::install_screen_control_watch(cx);
         // Resolve the reduced-motion preference once and install the Motion
         // global before any window opens, so the first animated surface reads
         // the right durations.
-        oximux_app::motion_settings::install(cx);
+        trex_app::motion_settings::install(cx);
         // Process-wide last-known-`GitState` cache. (Appearance is installed
         // further up, before the gpui-component bridge that reads it.) Registered before any
         // window opens so the first SCM panel can seed from it (no-op on a
@@ -410,7 +410,7 @@ fn main() {
         // poller seeds from them (stale-while-revalidate) — the prior state
         // paints instantly on open instead of "loading git…". On a fresh
         // install the blob is absent → empty cache → normal Loading flash.
-        cx.set_global(oximux_app::git_state_cache::GitStateCache::load_from(
+        cx.set_global(trex_app::git_state_cache::GitStateCache::load_from(
             app_state.settings_repo(),
         ));
         // Process-wide model-catalog cache for dynamic-model agents (Codex/ACP).
@@ -418,7 +418,7 @@ fn main() {
         // last session's catalog instantly (stale-while-revalidate) instead of
         // waiting on a cold backend spawn (~5s for a Node ACP agent). A fresh
         // install has no blob → empty cache → one cold probe, then self-heals.
-        cx.set_global(oximux_app::catalog_cache::CatalogCache::load_from(
+        cx.set_global(trex_app::catalog_cache::CatalogCache::load_from(
             app_state.settings_repo(),
         ));
         // Remote-control state (the session registry the in-app iroh host serves).
@@ -427,8 +427,8 @@ fn main() {
         // no endpoint is bound. Backed by the durable paired-device store so a phone
         // paired in an earlier run stays authorized across restarts.
         let mut remote_control =
-            oximux_app::remote_control::RemoteControl::with_devices(std::sync::Arc::new(
-                oximux_remote_host::StorageDeviceStore::new(app_state.remote_device_repo()),
+            trex_app::remote_control::RemoteControl::with_devices(std::sync::Arc::new(
+                trex_remote_host::StorageDeviceStore::new(app_state.remote_device_repo()),
             ));
         // Pin the host's endpoint identity from the persistent host key. Without
         // this iroh mints a fresh key per bind, so the endpoint id — the address a
@@ -436,7 +436,7 @@ fn main() {
         // every existing pairing. A key that can't be loaded degrades to an
         // ephemeral identity rather than blocking boot.
         if let Some(key_dir) = app_paths::data_dir() {
-            match oximux_remote_host::HostIdentity::load_or_generate(&key_dir, HOST_IDENTITY_SCOPE)
+            match trex_remote_host::HostIdentity::load_or_generate(&key_dir, HOST_IDENTITY_SCOPE)
             {
                 Ok(identity) => {
                     remote_control =
@@ -450,7 +450,7 @@ fn main() {
         }
         // Serve terminals when the relay came up. Absent (in-process PTY
         // fallback), every terminal RPC keeps answering `Unauthorized`.
-        if let Some(terminals) = oximux_app::remote_control::relay_terminals::installed() {
+        if let Some(terminals) = trex_app::remote_control::relay_terminals::installed() {
             remote_control.set_terminals(terminals);
         }
         // The inbound half: a phone asking for a new session hands the request
@@ -459,21 +459,21 @@ fn main() {
         // access simply never receives a request, and wiring it later would mean
         // remote could be switched on before the launcher existed.
         let bridge_launcher = {
-            let (launcher, requests) = oximux_app::remote_control::launch_bridge::launch_bridge();
+            let (launcher, requests) = trex_app::remote_control::launch_bridge::launch_bridge();
             // A clone of the same queue for the scheduler's firer below — one
             // GPUI drain loop serves phone launches and scheduled fires alike.
             let for_scheduler = launcher.clone();
             remote_control.set_launcher(std::sync::Arc::new(launcher));
-            oximux_app::remote_control::launch_bridge::serve_launches(requests, cx);
+            trex_app::remote_control::launch_bridge::serve_launches(requests, cx);
             for_scheduler
         };
         // The same inbound shape for rewinds: the request crosses to this loop,
         // which finds the tab holding that session and starts its rewind.
         // Installed unconditionally, for the same reason as the launcher.
         {
-            let (rewinder, requests) = oximux_app::remote_control::rewind_bridge::rewind_bridge();
+            let (rewinder, requests) = trex_app::remote_control::rewind_bridge::rewind_bridge();
             remote_control.set_rewinder(std::sync::Arc::new(rewinder));
-            oximux_app::remote_control::rewind_bridge::serve_rewinds(requests, cx);
+            trex_app::remote_control::rewind_bridge::serve_rewinds(requests, cx);
         }
         // Schedules the phone can list and manage: the same store the desktop's
         // ticker fires and its Settings pane edits, so all three surfaces share one
@@ -481,7 +481,7 @@ fn main() {
         // handed over directly rather than through a bridge, unlike the launcher
         // and rewinder above.
         remote_control.set_schedule_store(std::sync::Arc::new(app_state.schedule_store()));
-        // Team runs and the coordination blackboard: the same database `oximux
+        // Team runs and the coordination blackboard: the same database `TREX
         // serve` opens, so a run started against either host is one run. Both
         // are plain SQLite stores, handed over directly like the schedules.
         remote_control.set_automation_stores(
@@ -505,14 +505,14 @@ fn main() {
             let sweep_settings = app_state.settings_repo().clone();
             let sweep_projects = app_state.project_repo();
             let session_exists = move |sid: &str| {
-                oximux_app::remote_control::session_catalog::session_known_in_storage(
+                trex_app::remote_control::session_catalog::session_known_in_storage(
                     &sweep_settings,
                     &sweep_projects,
-                    oximux_app::window_registry::PRIMARY_WINDOW_ID,
+                    trex_app::window_registry::PRIMARY_WINDOW_ID,
                     sid,
                 )
             };
-            if let Some(ticker) = oximux_app::scheduler::install(
+            if let Some(ticker) = trex_app::scheduler::install(
                 app_state.schedule_store(),
                 bridge_launcher,
                 remote_control.registry(),
@@ -522,7 +522,7 @@ fn main() {
                 cx,
             ) {
                 remote_control.set_schedule_runner(std::sync::Arc::new(
-                    oximux_remote_host::TickerRunner(ticker),
+                    trex_remote_host::TickerRunner(ticker),
                 ));
             }
         }
@@ -530,7 +530,7 @@ fn main() {
         // recent-projects store the desktop sidebar lists, read directly (no UI hop)
         // since it is durable data, not live view state.
         remote_control.set_project_provider(std::sync::Arc::new(
-            oximux_app::remote_control::project_provider::RepoProjects::new(app_state.project_repo()),
+            trex_app::remote_control::project_provider::RepoProjects::new(app_state.project_repo()),
         ));
         // Worktrees the CLI can create, list, and remove: the same repos and
         // host-derived path scheme the desktop's New-Worktree flow uses, so a
@@ -538,9 +538,9 @@ fn main() {
         // Skipped only when this platform reports no data directory — there is
         // nowhere to derive a worktree path under, and the RPC answering
         // `Unsupported` beats one that fails at every create.
-        if let Some(data_dir) = oximux_app::app_paths::data_dir() {
+        if let Some(data_dir) = trex_app::app_paths::data_dir() {
             remote_control.set_worktree_service(std::sync::Arc::new(
-                oximux_app::remote_control::worktree_service::RepoWorktrees::new(
+                trex_app::remote_control::worktree_service::RepoWorktrees::new(
                     app_state.project_repo(),
                     app_state.workspace_repo(),
                     data_dir,
@@ -560,19 +560,19 @@ fn main() {
             // refuses now, which the client can retry.
             let (tx, requests) = tokio::sync::mpsc::channel(16);
             let catalog = std::sync::Arc::new(
-                oximux_app::remote_control::session_catalog::DesktopSessionCatalog::new(
+                trex_app::remote_control::session_catalog::DesktopSessionCatalog::new(
                     remote_control.registry(),
                     std::sync::Arc::new(app_state.settings_repo().clone()),
                     std::sync::Arc::new(app_state.project_repo()),
                     // The layout this catalog reads belongs to one window. A
                     // second window's sessions are reachable once it has shown
                     // their project itself, which is the pre-existing behaviour.
-                    oximux_app::window_registry::PRIMARY_WINDOW_ID.to_string(),
+                    trex_app::window_registry::PRIMARY_WINDOW_ID.to_string(),
                     tx,
                 ),
             );
             remote_control.set_session_catalog(catalog.clone());
-            oximux_app::remote_control::session_catalog::serve_opens(requests, catalog, cx);
+            trex_app::remote_control::session_catalog::serve_opens(requests, catalog, cx);
         }
         // Voice dictation the phone can drive: the desktop decodes clips with the
         // same speech engine and model manager its own composer uses, so a phone
@@ -580,7 +580,7 @@ fn main() {
         // installed above, so its model manager is shared here rather than a
         // second one being built.
         if let Some(transcriber) =
-            oximux_app::shell::agent_chat::build_remote_transcriber(cx)
+            trex_app::shell::agent_chat::build_remote_transcriber(cx)
         {
             remote_control.set_transcriber(transcriber);
         }
@@ -593,7 +593,7 @@ fn main() {
         // NEW device still takes a deliberate toggle.
         let remote_was_on = app_state
             .settings_repo()
-            .get(oximux_app::remote_control::ENABLED_SETTING)
+            .get(trex_app::remote_control::ENABLED_SETTING)
             .ok()
             .flatten()
             .is_some_and(|v| v == "true");
@@ -602,12 +602,12 @@ fn main() {
         // the default — otherwise a user who turned it off would get an assertion
         // for the moment between bind and hydration.
         if let Ok(Some(v)) =
-            app_state.settings_repo().get(oximux_app::remote_control::KEEP_AWAKE_SETTING)
+            app_state.settings_repo().get(trex_app::remote_control::KEEP_AWAKE_SETTING)
         {
-            oximux_app::agent_awake::global().set_remote_enabled(v == "true");
+            trex_app::agent_awake::global().set_remote_enabled(v == "true");
         }
         if remote_was_on {
-            oximux_app::remote_control::RemoteControl::resume_at_launch(cx);
+            trex_app::remote_control::RemoteControl::resume_at_launch(cx);
         }
         // Local CLI access resumes on the same reasoning, under its own key: a
         // scripted workflow must survive an app restart without someone
@@ -616,13 +616,13 @@ fn main() {
         // behind it. An explicit "false" still keeps it off.
         let stored_local = app_state
             .settings_repo()
-            .get(oximux_app::remote_control::LOCAL_ENABLED_SETTING)
+            .get(trex_app::remote_control::LOCAL_ENABLED_SETTING)
             .ok()
             .flatten();
         let local_was_on =
-            oximux_app::remote_control::local_access_enabled(stored_local.as_deref());
+            trex_app::remote_control::local_access_enabled(stored_local.as_deref());
         if local_was_on {
-            oximux_app::remote_control::RemoteControl::start_local(cx);
+            trex_app::remote_control::RemoteControl::start_local(cx);
         }
         // (The scheduled-run ticker is installed above, beside the launch
         // bridge it fires through — before `remote_control` is frozen into a
@@ -632,9 +632,9 @@ fn main() {
         // happens at quit, so the running workspace is never disturbed.
         #[cfg(any(target_os = "macos", windows))]
         {
-            oximux_app::updater::install(cx);
+            trex_app::updater::install(cx);
             if upgraded_this_boot {
-                oximux_app::updater::announce_update(cx);
+                trex_app::updater::announce_update(cx);
             }
         }
         // Install the full keymap (registry defaults ⊕ keybindings.toml
@@ -645,30 +645,30 @@ fn main() {
         // Installs the effective keymap plus the terminal's Tab/Shift+Tab
         // shadow bindings (so `cd <Tab>` reaches the shell instead of cycling
         // UI focus). Must run before `set_menus`.
-        oximux_app::keybindings_settings::install(cx);
-        // Install the application menu so the macOS menu bar reads "OxiMux"
+        trex_app::keybindings_settings::install(cx);
+        // Install the application menu so the macOS menu bar reads "TREX"
         // (not the launching process's name) and carries the standard
         // About / Hide / Quit / Window items. `Quit` routes through
         // `cx.quit()` so it shares the graceful-shutdown path; the native
         // items defer to AppKit selectors.
-        cx.set_menus(oximux_app::menu::app_menus());
-        cx.on_action::<oximux_app::menu::Quit>(|_, cx| cx.quit());
+        cx.set_menus(trex_app::menu::app_menus());
+        cx.on_action::<trex_app::menu::Quit>(|_, cx| cx.quit());
         // Help → the two links. App-level rather than window-level because a
         // URL needs no window, and the Help menu stays live when every window
         // is closed.
-        cx.on_action::<oximux_app::menu::OpenDocs>(|_, cx| {
-            cx.open_url(oximux_app::menu::DOCS_URL)
+        cx.on_action::<trex_app::menu::OpenDocs>(|_, cx| {
+            cx.open_url(trex_app::menu::DOCS_URL)
         });
-        cx.on_action::<oximux_app::menu::ReportIssue>(|_, cx| {
-            cx.open_url(oximux_app::menu::ISSUES_URL)
+        cx.on_action::<trex_app::menu::ReportIssue>(|_, cx| {
+            cx.open_url(trex_app::menu::ISSUES_URL)
         });
-        cx.on_action::<oximux_app::menu::HideApp>(|_, _cx| oximux_app::menu::platform::hide());
-        cx.on_action::<oximux_app::menu::HideOthers>(|_, _cx| {
-            oximux_app::menu::platform::hide_others()
+        cx.on_action::<trex_app::menu::HideApp>(|_, _cx| trex_app::menu::platform::hide());
+        cx.on_action::<trex_app::menu::HideOthers>(|_, _cx| {
+            trex_app::menu::platform::hide_others()
         });
-        cx.on_action::<oximux_app::menu::ShowAll>(|_, _cx| oximux_app::menu::platform::show_all());
-        cx.on_action::<oximux_app::menu::Minimize>(|_, _cx| oximux_app::menu::platform::minimize());
-        cx.on_action::<oximux_app::menu::Zoom>(|_, _cx| oximux_app::menu::platform::zoom());
+        cx.on_action::<trex_app::menu::ShowAll>(|_, _cx| trex_app::menu::platform::show_all());
+        cx.on_action::<trex_app::menu::Minimize>(|_, _cx| trex_app::menu::platform::minimize());
+        cx.on_action::<trex_app::menu::Zoom>(|_, _cx| trex_app::menu::platform::zoom());
         cx.activate(true);
 
         // Register the once-per-process lifecycle observers (quit-save,
@@ -684,32 +684,32 @@ fn main() {
         // takes the legacy single-window path: one "main" window bootstrapped
         // to the most-recent project.
         let manifest =
-            oximux_app::project_panes_factory::load_windows_manifest(app_state.settings_repo());
+            trex_app::project_panes_factory::load_windows_manifest(app_state.settings_repo());
         // First-run onboarding gate. Presence of the flag is what counts —
         // finished and skipped both write it. Existing installs (non-empty
         // manifest) get the flag backfilled instead of a wizard: an upgrade
         // must never open a welcome flow over a working setup.
         let onboarded = app_state
             .settings_repo()
-            .get(oximux_app::shell::onboarding::COMPLETED_SETTING)
+            .get(trex_app::shell::onboarding::COMPLETED_SETTING)
             .ok()
             .flatten()
             .is_some();
         if manifest.windows.is_empty() {
-            if oximux_app::shell::onboarding::should_show_onboarding(true, onboarded) {
-                oximux_app::shell::onboarding::set_pending();
+            if trex_app::shell::onboarding::should_show_onboarding(true, onboarded) {
+                trex_app::shell::onboarding::set_pending();
             }
             open_workspace_window(cx, app_state);
         } else {
             if !onboarded {
                 let _ = app_state
                     .settings_repo()
-                    .set(oximux_app::shell::onboarding::COMPLETED_SETTING, "1");
+                    .set(trex_app::shell::onboarding::COMPLETED_SETTING, "1");
             }
             // Reserve every restored id up front so a later Cmd+N can't re-mint
             // one and alias a restored window's persisted rows.
             for entry in &manifest.windows {
-                oximux_app::window_registry::note_restored_id(cx, &entry.window_id);
+                trex_app::window_registry::note_restored_id(cx, &entry.window_id);
             }
             for entry in manifest.windows {
                 open_workspace_window_with(
@@ -728,8 +728,8 @@ fn main() {
 /// is what makes multi-window correct: a SINGLE quit observer iterates every
 /// tracked window, and a SINGLE window-closed observer decides "last window →
 /// quit the app" vs. "dismiss just this window".
-fn install_app_lifecycle(cx: &mut gpui::App, app_state: oximux_app::state::AppState) {
-    use oximux_app::window_registry;
+fn install_app_lifecycle(cx: &mut gpui::App, app_state: trex_app::state::AppState) {
+    use trex_app::window_registry;
 
     // Cmd+N → open another independent workspace window. Handled globally
     // (not on `WorkspaceRoot`) because opening a window needs `&mut App`.
@@ -746,7 +746,7 @@ fn install_app_lifecycle(cx: &mut gpui::App, app_state: oximux_app::state::AppSt
     // scrollback + relay ids. Runs synchronously inside GPUI's grace window.
     let quit_settings_repo = app_state.settings_repo().clone();
     cx.on_app_quit(move |cx| {
-        oximux_app::shell::terminal_view::APP_QUITTING
+        trex_app::shell::terminal_view::APP_QUITTING
             .store(true, std::sync::atomic::Ordering::SeqCst);
         let capture_started = std::time::Instant::now();
         window_registry::capture_session(cx);
@@ -758,13 +758,13 @@ fn install_app_lifecycle(cx: &mut gpui::App, app_state: oximux_app::state::AppSt
         // them instead of flashing "loading git…". Best-effort: a write
         // error only costs one Loading flash next time.
         if let Some(cache) =
-            cx.try_global::<oximux_app::git_state_cache::GitStateCache>()
+            cx.try_global::<trex_app::git_state_cache::GitStateCache>()
         {
             cache.save_to(&quit_settings_repo);
         }
         // Persist the probed model catalogs so the next launch seeds the New
         // Agent picker instantly instead of paying a cold backend spawn.
-        if let Some(cache) = cx.try_global::<oximux_app::catalog_cache::CatalogCache>() {
+        if let Some(cache) = cx.try_global::<trex_app::catalog_cache::CatalogCache>() {
             cache.save_to(&quit_settings_repo);
         }
         // Apply a staged update, if one is waiting. Deliberately last: the
@@ -775,7 +775,7 @@ fn install_app_lifecycle(cx: &mut gpui::App, app_state: oximux_app::state::AppSt
         {
             let swap_started = std::time::Instant::now();
             let from_signal = SHUTDOWN_SIGNAL.load(std::sync::atomic::Ordering::SeqCst);
-            if oximux_app::updater::apply_pending_at_quit(cx, from_signal) {
+            if trex_app::updater::apply_pending_at_quit(cx, from_signal) {
                 tracing::info!(
                     elapsed_ms = swap_started.elapsed().as_millis() as u64,
                     "quit: applied staged update"
@@ -804,7 +804,7 @@ fn install_app_lifecycle(cx: &mut gpui::App, app_state: oximux_app::state::AppSt
             return;
         }
         if window_registry::remaining(cx) <= 1 {
-            oximux_app::shell::terminal_view::APP_QUITTING
+            trex_app::shell::terminal_view::APP_QUITTING
                 .store(true, std::sync::atomic::Ordering::SeqCst);
             let capture_started = std::time::Instant::now();
             window_registry::capture_session(cx);
@@ -922,7 +922,7 @@ fn install_signal_watchdog(cx: &mut gpui::App) {
                 // Same as the quit/window-close hooks: preserve relay
                 // PTYs across the SIGINT/SIGTERM shutdown so reattach
                 // works on the next launch.
-                oximux_app::shell::terminal_view::APP_QUITTING.store(true, Ordering::SeqCst);
+                trex_app::shell::terminal_view::APP_QUITTING.store(true, Ordering::SeqCst);
                 cx.update(|cx| cx.quit());
                 break;
             }
@@ -942,7 +942,7 @@ fn install_signal_watchdog(cx: &mut gpui::App) {
 /// Step-1 day-1 deliverable: window opens, file content visible, Rust
 /// tree-sitter highlights render. No LSP wiring yet — that's day 2.
 fn run_editor_spike() {
-    use oximux_editor::EditorView;
+    use trex_editor::EditorView;
 
     // Day-1 verification (success criteria checkbox in the sub-plan):
     // confirm the rt.enter guard above is in scope for callbacks. If
@@ -971,11 +971,11 @@ fn run_editor_spike() {
         gpui_component::init(cx);
         // Same font registration as the production path — a spike that renders
         // in a different face is not showing you what ships.
-        let _ = oximux_app::assets::load_fonts(cx);
+        let _ = trex_app::assets::load_fonts(cx);
         gpui_component::Theme::change(gpui_component::ThemeMode::Dark, None, cx);
         {
-            let palette = oximux_settings::Theme::charcoal();
-            let component_density = oximux_settings::Density::cockpit();
+            let palette = trex_settings::Theme::charcoal();
+            let component_density = trex_settings::Density::cockpit();
             // `Theme::update`, not `global_mut` — same reason as the
             // production bridge in `appearance_settings`: a bare write
             // leaves the token mirror and the Base projection on their
@@ -1002,14 +1002,14 @@ fn run_editor_spike() {
             window_bounds: Some(WindowBounds::Windowed(bounds)),
             window_min_size: Some(size(px(480.0), px(320.0))),
             titlebar: Some(TitlebarOptions {
-                title: Some("OxiMux — Editor Spike".into()),
+                title: Some("TREX — Editor Spike".into()),
                 appears_transparent: true,
                 traffic_light_position: Some(point(px(12.), px(8.))),
             }),
             ..Default::default()
         };
 
-        // Workspace root is the cwd — for OxiMux's own dogfood path that
+        // Workspace root is the cwd — for TREX's own dogfood path that
         // resolves to the repo root, which is what rust-analyzer wants.
         let workspace_root = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         let file_for_window = file_path.clone();
@@ -1032,8 +1032,8 @@ fn run_editor_spike() {
 /// no-op `tracing::info!` until step 5 lands the real pane-split
 /// handler.
 fn run_file_tree_spike() {
-    use oximux_app::shell::file_tree_view::{FileTreeView, OnOpenFile};
-    use oximux_editor::FileTree;
+    use trex_app::shell::file_tree_view::{FileTreeView, OnOpenFile};
+    use trex_editor::FileTree;
     use std::sync::Arc;
 
     // Same tokio precondition the editor spike checks — `cx.spawn` inside
@@ -1056,14 +1056,14 @@ fn run_file_tree_spike() {
     let app = gpui_platform::application().with_assets(CompositeAssets);
     app.run(move |cx| {
         gpui_component::init(cx);
-        let _ = oximux_app::assets::load_fonts(cx);
+        let _ = trex_app::assets::load_fonts(cx);
         gpui_component::Theme::change(gpui_component::ThemeMode::Dark, None, cx);
         // Keep the spike's input chrome in step with the production init
         // blocks above — debugging input styling in the spike must show
         // the same borders the shipping window does.
         {
-            let palette = oximux_settings::Theme::charcoal();
-            let component_density = oximux_settings::Density::cockpit();
+            let palette = trex_settings::Theme::charcoal();
+            let component_density = trex_settings::Density::cockpit();
             let component_theme = gpui_component::Theme::global_mut(cx);
             component_theme.colors.input = palette.border_input;
             component_theme.colors.ring = palette.focus_ring;
@@ -1085,7 +1085,7 @@ fn run_file_tree_spike() {
             window_bounds: Some(WindowBounds::Windowed(bounds)),
             window_min_size: Some(size(px(240.0), px(320.0))),
             titlebar: Some(TitlebarOptions {
-                title: Some("OxiMux — File Tree Spike".into()),
+                title: Some("TREX — File Tree Spike".into()),
                 appears_transparent: true,
                 traffic_light_position: Some(point(px(12.), px(8.))),
             }),
@@ -1105,7 +1105,7 @@ fn run_file_tree_spike() {
             let view = cx.new(|cx| {
                 FileTreeView::new(
                     tree,
-                    oximux_settings::Theme::charcoal(),
+                    trex_settings::Theme::charcoal(),
                     on_open,
                     None,
                     window,
@@ -1126,8 +1126,8 @@ fn run_file_tree_spike() {
 /// an unguarded boot — only when the data directory can't be resolved/created
 /// or the lock errored unexpectedly — never because a peer was found (that path
 /// exits).
-fn enforce_single_instance() -> Option<oximux_app::single_instance::SingleInstanceGuard> {
-    use oximux_app::single_instance::{
+fn enforce_single_instance() -> Option<trex_app::single_instance::SingleInstanceGuard> {
+    use trex_app::single_instance::{
         AcquireOutcome, activate_existing_instance, lock_path_in, try_acquire,
     };
     let Some(dir) = app_paths::data_dir() else {
@@ -1149,7 +1149,7 @@ fn enforce_single_instance() -> Option<oximux_app::single_instance::SingleInstan
                 .map(|p| format!(" (pid {p})"))
                 .unwrap_or_default();
             eprintln!(
-                "oximux: another OxiMux instance is already running{suffix} — \
+                "TREX: another TREX instance is already running{suffix} — \
                  bringing its window to the front."
             );
             std::process::exit(0);
@@ -1161,31 +1161,31 @@ fn enforce_single_instance() -> Option<oximux_app::single_instance::SingleInstan
     }
 }
 
-/// Resolve `~/Library/Application Support/dev.nhtera.oximux/oximux.db`,
+/// Resolve `~/Library/Application Support/dev.tiraci.trex/trex.db`,
 /// mkdir-p the parent, and open the SQLite database. Any failure on this
 /// path is fatal — `eprintln` + `exit(1)` rather than panic so the user
 /// sees a one-line message instead of a Rust backtrace.
 fn open_db_or_exit() -> Db {
     let Some(db_dir) = app_paths::data_dir() else {
         eprintln!(
-            "oximux: cannot resolve the application data directory; \
+            "TREX: cannot resolve the application data directory; \
              try setting $HOME or running outside a restrictive sandbox"
         );
         std::process::exit(1);
     };
     if let Err(err) = std::fs::create_dir_all(&db_dir) {
         eprintln!(
-            "oximux: cannot create data directory {}: {err}",
+            "TREX: cannot create data directory {}: {err}",
             db_dir.display()
         );
         std::process::exit(1);
     }
     let db_path = db_dir.join(DB_FILE_NAME);
-    let db = match oximux_storage::open(&db_path) {
+    let db = match trex_storage::open(&db_path) {
         Ok(db) => db,
         Err(err) => {
             eprintln!(
-                "oximux: cannot open database {} (is another OxiMux instance \
+                "TREX: cannot open database {} (is another TREX instance \
                  running? if the file is corrupt, delete it to reset): {err}",
                 db_path.display()
             );
@@ -1227,15 +1227,15 @@ fn restrict_db_files(db_path: &std::path::Path) {
         if !path.exists() {
             continue;
         }
-        if let Err(err) = oximux_owner_only::restrict_file(path) {
+        if let Err(err) = trex_owner_only::restrict_file(path) {
             tracing::warn!(?err, path = %path.display(), "could not restrict database file");
         }
     }
 }
 
-/// `oximux notify` CLI entry. Resolves the relay socket/token the same way
+/// `TREX notify` CLI entry. Resolves the relay socket/token the same way
 /// the supervisor does, connects, and sends `Request::Notify` for the pane
-/// named by `OXIMUX_PTY_ID`. Returns a process exit code (0 = ok).
+/// named by `trex_PTY_ID`. Returns a process exit code (0 = ok).
 fn run_notify_cli(rt: &tokio::runtime::Runtime) -> i32 {
     let mut title = String::new();
     let mut body = String::new();
@@ -1247,15 +1247,15 @@ fn run_notify_cli(rt: &tokio::runtime::Runtime) -> i32 {
             _ => {}
         }
     }
-    let pty_id = match std::env::var("OXIMUX_PTY_ID") {
+    let pty_id = match std::env::var("TREX_PTY_ID") {
         Ok(id) if !id.is_empty() => id,
         _ => {
-            eprintln!("oximux notify: OXIMUX_PTY_ID not set (run inside an OxiMux terminal)");
+            eprintln!("TREX notify: trex_PTY_ID not set (run inside an TREX terminal)");
             return 1;
         }
     };
     let (Some(data_dir), Some(log_dir)) = (app_paths::data_dir(), app_paths::log_dir()) else {
-        eprintln!("oximux notify: cannot resolve application data directory");
+        eprintln!("TREX notify: cannot resolve application data directory");
         return 1;
     };
     let supervisor = RelaySupervisor::new(data_dir, log_dir);
@@ -1263,7 +1263,7 @@ fn run_notify_cli(rt: &tokio::runtime::Runtime) -> i32 {
     let token = match std::fs::read_to_string(supervisor.token_path()) {
         Ok(t) => t.trim().to_owned(),
         Err(err) => {
-            eprintln!("oximux notify: relay not reachable ({err})");
+            eprintln!("TREX notify: relay not reachable ({err})");
             return 1;
         }
     };
@@ -1271,46 +1271,46 @@ fn run_notify_cli(rt: &tokio::runtime::Runtime) -> i32 {
         let client = match RelayClient::connect(&socket, &token).await {
             Ok(c) => c,
             Err(err) => {
-                eprintln!("oximux notify: connect failed: {err}");
+                eprintln!("TREX notify: connect failed: {err}");
                 return 1;
             }
         };
         match client
-            .request(oximux_relay_proto::Request::Notify {
+            .request(trex_relay_proto::Request::Notify {
                 pty_id,
                 title,
                 body,
             })
             .await
         {
-            Ok(oximux_relay_proto::Response::Ok) => 0,
+            Ok(trex_relay_proto::Response::Ok) => 0,
             Ok(other) => {
-                eprintln!("oximux notify: unexpected response: {other:?}");
+                eprintln!("TREX notify: unexpected response: {other:?}");
                 1
             }
             Err(err) => {
-                eprintln!("oximux notify: request failed: {err}");
+                eprintln!("TREX notify: request failed: {err}");
                 1
             }
         }
     })
 }
 
-/// `oximux agent-status` CLI entry. Mirrors `run_notify_cli`: resolves the
+/// `TREX agent-status` CLI entry. Mirrors `run_notify_cli`: resolves the
 /// relay socket/token, connects, and sends `Request::AgentStatus` for the pane
-/// named by `OXIMUX_PTY_ID`. The relay frames the payload as OSC-9999 on that
+/// named by `trex_PTY_ID`. The relay frames the payload as OSC-9999 on that
 /// PTY's output stream, where the app's scanner decodes it. Returns a process
 /// exit code (0 = ok). Writes only to stderr — agent hooks capture stdout.
 fn run_agent_status_cli(rt: &tokio::runtime::Runtime) -> i32 {
     // Everything this verb DECIDES — which dialect's payload shape to read,
     // whether the event should report at all, what the sideband blob says —
-    // lives in the shared crate, because `oximux-cli` runs the same verb and a
+    // lives in the shared crate, because `trex-cli` runs the same verb and a
     // second copy would be a second set of dialect bugs. What stays here is
     // this binary's own socket.
     let args = match StatusArgs::parse(std::env::args().skip(2)) {
         Ok(args) => args,
         Err(msg) => {
-            eprintln!("oximux agent-status: {msg}");
+            eprintln!("TREX agent-status: {msg}");
             return 1;
         }
     };
@@ -1320,9 +1320,9 @@ fn run_agent_status_cli(rt: &tokio::runtime::Runtime) -> i32 {
         let _ = std::io::stdin().read_to_string(&mut buf);
         buf
     };
-    // Absent outside an OxiMux pane (a plain shell): nothing to report to.
+    // Absent outside an TREX pane (a plain shell): nothing to report to.
     // Exit 0 either way — a hook must never fail the agent's turn.
-    let pty_id = match std::env::var("OXIMUX_PTY_ID") {
+    let pty_id = match std::env::var("TREX_PTY_ID") {
         Ok(id) if !id.is_empty() => id,
         _ => return 0,
     };
@@ -1331,7 +1331,7 @@ fn run_agent_status_cli(rt: &tokio::runtime::Runtime) -> i32 {
     };
 
     let (Some(data_dir), Some(log_dir)) = (app_paths::data_dir(), app_paths::log_dir()) else {
-        eprintln!("oximux agent-status: cannot resolve application data directory");
+        eprintln!("TREX agent-status: cannot resolve application data directory");
         return 1;
     };
     let supervisor = RelaySupervisor::new(data_dir, log_dir);
@@ -1339,7 +1339,7 @@ fn run_agent_status_cli(rt: &tokio::runtime::Runtime) -> i32 {
     let token = match std::fs::read_to_string(supervisor.token_path()) {
         Ok(t) => t.trim().to_owned(),
         Err(err) => {
-            eprintln!("oximux agent-status: relay not reachable ({err})");
+            eprintln!("TREX agent-status: relay not reachable ({err})");
             return 1;
         }
     };
@@ -1355,28 +1355,28 @@ fn run_agent_status_cli(rt: &tokio::runtime::Runtime) -> i32 {
             let client = match RelayClient::connect(&socket, &token).await {
                 Ok(c) => c,
                 Err(err) => {
-                    eprintln!("oximux agent-status: connect failed: {err}");
+                    eprintln!("TREX agent-status: connect failed: {err}");
                     return 1;
                 }
             };
             match client
-                .request(oximux_relay_proto::Request::AgentStatus { pty_id, payload })
+                .request(trex_relay_proto::Request::AgentStatus { pty_id, payload })
                 .await
             {
-                Ok(oximux_relay_proto::Response::Ok) => 0,
+                Ok(trex_relay_proto::Response::Ok) => 0,
                 Ok(other) => {
-                    eprintln!("oximux agent-status: unexpected response: {other:?}");
+                    eprintln!("TREX agent-status: unexpected response: {other:?}");
                     1
                 }
                 Err(err) => {
-                    eprintln!("oximux agent-status: request failed: {err}");
+                    eprintln!("TREX agent-status: request failed: {err}");
                     1
                 }
             }
         })
         .await;
         sent.unwrap_or_else(|_| {
-            eprintln!("oximux agent-status: the relay did not answer in time");
+            eprintln!("TREX agent-status: the relay did not answer in time");
             1
         })
     })
@@ -1395,7 +1395,7 @@ fn run_agent_status_cli(rt: &tokio::runtime::Runtime) -> i32 {
 // context, matching the invariant documented on `RelayBackend::new`.
 // `None` ⇒ no relay; the app falls back to in-process PTYs.
 fn boot_relay_supervisor(
-    pane_relay_id_repo: oximux_storage::PaneRelayIdRepo,
+    pane_relay_id_repo: trex_storage::PaneRelayIdRepo,
 ) -> Option<tokio::runtime::Runtime> {
     let Some(runtime_dir) = app_paths::data_dir() else {
         tracing::warn!("no data_dir; skipping relay supervisor");
@@ -1440,9 +1440,9 @@ fn boot_relay_supervisor(
         Err(SupervisorError::VersionMismatch) => {
             tracing::warn!("relay version mismatch; falling back to in-process PTYs");
             #[cfg(target_os = "macos")]
-            oximux_app::notifier::mac::post_system_banner(
-                "OxiMux relay version mismatch",
-                "Restart OxiMux to pick up the new daemon.",
+            trex_app::notifier::mac::post_system_banner(
+                "TREX relay version mismatch",
+                "Restart TREX to pick up the new daemon.",
             );
             return None;
         }
@@ -1470,8 +1470,8 @@ fn boot_relay_supervisor(
     // Publish the relay-backed terminal source so the remote host can serve
     // terminals. Installed here rather than returned because the relay boots
     // before the `RemoteControl` global exists.
-    oximux_app::remote_control::relay_terminals::install(std::sync::Arc::new(
-        oximux_app::remote_control::relay_terminals::RelayTerminals::new(std::sync::Arc::clone(
+    trex_app::remote_control::relay_terminals::install(std::sync::Arc::new(
+        trex_app::remote_control::relay_terminals::RelayTerminals::new(std::sync::Arc::clone(
             &client_arc,
         )),
     ));
@@ -1480,8 +1480,8 @@ fn boot_relay_supervisor(
     let shared = std::sync::Arc::new(std::sync::Mutex::new(boxed));
     install_shared_backend(shared);
     // Record the daemon socket so spawned shells can advertise it via
-    // OXIMUX_SOCKET_PATH (lets `oximux notify` / agents dial the daemon).
-    oximux_app::shell::context_env::set_relay_socket_path(
+    // trex_SOCKET_PATH (lets `TREX notify` / agents dial the daemon).
+    trex_app::shell::context_env::set_relay_socket_path(
         supervisor.socket_path().to_string_lossy().into_owned(),
     );
     tracing::info!("relay supervisor up; PTYs will route through the daemon");
@@ -1497,7 +1497,7 @@ fn arm_relay_heartbeat(
     pid: u32,
     runtime_dir: PathBuf,
     log_dir: PathBuf,
-    repo: oximux_storage::PaneRelayIdRepo,
+    repo: trex_storage::PaneRelayIdRepo,
     session_id: String,
     handle: tokio::runtime::Handle,
 ) {
@@ -1525,7 +1525,7 @@ fn arm_relay_heartbeat(
 fn respawn_relay_after_death_boxed(
     runtime_dir: PathBuf,
     log_dir: PathBuf,
-    repo: oximux_storage::PaneRelayIdRepo,
+    repo: trex_storage::PaneRelayIdRepo,
     dead_session_id: String,
     handle: tokio::runtime::Handle,
 ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send>> {
@@ -1561,7 +1561,7 @@ fn respawn_backoff_delay(attempt: u32) -> Duration {
 async fn respawn_relay_after_death(
     runtime_dir: PathBuf,
     log_dir: PathBuf,
-    repo: oximux_storage::PaneRelayIdRepo,
+    repo: trex_storage::PaneRelayIdRepo,
     dead_session_id: String,
     handle: tokio::runtime::Handle,
 ) {
@@ -1586,7 +1586,7 @@ async fn respawn_relay_after_death(
     // respawn run during teardown — accepted; worst case is a swapped-in
     // backend nobody reads plus one stray notification, and runtime drop
     // waits out the re-armed heartbeat tick (~1s) at exit.
-    if oximux_app::shell::terminal_view::APP_QUITTING.load(Ordering::SeqCst) {
+    if trex_app::shell::terminal_view::APP_QUITTING.load(Ordering::SeqCst) {
         tracing::info!("app quitting; skipping relay respawn");
         return;
     }
@@ -1598,7 +1598,7 @@ async fn respawn_relay_after_death(
     // windows — so it exits immediately, same as the boot path.
     let outcome = 'retry: {
         for attempt in 1..=RESPAWN_MAX_ATTEMPTS {
-            if oximux_app::shell::terminal_view::APP_QUITTING.load(Ordering::SeqCst) {
+            if trex_app::shell::terminal_view::APP_QUITTING.load(Ordering::SeqCst) {
                 tracing::info!("app quitting; abandoning relay respawn retries");
                 return;
             }
@@ -1626,7 +1626,7 @@ async fn respawn_relay_after_death(
         Ok(client) => {
             let new_session_id = client.server_session_id().to_owned();
             let backend = RelayBackend::new(std::sync::Arc::new(client), handle.clone());
-            match oximux_app::shell::terminal_view::shared_backend() {
+            match trex_app::shell::terminal_view::shared_backend() {
                 Some(shared) => {
                     let mut guard = shared.lock().expect("shared backend poisoned");
                     // Seed BEFORE the swap publishes the new backend:
@@ -1661,7 +1661,7 @@ async fn respawn_relay_after_death(
                 "relay daemon respawned; shared backend swapped in place"
             );
             notify_user(
-                "OxiMux relay restarted",
+                "TREX relay restarted",
                 "Terminal sessions from before the crash have ended. \
                  New terminals are daemon-backed again.",
             );
@@ -1669,8 +1669,8 @@ async fn respawn_relay_after_death(
         Err(err) => {
             tracing::warn!(?err, "relay respawn failed; PTYs fall back to in-process");
             notify_user(
-                "OxiMux relay could not be restarted",
-                "New terminals will run in-process (no quit-survival) until you relaunch OxiMux.",
+                "TREX relay could not be restarted",
+                "New terminals will run in-process (no quit-survival) until you relaunch TREX.",
             );
         }
     }
@@ -1678,7 +1678,7 @@ async fn respawn_relay_after_death(
 
 fn notify_user(title: &'static str, message: &'static str) {
     #[cfg(target_os = "macos")]
-    oximux_app::notifier::mac::post_system_banner(title, message);
+    trex_app::notifier::mac::post_system_banner(title, message);
     #[cfg(not(target_os = "macos"))]
     let _ = (title, message);
 }
@@ -1687,7 +1687,7 @@ fn notify_user(title: &'static str, message: &'static str) {
 ///
 /// The binary is GUI-subsystem (see the crate attribute), so Windows never
 /// creates a console for it. This call is the other half of that choice: when
-/// a console-launched dev run (`cargo run`, `.\oximux.exe` in a shell) does
+/// a console-launched dev run (`cargo run`, `.\TREX.exe` in a shell) does
 /// have a parent console, attach to it so `tracing` output lands there and
 /// Ctrl+C still reaches the process. Launched from Explorer or the debugger
 /// there is no parent console, the call fails, and that failure is the
@@ -1698,7 +1698,7 @@ fn notify_user(title: &'static str, message: &'static str) {
 /// because attaching couples the process to the console's window: close that
 /// terminal and Windows ends every attached client, which is right for a dev
 /// run and wrong for a release app someone happened to start from a shell.
-/// Build profile stands in for Zed's flag until OxiMux grows a CLI surface.
+/// Build profile stands in for Zed's flag until TREX grows a CLI surface.
 ///
 /// Ordering: must run before `init_tracing` (and any other stdio use), because
 /// the std handles are resolved on first use. Handle semantics are Windows's,
@@ -1717,7 +1717,7 @@ fn attach_parent_console() {
 
 fn init_tracing() {
     let filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info,oximux=debug"));
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info,TREX=debug"));
     let _ = tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_target(false)

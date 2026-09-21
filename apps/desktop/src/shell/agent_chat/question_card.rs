@@ -1,4 +1,4 @@
-//! The interactive AskUserQuestion card — a Claude-Desktop-style *pager*.
+﻿//! The interactive AskUserQuestion card — a Claude-Desktop-style *pager*.
 //!
 //! Rendered inline in the transcript for a tool call awaiting answers. It is its
 //! own gpui entity (not part of `AgentChatView`'s render) so its per-question
@@ -19,8 +19,8 @@ use gpui::{
     StatefulInteractiveElement, Styled, Subscription, Window, div, prelude::FluentBuilder, px,
 };
 use gpui_component::input::{Input, InputEvent, InputState};
-use oximux_agents::thread::{QuestionAnswer, QuestionAnswers, QuestionRequest, ToolCall};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::{QuestionAnswer, QuestionAnswers, QuestionRequest, ToolCall};
+use trex_settings::{Density, Theme, Typography};
 
 use super::bubble;
 use super::tool_card::pill_button;
@@ -399,7 +399,7 @@ impl QuestionCard {
 
 impl Render for QuestionCard {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typo = self.typography.clone();
@@ -685,7 +685,7 @@ impl QuestionCard {
 mod tests {
     use super::*;
     use gpui::TestAppContext;
-    use oximux_agents::thread::{AskQuestion, QuestionKind, QuestionOption, QuestionRequest};
+    use trex_agents::thread::{AskQuestion, QuestionKind, QuestionOption, QuestionRequest};
 
     fn q(id: &str) -> AskQuestion {
         AskQuestion {

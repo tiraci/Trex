@@ -1,4 +1,4 @@
-//! The inbound half of remote control: a launch request crossing from the
+﻿//! The inbound half of remote control: a launch request crossing from the
 //! dispatcher's tokio task onto the GPUI thread, and its answer coming back.
 //!
 //! Every other remote capability reaches something the registry already holds —
@@ -13,7 +13,7 @@
 //! riding along so the caller learns the new session's id rather than polling
 //! for it.
 
-use oximux_remote_host::{LaunchError, SessionLauncher};
+use trex_remote_host::{LaunchError, SessionLauncher};
 use tokio::sync::{mpsc, oneshot};
 
 /// One request to open a session, plus where to send the answer.
@@ -176,7 +176,7 @@ pub(crate) fn open_session(
     // resolution the left rail performs, so a remote launch and a local one
     // produce the same kind of session rather than two subtly different ones.
     let settings = cx
-        .try_global::<oximux_settings::AgentLaunchSettings>()
+        .try_global::<trex_settings::AgentLaunchSettings>()
         .cloned()
         .unwrap_or_default();
     // A request that names no agent (a remote quick-add — the local launcher
@@ -317,7 +317,7 @@ mod tests {
 
     #[test]
     fn a_file_is_not_a_working_directory() {
-        let file = std::env::temp_dir().join("oximux-launch-bridge-test-file");
+        let file = std::env::temp_dir().join("trex-launch-bridge-test-file");
         std::fs::write(&file, b"x").unwrap();
         // `canonicalize` succeeds for a file, so the is_dir check is what
         // actually rejects this — worth pinning, since dropping it would leave a

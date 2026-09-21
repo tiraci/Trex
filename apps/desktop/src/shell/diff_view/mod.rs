@@ -1,4 +1,4 @@
-//! DiffView — read-only patch renderer driven by GitPanel selection.
+﻿//! DiffView — read-only patch renderer driven by GitPanel selection.
 //!
 //! State machine:
 //! ```text
@@ -49,11 +49,11 @@ use gpui::{
     ListOffset, ListState, Subscription, Task, WeakEntity, Window, px,
 };
 use gpui_component::input::InputState;
-use oximux_core::{CombinedDiffScope, FileDiff, FileGroup, NoteSide};
-use oximux_editor::{EditorZoom, EditorZoomIn, EditorZoomOut, EditorZoomReset};
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
-use oximux_storage::DiffReviewNoteRepo;
+use trex_core::{CombinedDiffScope, FileDiff, FileGroup, NoteSide};
+use trex_editor::{EditorZoom, EditorZoomIn, EditorZoomOut, EditorZoomReset};
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
+use trex_storage::DiffReviewNoteRepo;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -212,7 +212,7 @@ pub(crate) struct PlanCache {
     /// Per-file tokenised render plan — the syntect/word-diff output.
     plan: Vec<FilePlan>,
     /// Stageable change regions per file (git add -p granularity).
-    regions: Vec<Vec<oximux_core::ChangeRegion>>,
+    regions: Vec<Vec<trex_core::ChangeRegion>>,
     /// Per-file staged flag (combined view only; empty elsewhere → solid).
     staged_per_file: Vec<bool>,
     /// File paths in file order, for `mark_notes`.
@@ -742,7 +742,7 @@ impl DiffView {
             .current_diffs()
             .iter()
             .filter(|d| {
-                matches!(d.status, oximux_core::DiffStatus::Binary)
+                matches!(d.status, trex_core::DiffStatus::Binary)
                     && image_diff::is_image_path(d.path.as_path())
             })
             .map(|d| d.path.clone())
@@ -756,7 +756,7 @@ impl DiffView {
         let (tx, rx) = oneshot::channel::<Vec<(String, image_diff::ImageDiffData)>>();
         let Ok(handle) = tokio::runtime::Handle::try_current() else {
             tracing::warn!(
-                target: "oximux_app::diff_view",
+                target: "trex_app::diff_view",
                 "no tokio runtime entered; image preview fetch skipped"
             );
             return;
@@ -877,7 +877,7 @@ impl DiffView {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     "no tokio runtime entered; diff load skipped (step 14 wires runtime)"
                 );
                 return;
@@ -1196,7 +1196,7 @@ impl DiffView {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     "no tokio runtime entered; commit load skipped"
                 );
                 return;
@@ -1298,7 +1298,7 @@ impl DiffView {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     "no tokio runtime entered; range load skipped"
                 );
                 return;
@@ -1382,7 +1382,7 @@ impl DiffView {
             scope: scope.clone(),
         };
         let repo = self.repo.clone();
-        let (tx, rx) = oneshot::channel::<Result<oximux_core::CombinedDiff, String>>();
+        let (tx, rx) = oneshot::channel::<Result<trex_core::CombinedDiff, String>>();
         match tokio::runtime::Handle::try_current() {
             Ok(handle) => {
                 let scope_for_fetch = scope.clone();
@@ -1396,7 +1396,7 @@ impl DiffView {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     "no tokio runtime entered; combined load skipped"
                 );
                 return;
@@ -1421,7 +1421,7 @@ impl DiffView {
     /// card.
     ///
     /// This is the whole virtual path: parse with the same
-    /// [`oximux_git::parse_unified_diff`] the fetch path uses, then hand the
+    /// [`trex_git::parse_unified_diff`] the fetch path uses, then hand the
     /// result to the same [`Self::apply_combined_result`] the fetch path ends at.
     /// No shellout, no task, no second viewer — the only difference from
     /// [`Self::load_combined`] is where the bytes came from.
@@ -1442,10 +1442,10 @@ impl DiffView {
         self.reset_rail_state();
         self.notes.clear();
         self.images.clear();
-        let result = oximux_git::parse_unified_diff(raw_diff)
+        let result = trex_git::parse_unified_diff(raw_diff)
             .map(|diffs| {
                 let groups = vec![FileGroup::Committed; diffs.len()];
-                oximux_core::CombinedDiff { diffs, groups }
+                trex_core::CombinedDiff { diffs, groups }
             })
             .map_err(|e| e.to_string());
         self.apply_combined_result(scope, result);
@@ -1457,7 +1457,7 @@ impl DiffView {
     fn apply_combined_result(
         &mut self,
         scope: CombinedDiffScope,
-        result: Result<oximux_core::CombinedDiff, String>,
+        result: Result<trex_core::CombinedDiff, String>,
     ) {
         match result {
             Ok(combined) => {
@@ -1684,7 +1684,7 @@ impl DiffView {
             }
             _ => return None,
         };
-        let regions = oximux_core::change_regions(orig);
+        let regions = trex_core::change_regions(orig);
         let file = FileDiff {
             path: orig.path.clone(),
             status: orig.status.clone(),
@@ -1866,7 +1866,7 @@ impl DiffView {
             }
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     "no tokio runtime entered; hunk op skipped"
                 );
                 return;
@@ -1878,7 +1878,7 @@ impl DiffView {
             };
             if let Err(err) = result {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     %err,
                     "hunk op failed; reloading to surface live state"
                 );
@@ -1953,7 +1953,7 @@ impl DiffView {
             Ok(notes) => self.notes.load(notes),
             Err(err) => {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     %err,
                     "review-note load failed"
                 );
@@ -1999,13 +1999,13 @@ impl DiffView {
             // is right for this session; only the saved copy is stale, and the
             // next load reconciles it again from the same evidence.
             tracing::warn!(
-                target: "oximux_app::diff_view",
+                target: "trex_app::diff_view",
                 %err,
                 "review-note re-anchor failed"
             );
         }
         tracing::debug!(
-            target: "oximux_app::diff_view",
+            target: "trex_app::diff_view",
             moved = outcome.moves.len(),
             detached = outcome.newly_detached,
             reattached = outcome.reattached,
@@ -2116,7 +2116,7 @@ impl DiffView {
         };
         if let Err(err) = res {
             tracing::warn!(
-                target: "oximux_app::diff_view",
+                target: "trex_app::diff_view",
                 %err,
                 "review-note persist failed"
             );
@@ -2218,7 +2218,7 @@ impl DiffView {
             let scope = self.scope_key();
             if let Err(err) = repo.clear_scope(&scope, &diff_ref) {
                 tracing::warn!(
-                    target: "oximux_app::diff_view",
+                    target: "trex_app::diff_view",
                     %err,
                     "review-note clear failed"
                 );
@@ -2308,7 +2308,7 @@ impl Focusable for DiffView {
 #[cfg(test)]
 mod diff_ref_tests {
     use super::*;
-    use oximux_core::CombinedDiffScope;
+    use trex_core::CombinedDiffScope;
 
     #[test]
     fn non_ready_states_have_no_diff_ref() {

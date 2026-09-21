@@ -1,4 +1,4 @@
-//! Process-wide handle to the persisted review-note repository.
+﻿//! Process-wide handle to the persisted review-note repository.
 //!
 //! A diff view is constructed deep inside the pane/sidebar tree, far from the
 //! single `Db` the app opens at boot. Rather than thread a `DiffReviewNoteRepo`
@@ -14,7 +14,7 @@
 
 use std::sync::OnceLock;
 
-use oximux_storage::DiffReviewNoteRepo;
+use trex_storage::DiffReviewNoteRepo;
 
 static NOTE_REPO: OnceLock<DiffReviewNoteRepo> = OnceLock::new();
 

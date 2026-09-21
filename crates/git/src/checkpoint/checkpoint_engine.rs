@@ -1,4 +1,4 @@
-//! The checkpoint engine: create / restore / compare dangling-commit
+﻿//! The checkpoint engine: create / restore / compare dangling-commit
 //! snapshots of one repository's worktree.
 
 use super::checkpoint_exclude::{ExcludeGuard, MAX_UNTRACKED_BYTES};
@@ -96,7 +96,7 @@ impl CheckpointEngine {
         let mut commit = self
             .cmd()
             .env("GIT_INDEX_FILE", temp_index.path())
-            .args(["commit-tree", &tree, "-m", "oximux checkpoint"]);
+            .args(["commit-tree", &tree, "-m", "TREX checkpoint"]);
         if let Some(head) = &head {
             commit = commit.args(["-p", head]);
         }
@@ -181,10 +181,10 @@ impl CheckpointEngine {
             .args(["-c", "core.hooksPath=/dev/null"])
             .args(["-c", "credential.helper="])
             .args(["-c", "commit.gpgsign=false"])
-            .env("GIT_AUTHOR_NAME", "oximux")
-            .env("GIT_AUTHOR_EMAIL", "checkpoint@oximux")
-            .env("GIT_COMMITTER_NAME", "oximux")
-            .env("GIT_COMMITTER_EMAIL", "checkpoint@oximux")
+            .env("GIT_AUTHOR_NAME", "TREX")
+            .env("GIT_AUTHOR_EMAIL", "checkpoint@TREX")
+            .env("GIT_COMMITTER_NAME", "TREX")
+            .env("GIT_COMMITTER_EMAIL", "checkpoint@TREX")
     }
 
     /// Untracked files >= 2 MiB (repo-root-relative), to exclude from capture.

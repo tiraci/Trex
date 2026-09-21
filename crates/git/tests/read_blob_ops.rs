@@ -1,4 +1,4 @@
-//! Tests for `Repository::read_blob_at` — raw blob bytes by `<rev>:<path>`,
+﻿//! Tests for `Repository::read_blob_at` — raw blob bytes by `<rev>:<path>`,
 //! used by the diff view to preview the "before" side of an image change.
 //!
 //! Each test drives real `git` against a tempdir repo: it must return the
@@ -8,7 +8,7 @@
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_git::Repository;
+use trex_git::Repository;
 use std::path::Path;
 use tempfile::TempDir;
 

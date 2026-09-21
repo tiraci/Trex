@@ -1,4 +1,4 @@
-import type { ProjectSummary, SessionSummary } from 'oximux-core';
+﻿import type { ProjectSummary, SessionSummary } from 'trex-core';
 
 import { parseSessionTitle } from './session-title';
 

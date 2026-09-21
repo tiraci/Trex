@@ -1,4 +1,4 @@
-//! Cross-cutting button-shaped primitives.
+﻿//! Cross-cutting button-shaped primitives.
 //!
 //! The gpui-component `Button` family resolves its own `text_color` at
 //! render time from the variant's style table, which means a `.ghost()`
@@ -24,7 +24,7 @@ use gpui::{
     MouseDownEvent, ParentElement, SharedString, Styled, Window, div, px,
 };
 
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Default item height for a row-level destructive action, matching
 /// the `.xsmall()` Button height other row siblings use.

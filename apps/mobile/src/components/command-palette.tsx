@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+﻿import { router } from 'expo-router';
 import {
   CalendarClock,
   MessageSquare,
@@ -7,7 +7,7 @@ import {
   SquareTerminal,
   type LucideIcon,
 } from 'lucide-react-native';
-import type { SessionSummary } from 'oximux-core';
+import type { SessionSummary } from 'trex-core';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 

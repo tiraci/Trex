@@ -1,4 +1,4 @@
-//! The git RPCs against a **real repository**, driven through the real dispatcher
+﻿//! The git RPCs against a **real repository**, driven through the real dispatcher
 //! over the in-memory loopback.
 //!
 //! The load-bearing assertion here is containment: `path_guard` is unit-tested on
@@ -10,13 +10,13 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Arc;
 
-use oximux_agents::session_registry::{SessionMeta, SessionRegistry};
-use oximux_agents::thread::StubConnection;
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
-use oximux_remote_proto::messages::{IndexStatusWire, RegisterReq};
-use oximux_remote_proto::proto::{Request, Response, RpcError};
-use oximux_remote_proto::testing::duplex_pair;
-use oximux_remote_proto::Transport;
+use trex_agents::session_registry::{SessionMeta, SessionRegistry};
+use trex_agents::thread::StubConnection;
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot, registration_proof};
+use trex_remote_proto::messages::{IndexStatusWire, RegisterReq};
+use trex_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::testing::duplex_pair;
+use trex_remote_proto::Transport;
 
 const SECRET: [u8; 16] = [0x22; 16];
 const NOW: u64 = 1_700_000_000;

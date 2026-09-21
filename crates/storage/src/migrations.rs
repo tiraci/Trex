@@ -1,4 +1,4 @@
-//! Migration ladder.
+﻿//! Migration ladder.
 //!
 //! Each entry is a `(version, name, sql)` triple. New migrations MUST be
 //! appended to `MIGRATIONS` AND have a matching `migrations/V<NNN>__*.sql`
@@ -11,7 +11,7 @@
 //!    CI, not the user's machine.
 //!
 //! Versions are linear, ascending, gap-free. The runner applies any version
-//! not yet recorded in `__oximux_migrations`, in ascending order, one
+//! not yet recorded in `__trex_migrations`, in ascending order, one
 //! transaction per migration.
 
 use std::path::PathBuf;
@@ -21,7 +21,7 @@ use rusqlite::{Connection, params};
 use crate::error::StorageError;
 
 /// Name of the bookkeeping table that records applied migrations.
-const APPLIED_TABLE: &str = "__oximux_migrations";
+const APPLIED_TABLE: &str = "__trex_migrations";
 
 #[derive(Debug, Clone, Copy)]
 pub struct Migration {
@@ -34,7 +34,7 @@ pub struct Migration {
     pub sql: &'static str,
 }
 
-/// V001 lands the five-table OxiMux schema (projects, workspaces,
+/// V001 lands the five-table TREX schema (projects, workspaces,
 /// agent_sessions, pane_sessions, settings) plus three FK-support
 /// indexes. V002 adds `pane_buffers` (per-pane scrollback snapshots for
 /// terminal-tab restore, Phase 4 step 16). V003 adds `pane_relay_ids`
@@ -258,7 +258,7 @@ pub fn migrations_dir() -> PathBuf {
 }
 
 /// Apply every migration in `migrations` whose version is not already
-/// recorded in `__oximux_migrations`, in ascending version order, each
+/// recorded in `__trex_migrations`, in ascending version order, each
 /// inside its own transaction.
 ///
 /// Idempotent: running against an already-migrated database is a no-op.
@@ -534,7 +534,7 @@ mod tests {
         conn.execute(
             "INSERT INTO workspaces \
              (id, project_id, name, slug, branch, worktree_path, status, created_at, sort_order) \
-             VALUES ('w1', 'p1', 'feature', 'feature', 'oximux/feature', '/p/wt', 'active', \
+             VALUES ('w1', 'p1', 'feature', 'feature', 'TREX/feature', '/p/wt', 'active', \
                      '2026-01-01T00:00:00Z', 1.0)",
             [],
         )
@@ -559,7 +559,7 @@ mod tests {
             )
             .expect("the pre-existing row survives the upgrade");
         assert_eq!(name, "feature", "existing data must survive");
-        assert_eq!(branch, "oximux/feature", "existing data must survive");
+        assert_eq!(branch, "TREX/feature", "existing data must survive");
         assert_eq!(comment, "", "an upgraded row reads as having said nothing");
         assert_eq!(phase, "", "an upgraded row reads as having no phase");
     }
@@ -616,7 +616,7 @@ mod tests {
     ///
     /// The direction matters. `branch_minted` gates branch deletion, so a
     /// pre-V029 row defaulting to `false` would silently stop cleaning up
-    /// branches OxiMux itself made — leaking a dangling branch per delete,
+    /// branches TREX itself made — leaking a dangling branch per delete,
     /// forever, with nothing to point at. `DEFAULT 1` is the correct reading of
     /// history (adoption shipped with the column), not a convenience.
     #[test]
@@ -635,7 +635,7 @@ mod tests {
         conn.execute(
             "INSERT INTO workspaces \
              (id, project_id, name, slug, branch, worktree_path, status, created_at) \
-             VALUES ('ws-1', 'p-1', 'Feat', 'feat', 'oximux/feat', '/wt/feat', 'active', \
+             VALUES ('ws-1', 'p-1', 'Feat', 'feat', 'TREX/feat', '/wt/feat', 'active', \
                      '2026-01-01T00:00:00Z')",
             [],
         )
@@ -657,12 +657,12 @@ mod tests {
         let minted: i64 = conn
             .query_row("SELECT branch_minted FROM workspaces WHERE id = 'ws-1'", [], |r| r.get(0))
             .expect("read back");
-        assert_eq!(minted, 1, "a pre-adoption worktree was minted by OxiMux");
+        assert_eq!(minted, 1, "a pre-adoption worktree was minted by TREX");
     }
 
     /// The upgrade proof for V030: the two side tables arrive empty, and both
     /// follow their parent row out. A pre-V030 workspace has no adoption row —
-    /// which is the vetted reading, the only correct one for a row OxiMux
+    /// which is the vetted reading, the only correct one for a row TREX
     /// provisioned itself.
     #[test]
     fn v030_side_tables_arrive_empty_and_cascade() {
@@ -679,7 +679,7 @@ mod tests {
         conn.execute(
             "INSERT INTO workspaces \
              (id, project_id, name, slug, branch, worktree_path, status, created_at) \
-             VALUES ('ws-1', 'p-1', 'Feat', 'feat', 'oximux/feat', '/wt/feat', 'active', \
+             VALUES ('ws-1', 'p-1', 'Feat', 'feat', 'TREX/feat', '/wt/feat', 'active', \
                      '2026-01-01T00:00:00Z')",
             [],
         )

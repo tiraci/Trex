@@ -1,4 +1,4 @@
-//! `oximux permit` — list and decide a session's pending permission requests
+﻿//! `TREX permit` — list and decide a session's pending permission requests
 //! and `AskUserQuestion`s. Pending state is derived from the retained event
 //! stream (requests since the last completed turn, while the session reports
 //! `awaiting_permission`); deciding echoes the host's own event back at it,
@@ -6,11 +6,11 @@
 
 use std::io::{IsTerminal as _, Write as _};
 
-use oximux_agent_core::thread::{
+use trex_agent_core::thread::{
     AskQuestion, PermissionDecision, QuestionAnswer, QuestionAnswers, ThreadEvent,
 };
-use oximux_remote_proto::messages::{AnswerQuestionReq, ResolvePermissionReq};
-use oximux_remote_proto::proto::{Request, Response, RpcError};
+use trex_remote_proto::messages::{AnswerQuestionReq, ResolvePermissionReq};
+use trex_remote_proto::proto::{Request, Response, RpcError};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -80,11 +80,11 @@ fn pick<'a>(list: &'a [Pending], request: Option<&str>) -> Result<&'a Pending, F
     match request {
         Some(id) => list.iter().find(|p| p.request_id() == id).ok_or_else(|| {
             Failure::new("unknown-request", exit::ERROR, format!("no pending request {id}"))
-                .with_steps(["list pending requests with `oximux permit ls <session>`".into()])
+                .with_steps(["list pending requests with `TREX permit ls <session>`".into()])
         }),
         None => list.last().ok_or_else(|| {
             Failure::new("nothing-pending", exit::ERROR, "nothing is awaiting a decision")
-                .with_steps(["check state with `oximux permit ls <session>`".into()])
+                .with_steps(["check state with `TREX permit ls <session>`".into()])
         }),
     }
 }
@@ -175,7 +175,7 @@ pub async fn allow(
         return Err(Failure::new(
             "wrong-kind",
             exit::ERROR,
-            "that request is a question — answer it with `oximux permit answer`",
+            "that request is a question — answer it with `TREX permit answer`",
         ));
     };
     // An allow always carries the input the tool will run with. Without
@@ -202,7 +202,7 @@ pub async fn allow(
 pub fn parse_input_override(raw: &str) -> Result<Value, Failure> {
     let usage = |msg: String| {
         Failure::new("bad-input", exit::USAGE, msg).with_steps([
-            "`oximux permit ls <session> --json` prints the proposed input to edit from".into(),
+            "`TREX permit ls <session> --json` prints the proposed input to edit from".into(),
             "pass a complete JSON object, e.g. --input '{\"command\":\"ls -la\"}'".into(),
         ])
     };
@@ -234,7 +234,7 @@ pub async fn deny(
         return Err(Failure::new(
             "wrong-kind",
             exit::ERROR,
-            "that request is a question — answer it with `oximux permit answer`",
+            "that request is a question — answer it with `TREX permit answer`",
         ));
     };
     let decision = PermissionDecision::Deny { message: message.to_string() };
@@ -311,7 +311,7 @@ pub async fn answer(
         return Err(Failure::new(
             "wrong-kind",
             exit::ERROR,
-            "that request is a permission — decide it with `oximux permit allow|deny`",
+            "that request is a permission — decide it with `TREX permit allow|deny`",
         ));
     };
     let mut by_question = std::collections::HashMap::new();

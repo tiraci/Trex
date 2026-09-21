@@ -1,7 +1,7 @@
-//! Reconnect: the `session_token` fast path and the Ed25519 challenge.
+﻿//! Reconnect: the `session_token` fast path and the Ed25519 challenge.
 
 use ed25519_dalek::{Signature, VerifyingKey};
-use oximux_remote_proto::RpcError;
+use trex_remote_proto::RpcError;
 
 use super::{AppPubkey, AuthStore, issue_token};
 

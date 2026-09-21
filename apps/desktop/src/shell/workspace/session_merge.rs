@@ -1,4 +1,4 @@
-//! Merge live agent sessions with DB history into a per-workspace list.
+﻿//! Merge live agent sessions with DB history into a per-workspace list.
 //!
 //! The rail used to collapse a workspace's agents to its single most-recent
 //! session. This pure function instead unifies the live runtime sessions
@@ -9,7 +9,7 @@
 use std::collections::{HashMap, HashSet};
 
 use chrono::DateTime;
-use oximux_core::{AgentSession, AgentStatus, Workspace};
+use trex_core::{AgentSession, AgentStatus, Workspace};
 
 use crate::shell::agent_presentation::{AmbientAgent, adapter_display_name, adapter_id_for_label};
 use crate::shell::left_rail::{RailAgentRow, RailAgentTarget, WorkspaceAgentList};
@@ -202,7 +202,7 @@ pub fn append_ambient_agent_rows(
 /// The headline string for an ambient agent row from its hook detail: the
 /// user's prompt when present, otherwise the live tool step (`"Edit: x.rs"`),
 /// otherwise the last free-form message. `None` when the detail is empty.
-fn ambient_title_from_detail(detail: &oximux_core::SidebandDetail) -> Option<String> {
+fn ambient_title_from_detail(detail: &trex_core::SidebandDetail) -> Option<String> {
     if let Some(p) = detail.prompt.as_deref().filter(|p| !p.is_empty()) {
         return Some(p.to_string());
     }
@@ -326,8 +326,8 @@ fn sort_and_cap_rows(rows: &mut Vec<RailAgentRow>) {
 mod tests {
     use super::*;
     use crate::shell::session_live_store::LiveAgentEntry;
-    use oximux_agents::AgentStatusStream;
-    use oximux_core::AgentSnapshot;
+    use trex_agents::AgentStatusStream;
+    use trex_core::AgentSnapshot;
     use tokio::sync::watch;
 
     const WS: &str = "primary:proj-1";
@@ -371,7 +371,7 @@ mod tests {
             label: "Claude Code".into(),
             status_rx: rx,
             started_at: started.into(),
-            session_id: oximux_core::AgentSessionId::new(1),
+            session_id: trex_core::AgentSessionId::new(1),
         }
     }
 
@@ -379,7 +379,7 @@ mod tests {
         Workspace {
             id: id.into(),
             project_id: "proj-1".into(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: id.into(),
@@ -635,7 +635,7 @@ mod tests {
             agent: AmbientAgent {
                 status: AgentStatus::Running,
                 label: Some("Claude Code"),
-                detail: Some(oximux_core::SidebandDetail {
+                detail: Some(trex_core::SidebandDetail {
                     prompt: Some(prompt.to_string()),
                     ..Default::default()
                 }),
@@ -778,7 +778,7 @@ mod tests {
 
     #[test]
     fn hand_launched_agents_list_alongside_a_tracked_session() {
-        // A worktree can hold both at once: one agent OxiMux spawned (a DB
+        // A worktree can hold both at once: one agent TREX spawned (a DB
         // session) and others typed into terminals. All of them belong to the
         // same workspace list, and together they cross the threshold that
         // opens the disclosure.

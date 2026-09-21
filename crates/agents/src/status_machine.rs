@@ -1,4 +1,4 @@
-//! Regex-driven status machine.
+﻿//! Regex-driven status machine.
 //!
 //! Owns a small ring buffer of the last 1024 output bytes per session and
 //! scans it against the adapter's `StatusPattern` table on every chunk.
@@ -18,7 +18,7 @@ use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use oximux_core::AgentStatus;
+use trex_core::AgentStatus;
 
 use crate::cli::adapter::StatusPattern;
 
@@ -191,7 +191,7 @@ impl StatusMachine {
     /// adapters whose raw output the regex table can't classify.
     pub fn feed_sideband(
         &mut self,
-        state: oximux_core::AgentSidebandState,
+        state: trex_core::AgentSidebandState,
         tool: Option<String>,
     ) -> Option<StatusTransition> {
         let derived = crate::osc_sideband::map_state_to_status(state, tool);
@@ -465,7 +465,7 @@ mod tests {
 
     #[test]
     fn feed_sideband_drives_needs_approval_without_patterns() {
-        use oximux_core::AgentSidebandState;
+        use trex_core::AgentSidebandState;
         // Empty pattern table (the EMPTY_PATTERNS adapter case) — sideband
         // still transitions the machine to NeedsApproval with its tool.
         let mut sm = StatusMachine::new(patterns(&[]));
@@ -478,7 +478,7 @@ mod tests {
 
     #[test]
     fn feed_sideband_respects_terminal_guard() {
-        use oximux_core::AgentSidebandState;
+        use trex_core::AgentSidebandState;
         let mut sm = StatusMachine::new(patterns(&[]));
         sm.note_exit(Some(0));
         // A Done session cannot be resurrected by a late sideband.
@@ -491,7 +491,7 @@ mod tests {
 
     #[test]
     fn feed_sideband_identity_is_noop() {
-        use oximux_core::AgentSidebandState;
+        use trex_core::AgentSidebandState;
         let mut sm = StatusMachine::new(patterns(&[]));
         sm.feed_sideband(AgentSidebandState::Working, None); // → Running
         // Same state again — no transition emitted.
@@ -503,7 +503,7 @@ mod tests {
 
     #[test]
     fn feed_sideband_working_clears_stale_output_decay_clock() {
-        use oximux_core::AgentSidebandState;
+        use trex_core::AgentSidebandState;
         let mut sm = StatusMachine::new(patterns(&[]));
         let start = t0();
         sm.feed(b"old output", start);
@@ -521,7 +521,7 @@ mod tests {
 
     #[test]
     fn hook_driven_idle_is_not_revived_by_trailing_output() {
-        use oximux_core::AgentSidebandState;
+        use trex_core::AgentSidebandState;
         // The "Running flash" regression: an agent finishes (Stop → Idle via
         // sideband), then prints a final summary. Under hooks that trailing
         // output must NOT flip it back to Running (and therefore never decays).
@@ -541,7 +541,7 @@ mod tests {
 
     #[test]
     fn hook_driven_still_matches_blocking_patterns() {
-        use oximux_core::AgentSidebandState;
+        use trex_core::AgentSidebandState;
         // Suppressing the output→Running fallback under hooks must NOT disable
         // the regex table — the immediate NeedsApproval body backstop still fires.
         let pats = patterns(&[(r"Do you want to proceed", AgentStatus::NeedsApproval("x".into()))]);
@@ -553,7 +553,7 @@ mod tests {
 
     #[test]
     fn sideband_working_ignores_later_plain_output_decay_clock() {
-        use oximux_core::AgentSidebandState;
+        use trex_core::AgentSidebandState;
         let mut sm = StatusMachine::new(patterns(&[]));
         let start = t0();
         sm.feed_sideband(AgentSidebandState::Working, None);

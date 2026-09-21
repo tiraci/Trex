@@ -1,4 +1,4 @@
-//! The dial seam: how the reconnect driver obtains a fresh transport to the host.
+﻿//! The dial seam: how the reconnect driver obtains a fresh transport to the host.
 //!
 //! Each (re)connect attempt asks the [`Connector`] for a new [`Transport`]. The
 //! production impl is an iroh endpoint dial — a fresh QUIC bi-stream with a fresh
@@ -10,7 +10,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use oximux_remote_proto::Transport;
+use trex_remote_proto::Transport;
 
 /// Produces a fresh [`Transport`] to the host on demand — one per (re)connect
 /// attempt.
@@ -36,7 +36,7 @@ pub enum ConnectError {
 mod tests {
     use super::*;
     use futures::executor::block_on;
-    use oximux_remote_proto::TransportError;
+    use trex_remote_proto::TransportError;
 
     /// A trivial transport so the mock connector can hand back an object.
     struct StubTransport;

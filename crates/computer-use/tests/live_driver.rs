@@ -1,4 +1,4 @@
-//! Checks that run against a real installed `cua-driver`.
+﻿//! Checks that run against a real installed `cua-driver`.
 //!
 //! Every test here skips cleanly when no driver is installed, because that is
 //! the normal state on CI and for contributors who never enable screen
@@ -12,11 +12,11 @@
 
 use std::time::Duration;
 
-use oximux_computer_use::{daemon, discovery, verify, Error};
+use trex_computer_use::{daemon, discovery, verify, Error};
 // Only the declared-invocation check reaches for it, and that is gated off on
 // Windows until the safety pair lands.
 #[cfg(any(not(windows), feature = "windows-screen-control"))]
-use oximux_computer_use::mcp;
+use trex_computer_use::mcp;
 
 /// Locate the driver, or return `None` so the caller can skip.
 fn installed() -> Option<std::path::PathBuf> {
@@ -71,7 +71,7 @@ fn a_real_driver_passes_every_gate() {
 ///
 /// Against a throwaway store, never the user's real one: a test that pinned
 /// into the real store would hand the whole product a trust decision nobody
-/// made. This one became reachable when OxiMux learned to install the driver
+/// made. This one became reachable when TREX learned to install the driver
 /// itself; before that the check simply never had a driver to run against.
 #[cfg(windows)]
 #[test]
@@ -79,7 +79,7 @@ fn a_real_driver_passes_every_gate() {
     let Some(path) = installed() else { return };
 
     let pins = tempfile::tempdir().expect("tempdir");
-    let store = oximux_computer_use::TrustStore::at(pins.path().join("pins.json"));
+    let store = trex_computer_use::TrustStore::at(pins.path().join("pins.json"));
 
     match verify::verify_pinned(&path, &store) {
         Err(Error::NotApproved { sha256, .. }) => {
@@ -149,7 +149,7 @@ fn status_is_readable_and_bounded() {
         "status outran its own ceiling"
     );
     // Either verdict is fine — the daemon is started on demand by the driver,
-    // not by OxiMux. What must not happen is an unparsed verdict.
+    // not by TREX. What must not happen is an unparsed verdict.
     assert!(
         !matches!(state, daemon::DaemonState::Unknown { .. }),
         "could not parse daemon status: {state:?}"
@@ -171,7 +171,7 @@ fn the_declared_server_matches_the_drivers_own_recommended_invocation() {
     // `cua-driver mcp-config` prints the invocation upstream recommends. If a
     // future release changes it, this catches the drift here rather than as a
     // silently broken tool surface inside an agent session.
-    let out = oximux_computer_use::exec::run_bounded(
+    let out = trex_computer_use::exec::run_bounded(
         &path,
         &["mcp-config"],
         Duration::from_secs(10),
@@ -204,7 +204,7 @@ fn every_tool_the_driver_registers_is_classified() {
     let Some(path) = installed() else { return };
 
     let out =
-        oximux_computer_use::exec::run_bounded(&path, &["list-tools"], Duration::from_secs(10))
+        trex_computer_use::exec::run_bounded(&path, &["list-tools"], Duration::from_secs(10))
             .expect("list-tools must run");
     assert!(out.success(), "list-tools failed: {}", out.stderr);
 
@@ -232,9 +232,9 @@ fn every_tool_the_driver_registers_is_classified() {
         .into_iter()
         .filter(|name| {
             matches!(
-                oximux_computer_use::tools::classify(name),
-                oximux_computer_use::tools::ToolClass::Forbidden(
-                    oximux_computer_use::tools::Refusal::Unrecognised
+                trex_computer_use::tools::classify(name),
+                trex_computer_use::tools::ToolClass::Forbidden(
+                    trex_computer_use::tools::Refusal::Unrecognised
                 )
             )
         })
@@ -253,7 +253,7 @@ fn the_driver_still_offers_the_tools_the_integration_assumes() {
     let Some(path) = installed() else { return };
 
     let out =
-        oximux_computer_use::exec::run_bounded(&path, &["list-tools"], Duration::from_secs(10))
+        trex_computer_use::exec::run_bounded(&path, &["list-tools"], Duration::from_secs(10))
             .expect("list-tools must run");
     assert!(out.success(), "list-tools failed: {}", out.stderr);
 

@@ -1,5 +1,5 @@
-[package]
-name = "oximux-app"
+﻿[package]
+name = "trex-app"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,57 +8,57 @@ publish.workspace = true
 rust-version.workspace = true
 
 [[bin]]
-name = "oximux"
+name = "TREX"
 path = "src/main.rs"
 
 [dependencies]
-oximux-agents = { workspace = true }
+trex-agents = { workspace = true }
 # The portable half of the agent-chat core. Reached directly (rather than
-# through `oximux-agents`) for the pieces that must stay compiled on every
+# through `trex-agents`) for the pieces that must stay compiled on every
 # platform — screenshot scrubbing and the screen-tool naming contract.
-oximux-agent-core = { workspace = true }
-oximux-auto-update = { workspace = true }
-oximux-core = { workspace = true }
-oximux-dictation = { workspace = true }
-oximux-editor = { workspace = true }
-oximux-git = { workspace = true }
+trex-agent-core = { workspace = true }
+trex-auto-update = { workspace = true }
+trex-core = { workspace = true }
+trex-dictation = { workspace = true }
+trex-editor = { workspace = true }
+trex-git = { workspace = true }
 # CREATE_NO_WINDOW on every child this GUI-subsystem process spawns directly
 # (rg, cleanup scripts, the relay daemon) — without it Windows pops an empty
 # console window per console-subsystem child.
-oximux-no-window = { workspace = true }
-oximux-proc-cwd = { workspace = true }
+trex-no-window = { workspace = true }
+trex-proc-cwd = { workspace = true }
 # Names the agent CLI a plain terminal is running, by walking its shell's
 # descendants — the one presence signal that covers every agent and outlives
 # an idle one, since it depends on nothing the agent chooses to emit.
-oximux-proc-tree = { workspace = true }
-oximux-proc-ports = { workspace = true }
-oximux-pty = { workspace = true }
+trex-proc-tree = { workspace = true }
+trex-proc-ports = { workspace = true }
+trex-pty = { workspace = true }
 async-trait = { workspace = true }
-oximux-relay-client = { workspace = true }
-oximux-relay-supervisor = { workspace = true }
-oximux-relay-terminals = { workspace = true }
+trex-relay-client = { workspace = true }
+trex-relay-supervisor = { workspace = true }
+trex-relay-terminals = { workspace = true }
 # The shared Claude session-marker scrub (one list, three consumers).
-oximux-shell-env = { workspace = true }
-oximux-relay-proto = { workspace = true }
+trex-shell-env = { workspace = true }
+trex-relay-proto = { workspace = true }
 # Owner-only access on the relay auth token this process writes.
-oximux-owner-only = { workspace = true }
+trex-owner-only = { workspace = true }
 # Remote control: the in-app iroh host (bind + accept loop) that serves the
 # SessionRegistry to paired phones, its transport-agnostic dispatcher/auth, and
 # the shared wire types (PairingTicket).
-oximux-remote-host = { workspace = true }
-oximux-worktree-ops = { workspace = true }
+trex-remote-host = { workspace = true }
+trex-worktree-ops = { workspace = true }
 # The status-hook dialect table and installer, shared with the CLI so
-# `oximux agent hooks` writes the same entries the app's settings toggle does.
-oximux-agent-hooks = { workspace = true }
-oximux-remote-iroh = { workspace = true, features = ["host"] }
-# The owner-only control socket the `oximux` CLI dials (opt-in listener).
-oximux-remote-local = { workspace = true }
-oximux-remote-proto = { workspace = true }
-oximux-settings = { workspace = true, features = ["gpui"] }
-oximux-markdown = { workspace = true }
-oximux-syntax = { workspace = true }
-oximux-storage = { workspace = true }
-oximux-ui = { workspace = true }
+# `TREX agent hooks` writes the same entries the app's settings toggle does.
+trex-agent-hooks = { workspace = true }
+trex-remote-iroh = { workspace = true, features = ["host"] }
+# The owner-only control socket the `TREX` CLI dials (opt-in listener).
+trex-remote-local = { workspace = true }
+trex-remote-proto = { workspace = true }
+trex-settings = { workspace = true, features = ["gpui"] }
+trex-markdown = { workspace = true }
+trex-syntax = { workspace = true }
+trex-storage = { workspace = true }
+trex-ui = { workspace = true }
 
 qrcode = { workspace = true }
 
@@ -112,8 +112,8 @@ two-face = { workspace = true }
 # them on automatically under debug_assertions, which broke release builds.
 wry = { version = "0.55", features = ["devtools"] }
 # Single-instance guard: the data-dir role lock (GUI instance, schedule
-# ticker), shared with `oximux serve` so both hosts contend identically.
-oximux-single-instance = { workspace = true }
+# ticker), shared with `TREX serve` so both hosts contend identically.
+trex-single-instance = { workspace = true }
 
 # Relay supervisor's `pre_exec` calls libc::umask so the bundled
 # socket/token files come out 0600. libc is already in the transitive
@@ -142,7 +142,7 @@ which = { workspace = true }
 # The hook would be warranted here even with the feature off, for a reason macOS
 # does not have: synthesizing input on Windows needs no permission at all, so an
 # agent's shell can drive the screen whether or not anything was opted into.
-oximux-computer-use = { workspace = true, features = ["windows-screen-control"] }
+trex-computer-use = { workspace = true, features = ["windows-screen-control"] }
 widestring = "1"
 windows-sys = { version = "0.61", features = [
     "Win32_Foundation",
@@ -173,8 +173,8 @@ windows-sys = { version = "0.61", features = [
 # they leave the dependency graph entirely elsewhere rather than growing stub
 # implementations. The features they back are hidden, not faked — see
 # `docs/windows-port-exclusions.md`.
-oximux-computer-use = { workspace = true }
-oximux-macos-trust = { workspace = true }
+trex-computer-use = { workspace = true }
+trex-macos-trust = { workspace = true }
 # Objective-C bridge for the NSProcessInfo `beginActivityWithOptions`
 # App Nap opt-out (`app_nap`) and the AppKit menu-item responder selectors
 # (`menu::platform`). objc2 is the maintained successor and is already in the

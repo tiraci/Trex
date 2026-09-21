@@ -1,10 +1,10 @@
-//! Fixture-driven unit tests for `parse_porcelain_v2`.
+﻿//! Fixture-driven unit tests for `parse_porcelain_v2`.
 //!
 //! Each fixture is the literal byte stream `git status --porcelain=v2 --branch -z`
 //! would emit. NUL terminators between records are written as `\x00` in source.
 
-use oximux_core::{ConflictKind, IndexStatus, RenameKind, WorktreeStatus};
-use oximux_git::parse_porcelain_v2;
+use trex_core::{ConflictKind, IndexStatus, RenameKind, WorktreeStatus};
+use trex_git::parse_porcelain_v2;
 
 #[test]
 fn empty_repo_initial_commit() {

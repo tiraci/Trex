@@ -1,4 +1,4 @@
-//! Status bar — 24px fixed-height bottom strip.
+﻿//! Status bar — 24px fixed-height bottom strip.
 //!
 //! Layout: `left | center | right`. Left zone shows brand + version. Center
 //! shows the git branch chip + dirty count when a repository is mounted,
@@ -21,10 +21,10 @@ use gpui::{
     StatefulInteractiveElement, Styled, Window, div, px,
 };
 use gpui_component::Icon;
-use oximux_agents::session_log::usage::ProviderUsage;
-use oximux_core::GitState;
-use oximux_git::PollState;
-use oximux_settings::{Density, Theme, Typography, UsageDetail};
+use trex_agents::session_log::usage::ProviderUsage;
+use trex_core::GitState;
+use trex_git::PollState;
+use trex_settings::{Density, Theme, Typography, UsageDetail};
 
 use crate::shell::source_control::primary_action::PrimaryAction;
 use crate::shell::usage_meter;
@@ -55,9 +55,9 @@ fn format_ready(g: &GitState) -> String {
     s
 }
 
-fn is_ignored(f: &oximux_core::FileStatus) -> bool {
-    matches!(f.index, oximux_core::IndexStatus::Ignored)
-        || matches!(f.worktree, oximux_core::WorktreeStatus::Ignored)
+fn is_ignored(f: &trex_core::FileStatus) -> bool {
+    matches!(f.index, trex_core::IndexStatus::Ignored)
+        || matches!(f.worktree, trex_core::WorktreeStatus::Ignored)
 }
 
 /// `"{n} TTY"` — always plural-stable since "TTY" is an abbreviation.
@@ -324,7 +324,7 @@ where
                 .gap(px(6.))
                 .text_size(px(typography.t_body_sm))
                 .text_color(theme.fg_subtle)
-                .child(format!("OxiMux v{}", env!("CARGO_PKG_VERSION")))
+                .child(format!("TREX v{}", env!("CARGO_PKG_VERSION")))
                 .children(update_pill),
         )
         .child(git_zone)
@@ -451,7 +451,7 @@ mod tests {
 
     #[test]
     fn primary_button_hidden_when_no_action() {
-        let state = oximux_git::PollState::Loading;
+        let state = trex_git::PollState::Loading;
         assert!(!primary_button_visible(Some(&state), None));
     }
 
@@ -466,7 +466,7 @@ mod tests {
             title: "Push 1 commit".into(),
             disabled: false,
         };
-        let state = oximux_git::PollState::Loading;
+        let state = trex_git::PollState::Loading;
         assert!(primary_button_visible(Some(&state), Some(&action)));
     }
 }

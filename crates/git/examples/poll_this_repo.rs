@@ -1,14 +1,14 @@
-//! Manual smoke for `StatusPoller`. Point at any git repo and watch state stream.
+﻿//! Manual smoke for `StatusPoller`. Point at any git repo and watch state stream.
 //!
 //! Usage:
-//!   cargo run -p oximux-git --example poll_this_repo -- [repo-path]
+//!   cargo run -p trex-git --example poll_this_repo -- [repo-path]
 //!
 //! repo-path defaults to the current directory. Type `f` + Enter on stdin to
 //! toggle focus (pause/resume). Type `q` + Enter to quit. Ctrl-C also works.
 //!
-//! Set RUST_LOG=oximux_git=debug to see the failure-counter warns from H2.
+//! Set RUST_LOG=trex_git=debug to see the failure-counter warns from H2.
 
-use oximux_git::{PollState, Repository, StatusPoller};
+use trex_git::{PollState, Repository, StatusPoller};
 use std::env;
 use std::time::Duration;
 use tokio::io::{AsyncBufReadExt, BufReader};
@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("oximux_git=info")),
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("trex_git=info")),
         )
         .init();
 

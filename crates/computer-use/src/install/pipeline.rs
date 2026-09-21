@@ -1,4 +1,4 @@
-//! The blocking install pipeline: resolve → download → gate → place.
+﻿//! The blocking install pipeline: resolve → download → gate → place.
 //!
 //! Every step here is the same on every platform. The four that are not live in
 //! [`super::platform`], behind identical signatures — which is what keeps this
@@ -29,7 +29,7 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const READ_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// GitHub's API refuses requests with no User-Agent.
-const USER_AGENT: &str = "OxiMux-driver-install";
+const USER_AGENT: &str = "trex-driver-install";
 
 /// Ceiling for the post-install `telemetry disable` run. Generous: it is the
 /// driver's first execution from its new home, which on Windows means Defender
@@ -129,9 +129,9 @@ pub(super) fn run(
 ///
 /// Upstream ships it **on** by default, and merely running the binary writes a
 /// persistent id under `~/.cua-driver`. A user who installs the driver
-/// themselves has at least chosen that; a user who clicks Install in OxiMux has
+/// themselves has at least chosen that; a user who clicks Install in TREX has
 /// not, and enrolling them silently in a third party's analytics is not
-/// OxiMux's call to make on their behalf. The pane says this happens.
+/// TREX's call to make on their behalf. The pane says this happens.
 ///
 /// Best effort on purpose: an installed, verified driver that refused this call
 /// is still an installed, verified driver, and failing the install over it

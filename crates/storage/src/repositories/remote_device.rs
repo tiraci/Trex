@@ -1,6 +1,6 @@
-//! `RemoteDeviceRepo` — durable remote-control paired devices, so the authorized
+﻿//! `RemoteDeviceRepo` — durable remote-control paired devices, so the authorized
 //! set + each device's scope + revocation survive an app restart. The in-memory
-//! `AuthStore` (in `oximux-remote-host`) seeds from [`list_all`](RemoteDeviceRepo::list_all)
+//! `AuthStore` (in `trex-remote-host`) seeds from [`list_all`](RemoteDeviceRepo::list_all)
 //! at boot and writes through on register / revoke. Keyed by the lowercase-hex
 //! app-signing pubkey.
 

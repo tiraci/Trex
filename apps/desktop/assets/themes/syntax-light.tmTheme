@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  OxiMux Light Syntax — the Paper counterpart of syntax-dark.tmTheme, scope for
+  TREX Light Syntax — the Paper counterpart of syntax-dark.tmTheme, scope for
   scope, using a conventional light-editor token palette (keyword #0000ff,
   string #a31515, comment #008000, …). Hand-authored from individual color
   values; not copied from any source file.
@@ -12,12 +12,12 @@
   theme — so there is a test that compares them.
 
   Only foreground colors are consumed by the renderer (HiToken r/g/b); the
-  `background` here is inert — OxiMux paints its own surface.
+  `background` here is inert — TREX paints its own surface.
 -->
 <plist version="1.0">
 <dict>
   <key>name</key>
-  <string>OxiMux Light Syntax</string>
+  <string>TREX Light Syntax</string>
   <key>settings</key>
   <array>
     <dict>

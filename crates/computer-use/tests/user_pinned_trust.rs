@@ -1,4 +1,4 @@
-//! The Windows trust anchor, end to end, against a real executable.
+﻿//! The Windows trust anchor, end to end, against a real executable.
 //!
 //! The unit tests in `trust` cover the store in isolation. This exercises the
 //! gate the way `prepare` does — [`verify::verify_pinned`] against a real file
@@ -12,8 +12,8 @@
 
 use std::path::{Path, PathBuf};
 
-use oximux_computer_use::trust::TrustStore;
-use oximux_computer_use::{verify, Error};
+use trex_computer_use::trust::TrustStore;
+use trex_computer_use::{verify, Error};
 
 /// A real, harmless executable, copied under the driver's name.
 ///

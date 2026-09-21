@@ -1,4 +1,4 @@
-//! Where a host puts a new worktree — and whether it may clear what it finds
+﻿//! Where a host puts a new worktree — and whether it may clear what it finds
 //! there.
 //!
 //! The path scheme used to be one function, [`worktree_path`], and one
@@ -27,8 +27,8 @@
 use std::fmt;
 use std::path::{Path, PathBuf};
 
-use oximux_core::Project;
-use oximux_git::worktree::derive_slug;
+use trex_core::Project;
+use trex_git::worktree::derive_slug;
 
 /// Where a host puts a new worktree. Implemented once per host kind.
 ///
@@ -46,7 +46,7 @@ pub trait WorktreeLocator: Send + Sync + fmt::Debug {
     /// May orphan reclaim clear debris at `path` for `slug`?
     ///
     /// True only when this locator itself would have minted exactly `path` for
-    /// exactly `slug` — i.e. the directory is one an interrupted OxiMux create
+    /// exactly `slug` — i.e. the directory is one an interrupted TREX create
     /// left behind, not a place a person chose. **Never a blanket answer about
     /// the locator kind**, and never `true` when either side fails to
     /// canonicalize: a mint-check that compares two spellings of a path is how
@@ -102,7 +102,7 @@ impl fmt::Display for LocateError {
             ),
             Self::InsideDataDir { root } => write!(
                 f,
-                "worktree directory {} is inside OxiMux's data directory; \
+                "worktree directory {} is inside TREX's data directory; \
                  choose a directory you can browse",
                 root.display()
             ),
@@ -126,7 +126,7 @@ impl std::error::Error for LocateError {}
 ///
 /// `data_dir` is passed rather than resolved here because the two hosts
 /// disagree about it: the desktop always uses its own app data root, while
-/// `oximux serve` honours `--data-dir`. Deriving it internally would put a
+/// `TREX serve` honours `--data-dir`. Deriving it internally would put a
 /// server's worktrees under the desktop's directory.
 pub fn worktree_path(data_dir: &Path, project_id: &str, slug: &str) -> PathBuf {
     data_dir
@@ -139,7 +139,7 @@ pub fn worktree_path(data_dir: &Path, project_id: &str, slug: &str) -> PathBuf {
 /// The scheme every headless host uses: [`worktree_path`] under a data
 /// directory the *host* chose.
 ///
-/// `oximux serve` and the RPC service construct this directly and take no
+/// `TREX serve` and the RPC service construct this directly and take no
 /// locator from a caller — that is what keeps "a client never supplies a
 /// location" true even now that a locator exists which reads a setting.
 #[derive(Debug, Clone)]
@@ -232,7 +232,7 @@ pub fn validate_worktree_root_shape(
 
 /// The directory name a project gets under a configured root.
 ///
-/// Readable first: the project's name, slugified, so `~/OxiMux/worktrees/api/`
+/// Readable first: the project's name, slugified, so `~/TREX/worktrees/api/`
 /// is what someone browsing to it expects. Unique always: when another project
 /// in `all` slugifies to the same name, this one carries a short piece of its
 /// id (`api-3f9c2a1b`), because two repositories both called `api` must not
@@ -332,7 +332,7 @@ fn probe_writable(dir: &Path) -> Result<(), String> {
         return Err(format!("{} is not a directory", dir.display()));
     }
     let probe = dir.join(format!(
-        ".oximux-write-probe-{}-{}",
+        ".trex-write-probe-{}-{}",
         std::process::id(),
         SEQ.fetch_add(1, Ordering::Relaxed)
     ));
@@ -370,10 +370,10 @@ mod tests {
     /// The whole reason `data_dir` is a parameter: two hosts, two roots.
     #[test]
     fn a_different_data_dir_relocates_the_worktree() {
-        let serve = worktree_path(Path::new("/srv/oximux"), "proj-1", "feat-x");
+        let serve = worktree_path(Path::new("/srv/TREX"), "proj-1", "feat-x");
         let desktop = worktree_path(Path::new("/home/u/Library"), "proj-1", "feat-x");
         assert_ne!(serve, desktop);
-        assert!(serve.starts_with("/srv/oximux"));
+        assert!(serve.starts_with("/srv/TREX"));
     }
 
     /// The host-derived locator IS `worktree_path`; extracting the trait
@@ -477,7 +477,7 @@ mod tests {
         std::fs::create_dir_all(home.join(".git")).expect("fake repo");
         let data_dir = tmp.path().join("data");
         // The root does not exist yet — judged from where it would be created.
-        let root = home.join("OxiMux").join("worktrees");
+        let root = home.join("TREX").join("worktrees");
         let err = validate_worktree_root(&root, Some(&data_dir)).unwrap_err();
         match err {
             LocateError::InsideRepository { repository, .. } => {

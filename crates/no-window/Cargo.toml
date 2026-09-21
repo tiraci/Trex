@@ -1,5 +1,5 @@
-[package]
-name = "oximux-no-window"
+﻿[package]
+name = "trex-no-window"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

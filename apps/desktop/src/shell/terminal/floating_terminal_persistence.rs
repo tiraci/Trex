@@ -1,4 +1,4 @@
-//! Persisted floating-terminal tab set.
+﻿//! Persisted floating-terminal tab set.
 //!
 //! One JSON blob per window under `floating_terminal.tabs.<window_id>` in
 //! the settings repo. Written (debounced) on every tab mutation, so quit
@@ -10,7 +10,7 @@
 //! missing fields all decode to an empty/default blob — never an error,
 //! never a crash.
 
-use oximux_storage::SettingsRepo;
+use trex_storage::SettingsRepo;
 use serde::{Deserialize, Serialize};
 
 /// Settings key for one window's floating-tab blob.
@@ -76,7 +76,7 @@ mod tests {
     use super::*;
 
     fn repo() -> SettingsRepo {
-        SettingsRepo::new(oximux_storage::open_memory().unwrap())
+        SettingsRepo::new(trex_storage::open_memory().unwrap())
     }
 
     fn blob() -> FloatingTabsBlob {

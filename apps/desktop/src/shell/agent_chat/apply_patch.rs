@@ -1,4 +1,4 @@
-//! Codex `apply_patch` payloads → renderable diff rows.
+﻿//! Codex `apply_patch` payloads → renderable diff rows.
 //!
 //! Codex reports a file edit as an `apply_patch` tool call carrying a `changes`
 //! array of per-file patches — a different shape to Claude's `Edit` (which
@@ -6,8 +6,8 @@
 //! module turns that payload into the shared `DiffLine` stream `diff_card`
 //! renders, so all three providers converge on one visual.
 
-use oximux_core::{DiffLine, DiffLineKind};
-use oximux_agents::thread::ToolCall;
+use trex_core::{DiffLine, DiffLineKind};
+use trex_agents::thread::ToolCall;
 use serde_json::Value;
 
 /// Build display rows for a Codex `apply_patch`, or `None` when the payload
@@ -208,12 +208,12 @@ mod tests {
             "apply_patch",
             json!({"changes": [
                 {
-                    "path": "/tmp/oximux-codex-probe/added.txt",
+                    "path": "/tmp/trex-codex-probe/added.txt",
                     "kind": {"type": "add"},
                     "diff": "one\ntwo\n"
                 },
                 {
-                    "path": "/tmp/oximux-codex-probe/sample.txt",
+                    "path": "/tmp/trex-codex-probe/sample.txt",
                     "kind": {"type": "update", "move_path": null},
                     "diff": "@@ -1,3 +1,3 @@\n alpha\n-beta\n+BETA\n gamma\n"
                 }
@@ -222,8 +222,8 @@ mod tests {
         let lines = diff(&tc).expect("live codex patch");
         let row = |c: &str| lines.iter().find(|l| l.content == c).map(|l| l.kind);
         // Both files captioned, since one item carries two paths.
-        assert_eq!(row("▸ /tmp/oximux-codex-probe/added.txt"), Some(DiffLineKind::Context));
-        assert_eq!(row("▸ /tmp/oximux-codex-probe/sample.txt"), Some(DiffLineKind::Context));
+        assert_eq!(row("▸ /tmp/trex-codex-probe/added.txt"), Some(DiffLineKind::Context));
+        assert_eq!(row("▸ /tmp/trex-codex-probe/sample.txt"), Some(DiffLineKind::Context));
         // The added file's raw content, with no trailing blank row from the
         // payload's trailing newline.
         assert_eq!(row("one"), Some(DiffLineKind::Added));

@@ -1,12 +1,12 @@
-//! Worktree operations on `Repository`: `add_worktree`, `list_worktrees`,
-//! `remove_worktree`. Branch convention: `oximux/<slug>` — a slug must be a
+﻿//! Worktree operations on `Repository`: `add_worktree`, `list_worktrees`,
+//! `remove_worktree`. Branch convention: `TREX/<slug>` — a slug must be a
 //! valid single git ref-name component (no slashes, no `..`, no whitespace,
 //! no `@{`).
 
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;
 use crate::repository::Repository;
-use oximux_core::WorktreeInfo;
+use trex_core::WorktreeInfo;
 use std::path::{Path, PathBuf};
 
 /// The working directory of the main repository that owns the linked worktree
@@ -55,11 +55,11 @@ impl Repository {
     /// Create a new linked worktree at `path` checked out on a brand-new
     /// `branch` (created from the current HEAD).
     ///
-    /// **The caller names the branch.** This used to derive `oximux/<slug>`
+    /// **The caller names the branch.** This used to derive `TREX/<slug>`
     /// itself, which made the prefix unconfigurable from the one place that
     /// could see the user's settings — and left the dialog's preview deriving
     /// the same name a second time, free to disagree. Resolution now happens
-    /// once, above, in `oximux_worktree_ops::branch_name`.
+    /// once, above, in `trex_worktree_ops::branch_name`.
     ///
     /// `path` must not already exist; `branch` must pass
     /// [`validate_branch_name`]. The branch must not already exist (git
@@ -100,12 +100,12 @@ impl Repository {
     /// **that override beats an explicit `-b`**. Verified on git 2.55:
     ///
     /// ```text
-    /// $ git worktree add -b oximux/x -- ../wt main   # local `main` deleted,
+    /// $ git worktree add -b TREX/x -- ../wt main   # local `main` deleted,
     /// Preparing worktree (new branch 'main')          # origin/main present
     /// branch 'main' set up to track 'origin/main'.
     /// ```
     ///
-    /// The worktree lands on `main`, `oximux/x` is never created, and nothing
+    /// The worktree lands on `main`, `TREX/x` is never created, and nothing
     /// reports a problem. The `workspaces` row would then name a branch that
     /// does not exist, breaking the three-way agreement the crate is built on —
     /// and a worktree-centric user who deleted their local `main` hits it on an
@@ -141,7 +141,7 @@ impl Repository {
     /// [`validate_ref_name`] rather than [`validate_branch_name`] — an adopted
     /// branch is somebody else's name and may carry more than one prefix
     /// segment (`feature/api/retry`), which the one-segment branch rule exists
-    /// to forbid only for names OxiMux itself mints.
+    /// to forbid only for names TREX itself mints.
     ///
     /// Git refuses when the branch is already checked out in another worktree,
     /// and its message names that worktree; the error carries git's own text so
@@ -279,7 +279,7 @@ impl Repository {
 /// - No whitespace anywhere
 /// - No `..` (relative-ref-path injection)
 /// - No `@{` (reflog selector syntax)
-/// - No `~` `^` `:` (revision modifier syntax — `oximux/feat^1` would parse
+/// - No `~` `^` `:` (revision modifier syntax — `TREX/feat^1` would parse
 ///   as a relative ref in subsequent git commands)
 /// - No leading `-` (would be parsed as a flag by `git worktree add -b`)
 /// - No leading or trailing `.` (rejected by `git check-ref-format`)
@@ -316,11 +316,11 @@ pub fn validate_slug(slug: &str) -> Result<()> {
     Ok(())
 }
 
-/// Reject branch names OxiMux would not be able to hand to git safely.
+/// Reject branch names TREX would not be able to hand to git safely.
 ///
 /// [`validate_slug`] deliberately rejects `/`, because a slug is one path
 /// component. A *branch name* is one optional prefix segment plus that slug —
-/// `oximux/feat`, `nhtera/feat`, or a bare `feat` when the user has turned the
+/// `TREX/feat`, `tiraci/feat`, or a bare `feat` when the user has turned the
 /// prefix off. So the resolved name cannot go through `validate_slug` at all,
 /// and the check that replaces it has to allow exactly one more segment and no
 /// further.
@@ -328,7 +328,7 @@ pub fn validate_slug(slug: &str) -> Result<()> {
 /// Each segment is held to `validate_slug`'s rules, which is what keeps the
 /// prefix half from smuggling in the revision syntax (`~`, `^`, `:`, `@{`,
 /// `..`) that the slug half is screened for. Empty segments are rejected
-/// explicitly: `/feat`, `oximux/`, and `a//b` all reach git as refs it either
+/// explicitly: `/feat`, `TREX/`, and `a//b` all reach git as refs it either
 /// refuses or, worse, accepts as something other than what was meant.
 pub fn validate_branch_name(branch: &str) -> Result<()> {
     let mut segments = branch.split('/');
@@ -350,9 +350,9 @@ pub fn validate_branch_name(branch: &str) -> Result<()> {
     }
 }
 
-/// Reject ref names OxiMux would not be able to hand to git safely.
+/// Reject ref names TREX would not be able to hand to git safely.
 ///
-/// A *ref* is not a branch OxiMux minted, so neither of the existing validators
+/// A *ref* is not a branch TREX minted, so neither of the existing validators
 /// fits. [`validate_slug`] rejects `/`, which every remote-tracking ref and most
 /// real branch names contain. [`validate_branch_name`] allows exactly one `/`,
 /// because that is the shape of `<prefix>/<slug>` — but a base ref the user
@@ -711,7 +711,7 @@ branch refs/heads/main
 
 worktree /tmp/wt-feat
 HEAD def456
-branch refs/heads/oximux/feat
+branch refs/heads/TREX/feat
 
 worktree /tmp/wt-detached
 HEAD 789xyz
@@ -721,7 +721,7 @@ detached
         assert_eq!(ws.len(), 3);
         assert!(ws[0].is_main);
         assert!(!ws[1].is_main);
-        assert_eq!(ws[1].branch.as_deref(), Some("oximux/feat"));
+        assert_eq!(ws[1].branch.as_deref(), Some("TREX/feat"));
         assert_eq!(ws[2].branch, None, "detached has no branch");
     }
 
@@ -734,7 +734,7 @@ branch refs/heads/main
 
 worktree /tmp/wt
 HEAD def
-branch refs/heads/oximux/work
+branch refs/heads/TREX/work
 locked
 ";
         let ws = parse_worktree_list(text).unwrap();

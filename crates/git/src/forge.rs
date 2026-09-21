@@ -1,4 +1,4 @@
-//! Which forge backs a repo, and the read-only queries routed to it.
+﻿//! Which forge backs a repo, and the read-only queries routed to it.
 //!
 //! The desktop's `ForgeProvider` layer (in the `app` crate) covers the full
 //! surface including the mutating calls. This module holds only the read-only
@@ -56,20 +56,20 @@ pub async fn detect(cwd: &Path) -> Option<ForgeHost> {
 /// unauthenticated, or nothing matches — never an error.
 pub async fn list_items(
     cwd: &Path,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     filter: ForgeListFilter,
 ) -> Vec<ForgeItem> {
     match (detect(cwd).await, kind) {
-        (Some(ForgeHost::Github), oximux_core::ForgeRefKind::Issue) => {
+        (Some(ForgeHost::Github), trex_core::ForgeRefKind::Issue) => {
             gh::issue_list(cwd, filter).await
         }
-        (Some(ForgeHost::Github), oximux_core::ForgeRefKind::Pull) => {
+        (Some(ForgeHost::Github), trex_core::ForgeRefKind::Pull) => {
             gh::pr_list(cwd, filter).await
         }
-        (Some(ForgeHost::Gitlab), oximux_core::ForgeRefKind::Issue) => {
+        (Some(ForgeHost::Gitlab), trex_core::ForgeRefKind::Issue) => {
             glab::issue_list(cwd, filter).await
         }
-        (Some(ForgeHost::Gitlab), oximux_core::ForgeRefKind::Pull) => {
+        (Some(ForgeHost::Gitlab), trex_core::ForgeRefKind::Pull) => {
             glab::mr_list(cwd, filter).await
         }
         (None, _) => Vec::new(),
@@ -95,7 +95,7 @@ pub async fn checks(cwd: &Path) -> Vec<CheckRun> {
 /// `None` when the CLI cannot supply it (absent, no network, item deleted).
 pub async fn item_detail(
     cwd: &Path,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u64,
 ) -> Option<ItemDetail> {
     match detect(cwd).await? {

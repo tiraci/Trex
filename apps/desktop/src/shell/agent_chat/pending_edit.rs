@@ -1,4 +1,4 @@
-//! Edit-and-resend as a STAGED operation.
+﻿//! Edit-and-resend as a STAGED operation.
 //!
 //! Clicking ✎ on a prior user message enters "pending edit" mode: the composer
 //! is prefilled with that message's text + images, later messages are dimmed,
@@ -13,7 +13,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::{div, px, Context, Hsla, InteractiveElement, IntoElement, ParentElement, SharedString,
     StatefulInteractiveElement, Styled, Window};
-use oximux_agents::thread::{ChatImage, ThreadEntry};
+use trex_agents::thread::{ChatImage, ThreadEntry};
 
 use super::AgentChatView;
 

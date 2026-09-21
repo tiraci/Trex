@@ -1,22 +1,22 @@
-//! The MCP server OxiMux declares for an agent that may drive the screen.
+﻿//! The MCP server TREX declares for an agent that may drive the screen.
 //!
 //! This is where the injection seam built previously meets the driver: the
 //! returned [`McpServerSpec`] is what gets handed to a spawned agent, so
 //! `claude` launches `cua-driver mcp` itself and talks to it directly.
 //!
-//! That out-of-process hop is why OxiMux's Rust is not in the tool-dispatch
+//! That out-of-process hop is why TREX's Rust is not in the tool-dispatch
 //! path, and why the enforcement point is the permission round-trip rather
 //! than anything in this crate.
 
 use std::path::Path;
 
-use oximux_agent_core::thread::McpServerSpec;
+use trex_agent_core::thread::McpServerSpec;
 
 // The server name and the tool-name predicates derived from it live in
-// `oximux-agent-core`, because the transcript scrubber has to match on them
+// `trex-agent-core`, because the transcript scrubber has to match on them
 // even where this crate does not build. Re-exported here so callers keep
 // reaching for them at the screen-control crate, which is where they read.
-pub use oximux_agent_core::screen_tools::{
+pub use trex_agent_core::screen_tools::{
     bare_tool_name, is_computer_use_tool, tool_prefix, SERVER_NAME,
 };
 
@@ -95,7 +95,7 @@ pub struct Declaration {
     /// `None` for every chat the user has not opted in, which is nearly all of
     /// them — and those chats are still given the hook. The reason is that the
     /// thing being gated is not really the tools: the macOS Accessibility grant
-    /// behind them belongs to the OxiMux *process*, every child inherits it, and
+    /// behind them belongs to the TREX *process*, every child inherits it, and
     /// an agent's shell is a child. So a chat with no screen-control tools can
     /// still drive the screen through `osascript`, and the gate is what refuses
     /// that. Registering it only where the tools are declared would put the
@@ -124,12 +124,12 @@ pub struct HookSpec<'a> {
     /// The shared grant store. Passed explicitly so the app and the hook cannot
     /// resolve different files.
     pub grants: &'a Path,
-    /// OxiMux's own executable — normally `std::env::current_exe()`.
+    /// TREX's own executable — normally `std::env::current_exe()`.
     ///
     /// Passed for the same reason as `grants`, and it matters more than it
     /// looks: the gate is a *separate binary*, so it cannot ask what process it
     /// is and get a useful answer. Without this, "an agent may never drive
-    /// OxiMux" holds only for a shipped build, which is identifiable by bundle
+    /// TREX" holds only for a shipped build, which is identifiable by bundle
     /// id — a development build is ad-hoc signed with none, and that is the
     /// build this feature is written in.
     pub host: &'a Path,
@@ -247,7 +247,7 @@ fn shell_quote(value: &str) -> String {
 /// # Why the POSIX form is not merely suboptimal here but broken
 ///
 /// Single quotes mean nothing to `cmd.exe`. Handed
-/// `'C:\Program Files\OxiMux\oximux-screen-gate.exe'` it would look for a
+/// `'C:\Program Files\TREX\trex-screen-gate.exe'` it would look for a
 /// program named `'C:\Program` and fail — and the paths this quotes are
 /// `%LOCALAPPDATA%`- and `C:\Program Files`-shaped, so the case with a space in
 /// it is the *normal* one rather than the edge case it is on macOS.
@@ -317,7 +317,7 @@ fn shell_quote(value: &str) -> String {
 mod tests {
     use super::*;
     #[cfg(any(not(windows), feature = "windows-screen-control"))]
-    use oximux_agent_core::thread::to_claude_mcp_config;
+    use trex_agent_core::thread::to_claude_mcp_config;
 
     /// Tests of what a chat *with* a driver is handed.
     ///
@@ -396,10 +396,10 @@ mod tests {
         declaration(
             Some(Path::new("/bin/cua-driver")),
             &HookSpec {
-                command: Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux-screen-gate"),
+                command: Path::new("/Applications/trex.app/Contents/MacOS/trex-screen-gate"),
                 chat: "chat-7",
                 grants: Path::new("/data/grants.json"),
-                host: Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux"),
+                host: Path::new("/Applications/trex.app/Contents/MacOS/TREX"),
                 worktree: Some(Path::new("/repo")),
                 started_at: Some(std::time::UNIX_EPOCH + std::time::Duration::from_secs(1_700_000_000)),
             },
@@ -415,19 +415,19 @@ mod tests {
         let entry = &v["hooks"]["PreToolUse"][0];
         assert_eq!(entry["matcher"], hook_matcher());
         let command = entry["hooks"][0]["command"].as_str().expect("command");
-        assert!(command.contains("oximux-screen-gate"), "{command}");
+        assert!(command.contains("trex-screen-gate"), "{command}");
         assert!(command.contains(&format!("--chat {}", shell_quote("chat-7"))), "{command}");
         assert!(
             command.contains(&format!("--grants {}", shell_quote("/data/grants.json"))),
             "{command}"
         );
         assert!(command.contains("--since 1700000000"), "{command}");
-        // Without this the gate cannot tell that a call is aimed at OxiMux,
+        // Without this the gate cannot tell that a call is aimed at TREX,
         // because it is a different binary and `current_exe()` names itself.
         assert!(
             command.contains(&format!(
                 "--host-exe {}",
-                shell_quote("/Applications/OxiMux.app/Contents/MacOS/oximux")
+                shell_quote("/Applications/trex.app/Contents/MacOS/TREX")
             )),
             "{command}"
         );
@@ -441,10 +441,10 @@ mod tests {
         let declared = declaration(
             None,
             &HookSpec {
-                command: Path::new(r"C:\Program Files\OxiMux\oximux-screen-gate.exe"),
+                command: Path::new(r"C:\Program Files\TREX\trex-screen-gate.exe"),
                 chat: "chat-1",
-                grants: Path::new(r"C:\Users\u\AppData\Roaming\OxiMux\grants.json"),
-                host: Path::new(r"C:\Program Files\OxiMux\oximux.exe"),
+                grants: Path::new(r"C:\Users\u\AppData\Roaming\TREX\grants.json"),
+                host: Path::new(r"C:\Program Files\TREX\TREX.exe"),
                 // A worktree at a drive-relative root, so the value ends in a
                 // backslash — the case that silently eats the closing quote.
                 worktree: Some(Path::new(r"C:\repo\")),
@@ -459,7 +459,7 @@ mod tests {
 
         // Double quotes, because `cmd` does not know what a single quote is.
         assert!(
-            command.contains(r#""C:\Program Files\OxiMux\oximux-screen-gate.exe""#),
+            command.contains(r#""C:\Program Files\TREX\trex-screen-gate.exe""#),
             "{command}"
         );
         assert!(!command.contains('\''), "no POSIX quoting: {command}");
@@ -475,7 +475,7 @@ mod tests {
             "worktree did not round-trip: {args:?}"
         );
         assert!(
-            args.contains(&r"C:\Program Files\OxiMux\oximux.exe".to_string()),
+            args.contains(&r"C:\Program Files\TREX\TREX.exe".to_string()),
             "host exe did not round-trip: {args:?}"
         );
     }
@@ -554,7 +554,7 @@ mod tests {
                 command: Path::new("/Apps/Oxi Mux.app/gate"),
                 chat: "chat-1",
                 grants: Path::new("/data/grants.json"),
-                host: Path::new("/Apps/Oxi Mux.app/oximux"),
+                host: Path::new("/Apps/Oxi Mux.app/TREX"),
                 worktree: Some(Path::new("/Users/x/it's mine")),
                 started_at: None,
             },
@@ -579,11 +579,11 @@ mod tests {
         assert!(
             declared
                 .disallowed_tools
-                .contains(&"mcp__oximux-computer-use__replay_trajectory".to_string()),
+                .contains(&"mcp__trex-computer-use__replay_trajectory".to_string()),
             "{:?}",
             declared.disallowed_tools
         );
-        assert!(declared.disallowed_tools.iter().all(|t| t.starts_with("mcp__oximux-computer-use__")));
+        assert!(declared.disallowed_tools.iter().all(|t| t.starts_with("mcp__trex-computer-use__")));
         // And every denied name must round-trip back to a forbidden class.
         for name in &declared.disallowed_tools {
             let bare = bare_tool_name(name).expect("namespaced");
@@ -603,7 +603,7 @@ mod tests {
             assert!(
                 !declared
                     .disallowed_tools
-                    .contains(&format!("mcp__oximux-computer-use__{tool}")),
+                    .contains(&format!("mcp__trex-computer-use__{tool}")),
                 "{tool} must stay available"
             );
         }
@@ -613,7 +613,7 @@ mod tests {
     /// registered anyway.
     ///
     /// Not a degenerate configuration — it is what protects the road around the
-    /// tools. OxiMux holds Accessibility process-wide so an agent's shell
+    /// tools. TREX holds Accessibility process-wide so an agent's shell
     /// inherits it, which means a chat with no server can still drive the screen
     /// and the gate is the only thing that says no.
     #[test]
@@ -621,10 +621,10 @@ mod tests {
         let declared = declaration(
             None,
             &HookSpec {
-                command: Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux-screen-gate"),
+                command: Path::new("/Applications/trex.app/Contents/MacOS/trex-screen-gate"),
                 chat: "chat-7",
                 grants: Path::new("/data/grants.json"),
-                host: Path::new("/Applications/OxiMux.app/Contents/MacOS/oximux"),
+                host: Path::new("/Applications/trex.app/Contents/MacOS/TREX"),
                 worktree: None,
                 started_at: None,
             },
@@ -638,7 +638,7 @@ mod tests {
         let command = v["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
             .as_str()
             .expect("command");
-        assert!(command.contains("oximux-screen-gate"), "{command}");
+        assert!(command.contains("trex-screen-gate"), "{command}");
         assert!(
             command.contains(&format!("--chat {}", shell_quote("chat-7"))),
             "{command}"
@@ -663,10 +663,10 @@ mod tests {
         let declared = declaration(
             Some(Path::new(r"C:\Users\u\AppData\Local\Programs\Cua\bin\cua-driver.exe")),
             &HookSpec {
-                command: Path::new(r"C:\Program Files\OxiMux\oximux-screen-gate.exe"),
+                command: Path::new(r"C:\Program Files\TREX\trex-screen-gate.exe"),
                 chat: "chat-7",
-                grants: Path::new(r"C:\Users\u\AppData\Roaming\OxiMux\grants.json"),
-                host: Path::new(r"C:\Program Files\OxiMux\oximux.exe"),
+                grants: Path::new(r"C:\Users\u\AppData\Roaming\TREX\grants.json"),
+                host: Path::new(r"C:\Program Files\TREX\TREX.exe"),
                 worktree: None,
                 started_at: None,
             },
@@ -688,7 +688,7 @@ mod tests {
         let command = v["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
             .as_str()
             .expect("command");
-        assert!(command.contains("oximux-screen-gate"), "{command}");
+        assert!(command.contains("trex-screen-gate"), "{command}");
         assert!(
             command.contains(&format!("--chat {}", shell_quote("chat-7"))),
             "{command}"
@@ -703,7 +703,7 @@ mod tests {
         // `probes/matcher.py`, not just re-reading this file.
         assert_eq!(
             hook_matcher(),
-            r"^(Bash|bash|shell|local_shell|run_terminal_cmd|mcp__oximux-computer-use__.*)$"
+            r"^(Bash|bash|shell|local_shell|run_terminal_cmd|mcp__trex-computer-use__.*)$"
         );
     }
 
@@ -717,7 +717,7 @@ mod tests {
             assert!(matcher.is_match(shell), "{shell} must reach the gate");
         }
         for tool in ["click", "type_text", "get_window_state"] {
-            let name = format!("mcp__oximux-computer-use__{tool}");
+            let name = format!("mcp__trex-computer-use__{tool}");
             assert!(matcher.is_match(&name), "{name} must reach the gate");
         }
     }
@@ -734,7 +734,7 @@ mod tests {
             "mcp__github__create_issue",
             // Near misses in both families.
             "BashOutput",
-            "mcp__oximux-computer-use-extra__click",
+            "mcp__trex-computer-use-extra__click",
         ] {
             assert!(!matcher.is_match(tool), "{tool} must not reach the gate");
         }
@@ -742,8 +742,8 @@ mod tests {
 
     #[test]
     fn recognises_its_own_namespaced_tools() {
-        assert!(is_computer_use_tool("mcp__oximux-computer-use__click"));
-        assert!(is_computer_use_tool("mcp__oximux-computer-use__type_text"));
+        assert!(is_computer_use_tool("mcp__trex-computer-use__click"));
+        assert!(is_computer_use_tool("mcp__trex-computer-use__type_text"));
     }
 
     #[test]
@@ -752,19 +752,19 @@ mod tests {
         // miss one because a different server merely resembles the name.
         assert!(!is_computer_use_tool("Bash"));
         assert!(!is_computer_use_tool("mcp__other__click"));
-        assert!(!is_computer_use_tool("mcp__oximux-computer-use-extra__click"));
+        assert!(!is_computer_use_tool("mcp__trex-computer-use-extra__click"));
         assert!(!is_computer_use_tool("computer-use__click"));
     }
 
     #[test]
     fn extracts_the_bare_tool_name() {
         assert_eq!(
-            bare_tool_name("mcp__oximux-computer-use__type_text"),
+            bare_tool_name("mcp__trex-computer-use__type_text"),
             Some("type_text")
         );
         assert_eq!(bare_tool_name("mcp__other__click"), None);
         assert_eq!(bare_tool_name("Bash"), None);
-        assert_eq!(bare_tool_name("mcp__oximux-computer-use__"), None);
+        assert_eq!(bare_tool_name("mcp__trex-computer-use__"), None);
     }
 
     #[test]

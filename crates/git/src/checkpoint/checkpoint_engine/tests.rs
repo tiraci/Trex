@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 use std::path::Path;
 use std::time::Duration;
 
@@ -157,7 +157,7 @@ async fn oversized_untracked_excluded() {
     // Exclude file back to pristine (absent or without our block).
     let exclude = tmp.path().join(".git/info/exclude");
     if exclude.exists() {
-        assert!(!read(tmp.path(), ".git/info/exclude").contains("oximux"));
+        assert!(!read(tmp.path(), ".git/info/exclude").contains("TREX"));
     }
 }
 

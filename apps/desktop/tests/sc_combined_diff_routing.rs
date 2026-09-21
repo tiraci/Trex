@@ -1,4 +1,4 @@
-//! Regression test for combined-diff staging routing.
+﻿//! Regression test for combined-diff staging routing.
 //!
 //! In a combined multi-file view, the floating Stage/Discard card's action
 //! side is resolved PER FILE from its group tag — not a single side for the
@@ -17,12 +17,12 @@
 use gpui::{
     AppContext, Context, Entity, IntoElement, ParentElement, Render, TestAppContext, Window, div,
 };
-use oximux_app::shell::diff_view::DiffView;
-use oximux_core::{
+use trex_app::shell::diff_view::DiffView;
+use trex_core::{
     CombinedDiffScope, DiffHunk, DiffLine, DiffLineKind, DiffStatus, FileDiff, FileGroup,
 };
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
 use std::path::PathBuf;
 use std::process::Command;
 use tempfile::TempDir;

@@ -1,4 +1,4 @@
-//! Transcript snapshot harness — the fidelity floor under the agent mappers.
+﻿//! Transcript snapshot harness — the fidelity floor under the agent mappers.
 //!
 //! Written as the safety net for a five-way `Assembler` extraction, which was
 //! then declined on measurement: the mappers turned out not to be five copies
@@ -16,7 +16,7 @@
 //! "rendered output is unchanged" is actually decidable, because it is what
 //! every render path reads.
 //!
-//! Behind the `test-support` feature so none of this ships: `oximux-agents`
+//! Behind the `test-support` feature so none of this ships: `trex-agents`
 //! turns it on in dev-dependencies so both crates pin transcripts identically
 //! rather than each growing its own harness.
 //!

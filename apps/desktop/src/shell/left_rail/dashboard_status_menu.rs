@@ -1,4 +1,4 @@
-//! Agents-page status-filter dropdown — the popover that opens under the
+﻿//! Agents-page status-filter dropdown — the popover that opens under the
 //! header's status trigger and lets the user pick which status bucket the
 //! dashboard is narrowed to (All / Needs attention / Working / Done / Idle /
 //! Ended). The active bucket carries a trailing check, like the reference
@@ -14,7 +14,7 @@ use gpui::{
     Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement, Render,
     Styled, WeakEntity, Window, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::agents_dashboard::filter::StatusFilter;
 use crate::shell::left_rail::LeftRail;
@@ -83,7 +83,7 @@ impl DashboardStatusFilterMenu {
 
 impl Render for DashboardStatusFilterMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let Some((active, x, y)) = self.open_for else {
             return div().into_any_element();
         };

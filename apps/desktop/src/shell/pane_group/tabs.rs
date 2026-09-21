@@ -1,10 +1,10 @@
-use super::*;
+﻿use super::*;
 
 use crate::shell::agent_chat::{ChatTerminalSpec, ChatViewMode};
 use crate::shell::terminal_view::{DEFAULT_COLS, DEFAULT_ROWS};
-use oximux_agents::AgentSessionConfig;
-use oximux_core::SessionResumption;
-use oximux_settings::AgentLaunchSettings;
+use trex_agents::AgentSessionConfig;
+use trex_core::SessionResumption;
+use trex_settings::AgentLaunchSettings;
 
 impl PaneGroup {
 
@@ -231,8 +231,8 @@ impl PaneGroup {
         path: &Path,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) -> (Entity<oximux_editor::EditorView>, Subscription) {
-        let view = cx.new(|cx| oximux_editor::EditorView::new(path.to_path_buf(), window, cx));
+    ) -> (Entity<trex_editor::EditorView>, Subscription) {
+        let view = cx.new(|cx| trex_editor::EditorView::new(path.to_path_buf(), window, cx));
         // Route document links clicked in the markdown preview back into this
         // pane group. Opened as a preview (ephemeral) tab — following a link
         // is browsing, so hopping through several docs reuses one tab slot
@@ -248,7 +248,7 @@ impl PaneGroup {
         });
         // Resolve + attach a language server (extension-keyed, PATH-resolved;
         // unsupported language or uninstalled server is a clean no-op).
-        if let Some(server) = oximux_editor::resolve_lsp_server(path) {
+        if let Some(server) = trex_editor::resolve_lsp_server(path) {
             let workspace_root = self.cwd.clone();
             view.update(cx, |v, cx| {
                 v.attach_lsp(
@@ -529,7 +529,7 @@ impl PaneGroup {
     /// mounted as `PaneContent::Diff`.
     pub fn open_or_activate_diff_tab(
         &mut self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         path: PathBuf,
         staged: bool,
         untracked: bool,
@@ -679,7 +679,7 @@ impl PaneGroup {
     pub fn open_or_activate_tasks_tab(
         &mut self,
         weak_root: WeakEntity<crate::workspace_root::WorkspaceRoot>,
-        projects: Vec<oximux_core::Project>,
+        projects: Vec<trex_core::Project>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> usize {
@@ -750,7 +750,7 @@ impl PaneGroup {
     pub fn open_or_activate_automations_tab(
         &mut self,
         weak_root: WeakEntity<crate::workspace_root::WorkspaceRoot>,
-        store: oximux_agents::schedule::ScheduleStore,
+        store: trex_agents::schedule::ScheduleStore,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> usize {
@@ -822,7 +822,7 @@ impl PaneGroup {
         &mut self,
         cwd: PathBuf,
         model: Option<String>,
-        backend: oximux_agents::thread::ChatBackend,
+        backend: trex_agents::thread::ChatBackend,
         initial_prompt: Option<String>,
         window: &mut Window,
         cx: &mut Context<Self>,
@@ -868,7 +868,7 @@ impl PaneGroup {
         let density = self.density;
         let typography = self.typography.clone();
         let cwd_for_view = cwd.clone();
-        let backend = oximux_agents::thread::ChatBackend::stream_json();
+        let backend = trex_agents::thread::ChatBackend::stream_json();
         let view = cx.new(|cx| {
             crate::shell::agent_chat::AgentChatView::new_unbound(
                 cwd_for_view,
@@ -893,11 +893,11 @@ impl PaneGroup {
         &mut self,
         cwd: PathBuf,
         model: Option<String>,
-        backend: oximux_agents::thread::ChatBackend,
+        backend: trex_agents::thread::ChatBackend,
         session_id: Option<String>,
-        entries: Vec<oximux_agents::thread::ThreadEntry>,
+        entries: Vec<trex_agents::thread::ThreadEntry>,
         slash_commands: Vec<String>,
-        session_meta: oximux_agents::thread::SessionMeta,
+        session_meta: trex_agents::thread::SessionMeta,
         thinking_level: crate::shell::agent_chat::ThinkingLevel,
         posture: crate::shell::agent_chat::RestoredPosture,
         pending_retry: Option<crate::persisted_chat::PersistedRetry>,
@@ -957,7 +957,7 @@ impl PaneGroup {
         let density = self.density;
         let typography = self.typography.clone();
         let cwd_for_view = cwd.clone();
-        let backend = oximux_agents::thread::ChatBackend::stream_json();
+        let backend = trex_agents::thread::ChatBackend::stream_json();
         let view = cx.new(|cx| {
             crate::shell::agent_chat::AgentChatView::new_unbound(
                 cwd_for_view,
@@ -1073,11 +1073,11 @@ impl PaneGroup {
                 let Some(cwd) = cwd else { return };
                 let (key, diff) = (key.clone(), diff.clone());
                 cx.spawn_in(window, async move |group, cx| {
-                    let Ok(repo) = oximux_git::Repository::open(&cwd).await else {
+                    let Ok(repo) = trex_git::Repository::open(&cwd).await else {
                         // The chat's cwd isn't a repo — nothing to open the diff
                         // against. The card stays; only Review is a no-op.
                         tracing::warn!(
-                            target: "oximux_app::pane_group",
+                            target: "trex_app::pane_group",
                             cwd = %cwd.display(),
                             "turn-diff review: chat cwd is not a git repo"
                         );
@@ -1134,7 +1134,7 @@ impl PaneGroup {
                 self.open_agent_chat_tab_restored(
                     cwd.clone(),
                     model.clone(),
-                    oximux_agents::thread::ChatBackend::stream_json(),
+                    trex_agents::thread::ChatBackend::stream_json(),
                     Some(session_id.clone()),
                     entries.clone(),
                     slash_commands.clone(),
@@ -1212,7 +1212,7 @@ impl PaneGroup {
                 // here does not reliably reach the host's action handler, so build
                 // the command from `import_resume_command` and run it inline.
                 let Some((program, args)) =
-                    oximux_settings::import_resume_command(preset_id, resume_handle)
+                    trex_settings::import_resume_command(preset_id, resume_handle)
                 else {
                     tracing::warn!(%preset_id, "no import resume command for provider");
                     return;
@@ -1508,7 +1508,7 @@ impl PaneGroup {
         let is_custom = adapter == AgentAdapter::Custom;
         let custom_command = is_custom
             .then(|| {
-                oximux_settings::acp_preset(adapter_id)
+                trex_settings::acp_preset(adapter_id)
                     .and_then(|p| p.interactive_resume.map(|f| (p.command.to_string(), f(&session_id))))
                     // Pi is not an ACP preset (it speaks its own RPC), so it has
                     // no `AcpPreset` row to read a resume argv from — but it does
@@ -1516,7 +1516,7 @@ impl PaneGroup {
                     // fallback a Custom adapter with no preset would spawn with
                     // NO resume argv and `SessionResumption::None`, i.e. a fresh
                     // agent wearing a resumed chat's tab.
-                    .or_else(|| oximux_settings::import_resume_command(adapter_id, &session_id))
+                    .or_else(|| trex_settings::import_resume_command(adapter_id, &session_id))
             })
             .flatten();
         cx.spawn_in(window, async move |group, cx| {
@@ -1662,8 +1662,8 @@ impl PaneGroup {
             // missing rollout degrades to an empty seed — the resume still works.
             AgentAdapter::Codex => {
                 let (entries, seed_cwd) = codex_dir()
-                    .and_then(|dir| oximux_agents::thread::locate_rollout(&dir, session_id))
-                    .and_then(|p| oximux_agents::thread::import_codex_rollout(&p).ok())
+                    .and_then(|dir| trex_agents::thread::locate_rollout(&dir, session_id))
+                    .and_then(|p| trex_agents::thread::import_codex_rollout(&p).ok())
                     .map(|imp| (imp.entries, imp.cwd))
                     .unwrap_or_default();
                 // Prefer the rollout's recorded cwd; fall back to the passed cwd
@@ -1675,8 +1675,8 @@ impl PaneGroup {
                 self.open_agent_chat_tab_restored(
                     cwd,
                     None,
-                    oximux_agents::thread::ChatBackend::from(
-                        oximux_agents::thread::Transport::AppServer,
+                    trex_agents::thread::ChatBackend::from(
+                        trex_agents::thread::Transport::AppServer,
                     ),
                     Some(session_id.to_string()),
                     entries,
@@ -1703,14 +1703,14 @@ impl PaneGroup {
             // via `--resume` (stream-json backend).
             _ => {
                 let entries = match path {
-                    Some(p) => oximux_agents::thread::transcript_from_jsonl(std::path::Path::new(p))
+                    Some(p) => trex_agents::thread::transcript_from_jsonl(std::path::Path::new(p))
                         .unwrap_or_default(),
                     None => Vec::new(),
                 };
                 self.open_agent_chat_tab_restored(
                     cwd,
                     None,
-                    oximux_agents::thread::ChatBackend::stream_json(),
+                    trex_agents::thread::ChatBackend::stream_json(),
                     Some(session_id.to_string()),
                     entries,
                     Vec::new(),
@@ -1770,7 +1770,7 @@ impl PaneGroup {
         }
         let entries = match dirs::home_dir() {
             Some(home) => {
-                oximux_agents::session_log::import_provider_index::load_import_provider_transcript(
+                trex_agents::session_log::import_provider_index::load_import_provider_transcript(
                     &home, "pi", session_id, path,
                 )
             }
@@ -1787,7 +1787,7 @@ impl PaneGroup {
         self.open_agent_chat_tab_restored(
             cwd,
             None,
-            oximux_agents::thread::ChatBackend::from(oximux_agents::thread::Transport::Rpc),
+            trex_agents::thread::ChatBackend::from(trex_agents::thread::Transport::Rpc),
             Some(session_id.to_string()),
             entries,
             Vec::new(),
@@ -1854,7 +1854,7 @@ impl PaneGroup {
         }
         let entries = match dirs::home_dir() {
             Some(home) => {
-                oximux_agents::session_log::import_provider_index::load_import_provider_transcript(
+                trex_agents::session_log::import_provider_index::load_import_provider_transcript(
                     &home, "omp", session_id, path,
                 )
             }
@@ -1874,7 +1874,7 @@ impl PaneGroup {
         self.open_agent_chat_tab_restored(
             cwd,
             None,
-            oximux_agents::thread::ChatBackend::from(oximux_agents::thread::Transport::OmpRpc),
+            trex_agents::thread::ChatBackend::from(trex_agents::thread::Transport::OmpRpc),
             Some(session_id.to_string()),
             entries,
             Vec::new(),
@@ -1929,7 +1929,7 @@ impl PaneGroup {
                 return;
             }
         };
-        let entries = oximux_agents::session_log::import_provider_index::load_import_provider_transcript(
+        let entries = trex_agents::session_log::import_provider_index::load_import_provider_transcript(
             &home, preset, session_id, path,
         );
         // Root the (later) terminal resume at the recorded cwd, else the process
@@ -1984,7 +1984,7 @@ impl PaneGroup {
     /// land in the tab label.
     pub fn open_or_activate_commit_tab(
         &mut self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         sha: String,
         short_oid: String,
         subject: String,
@@ -2057,7 +2057,7 @@ impl PaneGroup {
     /// the `DiffView` loads `diff_for_range(base, head, path)`.
     pub fn open_or_activate_branch_diff_tab(
         &mut self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         base: String,
         head: String,
         path: PathBuf,
@@ -2124,8 +2124,8 @@ impl PaneGroup {
     /// use, with per-file-group staging routing.
     pub fn open_or_activate_combined_diff_tab(
         &mut self,
-        repo: oximux_git::Repository,
-        scope: oximux_core::CombinedDiffScope,
+        repo: trex_git::Repository,
+        scope: trex_core::CombinedDiffScope,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> usize {
@@ -2186,13 +2186,13 @@ impl PaneGroup {
     /// virtual diff — opening a file in the editor, review notes.
     pub fn open_or_activate_turn_diff_tab(
         &mut self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         key: &str,
         diff: &str,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> usize {
-        let scope = oximux_core::CombinedDiffScope::TurnDiff { key: key.to_string() };
+        let scope = trex_core::CombinedDiffScope::TurnDiff { key: key.to_string() };
         let scope_key = SharedString::from(scope.tab_key());
         let label = SharedString::from(scope.title());
         if let Some(idx) = self.tabs.iter().position(|t| {
@@ -2505,7 +2505,7 @@ impl PaneGroup {
     /// shift the index onto the wrong tab.
     fn mount_dirty_close_dialog(
         &mut self,
-        view: Entity<oximux_editor::EditorView>,
+        view: Entity<trex_editor::EditorView>,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {

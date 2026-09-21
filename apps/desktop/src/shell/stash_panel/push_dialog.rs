@@ -1,4 +1,4 @@
-//! PushStashDialog — small form modal for `git stash push`.
+﻿//! PushStashDialog — small form modal for `git stash push`.
 //!
 //! Two body fields: a single-line message input and an
 //! "Include untracked files" checkbox. Not a `ConfirmDialog` — that
@@ -20,7 +20,7 @@ use gpui_component::{
     checkbox::Checkbox,
     input::{Input, InputState},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 use std::rc::Rc;
@@ -141,7 +141,7 @@ impl Focusable for PushStashDialog {
 
 impl Render for PushStashDialog {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = &self.typography;

@@ -1,4 +1,4 @@
-//! Process-wide cache of the last-known `GitState` per working-tree root.
+﻿//! Process-wide cache of the last-known `GitState` per working-tree root.
 //!
 //! Switching the active project rebuilds the right sidebar, which spawns a
 //! fresh `StatusPoller` whose watch channel starts at `Loading`. Without a
@@ -19,8 +19,8 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 
 use gpui::Global;
-use oximux_core::GitState;
-use oximux_storage::SettingsRepo;
+use trex_core::GitState;
+use trex_storage::SettingsRepo;
 
 /// Settings key under which the whole cache map is persisted as JSON. The
 /// `_v1` suffix lets a future `GitState` shape change orphan the old blob
@@ -85,7 +85,7 @@ impl GitStateCache {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_storage::{SettingsRepo, open_memory};
+    use trex_storage::{SettingsRepo, open_memory};
 
     fn sample_state(branch: &str) -> GitState {
         GitState {

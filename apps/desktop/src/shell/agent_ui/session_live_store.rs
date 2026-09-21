@@ -1,4 +1,4 @@
-//! Live agent registry keyed by DB session UUID.
+﻿//! Live agent registry keyed by DB session UUID.
 //!
 //! Each open agent tab already owns a `watch::Receiver<AgentSnapshot>`
 //! (the per-tab badge reads it directly). The rail, however, only ever
@@ -15,8 +15,8 @@
 use std::collections::HashMap;
 
 use gpui::{Context, SharedString, Window};
-use oximux_agents::AgentStatusStream;
-use oximux_core::AgentSessionId;
+use trex_agents::AgentStatusStream;
+use trex_core::AgentSessionId;
 
 use crate::workspace_root::WorkspaceRoot;
 
@@ -189,7 +189,7 @@ impl WorkspaceRoot {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::{AgentSnapshot, AgentStatus};
+    use trex_core::{AgentSnapshot, AgentStatus};
     use tokio::sync::watch;
 
     fn entry(rx: AgentStatusStream) -> LiveAgentEntry {

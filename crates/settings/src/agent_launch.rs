@@ -1,4 +1,4 @@
-//! Per-agent launch defaults, loaded from `agent_launch.toml` in the app
+﻿//! Per-agent launch defaults, loaded from `agent_launch.toml` in the app
 //! data dir and held as a GPUI [`Global`] so the launch picker and the
 //! agent runtime read one source of truth.
 //!
@@ -14,7 +14,7 @@
 //! Live-reload: a file watcher (in the app crate) reparses on change and
 //! swaps the global, so an edit takes effect on the next launch without a
 //! restart. Keys are agent slugs (`claude-code`, `codex`, `pi`) matching
-//! [`oximux_core::AgentAdapter`]'s adapter id.
+//! [`trex_core::AgentAdapter`]'s adapter id.
 
 use std::collections::BTreeMap;
 
@@ -119,7 +119,7 @@ pub enum OpenMode {
 /// case for one of these appears, delete the entry **and its reason together**
 /// rather than adding an escape hatch that disarms the guard for every key.
 ///
-/// The `OXIMUX_` prefix is blocked separately — see
+/// The `trex_` prefix is blocked separately — see
 /// [`RESERVED_ENV_PREFIX`].
 pub const RESERVED_ENV_KEYS: [&str; 7] = [
     // The spawn resolves the agent binary through `PATH`. Replacing it is the
@@ -139,7 +139,7 @@ pub const RESERVED_ENV_KEYS: [&str; 7] = [
     // The terminal emulator sets this to describe the capabilities it actually
     // has. A value that claims otherwise produces unreadable output.
     "TERM",
-    // OxiMux reads `$CODEX_HOME` from its own environment to find Codex's
+    // TREX reads `$CODEX_HOME` from its own environment to find Codex's
     // rollout logs (the usage meter) and to install its status hooks. A launch
     // that moves it leaves both looking in the wrong directory, and the agent
     // simply appears to stop reporting.
@@ -150,11 +150,11 @@ pub const RESERVED_ENV_KEYS: [&str; 7] = [
     "CLAUDE_CONFIG_DIR",
 ];
 
-/// Variables under this prefix belong to OxiMux itself and are never a
-/// profile's to set. `OXIMUX_SESSION_ID` is the credential a spawned agent
+/// Variables under this prefix belong to TREX itself and are never a
+/// profile's to set. `trex_SESSION_ID` is the credential a spawned agent
 /// presents to claim its own scope — a profile that could set it could hand
 /// one agent another's authority.
-pub const RESERVED_ENV_PREFIX: &str = "OXIMUX_";
+pub const RESERVED_ENV_PREFIX: &str = "TREX_";
 
 /// Whether `key` is refused by [`AgentLaunchSettings::env_for`]. Exported so
 /// the settings UI can say so before the user commits, rather than leaving
@@ -349,7 +349,7 @@ pub struct AgentLaunchSettings {
     /// title + status. **On by default**: this is the whole point of the
     /// agent cockpit (the reference cockpit keeps its status hooks always on);
     /// without it the rail can only show a generic "Ready" per agent. A user
-    /// can disable it in Settings → Agents. The env var `OXIMUX_STATUS_HOOKS=1`
+    /// can disable it in Settings → Agents. The env var `trex_STATUS_HOOKS=1`
     /// force-enables regardless of this flag (a debug escape hatch). A missing
     /// key in an existing `agent_launch.toml` picks up this `true` default via
     /// the container-level `#[serde(default)]`, so the feature lights up on
@@ -1233,7 +1233,7 @@ PATH = "/nowhere"
 HOME = "/tmp/elsewhere"
 CODEX_HOME = "/tmp/codex"
 CLAUDE_CONFIG_DIR = "/tmp/claude"
-OXIMUX_SESSION_ID = "borrowed"
+trex_SESSION_ID = "borrowed"
 ANTHROPIC_BASE_URL = "https://proxy/v1"
 "#;
         let s: AgentLaunchSettings = toml::from_str(toml).expect("parses");
@@ -1253,12 +1253,12 @@ ANTHROPIC_BASE_URL = "https://proxy/v1"
             assert!(is_reserved_env_key(k), "{k} is on the list");
         }
         assert!(is_reserved_env_key("  PATH  "), "trimmed before comparing");
-        assert!(is_reserved_env_key("OXIMUX_SESSION_ID"));
-        assert!(is_reserved_env_key("OXIMUX_ANYTHING_AT_ALL"), "the whole prefix is ours");
+        assert!(is_reserved_env_key("TREX_SESSION_ID"));
+        assert!(is_reserved_env_key("TREX_ANYTHING_AT_ALL"), "the whole prefix is ours");
         // Case-sensitive: on Unix these are different variables, and refusing
         // the lowercase one would be a guess about what was meant.
         assert!(!is_reserved_env_key("path"));
-        assert!(!is_reserved_env_key("oximux_session_id"));
+        assert!(!is_reserved_env_key("trex_session_id"));
         // The things a profile exists to set are not on it.
         assert!(!is_reserved_env_key("ANTHROPIC_BASE_URL"));
         assert!(!is_reserved_env_key("OPENAI_API_KEY"));

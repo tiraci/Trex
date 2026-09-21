@@ -1,8 +1,8 @@
-// Async wrapper around `oximux_relay_proto::{encode_frame, decode_frame}`.
+﻿// Async wrapper around `trex_relay_proto::{encode_frame, decode_frame}`.
 // Lives in the daemon (and is copied client-side in phase 03) instead
 // of in the proto crate so the proto crate stays runtime-agnostic.
 
-use oximux_relay_proto::{Frame, ProtoError, decode_frame, encode_frame};
+use trex_relay_proto::{Frame, ProtoError, decode_frame, encode_frame};
 use thiserror::Error;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 
@@ -60,7 +60,7 @@ pub async fn write_frame<W: AsyncWrite + Unpin>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_relay_proto::{Notification, Request};
+    use trex_relay_proto::{Notification, Request};
     use tokio::io::duplex;
 
     #[tokio::test]

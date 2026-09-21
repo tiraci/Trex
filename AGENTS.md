@@ -1,4 +1,4 @@
-# Agent guide — OxiMux
+﻿# Agent guide — TREX
 
 Pointers only (no duplicated content — these files are the source of truth):
 

@@ -1,4 +1,4 @@
-//! ReviewNotePopover — compose / edit / delete one diff review note.
+﻿//! ReviewNotePopover — compose / edit / delete one diff review note.
 //!
 //! Opened when the reviewer clicks a line's gutter note marker. Pre-fills
 //! with the existing note body (if any); Save commits the typed text, Delete
@@ -19,7 +19,7 @@ use gpui_component::{
     button::{Button, ButtonVariants},
     input::{Textarea, TextareaState},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 use std::rc::Rc;
@@ -143,13 +143,13 @@ impl Focusable for ReviewNotePopover {
 
 impl Render for ReviewNotePopover {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         let theme = self.theme;
         let density = self.density;
         let typography = &self.typography;
         let side = match self.anchor.side {
-            oximux_core::NoteSide::Old => "old",
-            oximux_core::NoteSide::New => "new",
+            trex_core::NoteSide::Old => "old",
+            trex_core::NoteSide::New => "new",
         };
         let header = format!("Note · {} L{} ({side})", self.anchor.path, self.anchor.line);
         let can_delete = self.has_existing && !self.closed;

@@ -1,4 +1,4 @@
-//! Who a session RPC is served to — the caller vocabulary above the device
+﻿//! Who a session RPC is served to — the caller vocabulary above the device
 //! store.
 //!
 //! Remote callers carry the [`AppPubkey`] the host paired and can revoke. Local
@@ -17,7 +17,7 @@ use super::AppPubkey;
 ///
 /// `Full` is an operator at their own keyboard — the same person the desktop
 /// already obeys. `Session` is a caller that announced itself as belonging to
-/// one agent session (the CLI presents its `OXIMUX_SESSION_ID`), and is
+/// one agent session (the CLI presents its `trex_SESSION_ID`), and is
 /// confined to it exactly as a session-scoped paired device would be: it may
 /// read and write that conversation, and nothing else — no other sessions, no
 /// terminals, no schedules, no creating its way out of the box.

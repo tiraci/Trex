@@ -1,4 +1,4 @@
-//! In-memory review-note store for one diff view, plus the markdown
+﻿//! In-memory review-note store for one diff view, plus the markdown
 //! formatter that turns accumulated notes into an agent prompt.
 //!
 //! Pure + GPUI-free: the store is a map keyed by a `(path, line, side)`
@@ -26,7 +26,7 @@
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-use oximux_core::{DiffReviewNote, NoteSide, anchor_text_is_checkable, anchor_text_matches};
+use trex_core::{DiffReviewNote, NoteSide, anchor_text_is_checkable, anchor_text_matches};
 
 /// Anchor identifying one note within a diff scope. Field order is
 /// `(path, line, side)` so the derived `Ord` groups notes by file then walks

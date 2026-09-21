@@ -1,5 +1,5 @@
-{
-  "name": "@oximux/mobile",
+﻿{
+  "name": "@TREX/mobile",
   "main": "expo-router/entry",
   "version": "0.1.0",
   "private": true,
@@ -11,7 +11,7 @@
     "prebuild": "LANG=${LANG:-en_US.UTF-8} expo prebuild --clean",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "bindings": "npm run ubrn:ios --prefix modules/oximux-core",
+    "bindings": "npm run ubrn:ios --prefix modules/trex-core",
     "postinstall": "node scripts/patch-expo-modules-jsi.mjs && node scripts/generate-xterm-bundle.mjs",
     "eas-build-pre-install": "node scripts/build-rust-core-for-eas.mjs",
     "xterm:bundle": "node scripts/generate-xterm-bundle.mjs",
@@ -42,7 +42,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.1",
     "lucide-react-native": "^1.26.0",
-    "oximux-core": "file:./modules/oximux-core",
+    "trex-core": "file:./modules/trex-core",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.0",

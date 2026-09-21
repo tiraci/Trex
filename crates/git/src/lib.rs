@@ -1,11 +1,11 @@
-//! oximux-git
+﻿//! trex-git
 //!
 //! Git CLI wrappers (no gitoxide in v1). Phase 2 step 1+2 lands:
 //! - `process::GitCmd` — tokio-based `git` runner with timeout + kill_on_drop.
 //! - `repository::Repository` — validated handle to one working tree.
 //! - `status::parse_porcelain_v2` — pure parser for `--porcelain=v2 --branch -z`.
 //!
-//! Domain shapes (`GitState`, `FileStatus`, …) live in `oximux-core`.
+//! Domain shapes (`GitState`, `FileStatus`, …) live in `trex-core`.
 
 pub mod ahead_behind;
 pub mod branch;

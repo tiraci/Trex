@@ -1,11 +1,11 @@
-//! Client-side `terminal/*` request handlers for the ACP worker.
+﻿//! Client-side `terminal/*` request handlers for the ACP worker.
 //!
 //! ACP lets an agent create and drive a real terminal on the client (per the
 //! client's advertised `terminal` capability): the agent asks the client to
 //! spawn a command, polls its output, waits for exit, and can kill/release it —
 //! then embeds the live terminal inline in a tool card (`ToolCallContent::Terminal`).
 //!
-//! OxiMux serves the five methods by delegating to an app-provided
+//! TREX serves the five methods by delegating to an app-provided
 //! [`AcpTerminalHost`]. The **app** owns the real PTY (reusing its existing
 //! relay / portable-pty terminal machinery) and the inline `TerminalView`, so
 //! this domain crate stays free of the UI/relay stack — dependency inversion,

@@ -1,4 +1,4 @@
-//! A global Escape key that stops an agent driving the screen — and does not
+﻿//! A global Escape key that stops an agent driving the screen — and does not
 //! reach the app being driven.
 //!
 //! # Why a `CGEventTap` and not a global monitor
@@ -90,7 +90,7 @@
 //! - **A successful [`arm`] is still not proof Escape can stop an agent.** The
 //!   causes differ but the conclusion does not. The hook does not run on the
 //!   secure desktop (UAC consent, Ctrl+Alt+Del, the lock screen), and UIPI
-//!   stops an unelevated OxiMux from intercepting keys headed for a
+//!   stops an unelevated TREX from intercepting keys headed for a
 //!   higher-integrity foreground window. `SetWindowsHookExW` succeeds in both
 //!   cases and Escape simply never arrives.
 //!
@@ -312,7 +312,7 @@ mod imp {
     }
 
     /// Install the tap. `Err` means Escape cannot be intercepted — almost always
-    /// because OxiMux has no Input Monitoring permission.
+    /// because TREX has no Input Monitoring permission.
     ///
     /// Must be called from the main thread: the run-loop source is added to the
     /// main run loop, which is where GPUI's event loop lives.
@@ -904,7 +904,7 @@ pub enum EscapeTapError {
     /// there is no switch to send a Windows user to. The variant stays on the
     /// type rather than being `cfg`-ed so callers keep one `match`.
     #[error(
-        "OxiMux needs Input Monitoring permission to stop an agent with Escape — grant it in System Settings › Privacy & Security › Input Monitoring, and check Accessibility there too"
+        "TREX needs Input Monitoring permission to stop an agent with Escape — grant it in System Settings › Privacy & Security › Input Monitoring, and check Accessibility there too"
     )]
     NotPermitted,
     /// The hook or run-loop source could not be installed.

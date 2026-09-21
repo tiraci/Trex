@@ -1,8 +1,8 @@
-use super::*;
+﻿use super::*;
 
 impl Render for TerminalView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Adopt the grid size the canvas measured from its real bounds
         // last paint, then apply it. `maybe_resize` resizes the PTY +
         // refetches the snapshot only when the size actually changed.
@@ -253,7 +253,7 @@ impl Render for TerminalView {
         .size_full();
 
         let mut root = div()
-            .id("oximux-terminal-view")
+            .id("trex-terminal-view")
             .track_focus(&focus_handle)
             // Carries the terminal key context so Tab / Shift+Tab resolve to
             // the no-op bindings in `register_terminal_key_bindings` (shadowing
@@ -497,7 +497,7 @@ impl Render for TerminalView {
             root = root.child(bar);
         }
         // Attention ring: a blue inset stroke when an unfocused pane has
-        // signalled (terminal BEL today; agent-waiting / `oximux notify`
+        // signalled (terminal BEL today; agent-waiting / `TREX notify`
         // later). Absolute inset_0 so it overlays without shifting the grid
         // layout, and gated on `!pane_focused` so it vanishes the instant the
         // user looks at the pane (belt-and-braces with the on_focus clear).

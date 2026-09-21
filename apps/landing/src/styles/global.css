@@ -1,9 +1,9 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 
 /* ---------------------------------------------------------------------------
-   OxiMux landing design tokens.
+   TREX landing design tokens.
 
    These mirror docs/design-guidelines.md one-for-one so the page reads as the
    same product as the app. When a token changes in crates/settings/src/theme.rs,

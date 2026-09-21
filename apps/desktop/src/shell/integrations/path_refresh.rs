@@ -1,4 +1,4 @@
-//! Making a just-installed tool visible to the process that installed it.
+﻿//! Making a just-installed tool visible to the process that installed it.
 //!
 //! `winget` installs a CLI and appends its directory to the **persisted** PATH
 //! — the one in the registry, which every process started afterwards inherits.
@@ -38,7 +38,7 @@ pub(crate) fn refresh() -> bool {
     // nothing rather than doing this.
     unsafe { std::env::set_var("PATH", &merged) };
     tracing::info!(
-        target: "oximux_app::integrations",
+        target: "trex_app::integrations",
         "refreshed PATH from the registry after an install"
     );
     true
@@ -63,7 +63,7 @@ pub(crate) fn refresh() -> bool {
 /// that PATH cannot currently be trusted.
 #[cfg(windows)]
 fn persisted_path() -> Option<String> {
-    use oximux_no_window::NoWindow as _;
+    use trex_no_window::NoWindow as _;
 
     let root = std::env::var("SystemRoot").unwrap_or_else(|_| "C:\\Windows".to_string());
     let shell = format!("{root}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe");

@@ -1,4 +1,4 @@
-//! Scrim + spinner + stop button rendered over the commit textarea
+﻿//! Scrim + spinner + stop button rendered over the commit textarea
 //! while the AI message generator is in flight.
 //!
 //! Pure render fn — no entity, no state. The caller (`CommitArea`)
@@ -31,7 +31,7 @@ use gpui_component::{
     Icon, Sizable as _,
     button::{Button, ButtonVariants as _},
 };
-use oximux_settings::Theme;
+use trex_settings::Theme;
 
 use crate::shell::source_control::style::ScmStyle;
 

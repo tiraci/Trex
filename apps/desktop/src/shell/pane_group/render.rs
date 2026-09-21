@@ -1,4 +1,4 @@
-//! Render for `PaneGroup`: per-leaf tab strip + active content area.
+﻿//! Render for `PaneGroup`: per-leaf tab strip + active content area.
 //!
 //! Layout: a horizontal tab strip at the top + the active tab's content
 //! filling the remainder. Each tab carries an icon (file vs terminal),
@@ -17,7 +17,7 @@ use gpui::{
     ParentElement, Pixels, Point, Render, ScrollWheelEvent, SharedString,
     StatefulInteractiveElement, Styled, Window, div, point, prelude::FluentBuilder, px, svg,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use super::sub_pane::TerminalSplitTree;
 use super::tab_drag::{TabDragPayload, TabDragPreview};
@@ -60,7 +60,7 @@ pub struct TabTokens<'a> {
 
 impl Render for PaneGroup {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         // Drag-cancel cleanup: chips' `on_drag_move` fires only while a
         // drag is live, so a press-Escape (or off-window release) leaves
         // the last hover state painted. Mirrors the body-level guard in
@@ -379,7 +379,7 @@ struct PaneGroupTabHeader {
     tab_idx: usize,
     label: SharedString,
     kind_marker: PaneTabKindMarker,
-    agent_status: Option<oximux_core::AgentStatus>,
+    agent_status: Option<trex_core::AgentStatus>,
     /// True when a terminal in this tab has a pending attention signal
     /// (unfocused-pane bell). Lights the tab chip so a background bell is
     /// visible even when its pane isn't shown.
@@ -427,7 +427,7 @@ struct TabAgent {
     /// Registry adapter slug for the brand glyph (`agent_icon`), or `""` when
     /// the agent isn't one with a dedicated icon (falls back to terminal).
     adapter_id: &'static str,
-    status: oximux_core::AgentStatus,
+    status: trex_core::AgentStatus,
 }
 
 /// Detect an agent in a *plain* terminal tab from the active view's process
@@ -448,15 +448,15 @@ fn detect_tab_agent(tab: &PaneGroupTab, cx: &App) -> Option<TabAgent> {
     };
     let view = tree.active_view()?.read(cx);
     let title = view.title();
-    let title_status = title.and_then(oximux_agents::classify_agent_title);
+    let title_status = title.and_then(trex_agents::classify_agent_title);
     let label = view
         .agent_process()
-        .or_else(|| title.and_then(oximux_agents::agent_label_from_title))?;
+        .or_else(|| title.and_then(trex_agents::agent_label_from_title))?;
     // A title-only reading still needs the title to have classified: a shell
     // sitting in a directory named after an agent is not one.
     let status = match (view.agent_process().is_some(), title_status) {
         (_, Some(status)) => status,
-        (true, None) => oximux_core::AgentStatus::Idle,
+        (true, None) => trex_core::AgentStatus::Idle,
         (false, None) => return None,
     };
     Some(TabAgent {
@@ -512,7 +512,7 @@ fn kind_marker(kind: &PaneGroupTabKind) -> PaneTabKindMarker {
     }
 }
 
-fn agent_status_for(kind: &PaneGroupTabKind) -> Option<oximux_core::AgentStatus> {
+fn agent_status_for(kind: &PaneGroupTabKind) -> Option<trex_core::AgentStatus> {
     if let PaneGroupTabKind::Agent { status_rx, .. } = kind {
         Some(status_rx.borrow().status.clone())
     } else {
@@ -1123,7 +1123,7 @@ fn render_tab_chip(
     visible_idx: usize,
     label: SharedString,
     marker: PaneTabKindMarker,
-    agent_status: Option<&oximux_core::AgentStatus>,
+    agent_status: Option<&trex_core::AgentStatus>,
     attention: bool,
     is_active: bool,
     is_focused: bool,

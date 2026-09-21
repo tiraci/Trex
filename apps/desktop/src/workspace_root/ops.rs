@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 use crate::shell::workspace::discovery::{UntrackedWorktree, reconcile};
 
@@ -169,7 +169,7 @@ impl WorkspaceRoot {
             Ok(handle) => handle,
             Err(_) => {
                 tracing::warn!(
-                    target: "oximux_app::workspace_root",
+                    target: "trex_app::workspace_root",
                     "no tokio runtime; worktree stats stay stale this round"
                 );
                 return;
@@ -187,7 +187,7 @@ impl WorkspaceRoot {
                 // A listing failure keeps the previous answer, like a stats
                 // hiccup does; the reconcile runs here, off the main thread,
                 // since it canonicalises every path it compares.
-                let untracked = oximux_git::list_worktrees_at(root)
+                let untracked = trex_git::list_worktrees_at(root)
                     .await
                     .ok()
                     .map(|on_disk| reconcile(&t.project_id, root, on_disk, &t.tracked));
@@ -264,7 +264,7 @@ impl WorkspaceRoot {
     /// whenever `ReloadCustomCommands` fires.
     pub(crate) fn reload_custom_commands(&self, cx: &mut Context<Self>) {
         // `load_for_project` gracefully no-ops a missing project-level
-        // `.oximux/commands.toml`, so passing a non-existent root is fine.
+        // `.trex/commands.toml`, so passing a non-existent root is fine.
         let project_root = self
             .active_project
             .as_ref()
@@ -409,7 +409,7 @@ impl WorkspaceRoot {
     /// Open Settings at the About pane — version, install paths, and every
     /// update control there is.
     ///
-    /// Where "About OxiMux" goes on both platforms. macOS has a standard About
+    /// Where "About TREX" goes on both platforms. macOS has a standard About
     /// panel of its own, populated from the bundle's Info.plist, and this is
     /// deliberately used instead: that panel can show a version and an icon and
     /// nothing else, while the question someone opens About to answer is
@@ -691,7 +691,7 @@ impl WorkspaceRoot {
                 let Some(panes) = root.active_project_panes() else {
                     return;
                 };
-                let scope = oximux_core::CombinedDiffScope::Branch {
+                let scope = trex_core::CombinedDiffScope::Branch {
                     base: ev.base.clone(),
                     head: ev.head.clone(),
                 };
@@ -717,7 +717,7 @@ impl WorkspaceRoot {
         // isn't meaningful there and `std::fs::rename` would fail anyway.
         if path.parent().is_none() {
             tracing::warn!(
-                target: "oximux_app::file_explorer",
+                target: "trex_app::file_explorer",
                 path = %path.display(),
                 "rename refused: path has no parent directory"
             );
@@ -790,7 +790,7 @@ impl WorkspaceRoot {
     /// re-focuses the existing diff tab rather than opening a duplicate.
     pub fn open_diff_in_active_pane(
         &self,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
         path: std::path::PathBuf,
         staged: bool,
         untracked: bool,
@@ -1117,7 +1117,7 @@ impl WorkspaceRoot {
     /// it for the lifetime of the source-control surface.
     pub(crate) fn build_on_open_diff_callback(
         weak: WeakEntity<Self>,
-        repo: oximux_git::Repository,
+        repo: trex_git::Repository,
     ) -> crate::shell::file_tree_view::OnOpenDiff {
         Arc::new(move |path, staged, untracked, window, cx| {
             let repo = repo.clone();
@@ -1225,7 +1225,7 @@ impl WorkspaceRoot {
     /// The lib-level session-capture helper uses it to persist the
     /// open-windows manifest without the binary crate reaching into
     /// `AppState`'s private fields.
-    pub(crate) fn settings_repo(&self) -> &oximux_storage::SettingsRepo {
+    pub(crate) fn settings_repo(&self) -> &trex_storage::SettingsRepo {
         &self.app_state.settings_repo
     }
 
@@ -1245,7 +1245,7 @@ impl WorkspaceRoot {
         model: Option<String>,
         effort: Option<String>,
         prompt: Option<String>,
-        resumption: oximux_core::SessionResumption,
+        resumption: trex_core::SessionResumption,
         // For an import-provider resume (OpenCode/Copilot/Pi): the verbatim
         // `(program, argv)` to spawn as a `Custom` PTY (its resume handle rides
         // in the argv). `None` for a native launch/resume.
@@ -1266,7 +1266,7 @@ impl WorkspaceRoot {
         // over the spawn. The global is unset until the settings layer seeds
         // it, in which case defaults are empty.
         let (model, mut extra_args, env, status_hooks_on) = {
-            let defaults = cx.try_global::<oximux_settings::AgentLaunchSettings>();
+            let defaults = cx.try_global::<trex_settings::AgentLaunchSettings>();
             let sel = profile.as_deref();
             (
                 model.or_else(|| defaults.and_then(|d| d.model_for_in(adapter_id, sel))),
@@ -1279,7 +1279,7 @@ impl WorkspaceRoot {
             )
         };
         // OSC-9999 status hooks (on by default; Settings → Agents toggle, or
-        // the OXIMUX_STATUS_HOOKS=1 env override): inject the `--settings`
+        // the trex_STATUS_HOOKS=1 env override): inject the `--settings`
         // hooks block so Claude Code emits the prompt + tool + lifecycle the
         // poll-loop scanner reads. Claude-only for now; no-op when disabled.
         if adapter_id == "claude-code" {
@@ -1614,7 +1614,7 @@ impl WorkspaceRoot {
         let density = self.density;
         let typography = self.typography.clone();
         // The torn-off PTY survives in the daemon, so its shell keeps the
-        // original OXIMUX_* env it was spawned with. The destination view
+        // original trex_* env it was spawned with. The destination view
         // gets a fresh identity under THIS window's workspace for future
         // persistence/respawn (carrying the source ids across windows is a
         // follow-up).
@@ -1725,7 +1725,7 @@ impl WorkspaceRoot {
     /// no longer pins the tab — the page is scope-driven, not active-driven.
     pub(crate) fn refresh_tasks_tab_for_active_project(
         &self,
-        _project: Option<oximux_core::Project>,
+        _project: Option<trex_core::Project>,
         cx: &mut Context<Self>,
     ) {
         let Some(panes) = self.active_project_panes() else {
@@ -1829,13 +1829,13 @@ async fn measure_worktree(target: &StatsTarget) -> Measured {
     // call git has, and joining it here is what the module docs ask of any new
     // per-worktree number: join this round rather than start another timer.
     let (numstat, ahead_behind, head_branch) = futures::future::join3(
-        oximux_git::diff_numstat_head(path),
-        oximux_git::ahead_behind_vs_base(
+        trex_git::diff_numstat_head(path),
+        trex_git::ahead_behind_vs_base(
             path,
             target.pinned_base.as_deref(),
             &target.default_branch,
         ),
-        oximux_git::head_branch(path),
+        trex_git::head_branch(path),
     )
     .await;
     // Any of the three failing to run is a hiccup, not a fact about the
@@ -1859,7 +1859,7 @@ async fn measure_worktree(target: &StatsTarget) -> Measured {
             .collect();
         names.sort();
         tracing::warn!(
-            target: "oximux_app::workspace_root",
+            target: "trex_app::workspace_root",
             worktree = %target.path,
             files = map.len(),
             added = counts.added,
@@ -1872,7 +1872,7 @@ async fn measure_worktree(target: &StatsTarget) -> Measured {
         );
     } else {
         tracing::debug!(
-            target: "oximux_app::workspace_root",
+            target: "trex_app::workspace_root",
             worktree = %target.path,
             files = map.len(),
             added = counts.added,

@@ -1,10 +1,10 @@
-import { StyleSheet, View } from 'react-native';
+﻿import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { checkStatus, checksSummary, type CheckStatus } from '@/native/forge';
-import type { CheckRun } from 'oximux-core';
+import type { CheckRun } from 'trex-core';
 
 const GLYPH: Record<CheckStatus, string> = {
   pass: '✓',

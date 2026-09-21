@@ -1,4 +1,4 @@
-//! The client session: the Register/Connect/AuthProve handshake and the one-shot
+﻿//! The client session: the Register/Connect/AuthProve handshake and the one-shot
 //! RPCs, driven over the `remote-proto` [`Transport`] seam. Pure Rust — the iroh
 //! transport is injected as one `Transport` impl, and the in-memory loopback
 //! drives the full-loop test against the real host dispatcher.
@@ -16,14 +16,14 @@ mod terminals;
 use std::sync::{Arc, Mutex};
 
 use futures::channel::oneshot;
-use oximux_agent_core::thread::{AskQuestion, ChatImage, PermissionDecision, QuestionAnswers};
-use oximux_remote_proto::messages::{
+use trex_agent_core::thread::{AskQuestion, ChatImage, PermissionDecision, QuestionAnswers};
+use trex_remote_proto::messages::{
     AnswerQuestionReq, CheckRunWire, ForgeItemDetailWire, ForgeItemKindWire, ForgeItemWire,
     ForgeStateWire, ProjectSummaryWire, RecurrenceV2Wire, RecurrenceWire, ResolvePermissionReq,
     ScheduleRunWire, ScheduleV2Wire, ScheduleWire, SendPromptReq, SessionInfoWire, SessionSummary, SessionTranscriptWire,
 };
-use oximux_remote_proto::proto::{Request, Response, RpcError, SessionChoices};
-use oximux_remote_proto::{HostEvent, Transport};
+use trex_remote_proto::proto::{Request, Response, RpcError, SessionChoices};
+use trex_remote_proto::{HostEvent, Transport};
 
 use crate::demux::{Demux, DemuxPump, EventStream, SessionsStream, TerminalStream, demux};
 use crate::error::SessionError;
@@ -404,7 +404,7 @@ impl RemoteSession {
     /// Callers that can decode this should prefer it — the v18 reply substitutes
     /// a stand-in recurrence for a cron schedule, which is fine to display and
     /// wrong to reason about. Gate on
-    /// [`SCHEDULE_CRON_MIN_VERSION`](oximux_remote_proto::proto::SCHEDULE_CRON_MIN_VERSION)
+    /// [`SCHEDULE_CRON_MIN_VERSION`](trex_remote_proto::proto::SCHEDULE_CRON_MIN_VERSION)
     /// before calling: an older host cannot decode the request frame at all.
     pub async fn list_schedules_v2(&self) -> Result<Vec<ScheduleV2Wire>> {
         match self.call(Request::ListSchedulesV2).await? {

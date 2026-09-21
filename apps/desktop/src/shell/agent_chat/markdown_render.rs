@@ -1,4 +1,4 @@
-//! Chat markdown: a parsed block tree becomes GPUI elements.
+﻿//! Chat markdown: a parsed block tree becomes GPUI elements.
 //!
 //! Pure and `cx`-free, like [`super::bubble`] — every function here is a
 //! function of the block, the theme and the typography, and nothing else. That
@@ -36,9 +36,9 @@ use gpui::{
     StrikethroughStyle, StyledText, UnderlineStyle, div, linear_color_stop, linear_gradient, px,
 };
 use gpui_component::clipboard::Clipboard;
-use oximux_markdown::{Block, BlockTree, InlineRun, InlineStyle, TableAlign, TopBlock};
-use oximux_settings::{Density, SyntaxPalette, Theme, Typography};
-use oximux_syntax::{HighlightKind, HighlightedDocument, LanguageId};
+use trex_markdown::{Block, BlockTree, InlineRun, InlineStyle, TableAlign, TopBlock};
+use trex_settings::{Density, SyntaxPalette, Theme, Typography};
+use trex_syntax::{HighlightKind, HighlightedDocument, LanguageId};
 
 use super::markdown_select::{ChatText, MatchBand, Selection, TextPart, match_ranges};
 use super::markdown_state::MdKey;
@@ -552,7 +552,7 @@ fn code_block(language: Option<&str>, code: &str, cx: &Ctx<'_>) -> AnyElement {
     // Detection is by fence tag only. There is no path here, and guessing from
     // content would make a fence's *language* — hence its language tag —
     // dependent on how much of it has streamed in so far.
-    let colors = oximux_syntax::detect(None, language, "").and_then(|lang| {
+    let colors = trex_syntax::detect(None, language, "").and_then(|lang| {
         let doc = cx.hl.colors(&lang, code);
         doc.map(|doc| (lang, doc))
     });
@@ -743,7 +743,7 @@ fn copy_button(id: ElementId, code: &str) -> impl IntoElement {
 /// Colors only. Nothing here sets a weight, a size or a family — the whole
 /// safety argument for late highlighting is that this function cannot change
 /// what the line already measured.
-fn code_line(line: &str, spans: &[oximux_syntax::HighlightSpan], palette: &SyntaxPalette) -> StyledText {
+fn code_line(line: &str, spans: &[trex_syntax::HighlightSpan], palette: &SyntaxPalette) -> StyledText {
     let text = StyledText::new(SharedString::from(line.to_string()));
     if spans.is_empty() {
         return text;
@@ -928,7 +928,7 @@ fn rule(style: &MarkdownStyle) -> AnyElement {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_markdown::parse_full;
+    use trex_markdown::parse_full;
 
     /// Scroll positions that are never asked to persist. Every fence in a test
     /// gets a fresh handle, which is all a test that never scrolls needs.
@@ -1037,8 +1037,8 @@ mod tests {
     #[test]
     fn fence_colors_do_not_change_the_line_count_or_its_height() {
         let code = "fn main() {\n    let x = 1;\n}\n";
-        let lang = oximux_syntax::detect(None, Some("rust"), "").expect("rust grammar");
-        let doc = Arc::new(oximux_syntax::highlight(&lang, code));
+        let lang = trex_syntax::detect(None, Some("rust"), "").expect("rust grammar");
+        let doc = Arc::new(trex_syntax::highlight(&lang, code));
         assert!(doc.span_count() > 0, "the fixture must actually highlight");
 
         // Same source, same line count, same fixed line height — the only
@@ -1055,7 +1055,7 @@ mod tests {
     #[test]
     fn a_span_off_a_character_boundary_is_dropped_not_panicked() {
         let line = "héllo";
-        let bad = vec![oximux_syntax::HighlightSpan {
+        let bad = vec![trex_syntax::HighlightSpan {
             // Byte 2 is the middle of `é`.
             range: 1..2,
             kind: HighlightKind::Keyword,

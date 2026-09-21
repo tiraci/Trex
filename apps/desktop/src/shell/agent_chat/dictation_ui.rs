@@ -1,7 +1,7 @@
-//! Composer-side dictation UI state + helpers.
+﻿//! Composer-side dictation UI state + helpers.
 //!
 //! The heavy lifting (capture, decode, model management) lives in
-//! `oximux-dictation` and the [`super::dictation_service`]; this module holds
+//! `trex-dictation` and the [`super::dictation_service`]; this module holds
 //! only the small UI state machine the composer renders and the pure text
 //! helpers (smart spacing, mm:ss) that are worth unit-testing on their own.
 

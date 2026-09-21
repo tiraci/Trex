@@ -1,12 +1,12 @@
-//! Integration tests for hunk-level stage operations on `Repository`:
+﻿//! Integration tests for hunk-level stage operations on `Repository`:
 //! `stage_hunks`, `unstage_hunks`, and the round-trip of `build_patch`
 //! through real `git apply --cached`. Tempdir + real `git` binary on PATH.
 
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_core::{DiffStatus, IndexStatus};
-use oximux_git::Repository;
+use trex_core::{DiffStatus, IndexStatus};
+use trex_git::Repository;
 use std::path::Path;
 
 #[tokio::test]

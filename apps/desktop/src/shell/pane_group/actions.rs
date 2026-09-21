@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 impl PaneGroup {
 
@@ -452,7 +452,7 @@ impl PaneGroup {
         self.open_agent_chat_tab(
             cwd,
             None,
-            oximux_agents::thread::ChatBackend::stream_json(),
+            trex_agents::thread::ChatBackend::stream_json(),
             None,
             window,
             cx,

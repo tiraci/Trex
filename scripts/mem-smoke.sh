@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 #
 # mem-smoke — the memory baseline every phase of the transcript/memory plan is
 # measured against.
@@ -11,12 +11,12 @@
 # What it measures, and what it deliberately does not
 # ---------------------------------------------------------------------------
 #
-# Five numbers, against a real `oximux serve` host driven by the real CLI:
+# Five numbers, against a real `TREX serve` host driven by the real CLI:
 #
 #   boot_baseline_kb        RSS at readiness, no sessions
 #   peak_retention_multiple growth right after the last reply / bytes streamed
 #   retention_multiple      growth at STEADY STATE / bytes streamed
-#   reopen_ms               `oximux transcript` wall time for a streamed session
+#   reopen_ms               `TREX transcript` wall time for a streamed session
 #   idle_delta_kb           steady state minus peak; NEGATIVE means released
 #
 # The two retention numbers are not redundant, and measuring only the first —
@@ -69,9 +69,9 @@
 # Knobs
 # ---------------------------------------------------------------------------
 #
-#   OXIMUX_MEM_CHATS          streamed sessions to create        (default 16)
-#   OXIMUX_MEM_CHUNKS         delta events per reply             (default 400)
-#   OXIMUX_MEM_CHUNK_BYTES    bytes per delta                    (default 1024)
+#   TREX_MEM_CHATS          streamed sessions to create        (default 16)
+#   TREX_MEM_CHUNKS         delta events per reply             (default 400)
+#   TREX_MEM_CHUNK_BYTES    bytes per delta                    (default 1024)
 #
 # The defaults are not arbitrary and should not be casually changed: they are
 # exactly the workload `docs/memory-plan.md` records its baseline against, so
@@ -84,15 +84,15 @@
 # a knob and every threshold and every recorded number below becomes
 # incomparable, which is worse than not measuring, because the numbers still
 # look like they mean something.
-#   OXIMUX_MEM_IDLE_SECONDS   idle window for the creep number   (default 60)
-#   OXIMUX_MEM_PROFILE        debug | release                    (default debug)
-#   OXIMUX_MEM_CLI            skip the build, use this binary
+#   TREX_MEM_IDLE_SECONDS   idle window for the creep number   (default 60)
+#   TREX_MEM_PROFILE        debug | release                    (default debug)
+#   TREX_MEM_CLI            skip the build, use this binary
 #
 # Thresholds (only consulted under --check; see "Variance" below):
 #
-#   OXIMUX_MEM_MAX_RETENTION_MULTIPLE   default 12    (steady state)
-#   OXIMUX_MEM_MAX_IDLE_GROWTH_KB       default 16384  (only positive counts)
-#   OXIMUX_MEM_MAX_REOPEN_MS            default 5000
+#   TREX_MEM_MAX_RETENTION_MULTIPLE   default 12    (steady state)
+#   TREX_MEM_MAX_IDLE_GROWTH_KB       default 16384  (only positive counts)
+#   TREX_MEM_MAX_REOPEN_MS            default 5000
 #
 # ---------------------------------------------------------------------------
 # Variance — read before tightening anything
@@ -121,15 +121,15 @@
 #
 set -euo pipefail
 
-CHATS="${OXIMUX_MEM_CHATS:-16}"
-CHUNKS="${OXIMUX_MEM_CHUNKS:-400}"
-CHUNK_BYTES="${OXIMUX_MEM_CHUNK_BYTES:-1024}"
-IDLE_SECONDS="${OXIMUX_MEM_IDLE_SECONDS:-60}"
-PROFILE="${OXIMUX_MEM_PROFILE:-debug}"
+CHATS="${TREX_MEM_CHATS:-16}"
+CHUNKS="${TREX_MEM_CHUNKS:-400}"
+CHUNK_BYTES="${TREX_MEM_CHUNK_BYTES:-1024}"
+IDLE_SECONDS="${TREX_MEM_IDLE_SECONDS:-60}"
+PROFILE="${TREX_MEM_PROFILE:-debug}"
 
-MAX_RETENTION="${OXIMUX_MEM_MAX_RETENTION_MULTIPLE:-12}"
-MAX_IDLE_GROWTH_KB="${OXIMUX_MEM_MAX_IDLE_GROWTH_KB:-16384}"
-MAX_REOPEN_MS="${OXIMUX_MEM_MAX_REOPEN_MS:-5000}"
+MAX_RETENTION="${TREX_MEM_MAX_RETENTION_MULTIPLE:-12}"
+MAX_IDLE_GROWTH_KB="${TREX_MEM_MAX_IDLE_GROWTH_KB:-16384}"
+MAX_REOPEN_MS="${TREX_MEM_MAX_REOPEN_MS:-5000}"
 
 CHECK=0
 JSON_OUT=""
@@ -183,16 +183,16 @@ fi
 # The binary under measurement
 # ---------------------------------------------------------------------------
 
-if [ -n "${OXIMUX_MEM_CLI:-}" ]; then
-    CLI="$OXIMUX_MEM_CLI"
+if [ -n "${TREX_MEM_CLI:-}" ]; then
+    CLI="$TREX_MEM_CLI"
 else
-    echo "building oximux-cli ($PROFILE) …" >&2
+    echo "building trex-cli ($PROFILE) …" >&2
     if [ "$PROFILE" = "release" ]; then
-        (cd "$REPO_ROOT" && cargo build --release -p oximux-cli >&2)
-        CLI="$REPO_ROOT/target/release/oximux-cli"
+        (cd "$REPO_ROOT" && cargo build --release -p trex-cli >&2)
+        CLI="$REPO_ROOT/target/release/trex-cli"
     else
-        (cd "$REPO_ROOT" && cargo build -p oximux-cli >&2)
-        CLI="$REPO_ROOT/target/debug/oximux-cli"
+        (cd "$REPO_ROOT" && cargo build -p trex-cli >&2)
+        CLI="$REPO_ROOT/target/debug/trex-cli"
     fi
 fi
 [ -x "$CLI" ] || { echo "no CLI binary at $CLI" >&2; exit 1; }
@@ -207,7 +207,7 @@ fi
 # most of that budget before the socket name is appended — and the bind failure
 # it produces is reported as "another host is already serving here", which sends
 # you looking for a process that does not exist. `/tmp` keeps it well clear.
-SCRATCH="/tmp/oximux-mem.$$"
+SCRATCH="/tmp/trex-mem.$$"
 mkdir -p "$SCRATCH/data" "$SCRATCH/shim" "$SCRATCH/cwd"
 SERVE_PID=""
 
@@ -230,9 +230,9 @@ REPORT="$SCRATCH/agent-report.txt"
 : >"$REPORT"
 
 export PATH="$SCRATCH/shim:$PATH"
-export OXIMUX_MEM_AGENT_CHUNKS="$CHUNKS"
-export OXIMUX_MEM_AGENT_CHUNK_BYTES="$CHUNK_BYTES"
-export OXIMUX_MEM_AGENT_REPORT="$REPORT"
+export TREX_MEM_AGENT_CHUNKS="$CHUNKS"
+export TREX_MEM_AGENT_CHUNK_BYTES="$CHUNK_BYTES"
+export TREX_MEM_AGENT_REPORT="$REPORT"
 
 cli() { "$CLI" --dir "$SCRATCH/data" --json "$@"; }
 
@@ -263,7 +263,7 @@ until [ -s "$SCRATCH/ready.json" ]; do
         exit 1
     fi
 done
-grep -q oximux_serve_ready "$SCRATCH/ready.json" || {
+grep -q TREX_serve_ready "$SCRATCH/ready.json" || {
     echo "readiness line is not the expected object: $(cat "$SCRATCH/ready.json")" >&2
     exit 1
 }

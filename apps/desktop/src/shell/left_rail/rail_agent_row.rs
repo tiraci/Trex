@@ -1,4 +1,4 @@
-//! Per-agent rail row + the per-workspace list it composes into.
+﻿//! Per-agent rail row + the per-workspace list it composes into.
 //!
 //! Today the rail shows one collapsed status per workspace. To list every
 //! agent under a workspace, the merge step (`session_merge`) produces one
@@ -7,8 +7,8 @@
 //! `agent_sessions.id` UUID. Phase 3's render reads `WorkspaceAgentList`.
 
 use gpui::SharedString;
-use oximux_agents::AgentStatusStream;
-use oximux_core::AgentStatus;
+use trex_agents::AgentStatusStream;
+use trex_core::AgentStatus;
 
 /// What a clickable rail row should focus. Tracked agent sessions focus by
 /// their DB UUID → runtime session mapping; ambient terminal agents focus by
@@ -68,7 +68,7 @@ pub struct RailAgentRow {
     /// step + last assistant message that drive the row's secondary text and the
     /// "finished a turn" (done check) indicator. `None` for tracked rows, which
     /// read the same fields live from `status_rx`.
-    pub ambient_detail: Option<oximux_core::SidebandDetail>,
+    pub ambient_detail: Option<trex_core::SidebandDetail>,
 }
 
 impl RailAgentRow {

@@ -1,4 +1,4 @@
-//! Maps ACP `SessionUpdate` notifications → the transport-agnostic
+﻿//! Maps ACP `SessionUpdate` notifications → the transport-agnostic
 //! [`ThreadEvent`] vocabulary the `ChatThread`/UI consume.
 //!
 //! Covered: assistant message + thought chunks (streamed as deltas — the ACP
@@ -768,11 +768,11 @@ mod tests {
             turn_diff: None,
         });
 
-        let mut thread = oximux_agent_core::thread::state::ChatThread::default();
+        let mut thread = trex_agent_core::thread::state::ChatThread::default();
         for ev in &events {
             thread.apply(ev);
         }
-        oximux_agent_core::thread::invariants::assert_holds("acp-settled-turn", &thread, true);
+        trex_agent_core::thread::invariants::assert_holds("acp-settled-turn", &thread, true);
     }
 
     /// Negative control: the same turn with the tool left in-flight MUST be
@@ -790,11 +790,11 @@ mod tests {
             is_error: false,
             turn_diff: None,
         });
-        let mut thread = oximux_agent_core::thread::state::ChatThread::default();
+        let mut thread = trex_agent_core::thread::state::ChatThread::default();
         for ev in &events {
             thread.apply(ev);
         }
-        let violations = oximux_agent_core::thread::invariants::check(&thread, true);
+        let violations = trex_agent_core::thread::invariants::check(&thread, true);
         assert_eq!(violations.len(), 1, "a spinner surviving the turn must be caught: {violations:?}");
     }
 

@@ -1,4 +1,4 @@
-//! Pure async orchestration for workspace create + delete flows + the
+﻿//! Pure async orchestration for workspace create + delete flows + the
 //! `WorkspaceRoot` extension `impl` that drives them from the dialog.
 //!
 //! The pure `create_workspace_with_rollback` helper lives outside
@@ -14,12 +14,12 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use gpui::{AppContext, Context, Entity, FocusHandle, Focusable, WeakEntity, Window};
-use oximux_core::{AgentAdapter, Project, Workspace};
+use trex_core::{AgentAdapter, Project, Workspace};
 
 use crate::shell::agent_presentation::AmbientAgent;
-use oximux_git::{Repository, derive_slug, validate_slug};
-use oximux_settings::{Density, ScriptKind, Theme, Typography};
-use oximux_storage::ProjectRepo;
+use trex_git::{Repository, derive_slug, validate_slug};
+use trex_settings::{Density, ScriptKind, Theme, Typography};
+use trex_storage::ProjectRepo;
 
 use crate::shell::left_rail::open_in;
 use crate::shell::left_rail::row_menu::{RowCapabilities, ScriptAvail};
@@ -144,14 +144,14 @@ pub(crate) fn build_add_project_dialog(
     cx.new(|cx| AddProjectDialog::new(theme, density, typography, project_repo, on_pick, cx))
 }
 
-// The worktree lifecycle itself lives in `oximux-worktree-ops`, so
-// `oximux serve` creates the same worktree this flow does rather than a
+// The worktree lifecycle itself lives in `trex-worktree-ops`, so
+// `TREX serve` creates the same worktree this flow does rather than a
 // second implementation of the same rollback ladder. Re-exported here
 // because this module is the desktop's door to it.
 use crate::shell::workspace::base_choice::BaseChoice;
 use crate::shell::workspace::discovery::UntrackedWorktree;
 use crate::shell::workspace::rail_data::{gather_rail_db_data, workspaces_with_primary_for};
-pub use oximux_worktree_ops::{
+pub use trex_worktree_ops::{
     CreateBase, CreateOutcome, HostDerivedLocator, LocateError, Provision, ProvisionEvent,
     SetupTranscript, WorktreeLocator, create_workspace_with_rollback, provisioning_marker,
     run_cleanup_before_remove,
@@ -204,7 +204,7 @@ pub(crate) fn is_primary_row(workspace: &Workspace, project_root: &str) -> bool 
 }
 
 /// What a delete will do to the row's branch, in the dialog's words. The
-/// delete only removes a branch OxiMux minted (`Workspace::branch_minted`);
+/// delete only removes a branch TREX minted (`Workspace::branch_minted`);
 /// an adopted or pre-existing branch stays, and the dialog must say so — a
 /// user reading "deletes branch X" over a branch that survives, or vice
 /// versa, has been told the wrong thing about a destructive act.
@@ -216,7 +216,7 @@ fn delete_prompt_body(workspace: &Workspace) -> String {
         )
     } else {
         format!(
-            "Removes the worktree at {}. Branch {} stays: OxiMux did not create it. This cannot be undone.",
+            "Removes the worktree at {}. Branch {} stays: TREX did not create it. This cannot be undone.",
             workspace.worktree_path, workspace.branch
         )
     }
@@ -231,7 +231,7 @@ fn force_delete_prompt_body(workspace: &Workspace) -> String {
         )
     } else {
         format!(
-            "The worktree at {} could not be removed normally. Force delete removes the workspace entry anyway and force-removes the worktree; branch {} stays, since OxiMux did not create it. Anything that still fails is reported and left on disk.",
+            "The worktree at {} could not be removed normally. Force delete removes the workspace entry anyway and force-removes the worktree; branch {} stays, since TREX did not create it. Anything that still fails is reported and left on disk.",
             workspace.worktree_path, workspace.branch
         )
     }
@@ -287,7 +287,7 @@ pub enum ChatWorktreeOutcome {
 
 /// Resolve the static adapter slug used by `start_session` for each
 /// built-in agent variant. Inline match — KISS over adding a
-/// method to `oximux-core`.
+/// method to `trex-core`.
 fn agent_adapter_id(kind: AgentAdapter) -> &'static str {
     crate::app_settings::last_agent::adapter_id(kind)
 }
@@ -679,7 +679,7 @@ impl WorkspaceRoot {
         // project self-corrects on its own next render.
         self.hide_inactive_project_terminals(&project.id, cx);
         // Reload custom commands for the new project so the palette reflects
-        // the incoming project's `.oximux/commands.toml` immediately.
+        // the incoming project's `.trex/commands.toml` immediately.
         self.reload_custom_commands(cx);
         // Drop the Quick Open file index so the next open re-scans the new
         // project (prevents the previous project's files leaking through).
@@ -755,7 +755,7 @@ impl WorkspaceRoot {
             // (Source Control + Explorer + Search) or without (Explorer +
             // Search only). The Explorer + Search tabs always work from
             // `root_path` regardless of git status.
-            let opened = oximux_git::Repository::open(&project_root).await;
+            let opened = trex_git::Repository::open(&project_root).await;
             let repo = match opened {
                 Ok(r) => Some(r),
                 Err(err) => {
@@ -1023,7 +1023,7 @@ impl WorkspaceRoot {
     /// (tab closed since) does nothing.
     pub(crate) fn navigate_to_terminal_session(
         &mut self,
-        session: oximux_pty::TerminalSessionId,
+        session: trex_pty::TerminalSessionId,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -1288,7 +1288,7 @@ impl WorkspaceRoot {
     pub(crate) fn default_agent_for_create(&self, cx: &gpui::App) -> Option<AgentAdapter> {
         let last = crate::app_settings::last_agent::load(&self.app_state.settings_repo);
         let launch_default = cx
-            .try_global::<oximux_settings::AgentLaunchSettings>()
+            .try_global::<trex_settings::AgentLaunchSettings>()
             .map(|s| s.default_agent.clone())
             .unwrap_or_default();
         crate::app_settings::last_agent::resolve_default(last, &launch_default)
@@ -1298,7 +1298,7 @@ impl WorkspaceRoot {
     /// Closes any other overlays first so backdrops don't compete.
     pub(crate) fn open_row_menu(
         &mut self,
-        workspace: oximux_core::Workspace,
+        workspace: trex_core::Workspace,
         x: f32,
         y: f32,
         cx: &mut Context<Self>,
@@ -1306,7 +1306,7 @@ impl WorkspaceRoot {
         self.close_modal_overlays(cx);
         // Load lifecycle scripts so the menu only surfaces Run-* rows for
         // scripts the project actually defines. The worktree carries the
-        // committed `.oximux/scripts.toml`, so load from its path.
+        // committed `.trex/scripts.toml`, so load from its path.
         // `run_workspace_script` re-reads the file on click so an edit made
         // while the menu was open is still respected.
         let scripts =
@@ -1451,7 +1451,7 @@ impl WorkspaceRoot {
     /// compete.
     pub(crate) fn open_project_menu(
         &mut self,
-        project: oximux_core::Project,
+        project: trex_core::Project,
         x: f32,
         y: f32,
         cx: &mut Context<Self>,
@@ -1757,11 +1757,11 @@ impl WorkspaceRoot {
     pub(crate) fn note_agent_sideband(
         &mut self,
         workspace_key: &str,
-        status: &oximux_core::AgentStatus,
-        detail: Option<oximux_core::SidebandDetail>,
+        status: &trex_core::AgentStatus,
+        detail: Option<trex_core::SidebandDetail>,
         cx: &mut Context<Self>,
     ) {
-        let next = if matches!(status, oximux_core::AgentStatus::Running) {
+        let next = if matches!(status, trex_core::AgentStatus::Running) {
             detail.filter(|d| d.tool_name.is_some() || d.last_message.is_some())
         } else {
             None
@@ -1848,7 +1848,7 @@ impl WorkspaceRoot {
         // Per-request override for the project's `setup` script. `Inherit` —
         // every caller but the create dialog — defers to the project's
         // committed `auto_setup`.
-        setup_decision: oximux_settings::SetupDecision,
+        setup_decision: trex_settings::SetupDecision,
         // What the worktree is cut from. The create dialog passes the user's
         // **From** selection; every other caller passes the default, which is
         // a new branch based on the project's default branch.
@@ -2066,7 +2066,7 @@ impl WorkspaceRoot {
                                 None,
                                 None,
                                 agent_prompt.clone(),
-                                oximux_core::SessionResumption::None,
+                                trex_core::SessionResumption::None,
                                 None,
                                 // The create dialog offers no profile picker —
                                 // an auto-spawn takes the adapter's default.
@@ -2117,7 +2117,7 @@ impl WorkspaceRoot {
                                         title.into(),
                                         // No command: a declared tab is a shell
                                         // to work in, not a script to run. The
-                                        // scripts are `.oximux/scripts.toml`.
+                                        // scripts are `.trex/scripts.toml`.
                                         "",
                                         window,
                                         cx,
@@ -2589,7 +2589,7 @@ impl WorkspaceRoot {
     /// The row menu's `Move to Status ▸`: write a worktree's phase, or clear
     /// it with `None`.
     ///
-    /// Same vocabulary and same store as `oximux worktree set --phase`: the
+    /// Same vocabulary and same store as `TREX worktree set --phase`: the
     /// picker offers `WorkPhase::ALL` and writes each value's canonical
     /// spelling, which is exactly what the CLI normalises typed input to.
     /// There is no second validator because a `WorkPhase` cannot hold
@@ -2602,7 +2602,7 @@ impl WorkspaceRoot {
     pub(crate) fn set_workspace_phase(
         &mut self,
         workspace_id: &str,
-        phase: Option<oximux_core::WorkPhase>,
+        phase: Option<trex_core::WorkPhase>,
         cx: &mut Context<Self>,
     ) {
         let stored = phase.map(|p| p.as_str()).unwrap_or("");
@@ -2658,7 +2658,7 @@ impl WorkspaceRoot {
         cx: &mut Context<Self>,
     ) {
         let mut settings = cx
-            .try_global::<oximux_settings::ComputerUseSettings>()
+            .try_global::<trex_settings::ComputerUseSettings>()
             .cloned()
             .unwrap_or_default();
         let root = std::path::Path::new(&project.root_path);
@@ -2746,7 +2746,7 @@ impl WorkspaceRoot {
         let prompt = ConfirmPrompt {
             title: "Remove Project".into(),
             body: format!(
-                "Removes {} from OxiMux and forgets its workspaces. Files on disk are not deleted.",
+                "Removes {} from TREX and forgets its workspaces. Files on disk are not deleted.",
                 project.name
             )
             .into(),
@@ -2787,7 +2787,7 @@ mod nav_history_tests {
         workspace_delete_target,
         workspace_path_for_ambient_terminal,
     };
-    use oximux_core::{Project, Workspace};
+    use trex_core::{Project, Workspace};
     use std::collections::HashMap;
 
     fn r(id: &str) -> WorkspaceNavRef {
@@ -2801,7 +2801,7 @@ mod nav_history_tests {
         Workspace {
             id: id.to_string(),
             project_id: "p".to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: id.to_string(),
@@ -2836,7 +2836,7 @@ mod nav_history_tests {
         Workspace {
             id: format!("ws-{project_id}"),
             project_id: project_id.to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: "w".to_string(),
@@ -2887,7 +2887,7 @@ mod nav_history_tests {
         // An ordinary worktree row is not.
         let ordinary = Workspace {
             worktree_path: "/repos/api-wt/fix".into(),
-            ..workspace_in("api", "oximux/fix")
+            ..workspace_in("api", "TREX/fix")
         };
         assert!(!is_primary_row(&ordinary, "/repos/api"));
     }
@@ -2899,7 +2899,7 @@ mod nav_history_tests {
         // `web` is first — an "active project" fallback would pick it.
         let open = vec![web.clone(), api.clone()];
 
-        let row = workspace_in("api", "oximux/api-fix");
+        let row = workspace_in("api", "TREX/api-fix");
         let target = workspace_delete_target(&open, &row).expect("delete target");
         assert_eq!(
             target.project_root,
@@ -2913,7 +2913,7 @@ mod nav_history_tests {
         );
         // The branch that `git branch -D` would take on the force retry, and
         // the directory `remove_worktree` would take, both come from the row.
-        assert_eq!(target.branch, "oximux/api-fix");
+        assert_eq!(target.branch, "TREX/api-fix");
         assert_eq!(
             target.worktree_path,
             std::path::PathBuf::from("/wt/api")
@@ -2929,7 +2929,7 @@ mod nav_history_tests {
     #[test]
     fn unknown_project_yields_no_delete_target_rather_than_a_fallback() {
         let open = vec![project("web", "/repos/web")];
-        let orphan = workspace_in("api", "oximux/api-fix");
+        let orphan = workspace_in("api", "TREX/api-fix");
         assert!(workspace_delete_target(&open, &orphan).is_none());
         assert!(resolve_project_for_workspace(&open, &orphan).is_none());
     }
@@ -3042,7 +3042,7 @@ mod delete_prompt_tests {
         }
     }
 
-    /// The dialog tells the truth about the branch: deleted only when OxiMux
+    /// The dialog tells the truth about the branch: deleted only when TREX
     /// minted it, kept — and said to be kept — for an adopted one.
     #[test]
     fn the_delete_dialog_names_the_branch_outcome_correctly() {

@@ -1,9 +1,9 @@
-//! `oximux send` — a prompt into an existing session. Accepted ≠ finished:
+﻿//! `TREX send` — a prompt into an existing session. Accepted ≠ finished:
 //! the Ack means the host took the prompt (queueing mid-turn is normal); the
 //! default mode then streams the turn, `--no-wait` returns immediately.
 
-use oximux_remote_proto::messages::SendPromptReq;
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::messages::SendPromptReq;
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use super::attach::{Stop, StreamEnd, StreamOpts, stream_session};
@@ -85,7 +85,7 @@ pub async fn run(
     if no_wait {
         return Ok((
             base,
-            format!("accepted — watch with `oximux attach {session}` or `oximux wait {session} --until done`"),
+            format!("accepted — watch with `TREX attach {session}` or `TREX wait {session} --until done`"),
         ));
     }
     let opts = StreamOpts {

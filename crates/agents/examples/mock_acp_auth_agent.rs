@@ -1,12 +1,12 @@
-//! A deterministic mock ACP **agent** that requires authentication — for
-//! verifying OxiMux's auth flow: the client must surface the advertised methods,
+﻿//! A deterministic mock ACP **agent** that requires authentication — for
+//! verifying TREX's auth flow: the client must surface the advertised methods,
 //! call `authenticate`, and retry the session open on the same connection.
 //!
 //! It advertises one `agent`-kind auth method at `initialize` and fails
 //! `session/new` with `AuthRequired` (-32000) until `authenticate` is called;
 //! after that, `session/new` succeeds. The companion `acp_auth_smoke` drives it.
 //!
-//! Build:  `cargo build -p oximux-agents --example mock_acp_auth_agent`
+//! Build:  `cargo build -p trex-agents --example mock_acp_auth_agent`
 //! Binary: `target/debug/examples/mock_acp_auth_agent`
 
 use std::sync::Arc;

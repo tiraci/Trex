@@ -1,4 +1,4 @@
-//! One-shot tab-title generation for a chat's first message.
+﻿//! One-shot tab-title generation for a chat's first message.
 //!
 //! Split out of `mod.rs` — which sits at the `xtask file-size-lint` ratchet —
 //! as its own concern: the spawn, the tokio bridge, and the two events the
@@ -17,7 +17,7 @@ impl AgentChatView {
     /// process needing a tokio reactor, so it's handed to the tokio runtime and
     /// bridged back via a oneshot (the proven `source_control::ai_generation`
     /// pattern); a bounded timeout + `kill_on_drop` cap any lingering child
-    /// (see `oximux_agents::tab_title` for the cap and why it is what it is).
+    /// (see `trex_agents::tab_title` for the cap and why it is what it is).
     /// Any failure (missing `claude`, timeout, non-JSON reply) silently keeps the
     /// counter label. On success the result rides the existing, already-safe
     /// `TitleChanged` sink (a manual rename still wins in the header render) and,
@@ -32,7 +32,7 @@ impl AgentChatView {
             let (tx, rx) = tokio::sync::oneshot::channel();
             let cancel = Arc::new(std::sync::atomic::AtomicBool::new(false));
             handle.spawn(async move {
-                let title = oximux_agents::tab_title::generate_title(&first_message, &cwd, cancel).await;
+                let title = trex_agents::tab_title::generate_title(&first_message, &cwd, cancel).await;
                 let _ = tx.send(title);
             });
             if let Ok(Some(title)) = rx.await {

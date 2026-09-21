@@ -1,11 +1,11 @@
-//! Hook-driven status for agents in *plain* terminals.
+﻿//! Hook-driven status for agents in *plain* terminals.
 //!
 //! A spawned/tracked agent tab runs a full `AgentRuntime` whose poll loop reads
 //! the PTY, decodes the OSC-9999 status sideband, and publishes rich status. A
 //! hand-typed `claude`/`codex`/… in an ordinary terminal has no such runtime —
 //! historically the sidebar could only guess its state from the OSC *title*
-//! glyphs, which are coarse and flap. But OxiMux's global hooks already emit
-//! the same OSC-9999 packets (keyed by `OXIMUX_PTY_ID`) onto that terminal's
+//! glyphs, which are coarse and flap. But TREX's global hooks already emit
+//! the same OSC-9999 packets (keyed by `trex_PTY_ID`) onto that terminal's
 //! output stream; nothing was consuming them.
 //!
 //! [`AmbientAgentScan`] consumes them. The terminal view feeds it each output
@@ -20,8 +20,8 @@
 
 use std::time::{Duration, Instant};
 
-use oximux_agents::osc_sideband::{AgentOscScanner, map_state_to_status};
-use oximux_core::{AgentStatus, SidebandDetail};
+use trex_agents::osc_sideband::{AgentOscScanner, map_state_to_status};
+use trex_core::{AgentStatus, SidebandDetail};
 
 /// Six-byte OSC-9999 introducer (`ESC ] 9 9 9 9`). A chunk without it — and
 /// with no sequence mid-parse — cannot complete a sideband event, so the
@@ -87,7 +87,7 @@ impl AmbientAgentScan {
 
     fn apply(
         &mut self,
-        state: oximux_core::AgentSidebandState,
+        state: trex_core::AgentSidebandState,
         mut detail: SidebandDetail,
         now: Instant,
     ) {
@@ -111,7 +111,7 @@ impl AmbientAgentScan {
         let status = map_state_to_status(state, detail.tool_name.clone());
         // The one link in the global-hook → relay → plain-terminal path that
         // can't be unit-tested (needs a live hand-typed agent emitting to this
-        // PTY). `RUST_LOG=oximux_app=debug` surfaces it for live verification.
+        // PTY). `RUST_LOG=trex_app=debug` surfaces it for live verification.
         tracing::debug!(
             ?status,
             tool = ?detail.tool_name,

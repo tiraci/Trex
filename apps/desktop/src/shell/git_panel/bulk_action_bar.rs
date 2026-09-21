@@ -1,4 +1,4 @@
-//! Floating bulk-action bar for the multi-select SCM panel.
+﻿//! Floating bulk-action bar for the multi-select SCM panel.
 //!
 //! Renders below the changed-files scroll body when at least one row
 //! is selected. The bar floats over the bottom of the panel (absolute
@@ -21,7 +21,7 @@ use gpui_component::{
     Disableable, Icon, Sizable as _,
     button::{Button, ButtonVariants as _},
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Pixel size of the action-button icons. Matches `row_actions::ACTION_BTN_W`
 /// so the bar feels consistent with the per-row hover cluster.

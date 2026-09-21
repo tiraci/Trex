@@ -1,5 +1,5 @@
-//! Renaming a workspace from the desktop: the host half of
-//! `oximux-worktree-ops::rename`.
+﻿//! Renaming a workspace from the desktop: the host half of
+//! `trex-worktree-ops::rename`.
 //!
 //! The crate owns the ordering and the undo; this owns everything the crate
 //! deliberately refuses to guess at — which directories have something running
@@ -14,7 +14,7 @@
 use std::path::{Path, PathBuf};
 
 use gpui::{Context, WeakEntity, Window};
-use oximux_core::Workspace;
+use trex_core::Workspace;
 
 use crate::shell::confirm_dialog::{ConfirmCallback, ConfirmPrompt};
 use crate::shell::workspace::workspace_ops::resolve_project_for_workspace;
@@ -30,7 +30,7 @@ use crate::workspace_root::WorkspaceRoot;
 ///
 /// Returns the number of keys rewritten.
 pub fn repoint_persisted_tabs_in(
-    repo: &oximux_storage::SettingsRepo,
+    repo: &trex_storage::SettingsRepo,
     project_id: &str,
     old_root: &str,
     new_root: &str,
@@ -79,7 +79,7 @@ pub fn repoint_persisted_tabs_in(
 
 /// Whether `slug` is a faithful rendering of `name`, or a degraded stand-in.
 ///
-/// [`derive_slug`](oximux_git::derive_slug) never fails: a name with no
+/// [`derive_slug`](trex_git::derive_slug) never fails: a name with no
 /// `[a-z0-9]` in it becomes the literal `"workspace"`, and a long one is
 /// truncated at a word boundary. That is right for *creation*, where the user
 /// is watching a slug field and can correct it — but a rename now rewrites a
@@ -97,7 +97,7 @@ fn slug_degradation(name: &str, slug: &str, current_branch: &str) -> Option<Stri
     // The literal fallback, reached only when nothing in the name survived
     // normalisation. A user who genuinely typed "workspace" is unaffected: the
     // slug is then a faithful rendering, not a stand-in.
-    if slug == "workspace" && oximux_git::derive_slug("workspace") == slug {
+    if slug == "workspace" && trex_git::derive_slug("workspace") == slug {
         let has_usable = name
             .bytes()
             .any(|b| b.to_ascii_lowercase().is_ascii_lowercase() || b.is_ascii_digit());
@@ -114,8 +114,8 @@ fn slug_degradation(name: &str, slug: &str, current_branch: &str) -> Option<Stri
         .count();
     let kept = slug.bytes().filter(|b| b.is_ascii_alphanumeric()).count();
     if full > kept {
-        let would_be = oximux_worktree_ops::branch_name::branch_name(
-            oximux_worktree_ops::branch_name::split_prefix(current_branch),
+        let would_be = trex_worktree_ops::branch_name::branch_name(
+            trex_worktree_ops::branch_name::split_prefix(current_branch),
             slug,
         );
         return Some(format!(
@@ -131,7 +131,7 @@ fn slug_degradation(name: &str, slug: &str, current_branch: &str) -> Option<Stri
 /// Keeps the directory's existing naming SHAPE rather than replacing the whole
 /// final component with the new slug: rows created before the configured
 /// worktree root existed name their directories differently (`<slug>` under
-/// the data dir, `oximux-wt-<slug>` beside the repo), and a rename should not
+/// the data dir, `trex-wt-<slug>` beside the repo), and a rename should not
 /// silently re-shape one into another. Only the slug inside the name is
 /// swapped; a directory whose name does not contain the old slug falls back to
 /// the plain new slug.
@@ -219,7 +219,7 @@ impl WorkspaceRoot {
             );
             return;
         };
-        let new_slug = oximux_git::derive_slug(&new_name);
+        let new_slug = trex_git::derive_slug(&new_name);
         // `derive_slug` cannot fail, so without this the branch would be
         // rewritten to something the user never typed and never saw. Refuse
         // instead — the dialog still offers the label-only rename, which is
@@ -228,7 +228,7 @@ impl WorkspaceRoot {
             self.open_rename_refusal_dialog(
                 workspace,
                 new_name,
-                oximux_worktree_ops::RenameRefusal::InvalidSlug { reason },
+                trex_worktree_ops::RenameRefusal::InvalidSlug { reason },
                 window,
                 cx,
             );
@@ -257,7 +257,7 @@ impl WorkspaceRoot {
             // rollback to catch. This second read is the last moment one is
             // possible; `rename_with_rollback` is for hosts that have no live
             // panes and can guarantee that cannot happen.
-            let outcome = match oximux_worktree_ops::preflight_rename(
+            let outcome = match trex_worktree_ops::preflight_rename(
                 &project_root,
                 &ws,
                 &new_slug,
@@ -266,7 +266,7 @@ impl WorkspaceRoot {
             )
             .await
             {
-                Err(refusal) => oximux_worktree_ops::RenameOutcome::Refused(refusal),
+                Err(refusal) => trex_worktree_ops::RenameOutcome::Refused(refusal),
                 Ok(plan) => {
                     // `rename_holders` reads live entity state, so it is
                     // main-thread only — hence the hop back out before the
@@ -276,7 +276,7 @@ impl WorkspaceRoot {
                     else {
                         return;
                     };
-                    oximux_worktree_ops::apply_rename(
+                    trex_worktree_ops::apply_rename(
                         &project_root,
                         &ws,
                         &name_for_task,
@@ -305,11 +305,11 @@ impl WorkspaceRoot {
         new_name: String,
         old_path: PathBuf,
         new_path: PathBuf,
-        outcome: oximux_worktree_ops::RenameOutcome,
+        outcome: trex_worktree_ops::RenameOutcome,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
-        use oximux_worktree_ops::RenameOutcome;
+        use trex_worktree_ops::RenameOutcome;
         match outcome {
             RenameOutcome::Renamed(_) => {
                 // The directory moved, so every persisted pane row that named
@@ -357,7 +357,7 @@ impl WorkspaceRoot {
         &mut self,
         workspace: Workspace,
         new_name: String,
-        refusal: oximux_worktree_ops::RenameRefusal,
+        refusal: trex_worktree_ops::RenameRefusal,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -462,11 +462,11 @@ mod tests {
         // Chat-created: the slug is embedded in a prefixed name, which survives.
         assert_eq!(
             renamed_worktree_dir(
-                std::path::Path::new("/repos/oximux-wt-fix-lgoin"),
+                std::path::Path::new("/repos/trex-wt-fix-lgoin"),
                 "fix-lgoin",
                 "fix-login",
             ),
-            std::path::PathBuf::from("/repos/oximux-wt-fix-login"),
+            std::path::PathBuf::from("/repos/trex-wt-fix-login"),
         );
     }
 
@@ -498,18 +498,18 @@ mod tests {
     /// silently turns into something else must be refused rather than applied.
     #[test]
     fn a_name_with_nothing_usable_in_it_is_reported_as_degraded() {
-        let slug = oximux_git::derive_slug("!!!");
+        let slug = trex_git::derive_slug("!!!");
         assert_eq!(slug, "workspace", "precondition: the silent fallback");
-        let reason = slug_degradation("!!!", &slug, "oximux/old").expect("must be refused");
+        let reason = slug_degradation("!!!", &slug, "TREX/old").expect("must be refused");
         assert!(reason.contains("no letters or digits"), "got {reason}");
     }
 
     /// Someone who genuinely types "workspace" is not degrading anything.
     #[test]
     fn the_literal_name_workspace_is_not_a_degradation() {
-        let slug = oximux_git::derive_slug("workspace");
+        let slug = trex_git::derive_slug("workspace");
         assert_eq!(slug, "workspace");
-        assert!(slug_degradation("workspace", &slug, "oximux/old").is_none());
+        assert!(slug_degradation("workspace", &slug, "TREX/old").is_none());
     }
 
     /// Truncation is the quieter half: the branch simply stops matching what
@@ -517,23 +517,23 @@ mod tests {
     #[test]
     fn a_name_too_long_for_a_branch_is_reported_as_degraded() {
         let long = "a-very-long-workspace-name-that-keeps-going-and-going-well-past-the-cap";
-        let slug = oximux_git::derive_slug(long);
+        let slug = trex_git::derive_slug(long);
         assert!(slug.len() < long.len(), "precondition: it truncates");
-        let reason = slug_degradation(long, &slug, "nhtera/old").expect("must be refused");
+        let reason = slug_degradation(long, &slug, "tiraci/old").expect("must be refused");
         assert!(reason.contains("too long"), "got {reason}");
         // The message must name the branch this rename would ACTUALLY produce.
-        // Rename keeps the row's own prefix, so a row on `nhtera/` must not be
-        // told its branch would become `oximux/…` — the message hardcoded that
+        // Rename keeps the row's own prefix, so a row on `tiraci/` must not be
+        // told its branch would become `TREX/…` — the message hardcoded that
         // prefix until CodeRabbit caught it on the phase-5 PR.
-        assert!(reason.contains("nhtera/"), "must keep the row's prefix: {reason}");
-        assert!(!reason.contains("oximux/"), "must not hardcode a prefix: {reason}");
+        assert!(reason.contains("tiraci/"), "must keep the row's prefix: {reason}");
+        assert!(!reason.contains("TREX/"), "must not hardcode a prefix: {reason}");
     }
 
     /// A prefix-less row must be named without a stray leading slash.
     #[test]
     fn a_truncated_name_on_an_unprefixed_branch_names_the_bare_slug() {
         let long = "a-very-long-workspace-name-that-keeps-going-and-going-well-past-the-cap";
-        let slug = oximux_git::derive_slug(long);
+        let slug = trex_git::derive_slug(long);
         let reason = slug_degradation(long, &slug, "old").expect("must be refused");
         assert!(reason.contains(&slug), "got {reason}");
         assert!(!reason.contains('/'), "no prefix means no slash: {reason}");
@@ -544,9 +544,9 @@ mod tests {
     #[test]
     fn an_ordinary_name_is_not_degraded() {
         for name in ["fix login", "Fix Login!", "issue-42", "fix_login"] {
-            let slug = oximux_git::derive_slug(name);
+            let slug = trex_git::derive_slug(name);
             assert!(
-                slug_degradation(name, &slug, "oximux/old").is_none(),
+                slug_degradation(name, &slug, "TREX/old").is_none(),
                 "{name} -> {slug} should be accepted"
             );
         }

@@ -1,9 +1,9 @@
-//! Construct `SearchPanel` and exercise its toggle/cancellation paths without
+﻿//! Construct `SearchPanel` and exercise its toggle/cancellation paths without
 //! actually shelling out to ripgrep.
 
 use gpui::TestAppContext;
-use oximux_app::shell::search_panel::SearchPanel;
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::search_panel::SearchPanel;
+use trex_settings::{Density, Theme, Typography};
 
 fn setup() -> (tokio::runtime::Runtime, tempfile::TempDir) {
     let rt = tokio::runtime::Builder::new_current_thread()

@@ -1,4 +1,4 @@
-//! File-tree right-click context menu.
+﻿//! File-tree right-click context menu.
 //!
 //! Three open modes, one shared entity owned by `WorkspaceRoot`:
 //! - **Row (file)** — full menu: Open / Open to the Side / New File /
@@ -19,7 +19,7 @@ use gpui::{
     ClipboardItem, Context, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
     ParentElement, Render, Styled, Window, div, px,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -110,7 +110,7 @@ impl FileTreeContextMenu {
 
 impl Render for FileTreeContextMenu {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

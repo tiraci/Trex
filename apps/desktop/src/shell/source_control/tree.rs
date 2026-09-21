@@ -1,4 +1,4 @@
-//! Tree representation for the SCM panel's Tree-view mode.
+﻿//! Tree representation for the SCM panel's Tree-view mode.
 //!
 //! Pure data: takes a section's slice of [`FileStatus`], builds a trie
 //! keyed by path components, computes per-folder dominant-status rollup,
@@ -12,7 +12,7 @@
 //! and its badge is suppressed (otherwise every freshly-removed module
 //! would surface a misleading red D badge on its ancestors).
 
-use oximux_core::{FileStatus, IndexStatus, WorktreeStatus};
+use trex_core::{FileStatus, IndexStatus, WorktreeStatus};
 use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 
@@ -305,7 +305,7 @@ fn find_dir<'a>(tree: &'a TreeNode, target: &Path) -> Option<&'a TreeNode> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::FileStatus;
+    use trex_core::FileStatus;
 
     fn modified(path: &str) -> FileStatus {
         FileStatus::with_status(
@@ -528,7 +528,7 @@ mod tests {
     #[test]
     fn conflict_outranks_modified_in_rollup() {
         let mut conflict = modified("dir/conflict.rs");
-        conflict.conflict_kind = Some(oximux_core::ConflictKind::BothModified);
+        conflict.conflict_kind = Some(trex_core::ConflictKind::BothModified);
         let files = vec![modified("dir/plain.rs"), conflict];
         let tree = build_tree(&files, TreeSection::Unstaged);
         assert_eq!(

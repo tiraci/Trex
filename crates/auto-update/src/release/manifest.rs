@@ -1,4 +1,4 @@
-//! The release manifest: what versions exist and what their artifacts hash to.
+﻿//! The release manifest: what versions exist and what their artifacts hash to.
 //!
 //! The manifest is the *only* thing signed. Everything downstream — which
 //! archive to fetch, what it must hash to, how big it may be — is read out of
@@ -39,7 +39,7 @@ pub struct Manifest {
     /// Optional, and absent in every manifest published before the desktop app
     /// could update itself. That is deliberately not a schema bump: a v1 parser
     /// ignores a field it does not know, so bumping would strand every already-
-    /// released client on "install a newer oximux to update further" for a
+    /// released client on "install a newer TREX to update further" for a
     /// field that changes nothing about how the CLI verifies its own archive.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub apps: BTreeMap<String, Asset>,
@@ -75,7 +75,7 @@ impl std::fmt::Display for ManifestError {
             Self::UnknownSchema { found } => write!(
                 f,
                 "the release manifest declares schema {found}, and this build only understands \
-                 {SCHEMA_VERSION} — install a newer oximux to update further"
+                 {SCHEMA_VERSION} — install a newer TREX to update further"
             ),
             Self::NoAssetForTarget { target, available } => write!(
                 f,
@@ -169,7 +169,7 @@ mod tests {
     fn manifest_json(version: &str, target: &str, sha: &str) -> String {
         format!(
             r#"{{"schemaVersion":1,"version":"{version}","channel":"stable","targets":{{
-                "{target}":{{"archive":"oximux-{version}-{target}.tar.gz","size":100,"sha256":"{sha}"}}
+                "{target}":{{"archive":"trex-{version}-{target}.tar.gz","size":100,"sha256":"{sha}"}}
             }}}}"#
         )
     }
@@ -183,7 +183,7 @@ mod tests {
         assert_eq!(manifest.version, "0.2.0");
         assert_eq!(manifest.tag(), "v0.2.0");
         let asset = manifest.asset_for("aarch64-apple-darwin").expect("has the asset");
-        assert_eq!(asset.archive, "oximux-0.2.0-aarch64-apple-darwin.tar.gz");
+        assert_eq!(asset.archive, "trex-0.2.0-aarch64-apple-darwin.tar.gz");
     }
 
     /// The failure a user actually hits — a platform the release skipped —
@@ -204,18 +204,18 @@ mod tests {
     /// but this test connects them. `schemaVersion` in particular is camelCase
     /// on the wire and snake_case in Rust, which is the kind of detail a
     /// well-meaning edit to either side breaks without any other test noticing
-    /// — and the symptom would be every `oximux update` in the world reporting
+    /// — and the symptom would be every `TREX update` in the world reporting
     /// a malformed manifest, after the release is already published.
     #[test]
     fn the_manifest_the_release_workflow_generates_is_the_one_this_parses() {
-        let from_ci = r#"{"schemaVersion":1,"version":"0.1.6","channel":"stable","targets":{"aarch64-apple-darwin":{"archive":"oximux-0.1.6-aarch64-apple-darwin.tar.gz","size":37,"sha256":"5502bb9914bd6697b8c58d60baa7b4b7ecb61c01939c161fbd17b3fec14bd2cb"},"x86_64-pc-windows-msvc":{"archive":"oximux-0.1.6-x86_64-pc-windows-msvc.tar.gz","size":39,"sha256":"e8116cbfe68d3a7082a3c1b1cf8801c750596820ded6ab94ab45b160327c300d"}}}"#;
+        let from_ci = r#"{"schemaVersion":1,"version":"0.1.6","channel":"stable","targets":{"aarch64-apple-darwin":{"archive":"trex-0.1.6-aarch64-apple-darwin.tar.gz","size":37,"sha256":"5502bb9914bd6697b8c58d60baa7b4b7ecb61c01939c161fbd17b3fec14bd2cb"},"x86_64-pc-windows-msvc":{"archive":"trex-0.1.6-x86_64-pc-windows-msvc.tar.gz","size":39,"sha256":"e8116cbfe68d3a7082a3c1b1cf8801c750596820ded6ab94ab45b160327c300d"}}}"#;
 
         let manifest = Manifest::parse(from_ci.as_bytes()).expect("the workflow's own output parses");
         assert_eq!(manifest.version, "0.1.6");
         assert_eq!(manifest.channel, "stable");
         assert_eq!(manifest.tag(), "v0.1.6");
         let asset = manifest.asset_for("aarch64-apple-darwin").expect("its target");
-        assert_eq!(asset.archive, "oximux-0.1.6-aarch64-apple-darwin.tar.gz");
+        assert_eq!(asset.archive, "trex-0.1.6-aarch64-apple-darwin.tar.gz");
         assert_eq!(asset.size, 37);
     }
 
@@ -224,11 +224,11 @@ mod tests {
     /// by serde, and nothing but this connects them.
     #[test]
     fn the_app_payloads_the_release_workflow_generates_parse_too() {
-        let from_ci = r#"{"schemaVersion":1,"version":"0.1.16","channel":"stable","targets":{"x86_64-pc-windows-msvc":{"archive":"oximux-0.1.16-x86_64-pc-windows-msvc.tar.gz","size":39,"sha256":"e8116cbfe68d3a7082a3c1b1cf8801c750596820ded6ab94ab45b160327c300d"}},"apps":{"x86_64-pc-windows-msvc":{"archive":"OxiMux-0.1.16-windows-x64.zip","size":214748364,"sha256":"5502bb9914bd6697b8c58d60baa7b4b7ecb61c01939c161fbd17b3fec14bd2cb"}}}"#;
+        let from_ci = r#"{"schemaVersion":1,"version":"0.1.16","channel":"stable","targets":{"x86_64-pc-windows-msvc":{"archive":"trex-0.1.16-x86_64-pc-windows-msvc.tar.gz","size":39,"sha256":"e8116cbfe68d3a7082a3c1b1cf8801c750596820ded6ab94ab45b160327c300d"}},"apps":{"x86_64-pc-windows-msvc":{"archive":"trex-0.1.16-windows-x64.zip","size":214748364,"sha256":"5502bb9914bd6697b8c58d60baa7b4b7ecb61c01939c161fbd17b3fec14bd2cb"}}}"#;
 
         let manifest = Manifest::parse(from_ci.as_bytes()).expect("the workflow's own output parses");
         let app = manifest.app_for("x86_64-pc-windows-msvc").expect("its app payload");
-        assert_eq!(app.archive, "OxiMux-0.1.16-windows-x64.zip");
+        assert_eq!(app.archive, "trex-0.1.16-windows-x64.zip");
         assert_eq!(app.size, 214_748_364);
         // The CLI archive for the same triple is a different artifact, and
         // must not be reachable through the app lookup or vice versa.
@@ -239,7 +239,7 @@ mod tests {
     }
 
     /// Every manifest published before the desktop app could update itself has
-    /// no `apps` at all. Those releases must keep working for `oximux update`,
+    /// no `apps` at all. Those releases must keep working for `TREX update`,
     /// which is the whole reason this was not a schema bump.
     #[test]
     fn a_manifest_from_before_app_payloads_still_parses() {

@@ -1,4 +1,4 @@
-//! Decoder: Claude Code `stream-json` wire events → `ThreadEvent`.
+﻿//! Decoder: Claude Code `stream-json` wire events → `ThreadEvent`.
 //!
 //! Pure and sync: one raw JSON line in, zero-or-more `ThreadEvent`s out. A
 //! single `assistant` line can carry several content blocks (text + tool_use),
@@ -584,7 +584,7 @@ fn decode_result(v: &Value) -> Vec<ThreadEvent> {
 /// Decode a `rate_limit_event` line into the provider's current limit state.
 ///
 /// The CLI emits this on its own line whenever a window's rounded utilization
-/// or reset time moves, which includes the transition into `rejected`. OxiMux
+/// or reset time moves, which includes the transition into `rejected`. TREX
 /// discarded it until now; it is the only *typed* signal the wire gives for
 /// "this turn failed because a limit is closed", and reading it is what keeps
 /// the retry engine off error-message prose.
@@ -1162,7 +1162,7 @@ mod tests {
         assert_eq!(readings[2].utilization, Some(100.0));
     }
 
-    /// The wire reports `resetsAt` in seconds; every reset time inside OxiMux is
+    /// The wire reports `resetsAt` in seconds; every reset time inside TREX is
     /// milliseconds. This is the one decoding mistake that fails silently — a
     /// retry lands either instantly or fifty thousand years out, and neither
     /// looks like a units bug from the UI.

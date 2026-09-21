@@ -1,4 +1,4 @@
-//! Source Control dropdown menu — pure data resolver.
+﻿//! Source Control dropdown menu — pure data resolver.
 //!
 //! Computes the dropdown menu rows (kind + label + tooltip + disabled
 //! state) from a single inputs snapshot. No GPUI imports — every
@@ -457,7 +457,7 @@ fn push_disabled_reason(
 /// `!in_sync` case is split into needs-push (only ahead) vs needs-sync
 /// (behind — pull or force-push first), and detached-HEAD / default-branch
 /// get their own actionable steers. (A possible `auth_required` →
-/// "Run gh auth login" reason isn't distinguished here, since OxiMux
+/// "Run gh auth login" reason isn't distinguished here, since TREX
 /// doesn't poll `gh auth status`.)
 fn create_pr_disabled_reason(
     p: &PrimaryActionInputs,

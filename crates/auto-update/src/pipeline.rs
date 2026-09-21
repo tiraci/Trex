@@ -1,4 +1,4 @@
-//! The check → download → mount → stage → verify pipeline.
+﻿//! The check → download → mount → stage → verify pipeline.
 //!
 //! Runs on the dedicated thread `spawn_check` creates; never on a UI thread.
 //! Network I/O is sync `ureq` on purpose — the app hosts two tokio runtimes
@@ -24,7 +24,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
-use oximux_macos_trust::{ditto_copy, dir_size, ensure_disk_space, run_bounded};
+use trex_macos_trust::{ditto_copy, dir_size, ensure_disk_space, run_bounded};
 
 use crate::staging::{claim_staging_dir, downloads_dir, mounts_dir, PendingUpdate};
 use crate::version::Version;
@@ -34,14 +34,14 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const READ_TIMEOUT: Duration = Duration::from_secs(30);
 const MOUNT_TIMEOUT: Duration = Duration::from_secs(60);
 /// GitHub's API requires a User-Agent; requests without one are rejected.
-const USER_AGENT: &str = "oximux-updater";
+const USER_AGENT: &str = "trex-updater";
 
 const DEFAULT_FEED_URL: &str =
-    "https://api.github.com/repos/nhtera/OxiMux/releases/latest";
+    "https://api.github.com/repos/tiraci/Trex/releases/latest";
 
 fn feed_url() -> String {
     #[cfg(debug_assertions)]
-    if let Ok(url) = std::env::var("OXIMUX_UPDATE_FEED_URL") {
+    if let Ok(url) = std::env::var("TREX_UPDATE_FEED_URL") {
         return url;
     }
     DEFAULT_FEED_URL.to_string()
@@ -71,7 +71,7 @@ fn host_allowed(host: &str) -> bool {
 /// contains no way to bypass the one revocation-aware gate.
 #[cfg(debug_assertions)]
 fn spctl_skipped() -> bool {
-    std::env::var_os("OXIMUX_UPDATE_SKIP_SPCTL").is_some()
+    std::env::var_os("TREX_UPDATE_SKIP_SPCTL").is_some()
 }
 #[cfg(not(debug_assertions))]
 fn spctl_skipped() -> bool {
@@ -147,7 +147,7 @@ fn ready(pending: PendingUpdate) -> UpdateStatus {
 fn validated_pending(config: &UpdaterConfig) -> Option<PendingUpdate> {
     let pending = PendingUpdate::load(&config.manifest_path)?;
     let staged_ok = pending.staged_path.is_dir()
-        && oximux_macos_trust::verify_signed(&pending.staged_path, &config.app.pin).is_ok()
+        && trex_macos_trust::verify_signed(&pending.staged_path, &config.app.pin).is_ok()
         && Version::parse(&pending.version).is_some_and(|v| v > config.current_version);
     if staged_ok {
         Some(pending)
@@ -198,7 +198,7 @@ struct MountedImage {
 
 impl MountedImage {
     fn app_root(&self) -> PathBuf {
-        self.mountpoint.join("OxiMux.app")
+        self.mountpoint.join("trex.app")
     }
 }
 
@@ -242,7 +242,7 @@ fn download(
         return Err(UpdateError::DisallowedHost { host: final_host });
     }
 
-    let path = dir.join(format!("OxiMux-{}.dmg", release.version));
+    let path = dir.join(format!("trex-{}.dmg", release.version));
     let mut file = fs::File::create(&path).map_err(io_staging)?;
     let mut reader = response.into_reader();
 
@@ -378,10 +378,10 @@ fn stage_and_verify(
         ditto_copy(mounted_app, &staging).map_err(UpdateError::Gate)?;
         check_cancel(cancel)?;
 
-        oximux_macos_trust::verify_signed(&staging, &config.app.pin)
+        trex_macos_trust::verify_signed(&staging, &config.app.pin)
             .map_err(UpdateError::Gate)?;
         if !spctl_skipped() {
-            oximux_macos_trust::verify_notarized_bundle(&staging).map_err(UpdateError::Gate)?;
+            trex_macos_trust::verify_notarized_bundle(&staging).map_err(UpdateError::Gate)?;
         }
 
         // The feed's tag was only a claim. The staged bundle's own embedded

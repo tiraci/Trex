@@ -1,4 +1,4 @@
-//! Payload structs carried by the [`Request`](crate::proto::Request) /
+﻿//! Payload structs carried by the [`Request`](crate::proto::Request) /
 //! [`Response`](crate::proto::Response) envelope, plus the streamed
 //! [`HostEvent`] frame.
 //!
@@ -7,7 +7,7 @@
 //! both private so a payload can only be built through the encoding constructor
 //! — see the crate-level note for why they are not native postcard.
 
-use oximux_agent_core::thread::{
+use trex_agent_core::thread::{
     AskQuestion, ChatImage, PermissionDecision, QuestionAnswers, SessionMeta, ThreadEvent,
 };
 use serde::{Deserialize, Serialize};
@@ -271,7 +271,7 @@ pub struct WorktreeWire {
     /// Human label (the desktop's workspace name).
     pub name: String,
     pub slug: String,
-    /// The branch the worktree was created on (`oximux/<slug>` for rows the
+    /// The branch the worktree was created on (`TREX/<slug>` for rows the
     /// desktop minted).
     pub branch: String,
     /// Absolute host path of the worktree directory.
@@ -308,7 +308,7 @@ pub struct WorktreeProgressWire {
     /// ordinal, so a phase added by a newer peer would decode as a *different*
     /// existing phase on an older one — silently wrong rather than merely
     /// unknown. As a string, an unrecognised value is recognisably unknown and
-    /// renders as no phase. Parse with `oximux_core::WorkPhase::parse`.
+    /// renders as no phase. Parse with `trex_core::WorkPhase::parse`.
     pub phase: String,
 }
 
@@ -428,7 +428,7 @@ impl HostEvent {
 }
 
 /// Index-side (staged) status of a path, mirroring porcelain v2's X column.
-/// Re-declared here rather than reusing `oximux_core` so the wire crate stays
+/// Re-declared here rather than reusing `trex_core` so the wire crate stays
 /// dependency-minimal (the mobile core links it).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum IndexStatusWire {
@@ -536,11 +536,11 @@ pub struct FileDiffWire {
     pub large: bool,
 }
 
-/// One issue or pull request, mirroring `oximux_git::gh::ForgeItem`.
+/// One issue or pull request, mirroring `trex_git::gh::ForgeItem`.
 ///
 /// Re-declared here rather than reusing the git crate's type, for the same
 /// reason [`IndexStatusWire`] is: this crate is linked into the mobile core, and
-/// depending on `oximux-git` would drag the whole git layer — and its CLI
+/// depending on `trex-git` would drag the whole git layer — and its CLI
 /// shell-outs — into a phone build that can never use them.
 ///
 /// The source type is `Deserialize`-only (it parses forge-CLI JSON), so it could
@@ -566,7 +566,7 @@ pub struct ForgeItemWire {
     pub updated_at: String,
 }
 
-/// One CI check run, mirroring `oximux_git::gh::CheckRun`.
+/// One CI check run, mirroring `trex_git::gh::CheckRun`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CheckRunWire {
     pub name: String,
@@ -578,7 +578,7 @@ pub struct CheckRunWire {
     pub description: String,
 }
 
-/// Body + author of one issue/PR, mirroring `oximux_git::gh::ItemDetail`.
+/// Body + author of one issue/PR, mirroring `trex_git::gh::ItemDetail`.
 ///
 /// Fetched separately from the listing because the body is markdown that can run
 /// to kilobytes; sending it for every row would make a 50-item list far more
@@ -605,10 +605,10 @@ pub enum ForgeStateWire {
     All,
 }
 
-/// How often a schedule repeats, mirroring `oximux_agents::schedule::Recurrence`.
+/// How often a schedule repeats, mirroring `trex_agents::schedule::Recurrence`.
 ///
 /// Re-declared here rather than reused for the same reason [`ForgeItemWire`] is:
-/// this crate links into the mobile core, and depending on `oximux-agents` would
+/// this crate links into the mobile core, and depending on `trex-agents` would
 /// pull the session registry and its process-spawn machinery into a phone build
 /// that only needs the three shapes.
 ///
@@ -628,7 +628,7 @@ pub enum RecurrenceWire {
     WeeklyAt { weekday: u8, hour: u8, minute: u8 },
 }
 
-/// A stored schedule, mirroring `oximux_agents::schedule::Schedule`.
+/// A stored schedule, mirroring `trex_agents::schedule::Schedule`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ScheduleWire {
     pub id: String,
@@ -736,7 +736,7 @@ pub struct ScheduleV2Wire {
     pub summary: String,
 }
 
-/// One recorded fire, mirroring `oximux_agents::schedule::ScheduleRun`.
+/// One recorded fire, mirroring `trex_agents::schedule::ScheduleRun`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ScheduleRunWire {
     pub schedule_id: String,
@@ -750,7 +750,7 @@ pub struct ScheduleRunWire {
     pub detail: Option<String>,
 }
 
-/// How one fire turned out, mirroring `oximux_agents::schedule::RunOutcome`.
+/// How one fire turned out, mirroring `trex_agents::schedule::RunOutcome`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RunOutcomeWire {
     Ok,

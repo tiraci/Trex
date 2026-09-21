@@ -1,12 +1,12 @@
-//! Smoke test: `DiffView::new` against a real (empty) git repo. Verifies
+﻿//! Smoke test: `DiffView::new` against a real (empty) git repo. Verifies
 //! the view constructs in `DiffViewState::Empty`, renders without panic,
 //! and survives a `cx.run_until_parked` cycle. No tokio runtime entered
 //! during the view lifetime — verifies the empty-state placeholder path.
 
 use gpui::TestAppContext;
-use oximux_app::shell::diff_view::DiffView;
-use oximux_git::Repository;
-use oximux_settings::{Density, Theme, Typography};
+use trex_app::shell::diff_view::DiffView;
+use trex_git::Repository;
+use trex_settings::{Density, Theme, Typography};
 use std::process::Command;
 
 fn init_git_repo(p: &std::path::Path) {

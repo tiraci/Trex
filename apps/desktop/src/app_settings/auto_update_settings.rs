@@ -1,4 +1,4 @@
-//! App-side loader + persistence for [`AutoUpdateSettings`].
+﻿//! App-side loader + persistence for [`AutoUpdateSettings`].
 //!
 //! Reads `auto_update.toml` from the app data dir on boot (default if absent)
 //! and installs it as a GPUI global. No file watcher: unlike the settings
@@ -12,7 +12,7 @@
 use std::path::PathBuf;
 
 use gpui::App;
-use oximux_settings::AutoUpdateSettings;
+use trex_settings::AutoUpdateSettings;
 
 fn settings_path() -> Option<PathBuf> {
     crate::app_paths::data_dir().map(|d| d.join(AutoUpdateSettings::FILE_NAME))

@@ -1,4 +1,4 @@
-//! Git & Source Control pane — how OxiMux names the branches it creates, where
+﻿//! Git & Source Control pane — how TREX names the branches it creates, where
 //! it puts worktrees, and whether it freshens the default branch first.
 //!
 //! Every control applies immediately: it mutates the working copy and writes
@@ -15,7 +15,7 @@ use gpui_component::button::Button;
 // schedules pane for why: that widget hangs the menu off the chevron alone.
 use gpui_component::menu::{DropdownMenu as _, PopupMenuItem};
 use gpui_component::{Sizable as _, input::Input};
-use oximux_settings::{
+use trex_settings::{
     Density, OpenInApp, Theme, Typography, git::BranchPrefixMode, git::GitSettings,
 };
 
@@ -89,7 +89,7 @@ pub(super) fn entries(
     );
     rows.push(entry(
         "Branch prefix",
-        "What goes in front of the slug when OxiMux creates a worktree branch.",
+        "What goes in front of the slug when TREX creates a worktree branch.",
         prefix_control,
     ));
 
@@ -117,7 +117,7 @@ pub(super) fn entries(
     //
     // Against the window's active project, so `Git username` resolves the same
     // repository the New Workspace dialog will. Previewing against the global
-    // git config instead showed `oximux/…` here and `ada-lovelace/…` there for
+    // git config instead showed `TREX/…` here and `ada-lovelace/…` there for
     // one setting — correct in both places and unreadable as anything but a
     // bug. `None` (no project open) still falls back to the global config.
     let preview =

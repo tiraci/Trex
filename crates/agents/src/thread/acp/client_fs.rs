@@ -1,7 +1,7 @@
-//! Client-side `fs/*` request handlers for the ACP worker.
+﻿//! Client-side `fs/*` request handlers for the ACP worker.
 //!
 //! ACP lets an agent delegate file reads/writes to the client (per the client's
-//! advertised `FileSystemCapabilities`). OxiMux advertises `read_text_file` +
+//! advertised `FileSystemCapabilities`). TREX advertises `read_text_file` +
 //! `write_text_file` and serves them here, **scoped to the session cwd tree**: a
 //! path that resolves outside the tree is denied with a JSON-RPC error + a log
 //! (no silent widening). Canonicalizing the deepest existing ancestor defeats
@@ -152,7 +152,7 @@ mod tests {
         use std::sync::atomic::{AtomicU32, Ordering};
         static N: AtomicU32 = AtomicU32::new(0);
         let n = N.fetch_add(1, Ordering::Relaxed);
-        let dir = std::env::temp_dir().join(format!("oximux-acp-fs-{}-{n}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trex-acp-fs-{}-{n}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         dir
     }

@@ -1,4 +1,4 @@
-//! What `oximux agent-status` decides, separated from how it delivers it.
+﻿//! What `TREX agent-status` decides, separated from how it delivers it.
 //!
 //! An agent's hook runs a command and hands it the event as JSON on stdin. All
 //! of what that command has to work out — which dialect's payload shape it is
@@ -7,7 +7,7 @@
 //!
 //! It lives apart from the send for two reasons. The delivery half needs a
 //! tokio runtime, the relay client and the data directory, none of which this
-//! half has any use for; and both the desktop app and `oximux-cli` run this
+//! half has any use for; and both the desktop app and `trex-cli` run this
 //! verb, so a second copy of the decision would be a second set of dialect
 //! bugs. What each binary keeps is the ~20 lines that open its own socket.
 //!
@@ -51,7 +51,7 @@ impl StatusArgs {
     /// Parse the flags the hook was installed with.
     ///
     /// `args` is everything after the `agent-status` verb itself. Unknown flags
-    /// are ignored rather than refused: an entry written by a newer OxiMux and
+    /// are ignored rather than refused: an entry written by a newer TREX and
     /// run by an older binary should still report the state it does understand,
     /// not fail the agent's turn over a flag it has never heard of.
     ///
@@ -97,7 +97,7 @@ impl StatusArgs {
     ///
     /// `None` is a success, not a failure: a `Notification` that turned out to
     /// be a benign nudge has nothing to say, and neither does a hook that fired
-    /// outside any OxiMux pane (a plain shell, where `pty_id` is absent). Both
+    /// outside any TREX pane (a plain shell, where `pty_id` is absent). Both
     /// must leave the agent's turn alone rather than failing it.
     ///
     /// `stdin_json` is the event as the agent handed it over — `""` where the
@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn an_unknown_flag_is_ignored_so_a_newer_entry_still_reports() {
-        // An entry written by a newer OxiMux, run by an older binary: it must
+        // An entry written by a newer TREX, run by an older binary: it must
         // report the state it understands rather than failing the agent's turn.
         let parsed = StatusArgs::parse(args(&["--state", "working", "--future-flag", "x"]))
             .expect("must not refuse an unknown flag");

@@ -1,4 +1,4 @@
-//! Local control transport: the owner-only socket the `oximux` CLI uses to
+﻿//! Local control transport: the owner-only socket the `TREX` CLI uses to
 //! reach a host on the same machine.
 //!
 //! Trust is **two factors, never reachability alone**:
@@ -21,12 +21,12 @@
 //!
 //! # Threat boundary
 //!
-//! **`oximux serve` confines its agents; the desktop app does not yet.** Serve
+//! **`TREX serve` confines its agents; the desktop app does not yet.** Serve
 //! calls [`LocalControlListener::grant_session`] and injects
 //! [`SESSION_TOKEN_ENV_VAR`] for every agent it spawns or resumes, so an agent
 //! there reaches its own conversation and nothing else. The desktop's agents
 //! are spawned by its chat views, which do not mint a credential, so an agent
-//! that runs `oximux` on the desktop takes the operator path and is served full
+//! that runs `TREX` on the desktop takes the operator path and is served full
 //! scope. Anyone reading this to decide whether to enable the desktop's local
 //! access should read it as: enabling it gives every agent that desktop spawns
 //! the operator's authority.
@@ -96,9 +96,9 @@ pub const HOST_LOCK_FILENAME: &str = "control-v1.host.lock";
 /// (the id arrives with the agent's own `SessionInit`, after the environment is
 /// fixed) and injects an opaque handle instead, re-pointing the credential at
 /// the real session with [`LocalControlListener::bind_session`] when it lands.
-/// An agent that needs its own session id should read it from `oximux ls`,
+/// An agent that needs its own session id should read it from `TREX ls`,
 /// which a confined caller sees exactly one row of.
-pub const SESSION_ENV_VAR: &str = "OXIMUX_SESSION_ID";
+pub const SESSION_ENV_VAR: &str = "TREX_SESSION_ID";
 
 /// The per-session secret injected beside [`SESSION_ENV_VAR`] at agent spawn.
 ///
@@ -107,7 +107,7 @@ pub const SESSION_ENV_VAR: &str = "OXIMUX_SESSION_ID";
 /// agent subprocesses this credential exists to confine, so a file could not
 /// separate them at all. An environment variable is inherited only by the
 /// child it was spawned for.
-pub const SESSION_TOKEN_ENV_VAR: &str = "OXIMUX_SESSION_TOKEN";
+pub const SESSION_TOKEN_ENV_VAR: &str = "TREX_SESSION_TOKEN";
 
 /// The control socket's path inside a host's runtime directory.
 pub fn socket_path(runtime_dir: &Path) -> PathBuf {
@@ -149,5 +149,5 @@ pub fn check_data_dir(runtime_dir: &Path) -> anyhow::Result<()> {
 /// `data_local_dir`, never the roaming `data_dir`: a live socket and a bearer
 /// token must not follow a Windows user to another machine.
 pub fn default_runtime_dir() -> Option<PathBuf> {
-    dirs::data_local_dir().map(|d| d.join("dev.nhtera.oximux"))
+    dirs::data_local_dir().map(|d| d.join("dev.tiraci.trex"))
 }

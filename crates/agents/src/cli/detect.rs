@@ -1,4 +1,4 @@
-//! Shared detection helper for CLI adapters.
+﻿//! Shared detection helper for CLI adapters.
 //!
 //! Every concrete `CliAgentAdapter` implementation answers `detect()` by
 //! asking "is this binary on PATH?" The first adapter (`claude_code.rs`,
@@ -86,7 +86,7 @@ mod tests {
     async fn which_on_path_returns_false_for_garbage_name() {
         // Random-looking name that no sane installer would ship under.
         // Confirms the false branch never panics on a clean miss.
-        assert!(!which_on_path("oximux-this-binary-should-not-exist-xyz").await);
+        assert!(!which_on_path("trex-this-binary-should-not-exist-xyz").await);
     }
 
     #[tokio::test]
@@ -103,7 +103,7 @@ mod tests {
     #[tokio::test]
     async fn resolve_on_path_is_none_for_garbage_name() {
         assert!(
-            resolve_on_path("oximux-this-binary-should-not-exist-xyz")
+            resolve_on_path("trex-this-binary-should-not-exist-xyz")
                 .await
                 .is_none()
         );

@@ -1,4 +1,4 @@
-//! Pi chat backend — drives `pi --mode rpc` as a subprocess.
+﻿//! Pi chat backend — drives `pi --mode rpc` as a subprocess.
 //!
 //! Pi speaks neither ACP nor app-server; `--mode rpc` is its own public,
 //! purpose-built embedding protocol (a package export, `"./rpc-entry"`). The
@@ -72,7 +72,7 @@ pub struct PiRpcConnection {
     /// something. `Arc` because `terminate` hands the escalation to a detached
     /// thread that outlives the caller.
     #[cfg(windows)]
-    job: Option<Arc<oximux_job_object::JobObject>>,
+    job: Option<Arc<trex_job_object::JobObject>>,
     /// Live session facts: the current model (picker label, thinking levels,
     /// context window) and thinking level. Mutable — `set_model` and
     /// `set_thinking_level` both change it in-session, and pi re-clamps thinking
@@ -141,7 +141,7 @@ impl PiRpcConnection {
         // So fall back to a fresh session, and SAY SO. The silent version of this
         // is exactly the failure this adapter refuses elsewhere (resuming by path
         // mints an empty session and says nothing), and the difference is only
-        // that the user is told. OxiMux's own transcript still renders, so the
+        // that the user is told. TREX's own transcript still renders, so the
         // conversation is not lost from view — but the agent cannot see it, and
         // that must not be discovered by watching it answer as a stranger.
         tracing::warn!(session_id = %id, ?err, "pi could not resume; starting a fresh session");
@@ -260,7 +260,7 @@ impl PiRpcConnection {
         let shared_state = Arc::new(Mutex::new(Some(state)));
 
         #[cfg(windows)]
-        let job = match oximux_job_object::JobObject::adopt(&child) {
+        let job = match trex_job_object::JobObject::adopt(&child) {
             Ok(job) => Some(Arc::new(job)),
             Err(e) => {
                 tracing::warn!(?e, "could not put pi in a job object");
@@ -557,7 +557,7 @@ impl AgentConnection for PiRpcConnection {
     /// The palette's rows, described by pi rather than reconstructed from disk.
     ///
     /// Safe to offer because a `/command` needs no special send path: pi expands
-    /// one inside `prompt` itself (`agent-session.ts:809`), so OxiMux's existing
+    /// one inside `prompt` itself (`agent-session.ts:809`), so TREX's existing
     /// "forward `/cmd` as ordinary text" contract already invokes it. Verified
     /// live — `/skill:gpui-action <args>` arrives at the model as the skill's body
     /// wrapped in a `<skill>` block with the arguments appended, and an
@@ -699,7 +699,7 @@ impl Drop for PiRpcConnection {
 /// - **path** → anything containing a slash or ending `.jsonl` is taken as a
 ///   path **with no existence check**. A stale path therefore does not fail — pi
 ///   *creates* a new empty session there and starts normally (verified live:
-///   `messageCount: 0`, a fresh session id). OxiMux would render the restored
+///   `messageCount: 0`, a fresh session id). TREX would render the restored
 ///   transcript above an agent that remembers nothing, and neither the user nor
 ///   any assertion on the response could tell.
 ///
@@ -866,11 +866,11 @@ mod tests {
     /// Pinned to a scratch `--session-dir`: without one, pi roots sessions under
     /// the user's real `~/.pi` store, and a test must not write there.
     ///
-    /// Run: `cargo test -p oximux-agents pi:: -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents pi:: -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `pi` on this machine"]
     fn live_pi_handshake() {
-        let dir = std::env::temp_dir().join(format!("oximux-pi-live-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trex-pi-live-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("scratch");
         let program = resolve_pi_binary(None).expect("find pi");
         let mut cmd = Command::new(program);
@@ -908,13 +908,13 @@ mod tests {
     /// End-to-end against the real `pi`: spawn → send → map → render. Ignored by
     /// default (needs pi + a signed-in provider) and costs one cheap turn.
     ///
-    /// Run: `cargo test -p oximux-agents pi::tests::live_pi_turn_renders -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents pi::tests::live_pi_turn_renders -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `pi` and spends provider tokens"]
     fn live_pi_turn_renders() {
         use crate::thread::state::ChatThread;
 
-        let dir = std::env::temp_dir().join(format!("oximux-pi-turn-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trex-pi-turn-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("scratch");
         let program = resolve_pi_binary(None).expect("find pi");
         let mut cmd = Command::new(program);
@@ -1022,7 +1022,7 @@ mod tests {
         // THE hazard of this phase. pi takes anything path-shaped as a path and
         // never checks it exists (`main.ts:165`): a stale one makes pi create an
         // empty session there and start as if resumed (verified live —
-        // messageCount 0, new session id, success reported). OxiMux would then
+        // messageCount 0, new session id, success reported). TREX would then
         // render the restored transcript over an agent with no memory of it.
         // An id, by contrast, fails loudly ("No session found matching ...").
         for path_like in [
@@ -1042,13 +1042,13 @@ mod tests {
     /// Read-only posture must actually stop pi writing — against the real binary,
     /// not a mock. This is the criterion the whole phase exists for.
     ///
-    /// Run: `cargo test -p oximux-agents pi::tests::live_read_only -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents pi::tests::live_read_only -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `pi` and spends provider tokens"]
     fn live_read_only_posture_actually_prevents_a_write() {
         use crate::thread::state::ChatThread;
 
-        let dir = std::env::temp_dir().join(format!("oximux-pi-ro-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("trex-pi-ro-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("scratch");
         let target = dir.join("should-not-exist.txt");
         let _ = std::fs::remove_file(&target);
@@ -1135,7 +1135,7 @@ mod tests {
         if !auth.exists() {
             return None;
         }
-        let root = std::env::temp_dir().join(format!("oximux-pi-home-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("trex-pi-home-{}", std::process::id()));
         let agent = root.join("agent");
         std::fs::create_dir_all(&agent).ok()?;
         let guard = Scratch(root);
@@ -1157,7 +1157,7 @@ mod tests {
     /// SHAPE rather than a fixed list: a scratch cwd has no project skills, but
     /// user-global ones (`~/.agents/skills`) are still found.
     ///
-    /// Run: `cargo test -p oximux-agents pi::tests::live_palette -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents pi::tests::live_palette -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `pi` on this machine"]
     fn live_palette_is_described_by_pi_itself() {
@@ -1209,7 +1209,7 @@ mod tests {
     /// wire loads exactly the model it names, and switching moves the meter.
     /// Costs no provider tokens — none of these commands run a turn.
     ///
-    /// Run: `cargo test -p oximux-agents pi::tests::live_model -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents pi::tests::live_model -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `pi` on this machine"]
     fn live_model_catalog_qualifies_and_switching_moves_the_meter() {
@@ -1273,7 +1273,7 @@ mod tests {
     /// LOUDLY, never start an empty session wearing a restored transcript.
     ///
     /// Spends a few provider tokens (two cheap turns).
-    /// Run: `cargo test -p oximux-agents pi::tests::live_resume -- --ignored --nocapture`
+    /// Run: `cargo test -p trex-agents pi::tests::live_resume -- --ignored --nocapture`
     #[test]
     #[ignore = "requires a real `pi` and spends provider tokens"]
     fn live_resume_by_id_carries_the_conversation_across_a_restart() {

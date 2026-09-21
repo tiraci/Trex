@@ -1,4 +1,4 @@
-//! The end-to-end proof: the real `MobileClient` (the phone's Rust core) pairs
+﻿//! The end-to-end proof: the real `MobileClient` (the phone's Rust core) pairs
 //! with and drives the real `remote-host` `Dispatcher` over the in-memory
 //! loopback — a test `Connector` stands in for iroh. Everything crosses our
 //! actual FFI-facing wrapper: pairing, `list_sessions`, and a folded transcript
@@ -10,16 +10,16 @@ use std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 use futures::channel::oneshot;
 use futures::future::select;
-use oximux_agent_core::thread::{PermissionKind, ThreadEvent};
-use oximux_agents::session_registry::{SessionHandle, SessionRegistry};
-use oximux_agents::thread::{AgentCapabilities, StubConnection};
-use oximux_mobile_core::{
+use trex_agent_core::thread::{PermissionKind, ThreadEvent};
+use trex_agents::session_registry::{SessionHandle, SessionRegistry};
+use trex_agents::thread::{AgentCapabilities, StubConnection};
+use trex_mobile_core::{
     ChatImage, ConnState, ConnStateListener, MobileClient, ThreadSink, ThreadSnapshot,
 };
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot};
-use oximux_remote_proto::transport::Transport;
-use oximux_remote_proto::{PairingTicket, testing::duplex_pair};
-use oximux_remote_session::{ConnectError, Connector};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot};
+use trex_remote_proto::transport::Transport;
+use trex_remote_proto::{PairingTicket, testing::duplex_pair};
+use trex_remote_session::{ConnectError, Connector};
 use serde_json::json;
 
 const SECRET: [u8; 16] = [0x22; 16];
@@ -540,7 +540,7 @@ async fn an_oversize_attachment_is_refused_with_a_useful_message() {
         .await
         .expect("connect");
 
-    let huge = "A".repeat(oximux_remote_iroh::MAX_FRAME);
+    let huge = "A".repeat(trex_remote_iroh::MAX_FRAME);
     let err = client
         .send_prompt("sess-1".into(), "look".into(), vec![ChatImage {
             media_type: "image/png".into(),
@@ -572,7 +572,7 @@ struct RecordingTerminalSink {
     exits: Mutex<Vec<(String, Option<i32>)>>,
 }
 
-impl oximux_mobile_core::TerminalSink for RecordingTerminalSink {
+impl trex_mobile_core::TerminalSink for RecordingTerminalSink {
     fn on_output(&self, pty_id: String, bytes: Vec<u8>) {
         self.output.lock().unwrap().push((pty_id, bytes));
     }
@@ -586,16 +586,16 @@ impl oximux_mobile_core::TerminalSink for RecordingTerminalSink {
 
 /// A terminal source whose live frames this test drives by hand.
 struct ScriptedTerminals {
-    frames: Mutex<Option<tokio::sync::mpsc::Receiver<oximux_remote_host::TerminalFrame>>>,
+    frames: Mutex<Option<tokio::sync::mpsc::Receiver<trex_remote_host::TerminalFrame>>>,
 }
 
 #[async_trait]
-impl oximux_remote_host::TerminalSource for ScriptedTerminals {
+impl trex_remote_host::TerminalSource for ScriptedTerminals {
     async fn list(
         &self,
-    ) -> Result<Vec<oximux_remote_proto::messages::TerminalSummary>, oximux_remote_host::TerminalError>
+    ) -> Result<Vec<trex_remote_proto::messages::TerminalSummary>, trex_remote_host::TerminalError>
     {
-        Ok(vec![oximux_remote_proto::messages::TerminalSummary {
+        Ok(vec![trex_remote_proto::messages::TerminalSummary {
             pty_id: "pty-1".into(),
             cwd: "/work".into(),
             cols: 80,
@@ -608,26 +608,26 @@ impl oximux_remote_host::TerminalSource for ScriptedTerminals {
         pty_id: &str,
     ) -> Result<
         (
-            oximux_remote_host::TerminalAttach,
-            tokio::sync::mpsc::Receiver<oximux_remote_host::TerminalFrame>,
+            trex_remote_host::TerminalAttach,
+            tokio::sync::mpsc::Receiver<trex_remote_host::TerminalFrame>,
         ),
-        oximux_remote_host::TerminalError,
+        trex_remote_host::TerminalError,
     > {
         if pty_id != "pty-1" {
-            return Err(oximux_remote_host::TerminalError::NotFound);
+            return Err(trex_remote_host::TerminalError::NotFound);
         }
         let rx = self
             .frames
             .lock()
             .unwrap()
             .take()
-            .ok_or(oximux_remote_host::TerminalError::Unavailable)?;
+            .ok_or(trex_remote_host::TerminalError::Unavailable)?;
         Ok((
-            oximux_remote_host::TerminalAttach {
+            trex_remote_host::TerminalAttach {
                 replay: b"prompt$ ".to_vec(),
                 cols: 80,
                 rows: 24,
-                attachment: oximux_remote_host::AttachmentId(1),
+                attachment: trex_remote_host::AttachmentId(1),
             },
             rx,
         ))
@@ -637,21 +637,21 @@ impl oximux_remote_host::TerminalSource for ScriptedTerminals {
         &self,
         _pty_id: &str,
         _bytes: &[u8],
-    ) -> Result<(), oximux_remote_host::TerminalError> {
+    ) -> Result<(), trex_remote_host::TerminalError> {
         Ok(())
     }
 
     async fn resize(
         &self,
         _pty_id: &str,
-        _attachment: oximux_remote_host::AttachmentId,
+        _attachment: trex_remote_host::AttachmentId,
         _cols: u16,
         _rows: u16,
-    ) -> Result<(), oximux_remote_host::TerminalError> {
+    ) -> Result<(), trex_remote_host::TerminalError> {
         Ok(())
     }
 
-    async fn detach(&self, _pty_id: &str, _attachment: oximux_remote_host::AttachmentId) {}
+    async fn detach(&self, _pty_id: &str, _attachment: trex_remote_host::AttachmentId) {}
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -697,9 +697,9 @@ async fn terminal_frames_reach_the_app_sink() {
         "the dims cross the FFI — the app sizes its emulator from these before replaying",
     );
 
-    tx.send(oximux_remote_host::TerminalFrame::Output(b"ls\r\n".to_vec())).await.unwrap();
-    tx.send(oximux_remote_host::TerminalFrame::Gapped).await.unwrap();
-    tx.send(oximux_remote_host::TerminalFrame::Exited(Some(0))).await.unwrap();
+    tx.send(trex_remote_host::TerminalFrame::Output(b"ls\r\n".to_vec())).await.unwrap();
+    tx.send(trex_remote_host::TerminalFrame::Gapped).await.unwrap();
+    tx.send(trex_remote_host::TerminalFrame::Exited(Some(0))).await.unwrap();
 
     // Poll rather than sleep: the frames cross a host task, the wire, the demux
     // pump, and the terminal pump before reaching the sink.
@@ -731,16 +731,16 @@ async fn terminal_frames_reach_the_app_sink() {
 /// Keeps the sender for each attach so the test can push to the current one.
 #[derive(Default)]
 struct ReattachableTerminals {
-    senders: Mutex<Vec<tokio::sync::mpsc::Sender<oximux_remote_host::TerminalFrame>>>,
+    senders: Mutex<Vec<tokio::sync::mpsc::Sender<trex_remote_host::TerminalFrame>>>,
 }
 
 #[async_trait]
-impl oximux_remote_host::TerminalSource for ReattachableTerminals {
+impl trex_remote_host::TerminalSource for ReattachableTerminals {
     async fn list(
         &self,
-    ) -> Result<Vec<oximux_remote_proto::messages::TerminalSummary>, oximux_remote_host::TerminalError>
+    ) -> Result<Vec<trex_remote_proto::messages::TerminalSummary>, trex_remote_host::TerminalError>
     {
-        Ok(vec![oximux_remote_proto::messages::TerminalSummary {
+        Ok(vec![trex_remote_proto::messages::TerminalSummary {
             pty_id: "pty-1".into(),
             cwd: "/work".into(),
             cols: 80,
@@ -753,22 +753,22 @@ impl oximux_remote_host::TerminalSource for ReattachableTerminals {
         pty_id: &str,
     ) -> Result<
         (
-            oximux_remote_host::TerminalAttach,
-            tokio::sync::mpsc::Receiver<oximux_remote_host::TerminalFrame>,
+            trex_remote_host::TerminalAttach,
+            tokio::sync::mpsc::Receiver<trex_remote_host::TerminalFrame>,
         ),
-        oximux_remote_host::TerminalError,
+        trex_remote_host::TerminalError,
     > {
         if pty_id != "pty-1" {
-            return Err(oximux_remote_host::TerminalError::NotFound);
+            return Err(trex_remote_host::TerminalError::NotFound);
         }
         let (tx, rx) = tokio::sync::mpsc::channel(8);
         self.senders.lock().unwrap().push(tx);
         Ok((
-            oximux_remote_host::TerminalAttach {
+            trex_remote_host::TerminalAttach {
                 replay: b"prompt$ ".to_vec(),
                 cols: 80,
                 rows: 24,
-                attachment: oximux_remote_host::AttachmentId(1),
+                attachment: trex_remote_host::AttachmentId(1),
             },
             rx,
         ))
@@ -778,21 +778,21 @@ impl oximux_remote_host::TerminalSource for ReattachableTerminals {
         &self,
         _pty_id: &str,
         _bytes: &[u8],
-    ) -> Result<(), oximux_remote_host::TerminalError> {
+    ) -> Result<(), trex_remote_host::TerminalError> {
         Ok(())
     }
 
     async fn resize(
         &self,
         _pty_id: &str,
-        _attachment: oximux_remote_host::AttachmentId,
+        _attachment: trex_remote_host::AttachmentId,
         _cols: u16,
         _rows: u16,
-    ) -> Result<(), oximux_remote_host::TerminalError> {
+    ) -> Result<(), trex_remote_host::TerminalError> {
         Ok(())
     }
 
-    async fn detach(&self, _pty_id: &str, _attachment: oximux_remote_host::AttachmentId) {}
+    async fn detach(&self, _pty_id: &str, _attachment: trex_remote_host::AttachmentId) {}
 }
 
 /// A reconnect must restore an attached terminal, not silently strand it.
@@ -849,7 +849,7 @@ async fn a_reconnect_restores_an_attached_terminal() {
     // Live output flows over conn 1. The sender is cloned out of the lock first —
     // holding a std guard across an await is a deadlock waiting to happen.
     let conn1_tx = terminals.senders.lock().unwrap()[0].clone();
-    conn1_tx.send(oximux_remote_host::TerminalFrame::Output(b"before".to_vec())).await.unwrap();
+    conn1_tx.send(trex_remote_host::TerminalFrame::Output(b"before".to_vec())).await.unwrap();
     assert!(
         wait_until(|| !sink.output.lock().unwrap().is_empty()).await,
         "output flows before the drop",
@@ -879,7 +879,7 @@ async fn a_reconnect_restores_an_attached_terminal() {
 
     // The real property: output reaches the app again over the new connection.
     let conn2_tx = terminals.senders.lock().unwrap()[1].clone();
-    conn2_tx.send(oximux_remote_host::TerminalFrame::Output(b"after".to_vec())).await.unwrap();
+    conn2_tx.send(trex_remote_host::TerminalFrame::Output(b"after".to_vec())).await.unwrap();
     assert!(
         wait_until(|| sink
             .output
@@ -1010,7 +1010,7 @@ async fn a_permission_suggestion_reaches_the_agent_verbatim() {
         .resolve_permission(
             "sess-1".into(),
             "req-1".into(),
-            oximux_mobile_core::PermissionReply::AllowWithSuggestion {
+            trex_mobile_core::PermissionReply::AllowWithSuggestion {
                 updated_input_json: r#"{"path":"a.rs"}"#.into(),
                 suggestion_json: r#"{"kind":"setMode","label":"Always allow edits",
                                      "raw":{"mode":"acceptEdits"}}"#
@@ -1081,7 +1081,7 @@ async fn a_malformed_suggestion_is_refused_rather_than_sent() {
         .resolve_permission(
             "sess-1".into(),
             "req-1".into(),
-            oximux_mobile_core::PermissionReply::AllowWithSuggestion {
+            trex_mobile_core::PermissionReply::AllowWithSuggestion {
                 updated_input_json: "{}".into(),
                 suggestion_json: "not json at all".into(),
             },
@@ -1119,16 +1119,16 @@ async fn a_phone_rewinds_a_session_and_its_transcript_truncates() {
         calls: Mutex<Vec<(String, usize, bool)>>,
     }
     #[async_trait]
-    impl oximux_remote_host::RewindService for EmittingRewinder {
+    impl trex_remote_host::RewindService for EmittingRewinder {
         async fn rewind(
             &self,
             session_id: &str,
             ordinal: usize,
             include_files: bool,
-        ) -> Result<(), oximux_remote_host::RewindError> {
+        ) -> Result<(), trex_remote_host::RewindError> {
             self.calls.lock().unwrap().push((session_id.to_string(), ordinal, include_files));
             if include_files {
-                return Err(oximux_remote_host::RewindError::FilesUnsupported);
+                return Err(trex_remote_host::RewindError::FilesUnsupported);
             }
             self.handle.ingest(ThreadEvent::Rewound { ordinal });
             Ok(())

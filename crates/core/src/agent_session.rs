@@ -1,8 +1,8 @@
-//! Runtime + persisted agent session types.
+﻿//! Runtime + persisted agent session types.
 //!
-//! Lives in `oximux-core` so the UI (badge, sidebar dot) and storage
+//! Lives in `trex-core` so the UI (badge, sidebar dot) and storage
 //! (`AgentSessionRepo` row mapping in Phase 4) share one source of truth
-//! without pulling `oximux-agents` (which owns the runtime traits + tokio).
+//! without pulling `trex-agents` (which owns the runtime traits + tokio).
 //!
 //! `AgentSessionId` is a transient handle minted by the runtime per
 //! launch; the persisted `AgentSession::id` (`String` UUID) below is the

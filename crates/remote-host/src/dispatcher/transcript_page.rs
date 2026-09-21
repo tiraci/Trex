@@ -1,4 +1,4 @@
-//! The paginated folded-transcript fetch (`FetchTranscriptPage`, v16).
+﻿//! The paginated folded-transcript fetch (`FetchTranscriptPage`, v16).
 //!
 //! The v13 `FetchTranscript` returns the whole snapshot in one frame, which
 //! works until a long session's fold outgrows the transport's 16 MB frame cap —
@@ -8,8 +8,8 @@
 //! verb stays untouched (postcard payloads may never be reshaped) and v15
 //! phones keep using it.
 
-use oximux_remote_proto::messages::TranscriptPageWire;
-use oximux_remote_proto::proto::{Response, RpcError};
+use trex_remote_proto::messages::TranscriptPageWire;
+use trex_remote_proto::proto::{Response, RpcError};
 
 use super::Dispatcher;
 use crate::auth::Peer;
@@ -77,7 +77,7 @@ impl Dispatcher {
         // Scrub before slicing: the dormant branch reads straight off disk where
         // the desktop's own transcript keeps its screen captures, exactly as on
         // the legacy path.
-        let (entries_json, captures) = oximux_agent_core::redact::scrub_transcript(&entries_json);
+        let (entries_json, captures) = trex_agent_core::redact::scrub_transcript(&entries_json);
         if captures > 0 {
             tracing::debug!(session_id, captures, "dropped screen captures from stored history");
         }

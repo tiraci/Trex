@@ -1,8 +1,8 @@
-//! The client-side remote-control session — the phone's Rust core.
+﻿//! The client-side remote-control session — the phone's Rust core.
 //!
 //! Pure Rust, **no FFI**, so it is unit-testable standalone: it speaks the
 //! `remote-proto` wire protocol over the abstract
-//! [`Transport`](oximux_remote_proto::Transport) seam, so the in-memory loopback
+//! [`Transport`](trex_remote_proto::Transport) seam, so the in-memory loopback
 //! drives it against the real `remote-host` dispatcher with no network. iroh
 //! becomes one `Transport` impl underneath, and `mobile-core` (uniffi) wraps this
 //! to expose a typed API to React Native.
@@ -16,7 +16,7 @@
 //! machine (backoff + give-up); and [`maintain_connection`] — the runtime-agnostic
 //! driver that ties the [`Connector`], the [`Reconnect`] policy, a [`Sleeper`], and
 //! the demux pump into a self-healing connection. The iroh transport lands as a
-//! [`Connector`] + [`Transport`](oximux_remote_proto::Transport) impl beneath it.
+//! [`Connector`] + [`Transport`](trex_remote_proto::Transport) impl beneath it.
 
 mod connector;
 mod demux;

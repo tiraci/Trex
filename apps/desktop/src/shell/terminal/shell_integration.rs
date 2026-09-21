@@ -1,6 +1,6 @@
-//! OSC 133 shell-integration bootstrap injected at plain-shell spawn time.
+﻿//! OSC 133 shell-integration bootstrap injected at plain-shell spawn time.
 //!
-//! The terminal already *parses* OSC 133/633 command marks (`oximux_pty`'s
+//! The terminal already *parses* OSC 133/633 command marks (`trex_pty`'s
 //! OSC scanner), but a stock shell emits none — so the prompt/output bands and
 //! per-command exit codes that drive "send last output to agent" and the
 //! exit-code gutter badges stay empty by default. This module installs a small
@@ -9,7 +9,7 @@
 //! How: the hook is delivered without touching the user's own dotfiles.
 //! - **zsh** has no "extra rcfile" flag, so we point `ZDOTDIR` at an overlay
 //!   dir whose startup files `source` the user's real ones (resolved from
-//!   `OXIMUX_ORIG_ZDOTDIR`, defaulting to `$HOME`) and then arm `precmd` /
+//!   `trex_ORIG_ZDOTDIR`, defaulting to `$HOME`) and then arm `precmd` /
 //!   `preexec` hooks. `ZDOTDIR` is restored to the user's value afterward so
 //!   child shells and tools see the real one.
 //! - **bash** takes `--rcfile`, whose script sources `~/.bashrc` then arms a
@@ -27,7 +27,7 @@
 //!
 //! All four are guarded against double-emitting marks: a re-entry sentinel
 //! makes a re-source idempotent, an opt-out env var
-//! (`OXIMUX_SHELL_INTEGRATION=0`, also surfaced as the `shell_integration`
+//! (`trex_SHELL_INTEGRATION=0`, also surfaced as the `shell_integration`
 //! setting) disables it, and — crucially — we generically detect an *existing*
 //! OSC-133 emitter (any already-registered prompt/pre-exec hook whose body
 //! contains a `133;` mark, plus the well-known VS Code / iTerm env sentinels)
@@ -49,7 +49,7 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use oximux_pty::SpawnConfig;
+use trex_pty::SpawnConfig;
 
 use super::terminal_view::shell_integration_enabled;
 
@@ -105,7 +105,7 @@ pub fn augment_spawn_config(cfg: &mut SpawnConfig) {
         cfg.args = args;
     }
     // Caller env wins on key collision because the backend applies `cfg.env`
-    // last; our keys (`ZDOTDIR`, `OXIMUX_ORIG_ZDOTDIR`) don't collide with the
+    // last; our keys (`ZDOTDIR`, `trex_ORIG_ZDOTDIR`) don't collide with the
     // context-id env the terminal sets, so a plain extend is correct.
     cfg.env.extend(integration.env);
 }
@@ -163,7 +163,7 @@ fn install(kind: ShellKind, base: &Path, orig: Option<&str>) -> io::Result<Integ
             write_if_changed(&dir.join(".zlogin"), scripts::ZSH_ZLOGIN)?;
             let mut env = vec![("ZDOTDIR".to_string(), dir.to_string_lossy().into_owned())];
             if let Some(orig) = orig {
-                env.push(("OXIMUX_ORIG_ZDOTDIR".to_string(), orig.to_string()));
+                env.push(("TREX_ORIG_ZDOTDIR".to_string(), orig.to_string()));
             }
             Ok(Integration { env, args: Vec::new() })
         }
@@ -188,7 +188,7 @@ fn install(kind: ShellKind, base: &Path, orig: Option<&str>) -> io::Result<Integ
         // interactive afterwards; `try/catch` means a broken overlay costs the
         // marks, not the shell.
         ShellKind::PowerShell => {
-            let script = base.join("powershell").join("oximux.ps1");
+            let script = base.join("powershell").join("TREX.ps1");
             write_if_changed(&script, scripts::POWERSHELL_HOOK)?;
             let dot_source =
                 format!("try {{ . '{}' }} catch {{ }}", ps_single_quote(&script.to_string_lossy()));
@@ -226,29 +226,29 @@ fn write_if_changed(path: &Path, content: &str) -> io::Result<()> {
 }
 
 /// The shell-script payloads. Kept as data constants (not generated) so they're
-/// auditable and stable; the only runtime input is `OXIMUX_ORIG_ZDOTDIR`, read
+/// auditable and stable; the only runtime input is `trex_ORIG_ZDOTDIR`, read
 /// from the environment by the scripts themselves.
 mod scripts {
     /// zsh `.zshenv` — always sourced. Chain to the user's real `.zshenv`,
-    /// pinning `OXIMUX_ORIG_ZDOTDIR` to a concrete value for the later files.
+    /// pinning `trex_ORIG_ZDOTDIR` to a concrete value for the later files.
     pub const ZSH_ZSHENV: &str = "\
-# OxiMux shell integration overlay. Chains to your real zsh startup files.
-OXIMUX_ORIG_ZDOTDIR=\"${OXIMUX_ORIG_ZDOTDIR:-$HOME}\"
-[[ -f \"$OXIMUX_ORIG_ZDOTDIR/.zshenv\" ]] && builtin source \"$OXIMUX_ORIG_ZDOTDIR/.zshenv\"
+# TREX shell integration overlay. Chains to your real zsh startup files.
+trex_ORIG_ZDOTDIR=\"${trex_ORIG_ZDOTDIR:-$HOME}\"
+[[ -f \"$trex_ORIG_ZDOTDIR/.zshenv\" ]] && builtin source \"$trex_ORIG_ZDOTDIR/.zshenv\"
 ";
 
     /// zsh `.zprofile` — login shells only; chains to the user's.
     pub const ZSH_ZPROFILE: &str = "\
-# OxiMux shell integration overlay.
-OXIMUX_ORIG_ZDOTDIR=\"${OXIMUX_ORIG_ZDOTDIR:-$HOME}\"
-[[ -f \"$OXIMUX_ORIG_ZDOTDIR/.zprofile\" ]] && builtin source \"$OXIMUX_ORIG_ZDOTDIR/.zprofile\"
+# TREX shell integration overlay.
+trex_ORIG_ZDOTDIR=\"${trex_ORIG_ZDOTDIR:-$HOME}\"
+[[ -f \"$trex_ORIG_ZDOTDIR/.zprofile\" ]] && builtin source \"$trex_ORIG_ZDOTDIR/.zprofile\"
 ";
 
     /// zsh `.zlogin` — login shells only; chains to the user's.
     pub const ZSH_ZLOGIN: &str = "\
-# OxiMux shell integration overlay.
-OXIMUX_ORIG_ZDOTDIR=\"${OXIMUX_ORIG_ZDOTDIR:-$HOME}\"
-[[ -f \"$OXIMUX_ORIG_ZDOTDIR/.zlogin\" ]] && builtin source \"$OXIMUX_ORIG_ZDOTDIR/.zlogin\"
+# TREX shell integration overlay.
+trex_ORIG_ZDOTDIR=\"${trex_ORIG_ZDOTDIR:-$HOME}\"
+[[ -f \"$trex_ORIG_ZDOTDIR/.zlogin\" ]] && builtin source \"$trex_ORIG_ZDOTDIR/.zlogin\"
 ";
 
     /// zsh `.zshrc` — interactive. Source the user's rc, restore `ZDOTDIR`, then
@@ -256,84 +256,84 @@ OXIMUX_ORIG_ZDOTDIR=\"${OXIMUX_ORIG_ZDOTDIR:-$HOME}\"
     /// with its exit (`D;$?`) and opens the next prompt (`A`); `preexec` marks
     /// output start (`C`).
     pub const ZSH_ZSHRC: &str = "\
-# OxiMux shell integration overlay.
-OXIMUX_ORIG_ZDOTDIR=\"${OXIMUX_ORIG_ZDOTDIR:-$HOME}\"
-[[ -f \"$OXIMUX_ORIG_ZDOTDIR/.zshrc\" ]] && builtin source \"$OXIMUX_ORIG_ZDOTDIR/.zshrc\"
+# TREX shell integration overlay.
+trex_ORIG_ZDOTDIR=\"${trex_ORIG_ZDOTDIR:-$HOME}\"
+[[ -f \"$trex_ORIG_ZDOTDIR/.zshrc\" ]] && builtin source \"$trex_ORIG_ZDOTDIR/.zshrc\"
 # Restore ZDOTDIR so child shells and tools resolve your real startup dir.
-ZDOTDIR=\"$OXIMUX_ORIG_ZDOTDIR\"
+ZDOTDIR=\"$trex_ORIG_ZDOTDIR\"
 # Defer to an existing integration: if any registered prompt/pre-exec hook
 # already emits an OSC 133 mark, a second emitter would double the marks and
 # break the output band, so skip ours entirely.
-__oximux_emits_133=0
-for __oximux_f in $precmd_functions $preexec_functions; do
-  if [[ \"${functions[$__oximux_f]:-}\" == *\"133;\"* ]]; then
-    __oximux_emits_133=1
+__trex_emits_133=0
+for __trex_f in $precmd_functions $preexec_functions; do
+  if [[ \"${functions[$__trex_f]:-}\" == *\"133;\"* ]]; then
+    __trex_emits_133=1
     break
   fi
 done
-if [[ -z \"${__oximux_shell_integration:-}\" && \"${OXIMUX_SHELL_INTEGRATION:-1}\" != \"0\" \\
-      && \"$__oximux_emits_133\" == \"0\" \\
+if [[ -z \"${__trex_shell_integration:-}\" && \"${trex_SHELL_INTEGRATION:-1}\" != \"0\" \\
+      && \"$__trex_emits_133\" == \"0\" \\
       && -z \"${VSCODE_SHELL_INTEGRATION:-}\" && -z \"${ITERM_SHELL_INTEGRATION_INSTALLED:-}\" ]]; then
-  __oximux_shell_integration=1
-  __oximux_preexec() { printf '\\033]133;C\\007'; }
-  __oximux_precmd() {
-    local __oximux_status=$?
-    printf '\\033]133;D;%s\\007' \"$__oximux_status\"
+  __trex_shell_integration=1
+  __trex_preexec() { printf '\\033]133;C\\007'; }
+  __trex_precmd() {
+    local __trex_status=$?
+    printf '\\033]133;D;%s\\007' \"$__trex_status\"
     printf '\\033]133;A\\007'
   }
   autoload -Uz add-zsh-hook 2>/dev/null
   if (( ${+functions[add-zsh-hook]} )); then
-    add-zsh-hook preexec __oximux_preexec
-    add-zsh-hook precmd __oximux_precmd
+    add-zsh-hook preexec __trex_preexec
+    add-zsh-hook precmd __trex_precmd
   else
     typeset -ga preexec_functions precmd_functions
-    preexec_functions+=(__oximux_preexec)
-    precmd_functions+=(__oximux_precmd)
+    preexec_functions+=(__trex_preexec)
+    precmd_functions+=(__trex_precmd)
   fi
 fi
-unset __oximux_emits_133 __oximux_f
+unset __trex_emits_133 __trex_f
 ";
 
     /// bash `--rcfile`. Source the user's rc, then install a `PROMPT_COMMAND`
     /// (emit `D;$?` for the finished command, then `A`) plus a `DEBUG` trap
-    /// (emit `C` once per command). The `__oximux_in_command` latch keeps the
+    /// (emit `C` once per command). The `__trex_in_command` latch keeps the
     /// trap from firing for the prompt command itself or for completion.
     pub const BASH_RCFILE: &str = "\
-# OxiMux shell integration overlay. Chains to your real bash startup files.
+# TREX shell integration overlay. Chains to your real bash startup files.
 [[ -f /etc/bash.bashrc ]] && source /etc/bash.bashrc
 [[ -f \"$HOME/.bashrc\" ]] && source \"$HOME/.bashrc\"
 # Defer to an existing integration: skip if any function body or PROMPT_COMMAND
 # already emits an OSC 133 mark (a second emitter would double the marks).
-__oximux_emits_133=0
+__trex_emits_133=0
 if { declare -f 2>/dev/null; printf '%s' \"${PROMPT_COMMAND:-}\"; } | grep -q ']133;'; then
-  __oximux_emits_133=1
+  __trex_emits_133=1
 fi
-if [[ -z \"${__oximux_shell_integration:-}\" && \"${OXIMUX_SHELL_INTEGRATION:-1}\" != \"0\" \\
-      && \"$__oximux_emits_133\" == \"0\" \\
+if [[ -z \"${__trex_shell_integration:-}\" && \"${trex_SHELL_INTEGRATION:-1}\" != \"0\" \\
+      && \"$__trex_emits_133\" == \"0\" \\
       && -z \"${VSCODE_SHELL_INTEGRATION:-}\" ]]; then
-  __oximux_shell_integration=1
-  __oximux_precmd() {
-    local __oximux_status=$?
-    if [[ -n \"${__oximux_in_command:-}\" ]]; then
-      printf '\\033]133;D;%s\\007' \"$__oximux_status\"
-      unset __oximux_in_command
+  __trex_shell_integration=1
+  __trex_precmd() {
+    local __trex_status=$?
+    if [[ -n \"${__trex_in_command:-}\" ]]; then
+      printf '\\033]133;D;%s\\007' \"$__trex_status\"
+      unset __trex_in_command
     fi
     printf '\\033]133;A\\007'
   }
-  __oximux_preexec() {
+  __trex_preexec() {
     [[ -n \"${COMP_LINE:-}\" ]] && return
-    [[ -n \"${__oximux_in_command:-}\" ]] && return
-    [[ \"$BASH_COMMAND\" == \"__oximux_precmd\" ]] && return
+    [[ -n \"${__trex_in_command:-}\" ]] && return
+    [[ \"$BASH_COMMAND\" == \"__trex_precmd\" ]] && return
     printf '\\033]133;C\\007'
-    __oximux_in_command=1
+    __trex_in_command=1
   }
   case \";${PROMPT_COMMAND:-};\" in
-    *\";__oximux_precmd;\"*) ;;
-    *) PROMPT_COMMAND=\"__oximux_precmd${PROMPT_COMMAND:+;$PROMPT_COMMAND}\" ;;
+    *\";__trex_precmd;\"*) ;;
+    *) PROMPT_COMMAND=\"__trex_precmd${PROMPT_COMMAND:+;$PROMPT_COMMAND}\" ;;
   esac
-  trap '__oximux_preexec' DEBUG
+  trap '__trex_preexec' DEBUG
 fi
-unset __oximux_emits_133
+unset __trex_emits_133
 ";
 
     /// PowerShell overlay, dot-sourced after `$PROFILE` has run.
@@ -355,62 +355,62 @@ unset __oximux_emits_133
     /// falls inside the output band. Exit codes, which drive the gutter badges,
     /// are unaffected.
     pub const POWERSHELL_HOOK: &str = "\
-# OxiMux shell integration overlay. Dot-sourced after your profile.
+# TREX shell integration overlay. Dot-sourced after your profile.
 # Written to be safe under Set-StrictMode: every variable is tested for
 # existence before it is read, because a profile that turns strict mode on
 # would otherwise make the prompt itself throw.
-if (-not (Test-Path Variable:\\__OxiMuxShellIntegration) `
-    -and $env:OXIMUX_SHELL_INTEGRATION -ne '0') {
+if (-not (Test-Path Variable:\\__TREXShellIntegration) `
+    -and $env:trex_SHELL_INTEGRATION -ne '0') {
   # Defer to an existing integration: two emitters double the marks and
   # collapse the output band to nothing. This runs after the profile, so any
   # prompt already installed is the user's (or another host's) and wins.
-  $__oximux_existing = ''
+  $__trex_existing = ''
   if (Test-Path Function:\\prompt) {
-    $__oximux_existing = (Get-Item Function:\\prompt).ScriptBlock.ToString()
+    $__trex_existing = (Get-Item Function:\\prompt).ScriptBlock.ToString()
   }
-  if ($__oximux_existing -notmatch '\\]133;|\\]633;') {
-    $Global:__OxiMuxShellIntegration = 1
-    $Global:__OxiMuxRanCommand = $false
-    $Global:__OxiMuxOriginalPrompt = $null
+  if ($__trex_existing -notmatch '\\]133;|\\]633;') {
+    $Global:__TREXShellIntegration = 1
+    $Global:__TREXRanCommand = $false
+    $Global:__TREXOriginalPrompt = $null
     if (Test-Path Function:\\prompt) {
-      $Global:__OxiMuxOriginalPrompt = (Get-Item Function:\\prompt).ScriptBlock
+      $Global:__TREXOriginalPrompt = (Get-Item Function:\\prompt).ScriptBlock
     }
     function Global:prompt {
       # $? MUST be read first: every statement after this one overwrites it.
-      $__oximux_ok = $?
-      $__oximux_last = 0
-      if (Test-Path Variable:\\LASTEXITCODE) { $__oximux_last = $Global:LASTEXITCODE }
+      $__trex_ok = $?
+      $__trex_last = 0
+      if (Test-Path Variable:\\LASTEXITCODE) { $__trex_last = $Global:LASTEXITCODE }
       # A failed cmdlet clears $? without touching $LASTEXITCODE, so fall back
       # to 1 rather than reporting the previous command's code.
-      $__oximux_code = if ($__oximux_ok) { 0 }
-                       elseif ($__oximux_last) { $__oximux_last }
+      $__trex_code = if ($__trex_ok) { 0 }
+                       elseif ($__trex_last) { $__trex_last }
                        else { 1 }
-      $__oximux_esc = [char]27
-      $__oximux_bel = [char]7
-      if ($Global:__OxiMuxRanCommand) {
-        [Console]::Write(\"$__oximux_esc]133;D;$__oximux_code$__oximux_bel\")
+      $__trex_esc = [char]27
+      $__trex_bel = [char]7
+      if ($Global:__TREXRanCommand) {
+        [Console]::Write(\"$__trex_esc]133;D;$__trex_code$__trex_bel\")
       }
-      $Global:__OxiMuxRanCommand = $true
-      [Console]::Write(\"$__oximux_esc]133;A$__oximux_bel\")
-      $__oximux_loc = $ExecutionContext.SessionState.Path.CurrentLocation
-      if ($Global:__OxiMuxOriginalPrompt) {
-        $__oximux_text = & $Global:__OxiMuxOriginalPrompt
+      $Global:__TREXRanCommand = $true
+      [Console]::Write(\"$__trex_esc]133;A$__trex_bel\")
+      $__trex_loc = $ExecutionContext.SessionState.Path.CurrentLocation
+      if ($Global:__TREXOriginalPrompt) {
+        $__trex_text = & $Global:__TREXOriginalPrompt
       } else {
-        $__oximux_text = \"PS $($__oximux_loc.Path)> \"
+        $__trex_text = \"PS $($__trex_loc.Path)> \"
       }
-      $__oximux_tail = ''
+      $__trex_tail = ''
       # cwd + title only for a real filesystem location: a Registry:: or
       # Cert:: location has no path for the host to inherit into a split.
-      if ($__oximux_loc.Provider.Name -eq 'FileSystem') {
-        $__oximux_uri = ([uri]$__oximux_loc.ProviderPath).AbsoluteUri
-        $__oximux_leaf = Split-Path -Leaf $__oximux_loc.ProviderPath
-        $__oximux_tail = \"$__oximux_esc]7;$__oximux_uri$__oximux_bel\" +
-                         \"$__oximux_esc]0;$__oximux_leaf$__oximux_bel\"
+      if ($__trex_loc.Provider.Name -eq 'FileSystem') {
+        $__trex_uri = ([uri]$__trex_loc.ProviderPath).AbsoluteUri
+        $__trex_leaf = Split-Path -Leaf $__trex_loc.ProviderPath
+        $__trex_tail = \"$__trex_esc]7;$__trex_uri$__trex_bel\" +
+                         \"$__trex_esc]0;$__trex_leaf$__trex_bel\"
       }
-      return \"$__oximux_text$__oximux_tail$__oximux_esc]133;C$__oximux_bel\"
+      return \"$__trex_text$__trex_tail$__trex_esc]133;C$__trex_bel\"
     }
   }
-  Remove-Variable -Name __oximux_existing -ErrorAction SilentlyContinue
+  Remove-Variable -Name __trex_existing -ErrorAction SilentlyContinue
 }
 ";
 
@@ -418,22 +418,22 @@ if (-not (Test-Path Variable:\\__OxiMuxShellIntegration) `
     /// pre-exec (`C`), and post-exec (`D;$status`). Runs after the user's
     /// config, so it coexists with their setup.
     pub const FISH_INIT: &str = "\
-set -l __oximux_emits_133 0
-for __oximux_f in (functions -n)
-  if functions $__oximux_f 2>/dev/null | string match -q '*133;*'
-    set __oximux_emits_133 1
+set -l __trex_emits_133 0
+for __trex_f in (functions -n)
+  if functions $__trex_f 2>/dev/null | string match -q '*133;*'
+    set __trex_emits_133 1
     break
   end
 end
-if not set -q __oximux_shell_integration; and test \"$OXIMUX_SHELL_INTEGRATION\" != 0; and not set -q VSCODE_SHELL_INTEGRATION; and test $__oximux_emits_133 -eq 0
-  set -g __oximux_shell_integration 1
-  function __oximux_preexec --on-event fish_preexec
+if not set -q __trex_shell_integration; and test \"$trex_SHELL_INTEGRATION\" != 0; and not set -q VSCODE_SHELL_INTEGRATION; and test $__trex_emits_133 -eq 0
+  set -g __trex_shell_integration 1
+  function __trex_preexec --on-event fish_preexec
     printf '\\033]133;C\\007'
   end
-  function __oximux_postexec --on-event fish_postexec
+  function __trex_postexec --on-event fish_postexec
     printf '\\033]133;D;%s\\007' $status
   end
-  function __oximux_prompt --on-event fish_prompt
+  function __trex_prompt --on-event fish_prompt
     printf '\\033]133;A\\007'
   end
 end
@@ -446,7 +446,7 @@ mod tests {
 
     fn temp_base(tag: &str) -> PathBuf {
         let dir = std::env::temp_dir().join(format!(
-            "oximux-si-test-{}-{}",
+            "trex-si-test-{}-{}",
             std::process::id(),
             tag
         ));
@@ -461,8 +461,8 @@ mod tests {
         install(ShellKind::Zsh, &base, None).expect("install");
         let rc = fs::read_to_string(base.join("zsh").join(".zshrc")).expect("read rc");
         assert!(rc.contains("precmd_functions $preexec_functions"));
-        assert!(rc.contains("__oximux_emits_133=1"));
-        assert!(rc.contains("\"$__oximux_emits_133\" == \"0\""));
+        assert!(rc.contains("__trex_emits_133=1"));
+        assert!(rc.contains("\"$__trex_emits_133\" == \"0\""));
         let _ = fs::remove_dir_all(&base);
     }
 
@@ -510,7 +510,7 @@ mod tests {
     fn powershell_install_dot_sources_the_overlay_after_the_profile() {
         let base = temp_base("pwsh");
         let intg = install(ShellKind::PowerShell, &base, None).expect("install");
-        let script = base.join("powershell").join("oximux.ps1");
+        let script = base.join("powershell").join("TREX.ps1");
         assert!(script.exists());
         assert!(intg.env.is_empty());
         // -NoExit keeps the session interactive; -Command has to come last,
@@ -519,7 +519,7 @@ mod tests {
         assert_eq!(intg.args[1], "-NoExit");
         assert_eq!(intg.args[2], "-Command");
         assert_eq!(intg.args.len(), 4);
-        assert!(intg.args[3].contains("oximux.ps1"));
+        assert!(intg.args[3].contains("TREX.ps1"));
         assert!(intg.args[3].starts_with("try {"), "a broken overlay must not kill the shell");
 
         let hook = fs::read_to_string(&script).expect("read hook");
@@ -527,10 +527,10 @@ mod tests {
         // tab useful — there is no cwd source there other than OSC 7.
         assert!(hook.contains("133;A"));
         assert!(hook.contains("133;C"));
-        assert!(hook.contains("133;D;$__oximux_code"));
-        assert!(hook.contains("]7;$__oximux_uri"));
-        assert!(hook.contains("]0;$__oximux_leaf"));
-        assert!(hook.contains("__oximux_ok = $?"));
+        assert!(hook.contains("133;D;$__trex_code"));
+        assert!(hook.contains("]7;$__trex_uri"));
+        assert!(hook.contains("]0;$__trex_leaf"));
+        assert!(hook.contains("__trex_ok = $?"));
         assert!(hook.contains("-notmatch"));
         let _ = fs::remove_dir_all(&base);
     }
@@ -542,7 +542,7 @@ mod tests {
         // gutter shows is the status of our own bookkeeping.
         let body = scripts::POWERSHELL_HOOK;
         let fn_start = body.find("function Global:prompt {").expect("prompt fn");
-        let status_read = body.find("$__oximux_ok = $?").expect("status read");
+        let status_read = body.find("$__trex_ok = $?").expect("status read");
         let between = &body[fn_start + "function Global:prompt {".len()..status_read];
         assert!(
             between.lines().all(|l| l.trim().is_empty() || l.trim().starts_with('#')),
@@ -569,7 +569,7 @@ mod tests {
     fn ps_quoting_doubles_the_only_character_that_matters() {
         // Nothing interpolates in a PowerShell single-quoted literal, so a
         // backslash path and a `$` both pass through as-is.
-        assert_eq!(ps_single_quote(r"C:\Users\me\oximux.ps1"), r"C:\Users\me\oximux.ps1");
+        assert_eq!(ps_single_quote(r"C:\Users\me\TREX.ps1"), r"C:\Users\me\TREX.ps1");
         assert_eq!(ps_single_quote("$env:PATH"), "$env:PATH");
         assert_eq!(ps_single_quote("it's"), "it''s");
     }
@@ -591,12 +591,12 @@ mod tests {
             assert!(zdir.join(f).exists(), "missing {f}");
         }
         let rc = fs::read_to_string(zdir.join(".zshrc")).expect("read rc");
-        assert!(rc.contains("source \"$OXIMUX_ORIG_ZDOTDIR/.zshrc\""));
-        assert!(rc.contains("ZDOTDIR=\"$OXIMUX_ORIG_ZDOTDIR\""));
+        assert!(rc.contains("source \"$trex_ORIG_ZDOTDIR/.zshrc\""));
+        assert!(rc.contains("ZDOTDIR=\"$trex_ORIG_ZDOTDIR\""));
         assert!(rc.contains("133;A"));
         assert!(rc.contains("133;C"));
         assert!(rc.contains("133;D;%s"));
-        assert!(rc.contains("__oximux_shell_integration"));
+        assert!(rc.contains("__trex_shell_integration"));
         let _ = fs::remove_dir_all(&base);
     }
 
@@ -604,7 +604,7 @@ mod tests {
     fn zsh_install_passes_orig_zdotdir_when_known() {
         let base = temp_base("zsh-orig");
         let intg = install(ShellKind::Zsh, &base, Some("/home/me/.zsh")).expect("install");
-        assert!(intg.env.iter().any(|(k, v)| k == "OXIMUX_ORIG_ZDOTDIR"
+        assert!(intg.env.iter().any(|(k, v)| k == "TREX_ORIG_ZDOTDIR"
             && v == "/home/me/.zsh"));
         let _ = fs::remove_dir_all(&base);
     }
@@ -622,7 +622,7 @@ mod tests {
         let rc = fs::read_to_string(&rcfile).expect("read rcfile");
         assert!(rc.contains("source \"$HOME/.bashrc\""));
         assert!(rc.contains("PROMPT_COMMAND"));
-        assert!(rc.contains("trap '__oximux_preexec' DEBUG"));
+        assert!(rc.contains("trap '__trex_preexec' DEBUG"));
         assert!(rc.contains("133;A"));
         let _ = fs::remove_dir_all(&base);
     }

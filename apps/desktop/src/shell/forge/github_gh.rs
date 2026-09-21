@@ -1,5 +1,5 @@
-//! `gh`-CLI implementation of [`ForgeProvider`](super::ForgeProvider), backed
-//! by the wrappers in `oximux_git::gh`.
+﻿//! `gh`-CLI implementation of [`ForgeProvider`](super::ForgeProvider), backed
+//! by the wrappers in `trex_git::gh`.
 //!
 //! Stateless: a unit struct whose methods delegate to the off-thread `gh`
 //! runners. All `gh`-specific behavior (timeouts, exit-code semantics, graceful
@@ -8,8 +8,8 @@
 
 use std::path::Path;
 
-use oximux_git::Result;
-use oximux_git::gh;
+use trex_git::Result;
+use trex_git::gh;
 
 use super::{CheckRun, CreatePrOptions, ForgeItem, ForgeListFilter, ForgeProvider, MergeMethod};
 
@@ -27,7 +27,7 @@ impl ForgeProvider for GithubForge {
         gh::has_open_pr(cwd).await
     }
 
-    async fn pr_state(&self, cwd: &Path) -> oximux_core::PrState {
+    async fn pr_state(&self, cwd: &Path) -> trex_core::PrState {
         gh::pr_state(cwd).await
     }
 

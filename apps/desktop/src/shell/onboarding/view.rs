@@ -1,4 +1,4 @@
-//! Onboarding wizard render: occluding backdrop + centered card + step
+﻿//! Onboarding wizard render: occluding backdrop + centered card + step
 //! bodies + footer nav. The backdrop is deliberately inert (no click-outside
 //! dismiss); Esc maps to Skip and Enter to Continue/Finish.
 
@@ -19,7 +19,7 @@ const CARD_MAX_HEIGHT: f32 = 600.0;
 
 impl Render for OnboardingWizard {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }
@@ -167,11 +167,11 @@ impl Render for OnboardingWizard {
                         this.move_selection(-1, window, cx)
                     }
                     "left" if this.step == OnboardingStep::ChatView => {
-                        this.open_mode = oximux_settings::OpenMode::Chat;
+                        this.open_mode = trex_settings::OpenMode::Chat;
                         cx.notify();
                     }
                     "right" if this.step == OnboardingStep::ChatView => {
-                        this.open_mode = oximux_settings::OpenMode::Terminal;
+                        this.open_mode = trex_settings::OpenMode::Terminal;
                         cx.notify();
                     }
                     _ => return,
@@ -194,14 +194,14 @@ impl Render for OnboardingWizard {
             // open re-mounts and replays exactly once.
             .child(card.with_animation(
                 "onboarding-enter",
-                Animation::new(motion.m_overlay).with_easing(oximux_settings::ease_out_spring()),
+                Animation::new(motion.m_overlay).with_easing(trex_settings::ease_out_spring()),
                 |el, delta| el.opacity(delta).mt(px(8.0 * (1.0 - delta))),
             ))
             .into_any_element()
     }
 }
 
-fn step_dot(active: bool, theme: oximux_settings::Theme) -> gpui::Div {
+fn step_dot(active: bool, theme: trex_settings::Theme) -> gpui::Div {
     let dot = div().h(px(5.0)).rounded_full();
     if active {
         dot.w(px(16.0)).bg(theme.fg_base)
@@ -214,7 +214,7 @@ impl OnboardingWizard {
     /// Step 1 body: welcome heading + the agent picker (agent_step.rs).
     fn render_agent_step(&mut self, cx: &mut Context<Self>) -> gpui::Div {
         let heading = step_heading(
-            "Welcome to OxiMux",
+            "Welcome to TREX",
             "Choose your default agent — change anytime in Settings",
             self.theme,
             &self.typography.clone(),
@@ -242,8 +242,8 @@ impl OnboardingWizard {
 pub(super) fn step_heading(
     title: &'static str,
     subtitle: &'static str,
-    theme: oximux_settings::Theme,
-    typography: &oximux_settings::Typography,
+    theme: trex_settings::Theme,
+    typography: &trex_settings::Typography,
 ) -> gpui::Div {
     div()
         .flex()

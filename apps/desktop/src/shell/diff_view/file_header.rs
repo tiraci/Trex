@@ -1,4 +1,4 @@
-//! File-header row + sticky-header overlay for the diff body.
+﻿//! File-header row + sticky-header overlay for the diff body.
 //!
 //! Extracted from `paint.rs` so the header — which now carries a fold
 //! chevron, a copy affordance, and a sticky-overlay twin — lives in one
@@ -18,7 +18,7 @@ use gpui::{
     StatefulInteractiveElement as _, Styled, WeakEntity, div, px,
 };
 use gpui_component::{Icon, Sizable as _, tooltip::Tooltip};
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 /// Per-file header metadata, collected from the prepared row list so the
 /// sticky overlay can rebuild any file's header without re-walking the diff.

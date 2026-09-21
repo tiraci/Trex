@@ -1,4 +1,4 @@
-//! Per-agent-tab status watcher task.
+﻿//! Per-agent-tab status watcher task.
 //!
 //! Spawned once per agent tab inside its owning `PaneGroup`. Single
 //! consumer of `AgentStatusStream::changed()` drives BOTH the badge dot
@@ -10,8 +10,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 
 use gpui::{Context, SharedString, Task, WeakEntity};
-use oximux_agents::AgentStatusStream;
-use oximux_core::AgentStatus;
+use trex_agents::AgentStatusStream;
+use trex_core::AgentStatus;
 
 use crate::notifier::{
     NotificationKind, NotificationRequest, NotificationSource, Notifier, SuppressMap, TabId,

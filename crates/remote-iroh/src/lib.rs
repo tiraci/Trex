@@ -1,7 +1,7 @@
-//! The iroh P2P transport for OxiMux remote control.
+﻿//! The iroh P2P transport for TREX remote control.
 //!
-//! Provides the production [`Transport`](oximux_remote_proto::transport::Transport)
-//! and [`Connector`](oximux_remote_session::Connector) impls that sit beneath the
+//! Provides the production [`Transport`](trex_remote_proto::transport::Transport)
+//! and [`Connector`](trex_remote_session::Connector) impls that sit beneath the
 //! pure-Rust `remote-session` client and the transport-agnostic `remote-host`
 //! dispatcher:
 //! - [`IrohTransport`] — a framed message channel over one iroh QUIC bi-stream.
@@ -28,4 +28,4 @@ pub use transport::{IrohTransport, MAX_FRAME};
 
 /// The ALPN both sides negotiate. Bump the trailing version on any breaking wire
 /// change (kept in lock-step with `remote_proto::PROTOCOL_VERSION`).
-pub const OXIMUX_ALPN: &[u8] = b"oximux/remote/1";
+pub const TREX_ALPN: &[u8] = b"TREX/remote/1";

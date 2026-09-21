@@ -1,4 +1,4 @@
-//! The per-connection serve loop: multiplex incoming client requests against the
+﻿//! The per-connection serve loop: multiplex incoming client requests against the
 //! live events of any active `Subscribe`, so a live event is pushed the moment it
 //! is produced without waiting on the next request.
 
@@ -6,10 +6,10 @@ use std::collections::HashMap;
 
 use futures::future::{Either, select};
 use futures::stream::{BoxStream, SelectAll, StreamExt};
-use oximux_agents::session_registry::{ChoiceKind, Seq, SessionId};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::CreateBaseWire;
-use oximux_remote_proto::proto::{Request, Response, RpcError};
+use trex_agents::session_registry::{ChoiceKind, Seq, SessionId};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::CreateBaseWire;
+use trex_remote_proto::proto::{Request, Response, RpcError};
 
 use super::stream::{Live, forward_terminal};
 use super::{ConnAuthn, ConnState, Dispatcher, authorized_peer};
@@ -288,7 +288,7 @@ impl Dispatcher {
             // frame; an older subscriber would drop the whole connection on
             // the unknown ordinal. Opened once, like the sessions stream.
             if fresh
-                && state.peer_version >= oximux_remote_proto::proto::SCHEDULE_PUSH_MIN_VERSION
+                && state.peer_version >= trex_remote_proto::proto::SCHEDULE_PUSH_MIN_VERSION
                 && let Some(runs) = self.schedule_runs_push_stream()
             {
                 streams.push(runs);
@@ -558,7 +558,7 @@ impl Dispatcher {
             // deliberate — the prefixes may differ, and the frames are
             // idempotent for a client that gets both.
             if matches!(response, Response::StateSnapshot(_))
-                && state.peer_version >= oximux_remote_proto::proto::STATE_PUSH_MIN_VERSION
+                && state.peer_version >= trex_remote_proto::proto::STATE_PUSH_MIN_VERSION
                 && let Some(stream) = self.state_push_stream(prefix, /* with_cursor */ false)
             {
                 streams.push(stream);
@@ -575,7 +575,7 @@ impl Dispatcher {
             let response = self.state_watch_from(&peer, prefix.as_deref(), since_seq);
             if matches!(response, Response::StateWatchStarted(_))
                 && state.peer_version
-                    >= oximux_remote_proto::proto::STATE_CURSOR_PUSH_MIN_VERSION
+                    >= trex_remote_proto::proto::STATE_CURSOR_PUSH_MIN_VERSION
                 && let Some(stream) = self.state_push_stream(prefix, /* with_cursor */ true)
             {
                 streams.push(stream);

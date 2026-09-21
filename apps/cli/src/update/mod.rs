@@ -1,4 +1,4 @@
-//! Self-update: fetch a signed release manifest, prove it, and replace the
+﻿//! Self-update: fetch a signed release manifest, prove it, and replace the
 //! CLI and the relay together.
 //!
 //! The trust chain, in the order it must run and for the reason it must run in
@@ -18,13 +18,13 @@
 //! rewrites both. The signature is checked against a key compiled into this
 //! binary, which that token cannot reach.
 //!
-//! Nothing here ever restarts a running `oximux serve`. On unix the running
+//! Nothing here ever restarts a running `TREX serve`. On unix the running
 //! process keeps the image it already mapped, so a host stays up across the
 //! swap and picks the new binary up whenever its service manager restarts it —
 //! which is the service manager's decision, not this command's.
 //!
 //! Every step above except the last two lives in
-//! [`oximux_auto_update::release`], shared with the desktop app's in-app
+//! [`trex_auto_update::release`], shared with the desktop app's in-app
 //! updater. What stays here is what is actually about *this* program: which two
 //! binaries it owns, how they come out of a `.tar.gz`, and how a failure is
 //! rendered into the CLI's JSON envelope.
@@ -36,34 +36,34 @@ use std::path::{Path, PathBuf};
 use crate::cli::exit;
 use crate::output::Failure;
 
-pub use oximux_auto_update::release::{
+pub use trex_auto_update::release::{
     download, manifest, swap, verify, Staging, ReleaseError as UpdateError,
 };
-pub use oximux_auto_update::release::fetch_verified_manifest;
+pub use trex_auto_update::release::fetch_verified_manifest;
 
 use download::Fetcher;
 
 
 /// Printed whenever updating in place is not the answer.
 pub const INSTALL_HINT: &str =
-    "curl -fsSL https://raw.githubusercontent.com/nhtera/OxiMux/main/scripts/install-cli.sh | sh";
+    "curl -fsSL https://raw.githubusercontent.com/tiraci/Trex/main/scripts/install-cli.sh | sh";
 
 /// The command name users type, which is *not* the cargo bin name — the
-/// desktop app owns `oximux` as a cargo target, so the CLI builds as
-/// `oximux-cli` and is installed under this name.
+/// desktop app owns `TREX` as a cargo target, so the CLI builds as
+/// `trex-cli` and is installed under this name.
 pub fn cli_name() -> String {
-    format!("oximux{}", std::env::consts::EXE_SUFFIX)
+    format!("TREX{}", std::env::consts::EXE_SUFFIX)
 }
 
 pub fn relay_name() -> String {
-    format!("oximux-relay{}", std::env::consts::EXE_SUFFIX)
+    format!("trex-relay{}", std::env::consts::EXE_SUFFIX)
 }
 
 /// Map a release failure onto the CLI's shared failure vocabulary. "Already
 /// current" is not an error and never reaches here.
 ///
 /// A free function rather than a method, because [`UpdateError`] is the shared
-/// [`oximux_auto_update::release::ReleaseError`] — the desktop app renders the
+/// [`trex_auto_update::release::ReleaseError`] — the desktop app renders the
 /// same failures as a line of text in its About pane, and neither rendering
 /// belongs on the type both of them raise.
 pub fn into_failure(err: UpdateError) -> Failure {
@@ -94,7 +94,7 @@ fn next_steps(err: &UpdateError) -> Vec<String> {
         ],
         E::Verify(_) | E::DisallowedHost { .. } => vec![
             "Do not retry blindly — this is what a tampered release looks like. Check \
-             https://github.com/nhtera/OxiMux/releases before installing anything."
+             https://github.com/tiraci/Trex/releases before installing anything."
                 .into(),
         ],
         E::Manifest(manifest::ManifestError::NoAssetForTarget { .. }) => {
@@ -172,7 +172,7 @@ impl Install {
 fn managed_by(exe: &Path) -> Option<(&'static str, String)> {
     let path = exe.to_string_lossy().replace('\\', "/");
     if path.contains("/Cellar/") || path.contains("/homebrew/") {
-        return Some(("Homebrew", "brew upgrade oximux".to_string()));
+        return Some(("Homebrew", "brew upgrade TREX".to_string()));
     }
     if path.starts_with("/nix/store/") {
         return Some(("Nix", "Update through your Nix configuration.".to_string()));
@@ -202,7 +202,7 @@ pub fn apply(
     let manifest = fetch_verified_manifest(fetcher, public_key)?;
     verify::verify_is_upgrade(&manifest.version, current)?;
     let asset = manifest.asset_for(target)?;
-    let bytes = oximux_auto_update::release::fetch_verified_asset(fetcher, &manifest.tag(), asset)?;
+    let bytes = trex_auto_update::release::fetch_verified_asset(fetcher, &manifest.tag(), asset)?;
 
     // Staged beside the installed binaries so every rename stays on one
     // filesystem — a cross-device rename is not atomic and would defeat the
@@ -234,13 +234,13 @@ pub fn apply(
 /// breaking every developer's own build. Those pin nothing and pass.
 #[cfg(target_os = "macos")]
 fn platform_gate(candidate: &Path, running: &Path) -> Result<(), UpdateError> {
-    let Ok(pin) = oximux_macos_trust::read_signature(running) else {
+    let Ok(pin) = trex_macos_trust::read_signature(running) else {
         return Ok(());
     };
     if !pin.pinnable() {
         return Ok(());
     }
-    let found = oximux_macos_trust::read_signature(candidate).map_err(|err| UpdateError::Archive {
+    let found = trex_macos_trust::read_signature(candidate).map_err(|err| UpdateError::Archive {
         detail: format!("the downloaded binary carries no readable signature: {err}"),
     })?;
     if found.team_id == pin.team_id {

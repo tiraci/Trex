@@ -1,4 +1,4 @@
-//! `oximux term` — list the host's terminals and attach to one. Attach is the
+﻿//! `TREX term` — list the host's terminals and attach to one. Attach is the
 //! relay client's discipline over the remote protocol: build at the replay's
 //! dims, write replay bytes verbatim, then stream — and on a `TermGapped`
 //! notice re-attach for a fresh replay rather than rendering a screen with a
@@ -7,7 +7,7 @@
 
 use std::io::Write as _;
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -21,14 +21,14 @@ const DETACH: u8 = 0x1d;
 /// Map a terminal RPC failure, naming the one cause a generic `Unsupported`
 /// cannot: the host has no relay.
 ///
-/// A host serves terminals only when it could start `oximux-relay`, and a
-/// headless `oximux serve` that could not still serves everything else — so
+/// A host serves terminals only when it could start `trex-relay`, and a
+/// headless `TREX serve` that could not still serves everything else — so
 /// this is the expected state on a server where the relay is missing from the
 /// install, not an exotic one. `rpc_failure` renders `Unsupported` correctly
 /// but with no follow-up, and "does not offer that capability" alone does not
 /// tell an operator which binary to go find.
-fn term_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
-    use oximux_remote_proto::proto::RpcError;
+fn term_failure(err: trex_remote_proto::proto::RpcError) -> Failure {
+    use trex_remote_proto::proto::RpcError;
     if matches!(err, RpcError::Unsupported) {
         return Failure::new(
             "unsupported",
@@ -36,10 +36,10 @@ fn term_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
             "this host serves no terminals (it has no relay)",
         )
         .with_steps([
-            "put `oximux-relay` next to the `oximux` binary — the installer does \
+            "put `trex-relay` next to the `TREX` binary — the installer does \
              this, and the release archive carries both"
                 .into(),
-            "or point the host at one with $OXIMUX_RELAY_BINARY, then restart it".into(),
+            "or point the host at one with $trex_RELAY_BINARY, then restart it".into(),
             "the host logs the reason at startup (`relay unavailable`)".into(),
         ]);
     }

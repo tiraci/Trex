@@ -1,4 +1,4 @@
-//! App-side loader/saver for `keybindings.toml` plus the boot install of
+﻿//! App-side loader/saver for `keybindings.toml` plus the boot install of
 //! the effective keymap (defaults ⊕ overrides).
 //!
 //! Unlike `terminal.toml` there is no file watcher: the settings pane is
@@ -12,7 +12,7 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 
 use gpui::App;
-use oximux_settings::KeybindingOverrides;
+use trex_settings::KeybindingOverrides;
 
 use crate::keymap_registry;
 

@@ -1,4 +1,4 @@
-//! `BrowserView` — a pane-group leaf that hosts a native webview behind a
+﻿//! `BrowserView` — a pane-group leaf that hosts a native webview behind a
 //! minimal browser chrome (back / forward / reload + address bar).
 //!
 //! The webview itself is a native sibling view layered over the window's
@@ -29,7 +29,7 @@ use gpui::{
     Image, ImageFormat, Pixels, SharedString, Task, Window,
 };
 use gpui_component::input::InputState;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 use wry::PageLoadEvent;
 
 use agent_context::{IpcMessage, PickRect};

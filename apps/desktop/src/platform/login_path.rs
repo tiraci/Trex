@@ -1,4 +1,4 @@
-//! Give a GUI-launched app the `PATH` its owner actually has.
+﻿//! Give a GUI-launched app the `PATH` its owner actually has.
 //!
 //! # The failure this exists to stop
 //!
@@ -11,7 +11,7 @@
 //! out, and nothing else.
 //!
 //! Every agent CLI installs outside that stub — `~/.local/bin`, Homebrew, a
-//! Node version manager. So a double-clicked OxiMux lists every agent as "not
+//! Node version manager. So a double-clicked TREX lists every agent as "not
 //! installed", and starting one reports "Failed to start agent: spawn agent
 //! process" with no hint that the cause is an environment variable.
 //!
@@ -85,8 +85,8 @@ const SHELL_TIMEOUT: Duration = Duration::from_secs(10);
 /// prints other things — instant prompts, version-manager notices, a MOTD.
 /// Without them the first `PATH` entry would silently become "banner text glued
 /// to a directory".
-const BEGIN: &str = "__OXIMUX_PATH_BEGIN__";
-const END: &str = "__OXIMUX_PATH_END__";
+const BEGIN: &str = "__trex_PATH_BEGIN__";
+const END: &str = "__trex_PATH_END__";
 
 /// Whether the boot path already ran a probe in this process.
 ///
@@ -165,7 +165,7 @@ pub fn adopt_login_shell_path() {
 /// and it is the actual question being asked — "did a shell set this up for
 /// us?" — rather than a proxy for it.
 ///
-/// All three descriptors, because redirecting one (`oximux > log.txt`) does not
+/// All three descriptors, because redirecting one (`TREX > log.txt`) does not
 /// make a terminal launch into a GUI launch. A GUI launch has none: on macOS
 /// launchd hands the bundle `/dev/null` on all three (verified with `lsof`), a
 /// desktop launcher does the same, and an Explorer-launched Windows binary has
@@ -432,7 +432,7 @@ impl Probe {
 fn probes() -> Vec<Probe> {
     // Not a bare `$SHELL`: off macOS that variable is frequently unset, and
     // `default_shell` falls back to a shell that is actually on the box.
-    let shell = oximux_shell_env::default_shell();
+    let shell = trex_shell_env::default_shell();
     let script = unix_script(&shell);
     // Separate flags rather than a bundled `-lic`, because bundling is a
     // convention of POSIX shells' own option parsers and `fish` is not one.
@@ -488,14 +488,14 @@ fn unix_script(shell: &str) -> String {
 /// work around that buys a fallback with no profile support anyway.
 #[cfg(windows)]
 fn probes() -> Vec<Probe> {
-    use oximux_shell_env::{WindowsPowerShell, WindowsShell};
+    use trex_shell_env::{WindowsPowerShell, WindowsShell};
     // `[Console]::Out.Write` rather than `Write-Host`: no trailing newline, and
     // no console-host formatting between the markers.
     let script = format!("[Console]::Out.Write('{BEGIN}' + $env:PATH + '{END}')");
     [WindowsPowerShell::Auto, WindowsPowerShell::Windows]
         .into_iter()
         .map(|flavour| Probe {
-            program: oximux_shell_env::resolve_windows_shell(WindowsShell::PowerShell, flavour)
+            program: trex_shell_env::resolve_windows_shell(WindowsShell::PowerShell, flavour)
                 .program,
             args: vec![
                 "-NoLogo".into(),
@@ -585,7 +585,7 @@ fn strip_ansi(text: &str) -> String {
 /// stricter contract than the status anyway — either the answer is in the
 /// output or it is not.
 fn run_with_timeout(program: &str, args: &[String], timeout: Duration) -> Option<String> {
-    use oximux_no_window::NoWindow as _;
+    use trex_no_window::NoWindow as _;
     let mut child = Command::new(program)
         .args(args)
         // An `rc` file that reads from stdin blocks until the timeout
@@ -599,7 +599,7 @@ fn run_with_timeout(program: &str, args: &[String], timeout: Duration) -> Option
         // expensive half of it on this variable makes the probe cheap without
         // changing what their terminal does. Borrowed from a competitor that
         // ships the same escape hatch.
-        .env("OXIMUX_SHELL_PATH_PROBE", "1")
+        .env("TREX_SHELL_PATH_PROBE", "1")
         .no_window()
         .spawn()
         .ok()?;
@@ -704,7 +704,7 @@ mod tests {
     /// script, and is the one entry here not verified locally.
     #[cfg(unix)]
     fn the_login_shell_is_one_we_target() -> bool {
-        let shell = oximux_shell_env::default_shell();
+        let shell = trex_shell_env::default_shell();
         let name = std::path::Path::new(&shell)
             .file_name()
             .and_then(std::ffi::OsStr::to_str)
@@ -729,7 +729,7 @@ mod tests {
         // terminal on any descriptor — verified with `lsof` against a bundled
         // app, which holds `/dev/null` on all three.
         assert!(!looks_like_a_shell_launch(false, false, false));
-        // Redirecting one descriptor (`oximux > log.txt`) does not turn a
+        // Redirecting one descriptor (`TREX > log.txt`) does not turn a
         // terminal launch into a GUI launch, so any terminal at all counts.
         for (stdin, stdout, stderr) in [
             (true, false, false),
@@ -967,7 +967,7 @@ mod tests {
         // for — so a missing program must read as `None`, not panic.
         let args = vec!["-c".to_string(), "true".to_string()];
         assert!(
-            run_with_timeout("oximux-this-shell-should-not-exist-xyz", &args, SHELL_TIMEOUT)
+            run_with_timeout("trex-this-shell-should-not-exist-xyz", &args, SHELL_TIMEOUT)
                 .is_none()
         );
     }

@@ -1,4 +1,4 @@
-import { router, usePathname } from 'expo-router';
+﻿import { router, usePathname } from 'expo-router';
 import {
   CalendarClock,
   Circle,
@@ -9,7 +9,7 @@ import {
   SquareTerminal,
   type LucideIcon,
 } from 'lucide-react-native';
-import type { SessionSummary } from 'oximux-core';
+import type { SessionSummary } from 'trex-core';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';

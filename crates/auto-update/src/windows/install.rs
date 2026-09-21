@@ -1,4 +1,4 @@
-//! Self-inspection on Windows: is this process an updatable install, and where
+﻿//! Self-inspection on Windows: is this process an updatable install, and where
 //! are the files it would have to replace?
 //!
 //! The macOS counterpart ([`crate::bundle`]) asks a second question — who
@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use crate::bundle::UnsupportedReason;
 
 /// The executable the installer places, and the one this process is.
-pub const APP_EXE: &str = "oximux.exe";
+pub const APP_EXE: &str = "TREX.exe";
 
 /// An install the updater may act on.
 ///
@@ -23,7 +23,7 @@ pub const APP_EXE: &str = "oximux.exe";
 /// the thing it is supposed to be checking.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InstalledApp {
-    /// The directory the installer owns — `oximux.exe` and every DLL, helper
+    /// The directory the installer owns — `TREX.exe` and every DLL, helper
     /// binary, and bundled tool beside it.
     pub install_dir: PathBuf,
 }
@@ -47,11 +47,11 @@ pub fn eligibility(exe: &Path) -> Result<InstalledApp, UnsupportedReason> {
     Ok(InstalledApp { install_dir })
 }
 
-/// The directory an installed `oximux.exe` lives in, or `None` when this is a
+/// The directory an installed `TREX.exe` lives in, or `None` when this is a
 /// development build.
 ///
 /// "Development build" is decided by the cargo layout around the executable —
-/// `…/target/debug/oximux.exe`, or `…/target/<triple>/release/oximux.exe` —
+/// `…/target/debug/TREX.exe`, or `…/target/<triple>/release/TREX.exe` —
 /// rather than by `debug_assertions`, because `cargo build --release` produces
 /// a release binary sitting in exactly the tree an update must never overwrite.
 /// Replacing it would delete a developer's build output and leave cargo
@@ -82,7 +82,7 @@ fn in_cargo_target_dir(dir: &Path) -> bool {
 /// and the case that matters — an install someone moved into `Program Files`
 /// by hand — refuses writes for reasons no metadata read reports.
 fn dir_is_writable(dir: &Path) -> bool {
-    let probe = dir.join(format!(".oximux-write-probe-{}", std::process::id()));
+    let probe = dir.join(format!(".trex-write-probe-{}", std::process::id()));
     let ok = std::fs::write(&probe, b"").is_ok();
     if ok {
         let _ = std::fs::remove_file(&probe);
@@ -97,11 +97,11 @@ mod tests {
     #[test]
     fn an_installed_exe_resolves_to_its_directory() {
         let dir = install_dir_of(Path::new(
-            r"C:\Users\dev\AppData\Local\Programs\OxiMux\oximux.exe",
+            r"C:\Users\dev\AppData\Local\Programs\TREX\TREX.exe",
         ));
         assert_eq!(
             dir,
-            Some(PathBuf::from(r"C:\Users\dev\AppData\Local\Programs\OxiMux"))
+            Some(PathBuf::from(r"C:\Users\dev\AppData\Local\Programs\TREX"))
         );
     }
 
@@ -111,10 +111,10 @@ mod tests {
     #[test]
     fn a_cargo_build_is_never_an_installable_target() {
         for exe in [
-            r"D:\Projects\OxiMux\target\debug\oximux.exe",
-            r"D:\Projects\OxiMux\target\release\oximux.exe",
-            r"D:\Projects\OxiMux\target\x86_64-pc-windows-msvc\release\oximux.exe",
-            "/home/dev/oximux/target/debug/oximux",
+            r"D:\Projects\TREX\target\debug\TREX.exe",
+            r"D:\Projects\TREX\target\release\TREX.exe",
+            r"D:\Projects\TREX\target\x86_64-pc-windows-msvc\release\TREX.exe",
+            "/home/dev/TREX/target/debug/TREX",
         ] {
             assert_eq!(install_dir_of(Path::new(exe)), None, "{exe}");
         }
@@ -124,10 +124,10 @@ mod tests {
     /// `release`, and refusing that would disable updates for it.
     #[test]
     fn a_directory_merely_named_release_is_still_an_install() {
-        let exe = Path::new(r"C:\Tools\oximux\release\oximux.exe");
+        let exe = Path::new(r"C:\Tools\TREX\release\TREX.exe");
         assert_eq!(
             install_dir_of(exe),
-            Some(PathBuf::from(r"C:\Tools\oximux\release"))
+            Some(PathBuf::from(r"C:\Tools\TREX\release"))
         );
     }
 }

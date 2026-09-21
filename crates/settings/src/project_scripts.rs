@@ -1,6 +1,6 @@
-//! Per-project lifecycle scripts (setup / run / cleanup) loaded from TOML.
+﻿//! Per-project lifecycle scripts (setup / run / cleanup) loaded from TOML.
 //!
-//! Defined in a per-project `.oximux/scripts.toml` (git-committable so a
+//! Defined in a per-project `.trex/scripts.toml` (git-committable so a
 //! team shares them). Each entry is an optional shell snippet run against a
 //! worktree via the user's shell. `auto_setup` opts into running `setup`
 //! automatically as part of worktree *provisioning* (default off) — see
@@ -9,14 +9,14 @@
 //! `default_tabs` names terminal tabs to open in a freshly provisioned
 //! worktree, so a project can declare the shell layout a new branch starts in.
 //!
-//! Do not store secrets here — `.oximux/scripts.toml` is intended to be
+//! Do not store secrets here — `.trex/scripts.toml` is intended to be
 //! committed to git, the same trust boundary as `commands.toml`. Parsing is
 //! tolerant: unknown keys are ignored for forward-compat; a malformed file
 //! surfaces an error the caller logs and falls back to the empty default.
 
 use serde::{Deserialize, Serialize};
 
-/// File name for the per-project scripts file (inside `.oximux/`).
+/// File name for the per-project scripts file (inside `.trex/`).
 pub const FILE_NAME: &str = "scripts.toml";
 
 /// The three lifecycle phases a project can define a script for.
@@ -115,14 +115,14 @@ impl ProjectScripts {
 }
 
 /// Load the lifecycle scripts for `project_root` (or a worktree of it — the
-/// `.oximux/` dir is committed, so a worktree carries the same file). Reads
-/// `<project_root>/.oximux/scripts.toml`. Never panics; returns the default
+/// `.trex/` dir is committed, so a worktree carries the same file). Reads
+/// `<project_root>/.trex/scripts.toml`. Never panics; returns the default
 /// on a missing or malformed file.
 ///
 /// Lives beside the type rather than in the desktop because the worktree
-/// teardown path needs it too, and that path is shared with `oximux serve`.
+/// teardown path needs it too, and that path is shared with `TREX serve`.
 pub fn load_for_project(project_root: &std::path::Path) -> ProjectScripts {
-    let path = project_root.join(".oximux").join(FILE_NAME);
+    let path = project_root.join(".trex").join(FILE_NAME);
     match std::fs::read_to_string(&path) {
         Ok(text) => match ProjectScripts::from_toml_str(&text) {
             Ok(scripts) => scripts,
@@ -250,7 +250,7 @@ future_field = "ignored"
     }
 
     fn write_scripts(root: &std::path::Path, content: &str) {
-        let dir = root.join(".oximux");
+        let dir = root.join(".trex");
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join(FILE_NAME), content).unwrap();
     }

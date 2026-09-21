@@ -1,4 +1,4 @@
-//! Bring the local default branch up to date before branching off it.
+﻿//! Bring the local default branch up to date before branching off it.
 //!
 //! A worktree is created from whatever HEAD happens to be, so a default branch
 //! last pulled a week ago gives the new worktree a week-old base. Turning this
@@ -27,7 +27,7 @@
 //! is a cheap way to skip early with a legible reason, not the safety net —
 //! the safety net is git's.
 
-use oximux_git::Repository;
+use trex_git::Repository;
 
 /// What the freshen attempt did.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -96,7 +96,7 @@ impl SkipReason {
     }
 }
 
-/// The remote to freshen from. `origin` is the only one OxiMux's default-branch
+/// The remote to freshen from. `origin` is the only one TREX's default-branch
 /// detection consults (`origin/HEAD`), so freshening from anything else would
 /// update a branch against a remote the rest of the app is not looking at.
 const REMOTE: &str = "origin";

@@ -1,4 +1,4 @@
-//! The pairing ticket a QR encodes, and the `oximux://connect?ticket=` URL
+﻿//! The pairing ticket a QR encodes, and the `TREX://connect?ticket=` URL
 //! helpers around it.
 //!
 //! A ticket carries only what routes and authenticates a first connection: the
@@ -14,7 +14,7 @@ use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
 
 /// The scheme + host a pairing URL always starts with.
-pub const CONNECT_URL_PREFIX: &str = "oximux://connect";
+pub const CONNECT_URL_PREFIX: &str = "TREX://connect";
 
 /// The canonical registration proof: `HMAC-SHA256(secret, app_pubkey || ts_le)`.
 ///
@@ -71,7 +71,7 @@ impl std::fmt::Debug for PairingTicket {
 /// A pairing encode/decode failure.
 #[derive(Debug, thiserror::Error)]
 pub enum PairingError {
-    #[error("not an oximux pairing url")]
+    #[error("not an TREX pairing url")]
     NotAPairingUrl,
     #[error("pairing url is missing its ticket parameter")]
     MissingTicket,
@@ -97,12 +97,12 @@ impl PairingTicket {
         Ok(postcard::from_bytes(&bytes)?)
     }
 
-    /// The full `oximux://connect?ticket=…` deep link a QR renders.
+    /// The full `TREX://connect?ticket=…` deep link a QR renders.
     pub fn to_url(&self) -> Result<String, PairingError> {
         Ok(format!("{CONNECT_URL_PREFIX}?ticket={}", self.encode()?))
     }
 
-    /// Parse a ticket out of an `oximux://connect?ticket=…` URL. The `ticket`
+    /// Parse a ticket out of an `TREX://connect?ticket=…` URL. The `ticket`
     /// value is `base64url` (no `&`/`=`/reserved chars), so a lightweight split
     /// avoids pulling a URL-parsing dependency into this portable crate.
     pub fn from_url(url: &str) -> Result<Self, PairingError> {
@@ -141,7 +141,7 @@ mod tests {
     fn ticket_round_trips_through_url() {
         let t = sample(None);
         let url = t.to_url().expect("url");
-        assert!(url.starts_with("oximux://connect?ticket="));
+        assert!(url.starts_with("TREX://connect?ticket="));
         assert_eq!(PairingTicket::from_url(&url).expect("from_url"), t);
     }
 
@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn missing_ticket_param_is_rejected() {
         assert!(matches!(
-            PairingTicket::from_url("oximux://connect?foo=bar"),
+            PairingTicket::from_url("TREX://connect?foo=bar"),
             Err(PairingError::MissingTicket)
         ));
     }

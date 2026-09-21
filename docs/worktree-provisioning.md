@@ -1,15 +1,15 @@
-# Worktree provisioning
+﻿# Worktree provisioning
 
 A git worktree gives you every **tracked** file and none of the untracked ones.
 That is correct for git and useless in practice: the `.env`, the dev certs, and
 the `node_modules` your project needs are all things a fresh worktree does not
-have. Provisioning is the step that closes that gap, so a worktree OxiMux
+have. Provisioning is the step that closes that gap, so a worktree TREX
 reports as created is one you can actually work in.
 
 Two things happen, in this order, between `git worktree add` and the workspace
 appearing in the sidebar:
 
-1. **Copy** the untracked local files named in `.oximuxinclude`.
+1. **Copy** the untracked local files named in `.TREXinclude`.
 2. **Run** the project's `setup` script.
 
 The order is fixed, because setup scripts read the files the copy brings.
@@ -26,7 +26,7 @@ Provisioning is **off by default**. A project that has never configured it
 behaves exactly as it did before this existed.
 
 ```toml
-# .oximux/scripts.toml — committed, shared by the team
+# .trex/scripts.toml — committed, shared by the team
 auto_setup = true
 setup   = "pnpm install --frozen-lockfile"
 run     = "pnpm dev"
@@ -50,11 +50,11 @@ still how you re-run setup in an existing worktree.
 
 ## Verifying a change to any of this
 
-`scripts/live-verify-worktree.sh` drives the real `oximux serve` and
-`oximux worktree` against a real git repository:
+`scripts/live-verify-worktree.sh` drives the real `TREX serve` and
+`TREX worktree` against a real git repository:
 
 ```sh
-cargo build -p oximux-cli
+cargo build -p trex-cli
 ./scripts/live-verify-worktree.sh
 ```
 
@@ -74,11 +74,11 @@ actually broke, including that an adopted branch survives a delete.
 
 A worktree can check out a branch that already exists (`--branch <NAME>`, or
 **Existing branch** in the create dialog) instead of cutting a new one. When it
-does, OxiMux records that it did not create that branch — and every path that
+does, TREX records that it did not create that branch — and every path that
 later removes the worktree leaves the branch alone, including **Force Delete**.
 
 Removing a worktree is not permission to delete the branch it was sitting on.
-For a worktree whose branch OxiMux minted (`<prefix>/<slug>`, the ordinary
+For a worktree whose branch TREX minted (`<prefix>/<slug>`, the ordinary
 case), deletion still removes the branch as it always has: that branch has no
 life outside the worktree.
 
@@ -112,7 +112,7 @@ before, and so does an ordinary create that names no base at all.
 > Do not put secrets in `scripts.toml`. It is meant to be committed, the same
 > trust boundary as `commands.toml`.
 
-## `.oximuxinclude`
+## `.TREXinclude`
 
 A file at the project root naming the untracked files a worktree cannot work
 without. It is committed, so it names *paths*, never contents.
@@ -160,7 +160,7 @@ the assertions are `#[cfg(unix)]` and therefore prove nothing on Windows yet.
 
 ### Put dependencies in the setup script, not here
 
-`.oximuxinclude` copies files one at a time. Naming `node_modules/` will work
+`.TREXinclude` copies files one at a time. Naming `node_modules/` will work
 and will be slow. Installing dependencies is what `setup` is for.
 
 ## The transcript

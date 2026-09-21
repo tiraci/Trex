@@ -1,4 +1,4 @@
-//! End-to-end proof of the update lifecycle against *real* signed bundles,
+﻿//! End-to-end proof of the update lifecycle against *real* signed bundles,
 //! a real DMG, a real mount, and a real HTTP feed.
 //!
 //! Everything the unit tests mock out is genuine here: `codesign` signs the
@@ -13,7 +13,7 @@
 //! have. Run it locally with:
 //!
 //! ```text
-//! cargo test -p oximux-auto-update --test staged_update_e2e -- --ignored --nocapture
+//! cargo test -p trex-auto-update --test staged_update_e2e -- --ignored --nocapture
 //! ```
 //!
 //! `spctl` is skipped via the debug-only knob: these fixtures are signed but
@@ -29,8 +29,8 @@ use std::process::Command;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
-use oximux_auto_update::staging::{apply_pending, PendingUpdate, SwapOutcome};
-use oximux_auto_update::{
+use trex_auto_update::staging::{apply_pending, PendingUpdate, SwapOutcome};
+use trex_auto_update::{
     CheckTrigger, InstalledApp, SignaturePolicy, UpdateStatus, UpdaterConfig, Version,
 };
 
@@ -51,14 +51,14 @@ fn signing_identity() -> Option<String> {
 /// and an `Info.plist` carrying the version the updater reads.
 fn make_bundle(path: &Path, identifier: &str, version: &str, identity: &str) {
     std::fs::create_dir_all(path.join("Contents/MacOS")).expect("mkdir");
-    std::fs::copy("/bin/echo", path.join("Contents/MacOS/OxiMux")).expect("copy exe");
+    std::fs::copy("/bin/echo", path.join("Contents/MacOS/TREX")).expect("copy exe");
     std::fs::write(
         path.join("Contents/Info.plist"),
         format!(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
              <plist version=\"1.0\"><dict>\
              <key>CFBundleIdentifier</key><string>{identifier}</string>\
-             <key>CFBundleExecutable</key><string>OxiMux</string>\
+             <key>CFBundleExecutable</key><string>TREX</string>\
              <key>CFBundleShortVersionString</key><string>{version}</string>\
              </dict></plist>"
         ),
@@ -80,7 +80,7 @@ fn make_dmg(app: &Path, out: &Path) {
     std::fs::create_dir_all(&staging).expect("mkdir");
     let status = Command::new("/usr/bin/ditto")
         .arg(app)
-        .arg(staging.join("OxiMux.app"))
+        .arg(staging.join("trex.app"))
         .status()
         .expect("ditto runs");
     assert!(status.success(), "ditto into dmg staging failed");
@@ -89,7 +89,7 @@ fn make_dmg(app: &Path, out: &Path) {
         .args(["create", "-quiet", "-fs", "HFS+", "-format", "UDZO", "-srcfolder"])
         .arg(&staging)
         .arg("-volname")
-        .arg("OxiMux")
+        .arg("TREX")
         .arg(out)
         .status()
         .expect("hdiutil runs");
@@ -109,7 +109,7 @@ impl FeedServer {
         let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
         let port = listener.local_addr().expect("addr").port();
         let body = std::fs::read(&dmg).expect("read dmg");
-        let asset = format!("OxiMux-{version}-macos-arm64.dmg");
+        let asset = format!("trex-{version}-macos-arm64.dmg");
         let feed = format!(
             "{{\"tag_name\":\"v{version}\",\"body\":\"E2E release\",\"assets\":[\
                {{\"name\":\"{asset}\",\
@@ -168,7 +168,7 @@ fn an_update_stages_without_touching_the_running_bundle_then_swaps_at_quit() {
         panic!("no codesigning identity available — this test cannot prove anything without one");
     };
     // SAFETY: single-threaded test setup; no other thread reads env yet.
-    unsafe { std::env::set_var("OXIMUX_UPDATE_SKIP_SPCTL", "1") };
+    unsafe { std::env::set_var("TREX_UPDATE_SKIP_SPCTL", "1") };
 
     let root = tempfile::tempdir().expect("tempdir");
     let apps = root.path().join("Applications");
@@ -176,20 +176,20 @@ fn an_update_stages_without_touching_the_running_bundle_then_swaps_at_quit() {
     let cache = root.path().join("cache");
     let manifest = root.path().join("data/pending-update.json");
     let sentinel = root.path().join("data/update-pending-verify");
-    const ID: &str = "dev.nhtera.oximux.e2e";
+    const ID: &str = "dev.tiraci.trex.e2e";
 
     // The installed app, and the newer one a release would publish.
-    let installed = apps.join("OxiMux.app");
+    let installed = apps.join("trex.app");
     make_bundle(&installed, ID, "0.1.3", &identity);
-    let update_src = root.path().join("build/OxiMux.app");
+    let update_src = root.path().join("build/trex.app");
     make_bundle(&update_src, ID, "0.2.0", &identity);
-    let dmg = root.path().join("OxiMux-0.2.0-macos-arm64.dmg");
+    let dmg = root.path().join("trex-0.2.0-macos-arm64.dmg");
     make_dmg(&update_src, &dmg);
 
     let server = FeedServer::start(dmg, "0.2.0".into());
-    unsafe { std::env::set_var("OXIMUX_UPDATE_FEED_URL", server.feed_url()) };
+    unsafe { std::env::set_var("TREX_UPDATE_FEED_URL", server.feed_url()) };
 
-    let pin = oximux_macos_trust::read_signature(&installed).expect("installed bundle is signed");
+    let pin = trex_macos_trust::read_signature(&installed).expect("installed bundle is signed");
     assert!(
         pin.pinnable(),
         "a signed fixture must yield a pinnable identity, got {pin:?}"
@@ -208,7 +208,7 @@ fn an_update_stages_without_touching_the_running_bundle_then_swaps_at_quit() {
     };
 
     // --- Background pass: download, mount, stage, verify. ---
-    let (rx, handle) = oximux_auto_update::spawn_check(
+    let (rx, handle) = trex_auto_update::spawn_check(
         config.clone(),
         CheckTrigger::Manual,
         Arc::new(AtomicBool::new(false)),
@@ -251,7 +251,7 @@ fn an_update_stages_without_touching_the_running_bundle_then_swaps_at_quit() {
 
     // A second check while one is not running is fine; the guard is about
     // concurrency, and the staged update short-circuits the network.
-    let (rx2, handle2) = oximux_auto_update::spawn_check(
+    let (rx2, handle2) = trex_auto_update::spawn_check(
         config.clone(),
         CheckTrigger::Background,
         Arc::new(AtomicBool::new(false)),
@@ -284,8 +284,8 @@ fn an_update_stages_without_touching_the_running_bundle_then_swaps_at_quit() {
     assert_eq!(apply_pending(&config, Some(&sentinel)), SwapOutcome::Nothing);
 
     unsafe {
-        std::env::remove_var("OXIMUX_UPDATE_SKIP_SPCTL");
-        std::env::remove_var("OXIMUX_UPDATE_FEED_URL");
+        std::env::remove_var("TREX_UPDATE_SKIP_SPCTL");
+        std::env::remove_var("TREX_UPDATE_FEED_URL");
     }
 }
 
@@ -301,15 +301,15 @@ fn a_staged_bundle_tampered_before_quit_is_refused_and_the_old_version_survives(
     std::fs::create_dir_all(&apps).expect("mkdir");
     let manifest = root.path().join("data/pending-update.json");
     let sentinel = root.path().join("data/update-pending-verify");
-    const ID: &str = "dev.nhtera.oximux.e2e";
+    const ID: &str = "dev.tiraci.trex.e2e";
 
-    let installed = apps.join("OxiMux.app");
+    let installed = apps.join("trex.app");
     make_bundle(&installed, ID, "0.1.3", &identity);
 
     // A staged update that passed verification when it was staged...
-    let staged = apps.join(".OxiMux.update-tamper.app");
+    let staged = apps.join(".TREX.update-tamper.app");
     make_bundle(&staged, ID, "0.2.0", &identity);
-    let pin = oximux_macos_trust::read_signature(&installed).expect("signed");
+    let pin = trex_macos_trust::read_signature(&installed).expect("signed");
     let config = UpdaterConfig {
         current_version: Version::new(0, 1, 3),
         app: InstalledApp {
@@ -331,7 +331,7 @@ fn a_staged_bundle_tampered_before_quit_is_refused_and_the_old_version_survives(
     .expect("manifest");
 
     // ...and was then modified while it sat waiting for the user to quit.
-    std::fs::write(staged.join("Contents/MacOS/OxiMux"), b"#!/bin/sh\necho pwned\n")
+    std::fs::write(staged.join("Contents/MacOS/TREX"), b"#!/bin/sh\necho pwned\n")
         .expect("tamper");
 
     assert_eq!(

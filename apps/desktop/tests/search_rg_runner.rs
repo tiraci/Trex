@@ -1,13 +1,13 @@
-//! Integration test: shell out to real `ripgrep` against the checked-in
+﻿//! Integration test: shell out to real `ripgrep` against the checked-in
 //! fixture directory under `tests/fixtures/search/`.
 //!
 //! Skips automatically when `rg` is not on PATH so CI environments without
 //! the binary don't fail (they should run `apt-get install ripgrep` etc).
 
-use oximux_app::shell::search_panel::rg_runner::{
+use trex_app::shell::search_panel::rg_runner::{
     DEFAULT_MAX_RESULTS, detect_rg_available, run_ripgrep,
 };
-use oximux_app::shell::search_panel::search_state::SearchOptions;
+use trex_app::shell::search_panel::search_state::SearchOptions;
 use std::path::PathBuf;
 
 fn fixture_root() -> PathBuf {

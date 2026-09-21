@@ -1,4 +1,4 @@
-//! Connection factory — turns a transport-tagged [`ConnectSpec`] into a live
+﻿//! Connection factory — turns a transport-tagged [`ConnectSpec`] into a live
 //! `Box<dyn AgentConnection>` + its event receiver, so the app never names a
 //! concrete connection type. The StreamJson arm drives Claude (today's path);
 //! the ACP arm is a discoverable stub a later phase fills.
@@ -149,11 +149,11 @@ pub struct ConnectSpec {
     /// same per-adapter-launch-detail reason.
     pub omp_command: Option<String>,
     /// omp's approval posture (only read by the `OmpRpc` arm). `None` uses
-    /// the deliberate OxiMux default (`Write` — NOT omp's own `yolo` default;
+    /// the deliberate TREX default (`Write` — NOT omp's own `yolo` default;
     /// the flag is always passed explicitly either way). Never `PiPosture`:
     /// the domains differ (a tool allowlist vs an approval mode).
     pub omp_posture: Option<OmpPosture>,
-    /// MCP servers the *host* declares for this session — a sidecar OxiMux
+    /// MCP servers the *host* declares for this session — a sidecar TREX
     /// spawns and supervises, on top of whatever the user's own config provides.
     ///
     /// Unlike the per-transport fields above this one is deliberately shared:
@@ -162,7 +162,7 @@ pub struct ConnectSpec {
     /// launch that declares none, which keeps those invocations unchanged.
     pub mcp_servers: Vec<McpServerSpec>,
     /// Inline settings JSON for this session (Claude's `--settings`), carrying
-    /// the hooks OxiMux uses to police what it declared above.
+    /// the hooks TREX uses to police what it declared above.
     ///
     /// Claude-only, like `codex_posture` is Codex-only: hooks are that CLI's
     /// mechanism and no other transport here has an equivalent. That asymmetry
@@ -321,7 +321,7 @@ pub fn connect(spec: ConnectSpec) -> Result<(Arc<dyn AgentConnection>, Receiver<
             Ok((Arc::new(conn) as Arc<dyn AgentConnection>, rx))
         }
         Transport::OmpRpc => {
-            // `None` → the deliberate OxiMux default (Write). The flag itself
+            // `None` → the deliberate TREX default (Write). The flag itself
             // is ALWAYS emitted — omp's own default is yolo (see `build_args`).
             let posture = spec.omp_posture.unwrap_or_default();
             // omp resumes by full session UUID only; `build_args` refuses

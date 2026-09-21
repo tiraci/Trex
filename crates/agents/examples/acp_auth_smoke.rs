@@ -1,4 +1,4 @@
-//! Headless end-to-end verification of the ACP auth flow: a logged-out agent
+﻿//! Headless end-to-end verification of the ACP auth flow: a logged-out agent
 //! must surface its methods (not a dead-end error), and after the client
 //! `authenticate`s the session must open on the SAME connection (no respawn).
 //!
@@ -6,14 +6,14 @@
 //! carrying the advertised method arrives, drives `authenticate` with it, and
 //! then observes `SessionInit`. Exits non-zero otherwise.
 //!
-//! Run: `cargo run -p oximux-agents --example acp_auth_smoke`
+//! Run: `cargo run -p trex-agents --example acp_auth_smoke`
 
 use std::sync::mpsc::RecvTimeoutError;
 use std::time::{Duration, Instant};
 
-use oximux_agents::thread::acp::AcpConnection;
-use oximux_agents::thread::connection::AgentConnection;
-use oximux_agents::thread::event::ThreadEvent;
+use trex_agents::thread::acp::AcpConnection;
+use trex_agents::thread::connection::AgentConnection;
+use trex_agents::thread::event::ThreadEvent;
 
 fn main() {
     let agent_bin = std::env::current_exe()
@@ -22,7 +22,7 @@ fn main() {
         .expect("locate mock_acp_auth_agent");
     if !agent_bin.exists() {
         eprintln!(
-            "FAIL: {} not built — run `cargo build -p oximux-agents --example mock_acp_auth_agent` first",
+            "FAIL: {} not built — run `cargo build -p trex-agents --example mock_acp_auth_agent` first",
             agent_bin.display()
         );
         std::process::exit(1);

@@ -1,10 +1,10 @@
-//! Status-section grouping for the agents dashboard — the `DONE 4`-style
+﻿//! Status-section grouping for the agents dashboard — the `DONE 4`-style
 //! headers from the reference cockpit. Pure + testable: turns an
 //! attention-sorted `Vec<AgentRow>` into a flat `Header | Row` item list,
 //! severity-ordered, empty sections dropped. The render layer (mod.rs) walks
 //! the items and paints a header or a card per entry.
 
-use oximux_core::AgentStatus;
+use trex_core::AgentStatus;
 
 use crate::shell::agents_dashboard::model::AgentRow;
 
@@ -109,13 +109,13 @@ pub fn group_into_sections(rows: Vec<AgentRow>) -> Vec<DashboardItem> {
 mod tests {
     use super::*;
     use crate::shell::left_rail::RailAgentTarget;
-    use oximux_core::Workspace;
+    use trex_core::Workspace;
 
     fn workspace() -> Workspace {
         Workspace {
             id: "ws".into(),
             project_id: "p".into(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: "ws".into(),

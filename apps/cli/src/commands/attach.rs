@@ -1,4 +1,4 @@
-//! `oximux attach` — and the shared session-streaming loop `run`, `send`, and
+﻿//! `TREX attach` — and the shared session-streaming loop `run`, `send`, and
 //! `wait` compose. One loop owns the whole contract: Subscribe + backlog
 //! replay, seq-gap detection with EventsSince recovery, transcript resync with
 //! a printed marker when the backlog can no longer fill the gap, Ctrl+C as
@@ -6,9 +6,9 @@
 
 use std::io::Write as _;
 
-use oximux_agent_core::thread::ThreadEvent;
-use oximux_remote_proto::messages::HostEvent;
-use oximux_remote_proto::proto::{Request, Response};
+use trex_agent_core::thread::ThreadEvent;
+use trex_remote_proto::messages::HostEvent;
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -113,7 +113,7 @@ fn emit_keepalive(json_mode: bool, session: &str, waited: std::time::Duration, a
     } else if awaiting {
         eprintln!(
             "· still waiting on {session} ({secs}s) — a decision is pending; \
-             `oximux permit ls {session}`"
+             `TREX permit ls {session}`"
         );
     } else {
         eprintln!("· still waiting on {session} ({secs}s, quiet for {}s)", KEEPALIVE_AFTER.as_secs());

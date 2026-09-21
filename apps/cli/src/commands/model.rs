@@ -1,9 +1,9 @@
-//! `oximux model` / `oximux mode` — see and switch a session's model and
+﻿//! `TREX model` / `TREX mode` — see and switch a session's model and
 //! permission mode. A backend that fixes these at spawn may refuse the switch
 //! when no desktop view can respawn the child; that refusal is surfaced, not
 //! masked.
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::client::{Client, rpc_failure, unexpected_reply};

@@ -1,14 +1,14 @@
-//! The authenticated session-RPC handlers — each re-checks the device's scope
+﻿//! The authenticated session-RPC handlers — each re-checks the device's scope
 //! (`is_allowed_for`) before touching the [`SessionRegistry`], so revocation and
 //! per-device scoping bite on every call.
 
-use oximux_agents::session_registry::{ChoiceKind, SessionHandle};
-use oximux_remote_proto::messages::{
+use trex_agents::session_registry::{ChoiceKind, SessionHandle};
+use trex_remote_proto::messages::{
     AnswerQuestionReq, ResolvePermissionReq, SendPromptReq, SessionInfoWire, SessionStatusWire,
     SessionSummary, SessionTranscriptWire,
 };
-use oximux_remote_proto::proto::{Choice, Response, RpcError, SessionChoices};
-use oximux_remote_proto::HostEvent;
+use trex_remote_proto::proto::{Choice, Response, RpcError, SessionChoices};
+use trex_remote_proto::HostEvent;
 
 use super::Dispatcher;
 use crate::auth::Peer;
@@ -49,9 +49,9 @@ fn dormant_choice(choice: crate::catalog::DormantChoice) -> Choice {
 
 impl Dispatcher {
     /// The per-device-filtered session list — the shared body behind both the
-    /// [`Request::ListSessions`](oximux_remote_proto::proto::Request::ListSessions)
+    /// [`Request::ListSessions`](trex_remote_proto::proto::Request::ListSessions)
     /// reply and every pushed
-    /// [`SessionsChanged`](oximux_remote_proto::proto::Response::SessionsChanged)
+    /// [`SessionsChanged`](trex_remote_proto::proto::Response::SessionsChanged)
     /// snapshot, so both honour the same scope filter and meta lookup.
     pub(super) fn snapshot_sessions(&self, peer: &Peer) -> Vec<SessionSummary> {
         let live = self.live_session_rows(peer);
@@ -157,7 +157,7 @@ impl Dispatcher {
         // registry. This one was not: a dormant session is read straight off
         // disk, where the desktop's own persisted transcript keeps its screen
         // captures. Same call, so both branches leave here in the same state.
-        let (entries_json, captures) = oximux_agent_core::redact::scrub_transcript(&entries_json);
+        let (entries_json, captures) = trex_agent_core::redact::scrub_transcript(&entries_json);
         if captures > 0 {
             tracing::debug!(session_id, captures, "dropped screen captures from stored history");
         }

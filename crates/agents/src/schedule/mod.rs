@@ -1,8 +1,8 @@
-//! Scheduled agent runs: what repeats, when it fires next, where that is
+﻿//! Scheduled agent runs: what repeats, when it fires next, where that is
 //! stored, and the shared engine that fires it.
 //!
-//! **A schedule fires only while an OxiMux host is running** — the desktop app
-//! or `oximux serve`; whichever holds the data dir's ticker lock ticks (see
+//! **A schedule fires only while an TREX host is running** — the desktop app
+//! or `TREX serve`; whichever holds the data dir's ticker lock ticks (see
 //! [`ticker`]). There is no `launchd` job: a scheduled run is a ticker inside
 //! a host process. The desktop's keep-awake stops the Mac idle-sleeping while
 //! it holds the role, but nothing here wakes a sleeping machine or relaunches

@@ -1,4 +1,4 @@
-//! Shared transport for forge CLIs (`gh`, `glab`).
+﻿//! Shared transport for forge CLIs (`gh`, `glab`).
 //!
 //! Both wrappers need the exact same mechanics — off-thread spawn, a
 //! non-interactive environment, concurrent stdout/stderr drain, a hard
@@ -7,7 +7,7 @@
 //! here once and [`crate::gh::GhCmd`] / [`crate::glab::GlabCmd`] delegate.
 
 use crate::error::{GitError, Result};
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 use std::ffi::OsString;
 use std::path::Path;
 use std::time::Duration;

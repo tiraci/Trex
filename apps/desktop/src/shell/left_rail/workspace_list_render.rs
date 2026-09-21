@@ -1,8 +1,8 @@
-//! The rail's workspace-list ordering: sort and group modes, their persisted
+﻿//! The rail's workspace-list ordering: sort and group modes, their persisted
 //! keys, and the pure `sort_workspaces` the list renderer calls. No GPUI
 //! runtime needed.
 
-use oximux_core::Workspace;
+use trex_core::Workspace;
 
 /// How workspace rows within a project group are ordered.
 ///
@@ -174,12 +174,12 @@ mod tests {
         Workspace {
             id: id.to_string(),
             project_id: "p1".to_string(),
-            // Not a branch OxiMux minted: a synthesized row or a
+            // Not a branch TREX minted: a synthesized row or a
             // fixture. `false` is the reading that never deletes.
             branch_minted: false,
             name: id.to_string(),
             slug: id.to_string(),
-            branch: format!("oximux/{id}"),
+            branch: format!("TREX/{id}"),
             worktree_path: worktree_path.to_string(),
             status: "active".to_string(),
             created_at: created_at.to_string(),

@@ -1,13 +1,13 @@
-//! The headless [`ScheduleFirer`]: a scheduled fire spawns straight into the
+﻿//! The headless [`ScheduleFirer`]: a scheduled fire spawns straight into the
 //! registry through the same [`HeadlessLauncher`] the CreateSession RPC uses,
 //! then sends the schedule's prompt as the session's first message. No tab,
 //! no keep-awake — a server stays awake on its own.
 
 use std::sync::Arc;
 
-use oximux_agents::schedule::{FireOutcome, Schedule, ScheduleFirer, ScheduleTarget};
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_host::{LaunchError, SessionLauncher};
+use trex_agents::schedule::{FireOutcome, Schedule, ScheduleFirer, ScheduleTarget};
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_host::{LaunchError, SessionLauncher};
 
 use super::launcher::HeadlessLauncher;
 
@@ -31,7 +31,7 @@ impl ScheduleFirer for ServeFirer {
             // with the desktop firer — nothing about waking an already-open
             // session is host-specific.
             ScheduleTarget::ExistingSession(session_id) => {
-                return oximux_agents::schedule::nudge_existing_session(
+                return trex_agents::schedule::nudge_existing_session(
                     &self.registry,
                     schedule,
                     session_id,

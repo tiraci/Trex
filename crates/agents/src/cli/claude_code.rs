@@ -1,4 +1,4 @@
-//! Claude Code adapter.
+﻿//! Claude Code adapter.
 //!
 //! Spawns the `claude` CLI in a PTY for interactive use. Status detection
 //! uses a starter regex set focused on the two prompts that map cleanly to
@@ -12,7 +12,7 @@
 
 use anyhow::Result;
 use async_trait::async_trait;
-use oximux_core::AgentStatus;
+use trex_core::AgentStatus;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
@@ -166,7 +166,7 @@ impl CliAgentAdapter for ClaudeCodeAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::AgentAdapter;
+    use trex_core::AgentAdapter;
 
     fn cfg() -> AgentSessionConfig {
         AgentSessionConfig {
@@ -180,7 +180,7 @@ mod tests {
             cols: 80,
             rows: 24,
             custom_command: None,
-            resumption: oximux_core::SessionResumption::None,
+            resumption: trex_core::SessionResumption::None,
         }
     }
 
@@ -243,7 +243,7 @@ mod tests {
     #[test]
     fn build_command_includes_resume_flag() {
         let mut c = cfg();
-        c.resumption = oximux_core::SessionResumption::Resume { id: "abc".into() };
+        c.resumption = trex_core::SessionResumption::Resume { id: "abc".into() };
         let spec = ClaudeCodeAdapter.build_command(&c).unwrap();
         // Plain resume = `--resume <id>` ONLY: no --fork-session, and crucially
         // no --session-id (the CLI rejects it without --fork-session).
@@ -258,7 +258,7 @@ mod tests {
     #[test]
     fn build_command_includes_fork_session_flag() {
         let mut c = cfg();
-        c.resumption = oximux_core::SessionResumption::Fork { id: "x".into() };
+        c.resumption = trex_core::SessionResumption::Fork { id: "x".into() };
         let spec = ClaudeCodeAdapter.build_command(&c).unwrap();
         // Fork = resume + --fork-session, before the fresh --session-id.
         assert_eq!(&spec.args[0..3], &["--resume".to_string(), "x".into(), "--fork-session".into()]);

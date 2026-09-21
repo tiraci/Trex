@@ -1,4 +1,4 @@
-//! The per-connection RPC dispatcher — transport-agnostic.
+﻿//! The per-connection RPC dispatcher — transport-agnostic.
 //!
 //! It owns one connection's auth state, decodes each `Request` frame, and routes
 //! it to the [`SessionRegistry`]. It depends only on the `remote-proto`
@@ -31,8 +31,8 @@ mod worktree_rpcs;
 
 use std::sync::Arc;
 
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_remote_proto::proto::{
+use trex_agents::session_registry::SessionRegistry;
+use trex_remote_proto::proto::{
     ASSUMED_VERSION_WHEN_SILENT, MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Request, Response,
     RpcError, is_compatible,
 };
@@ -105,7 +105,7 @@ pub struct Dispatcher {
     /// trait because it is already gpui-free and process-spawn-free (it only
     /// reads and writes SQLite rows), so no view-layer seam is needed the way
     /// `launcher` and `rewinder` needed one.
-    schedules: Option<Arc<oximux_agents::schedule::ScheduleStore>>,
+    schedules: Option<Arc<trex_agents::schedule::ScheduleStore>>,
     /// The desktop's speech-to-text engine, when the host exposes it. `None`
     /// answers `Unauthorized` for the same reason the other optional surfaces do
     /// — whether this desktop can transcribe is not something an unauthorized
@@ -142,20 +142,20 @@ pub struct Dispatcher {
     /// host and shared with its ticker's recorded-run hook; `None` simply
     /// pushes nothing.
     schedule_events: Option<tokio::sync::broadcast::Sender<
-        oximux_remote_proto::messages::ScheduleRunWire,
+        trex_remote_proto::messages::ScheduleRunWire,
     >>,
     /// The host's team runs, when it keeps them. `None` answers an
     /// **authorized** caller `Unsupported`, like `worktrees` — a host without
     /// the table should say so rather than look like a refusal.
-    teams: Option<Arc<oximux_agents::team::TeamStore>>,
+    teams: Option<Arc<trex_agents::team::TeamStore>>,
     /// The coordination blackboard, when the host keeps one. Same
     /// `Unsupported`-for-authorized shape as `teams`.
-    coord: Option<Arc<oximux_agents::coord::CoordStore>>,
+    coord: Option<Arc<trex_agents::coord::CoordStore>>,
     /// Coordination writes, fanned out to `StateWatch` subscribers. The
     /// dispatcher owns this one (unlike `schedule_events`, which the host's
     /// ticker feeds) because every writer goes through these handlers.
     state_events: Option<
-        tokio::sync::broadcast::Sender<oximux_remote_proto::messages::StateChangeWire>,
+        tokio::sync::broadcast::Sender<trex_remote_proto::messages::StateChangeWire>,
     >,
     /// Recent coordination changes, so a `StateWatchFrom` can replay a gap
     /// instead of resyncing. Always present: it is a bounded in-memory ring, so
@@ -223,7 +223,7 @@ impl Dispatcher {
     /// Expose the desktop's schedules over this dispatcher.
     pub fn with_schedule_store(
         mut self,
-        schedules: Arc<oximux_agents::schedule::ScheduleStore>,
+        schedules: Arc<trex_agents::schedule::ScheduleStore>,
     ) -> Self {
         self.schedules = Some(schedules);
         self
@@ -267,14 +267,14 @@ impl Dispatcher {
     /// keeps the sender and feeds it from its ticker's recorded-run hook.
     pub fn with_schedule_events(
         mut self,
-        events: tokio::sync::broadcast::Sender<oximux_remote_proto::messages::ScheduleRunWire>,
+        events: tokio::sync::broadcast::Sender<trex_remote_proto::messages::ScheduleRunWire>,
     ) -> Self {
         self.schedule_events = Some(events);
         self
     }
 
     /// Expose the host's team runs over this dispatcher.
-    pub fn with_team_store(mut self, teams: Arc<oximux_agents::team::TeamStore>) -> Self {
+    pub fn with_team_store(mut self, teams: Arc<trex_agents::team::TeamStore>) -> Self {
         self.teams = Some(teams);
         self
     }
@@ -282,7 +282,7 @@ impl Dispatcher {
     /// Expose the coordination blackboard, and open the channel its watchers
     /// ride. Created here rather than passed in: every writer is a handler on
     /// this dispatcher, so nothing outside it has a reason to hold the sender.
-    pub fn with_coord_store(mut self, coord: Arc<oximux_agents::coord::CoordStore>) -> Self {
+    pub fn with_coord_store(mut self, coord: Arc<trex_agents::coord::CoordStore>) -> Self {
         self.coord = Some(coord);
         let (tx, _) = tokio::sync::broadcast::channel(64);
         self.state_events = Some(tx);

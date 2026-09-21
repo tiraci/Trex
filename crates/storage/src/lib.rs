@@ -1,4 +1,4 @@
-//! oximux-storage
+﻿//! trex-storage
 //!
 //! SQLite via `rusqlite`, with WAL + per-connection pragmas applied on
 //! `open()` and a linear migration ladder that ships zero migrations in

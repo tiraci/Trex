@@ -1,5 +1,5 @@
-[package]
-name = "oximux-mobile-core"
+﻿[package]
+name = "trex-mobile-core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -14,15 +14,15 @@ rust-version.workspace = true
 # React Native calls it over generated bindings. Builds as a `cdylib` (Android) /
 # `staticlib` (iOS) alongside the normal `lib` for in-workspace tests + bindgen.
 [lib]
-name = "oximux_mobile_core"
+name = "trex_mobile_core"
 crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
-oximux-remote-proto = { workspace = true }
-oximux-remote-session = { workspace = true }
+trex-remote-proto = { workspace = true }
+trex-remote-session = { workspace = true }
 # Client half only — deliberately without the `host` feature the desktop enables.
-oximux-remote-iroh = { workspace = true }
-oximux-agent-core = { workspace = true }
+trex-remote-iroh = { workspace = true }
+trex-agent-core = { workspace = true }
 uniffi = { workspace = true }
 # Owns a runtime for the long-lived connection/pump tasks; async FFI methods run
 # under uniffi's tokio bridge.
@@ -39,9 +39,9 @@ thiserror = { workspace = true }
 [dev-dependencies]
 # Tests drive the real client core against the real `remote-host` dispatcher over
 # the in-memory loopback (a test `Connector`), no iroh/network needed.
-oximux-remote-proto = { workspace = true, features = ["testing"] }
-oximux-remote-host = { workspace = true }
-oximux-agents = { workspace = true }
+trex-remote-proto = { workspace = true, features = ["testing"] }
+trex-remote-host = { workspace = true }
+trex-agents = { workspace = true }
 async-trait = { workspace = true }
 
 [[bin]]

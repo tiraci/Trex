@@ -1,10 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+﻿import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { ProjectGroupHeader } from '@/components/sessions/project-group-header';
 
 describe('ProjectGroupHeader', () => {
   it('reports how many sessions are hidden while it is shut', () => {
-    render(<ProjectGroupHeader name="OxiMux" count={3} expanded={false} onToggle={() => {}} />);
+    render(<ProjectGroupHeader name="TREX" count={3} expanded={false} onToggle={() => {}} />);
 
     // The count only earns its place while collapsed: with the rows on screen it
     // is arithmetic the user can already do.
@@ -12,16 +12,16 @@ describe('ProjectGroupHeader', () => {
   });
 
   it('drops the count once the rows themselves are showing', () => {
-    render(<ProjectGroupHeader name="OxiMux" count={3} expanded onToggle={() => {}} />);
+    render(<ProjectGroupHeader name="TREX" count={3} expanded onToggle={() => {}} />);
 
     expect(screen.queryByText('3')).toBeNull();
   });
 
   it('folds on a press anywhere across the name, not just the chevron', () => {
     const onToggle = jest.fn();
-    render(<ProjectGroupHeader name="OxiMux" count={3} expanded onToggle={onToggle} />);
+    render(<ProjectGroupHeader name="TREX" count={3} expanded onToggle={onToggle} />);
 
-    fireEvent.press(screen.getByLabelText('OxiMux, 3 sessions'));
+    fireEvent.press(screen.getByLabelText('TREX, 3 sessions'));
 
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
@@ -31,7 +31,7 @@ describe('ProjectGroupHeader', () => {
     const onCompose = jest.fn();
     render(
       <ProjectGroupHeader
-        name="OxiMux"
+        name="TREX"
         count={1}
         expanded
         onToggle={onToggle}
@@ -39,7 +39,7 @@ describe('ProjectGroupHeader', () => {
       />
     );
 
-    fireEvent.press(screen.getByLabelText('New session in OxiMux'));
+    fireEvent.press(screen.getByLabelText('New session in TREX'));
 
     // Tapping compose must not also collapse the project the new session lands in.
     expect(onCompose).toHaveBeenCalledTimes(1);

@@ -1,23 +1,23 @@
-//! The lazy host client: nothing here runs until a verb actually needs the
+﻿//! The lazy host client: nothing here runs until a verb actually needs the
 //! host, so `--help`, `version` and `agent-context` never touch the socket.
 //!
-//! Every connection claims a scope: `OXIMUX_SESSION_ID` in the environment
+//! Every connection claims a scope: `TREX_SESSION_ID` in the environment
 //! names the per-session credential this process holds, narrowing it to that
 //! one session; its absence is an operator at their own keyboard. The host
 //! enforces the claim — this side merely never omits it.
 //!
-//! `oximux serve` injects those variables into every agent it spawns; the
+//! `TREX serve` injects those variables into every agent it spawns; the
 //! desktop app does not yet, so an agent there runs as the operator. See
-//! `oximux-remote-local`'s threat-boundary docs.
+//! `trex-remote-local`'s threat-boundary docs.
 
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
-use oximux_remote_local::{DialError, SESSION_ENV_VAR, dial};
-use oximux_remote_proto::Transport;
-use oximux_remote_proto::messages::HelloReq;
-use oximux_remote_proto::proto::{
+use trex_remote_local::{DialError, SESSION_ENV_VAR, dial};
+use trex_remote_proto::Transport;
+use trex_remote_proto::messages::HelloReq;
+use trex_remote_proto::proto::{
     MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Request, Response, is_compatible,
 };
 
@@ -62,7 +62,7 @@ pub struct Client {
 pub fn runtime_dir(dir: Option<PathBuf>) -> Result<PathBuf, Failure> {
     dir.map_or_else(
         || {
-            oximux_remote_local::default_runtime_dir().ok_or_else(|| {
+            trex_remote_local::default_runtime_dir().ok_or_else(|| {
                 Failure::new(
                     "no-data-dir",
                     exit::ERROR,
@@ -96,7 +96,7 @@ pub struct HostSelection {
 
 impl Client {
     /// Connect to whichever host the resolution order picks: `--host` →
-    /// `OXIMUX_HOST` → the recorded default → the local socket.
+    /// `trex_HOST` → the recorded default → the local socket.
     ///
     /// Bare local use stays zero-config: a machine that has never paired has no
     /// hosts file, which resolves to `None` and takes the local path exactly as
@@ -168,8 +168,8 @@ impl Client {
             // thing. The remote path (`remote_client.rs`) has always said both.
             DialError::Unreachable { .. } => Failure::new("unreachable", exit::UNREACHABLE, e.to_string())
                 .with_steps([
-                    "start a host here with `oximux serve` (see docs/server-install.md)".into(),
-                    "or, on a desktop: open the OxiMux app and enable local CLI \
+                    "start a host here with `TREX serve` (see docs/server-install.md)".into(),
+                    "or, on a desktop: open the TREX app and enable local CLI \
                      access (Settings → Remote)"
                         .into(),
                     "if a host should already be running, check it is still up".into(),
@@ -193,7 +193,7 @@ impl Client {
                     ]
                 } else {
                     vec![
-                        "the control credential rotated — restart `oximux serve`, or \
+                        "the control credential rotated — restart `TREX serve`, or \
                          toggle local CLI access off and on in the desktop app, then retry"
                             .to_string(),
                     ]
@@ -202,7 +202,7 @@ impl Client {
             }
             DialError::Handshake(_) => Failure::new("handshake", exit::UNREACHABLE, e.to_string())
                 .with_steps([
-                    "retry; if it persists, restart the host (`oximux serve`, or the \
+                    "retry; if it persists, restart the host (`TREX serve`, or the \
                      desktop app)"
                         .into(),
                 ]),
@@ -266,7 +266,7 @@ impl Client {
         )
         .with_steps([
             format!("update the host so it speaks at least v{needed}"),
-            "`oximux hosts ls` shows every host's protocol version".into(),
+            "`TREX hosts ls` shows every host's protocol version".into(),
         ]))
     }
 
@@ -361,8 +361,8 @@ fn timed_out(what: &str) -> Failure {
 
 /// Map a protocol-level error into the exit-code contract. Shared by every
 /// verb so `Unauthorized` is always exit 5 and never a generic failure.
-pub fn rpc_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
-    use oximux_remote_proto::proto::RpcError;
+pub fn rpc_failure(err: trex_remote_proto::proto::RpcError) -> Failure {
+    use trex_remote_proto::proto::RpcError;
     match err {
         RpcError::Unauthorized => {
             Failure::new("denied", exit::DENIED, "the host refused this call").with_steps([
@@ -373,14 +373,14 @@ pub fn rpc_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
             ])
         }
         RpcError::UnknownSession => {
-            let mut steps = vec!["run `oximux ls` to list sessions".to_string()];
+            let mut steps = vec!["run `TREX ls` to list sessions".to_string()];
             // The one wrong guess worth naming: an agent reaching for its own
             // id finds the credential handle in its environment, which is not
             // a session id and never resolves to one.
             if std::env::var_os(SESSION_ENV_VAR).is_some() {
                 steps.push(format!(
                     "${SESSION_ENV_VAR} names this process's credential, not a session — \
-                     `oximux ls` shows the one session it can reach"
+                     `TREX ls` shows the one session it can reach"
                 ));
             }
             Failure::new("unknown-session", exit::ERROR, "no such session on this host")
@@ -410,12 +410,12 @@ mod tests {
         struct Dead;
         #[async_trait::async_trait]
         impl Transport for Dead {
-            async fn send(&self, _: Vec<u8>) -> Result<(), oximux_remote_proto::TransportError> {
+            async fn send(&self, _: Vec<u8>) -> Result<(), trex_remote_proto::TransportError> {
                 Ok(())
             }
             async fn recv(
                 &self,
-            ) -> Result<Option<Vec<u8>>, oximux_remote_proto::TransportError> {
+            ) -> Result<Option<Vec<u8>>, trex_remote_proto::TransportError> {
                 Ok(None)
             }
         }
@@ -460,7 +460,7 @@ mod tests {
     /// part worth reading.
     #[test]
     fn a_bad_request_surfaces_the_hosts_own_words() {
-        use oximux_remote_proto::proto::RpcError;
+        use trex_remote_proto::proto::RpcError;
         let failure = rpc_failure(RpcError::BadRequest(
             "no such permission mode for this session; it offers: default, plan".into(),
         ));

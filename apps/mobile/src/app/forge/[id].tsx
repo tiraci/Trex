@@ -1,5 +1,5 @@
-import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { ForgeItemKind, type ForgeItem } from 'oximux-core';
+﻿import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { ForgeItemKind, type ForgeItem } from 'trex-core';
 import { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

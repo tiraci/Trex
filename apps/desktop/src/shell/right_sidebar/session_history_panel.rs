@@ -1,4 +1,4 @@
-//! Session History — a right-sidebar panel listing past Claude sessions for the
+﻿//! Session History — a right-sidebar panel listing past Claude sessions for the
 //! project, with a click to reopen any of them as a chat tab.
 //!
 //! Mirrors the reference agent-cockpit "session history" panel: a
@@ -27,14 +27,14 @@ use gpui_component::{
     menu::{DropdownMenu as _, PopupMenu, PopupMenuItem},
 };
 
-use oximux_agents::session_log::{
+use trex_agents::session_log::{
     import_provider_index::load_import_provider_preview,
     now_unix_ms,
     session_index::{SessionEntry, SessionIndex, SessionScope},
     session_preview::{PreviewMessage, PreviewRole, load_session_preview},
 };
-use oximux_core::AgentAdapter;
-use oximux_settings::{Density, Theme, Typography};
+use trex_core::AgentAdapter;
+use trex_settings::{Density, Theme, Typography};
 
 use crate::actions::{OpenChatSession, ResumeAgentSession};
 use crate::shell::agent_ui::agent_presentation::{adapter_display_name, adapter_icon_path};
@@ -489,7 +489,7 @@ impl Focusable for SessionHistoryPanel {
 
 impl Render for SessionHistoryPanel {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(
+        trex_settings::appearance::sync(
             &mut self.theme,
             &mut self.density,
             &mut self.typography,

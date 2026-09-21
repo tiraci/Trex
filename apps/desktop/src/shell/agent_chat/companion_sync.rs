@@ -1,4 +1,4 @@
-//! Fold companion-terminal turns back into the chat transcript.
+﻿//! Fold companion-terminal turns back into the chat transcript.
 //!
 //! A chat tab's companion terminal (⌃⇧V) resumes the SAME session id
 //! interactively, so turns typed there land only in the CLI's session log
@@ -13,10 +13,10 @@ use std::sync::Arc;
 
 use gpui::{AppContext as _, Context, Window};
 
-use oximux_agents::thread::{AgentConnection, ThreadEntry, Transport};
-use oximux_agents::SharedBackend;
-use oximux_core::AgentSessionId;
-use oximux_pty::TerminalSessionId;
+use trex_agents::thread::{AgentConnection, ThreadEntry, Transport};
+use trex_agents::SharedBackend;
+use trex_core::AgentSessionId;
+use trex_pty::TerminalSessionId;
 
 use crate::shell::context_env::SurfaceIds;
 use crate::shell::terminal_view::TerminalView;
@@ -179,7 +179,7 @@ impl AgentChatView {
     ///
     /// Appends the log suffix past the thread's current turns, anchored on the
     /// count of user prompts (see
-    /// [`oximux_agents::thread::tail_beyond_known_turns`]).
+    /// [`trex_agents::thread::tail_beyond_known_turns`]).
     ///
     /// Every backend with a companion resumes the session IN PLACE (Claude
     /// appends to the per-project session jsonl; Codex `resume` appends to the
@@ -222,7 +222,7 @@ impl AgentChatView {
         }
         let source = match self.backend.transport {
             Transport::StreamJson => CompanionLog::Claude(
-                oximux_agents::session_log::project_log_dir(&home.join(".claude"), &self.cwd)
+                trex_agents::session_log::project_log_dir(&home.join(".claude"), &self.cwd)
                     .join(format!("{session_id}.jsonl")),
             ),
             Transport::AppServer => CompanionLog::Codex {
@@ -241,7 +241,7 @@ impl AgentChatView {
                     .acp_command
                     .as_deref()
                     .and_then(|cmd| {
-                        oximux_settings::ACP_PRESETS.iter().find(|p| p.command == cmd)
+                        trex_settings::ACP_PRESETS.iter().find(|p| p.command == cmd)
                     })
                     .is_some_and(|p| p.id == "opencode");
                 if !is_opencode {
@@ -256,49 +256,49 @@ impl AgentChatView {
                 .background_spawn(async move {
                     let folded = match source {
                         CompanionLog::Claude(path) => {
-                            oximux_agents::thread::transcript_from_jsonl(&path)
+                            trex_agents::thread::transcript_from_jsonl(&path)
                                 .unwrap_or_default()
                         }
                         CompanionLog::Codex { codex_dir, thread_id } => {
-                            oximux_agents::thread::locate_rollout(&codex_dir, &thread_id)
+                            trex_agents::thread::locate_rollout(&codex_dir, &thread_id)
                                 .and_then(|p| {
-                                    oximux_agents::thread::import_codex_rollout(&p).ok()
+                                    trex_agents::thread::import_codex_rollout(&p).ok()
                                 })
                                 .map(|import| import.entries)
                                 .unwrap_or_default()
                         }
                         CompanionLog::Pi { home, session_id } => {
-                            oximux_agents::session_log::import_transcript_pi::locate_pi_session(
+                            trex_agents::session_log::import_transcript_pi::locate_pi_session(
                                 &home,
                                 &session_id,
                             )
                             .map(|p| {
-                                oximux_agents::session_log::import_transcript_pi::pi_transcript(
+                                trex_agents::session_log::import_transcript_pi::pi_transcript(
                                     &p,
                                 )
                             })
                             .unwrap_or_default()
                         }
                         CompanionLog::Omp { home, session_id } => {
-                            oximux_agents::session_log::import_transcript_pi::locate_omp_session(
+                            trex_agents::session_log::import_transcript_pi::locate_omp_session(
                                 &home,
                                 &session_id,
                             )
                             .map(|p| {
-                                oximux_agents::session_log::import_transcript_pi::pi_transcript(
+                                trex_agents::session_log::import_transcript_pi::pi_transcript(
                                     &p,
                                 )
                             })
                             .unwrap_or_default()
                         }
                         CompanionLog::OpenCode { home, session_id } => {
-                            oximux_agents::session_log::import_transcript_opencode::opencode_transcript(
+                            trex_agents::session_log::import_transcript_opencode::opencode_transcript(
                                 &home,
                                 &session_id,
                             )
                         }
                     };
-                    oximux_agents::thread::tail_beyond_known_turns(folded, known)
+                    trex_agents::thread::tail_beyond_known_turns(folded, known)
                 })
                 .await;
             if tail.is_empty() {

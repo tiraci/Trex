@@ -1,4 +1,4 @@
-//! `oximux heartbeat` — a session's own recurring wake-ups.
+﻿//! `TREX heartbeat` — a session's own recurring wake-ups.
 //!
 //! The verb an agent runs on itself: from inside a session it needs no
 //! `--session`, because the host resolves the target from the credential the
@@ -23,9 +23,9 @@
 //! oversight. Widening this one means giving heartbeats the same V2 treatment
 //! schedules got, degradation path included.
 
-use oximux_agents::schedule::recurrence::MIN_INTERVAL_MINUTES;
-use oximux_remote_proto::messages::{CreateHeartbeatReq, HeartbeatWire, RecurrenceWire};
-use oximux_remote_proto::proto::{Request, Response};
+use trex_agents::schedule::recurrence::MIN_INTERVAL_MINUTES;
+use trex_remote_proto::messages::{CreateHeartbeatReq, HeartbeatWire, RecurrenceWire};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -45,7 +45,7 @@ const SUPPORTED_CRON: &str = "supported: \"*/N * * * *\" (every N minutes, N ≥
 /// wants that cadence, and it exists.
 const CRON_LIVES_AT: &str =
     "a full five-field expression (ranges, lists, day-of-month) works on \
-     `oximux schedule create --cron`, which opens a new session per fire";
+     `TREX schedule create --cron`, which opens a new session per fire";
 
 /// The `N ≥ 5` above is written out in prose, which a `const &str` cannot
 /// interpolate — so pin it here instead of letting the help text drift away

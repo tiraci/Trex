@@ -1,11 +1,11 @@
-//! First-time pairing: the `Register` HMAC proof path.
+﻿//! First-time pairing: the `Register` HMAC proof path.
 
 use std::collections::HashSet;
 
 use ed25519_dalek::VerifyingKey;
 use hmac::Mac;
-use oximux_remote_proto::RpcError;
-use oximux_remote_proto::messages::RegisterReq;
+use trex_remote_proto::RpcError;
+use trex_remote_proto::messages::RegisterReq;
 
 use super::{
     AuthStore, DeviceRecord, DeviceScope, HmacSha256, REGISTRATION_WINDOW_SECS, StoredDevice,

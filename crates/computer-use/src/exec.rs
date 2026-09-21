@@ -1,9 +1,9 @@
-//! Bounded subprocess execution.
+﻿//! Bounded subprocess execution.
 //!
 //! Every call into the driver goes through here. The driver talks to a daemon
 //! that is in turn talking to arbitrary GUI apps, and a hung or modal target is
 //! an *expected* state rather than an edge case — a spinning beachball on the
-//! app under test must not become a spinning beachball in OxiMux.
+//! app under test must not become a spinning beachball in TREX.
 //!
 //! Same reasoning as `relay-client`'s `REQUEST_TIMEOUT`: the caller may be the
 //! GPUI main thread, so an unbounded wait freezes the whole UI. The timeout
@@ -17,7 +17,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::Error;
-use oximux_no_window::NoWindow as _;
+use trex_no_window::NoWindow as _;
 
 /// How often the wait loop checks whether the child has exited. Small enough
 /// that a fast command (the common case — `status` and `--version` return in

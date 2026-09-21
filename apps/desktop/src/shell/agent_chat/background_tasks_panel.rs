@@ -1,6 +1,6 @@
-//! Stateless renderer for the Background Tasks drawer: the Running / Finished
+﻿//! Stateless renderer for the Background Tasks drawer: the Running / Finished
 //! list of subagents + background bash commands the current turn spawned, folded
-//! onto [`oximux_agents::thread::ChatThread::background_tasks`].
+//! onto [`trex_agents::thread::ChatThread::background_tasks`].
 //!
 //! Kept stateless (like `plan_panel`) — the toggle state lives on the chat view;
 //! this module only turns `&[BackgroundTask]` into an element. "View output" is a
@@ -11,8 +11,8 @@ use gpui::{
     AnyElement, InteractiveElement, IntoElement, MouseButton, ParentElement, SharedString, Styled,
     div, px,
 };
-use oximux_agents::thread::{BackgroundTask, TaskStatus};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::{BackgroundTask, TaskStatus};
+use trex_settings::{Density, Theme, Typography};
 
 /// The status glyph + resolved color for a task, using the shared status palette.
 fn status_badge(status: TaskStatus, theme: &Theme) -> (&'static str, gpui::Hsla) {

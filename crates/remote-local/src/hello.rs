@@ -1,4 +1,4 @@
-//! The local handshake: prove the token, claim a scope.
+﻿//! The local handshake: prove the token, claim a scope.
 //!
 //! The relay's v8 discipline, reused via its `relay-proto` primitives: the
 //! token never crosses the socket; each side proves possession with
@@ -10,8 +10,8 @@
 //! Rides the already-framed [`Transport`], so the handshake and the RPCs that
 //! follow share one framing layer instead of a raw-stream phase with its own.
 
-use oximux_relay_proto::auth::{Nonce, client_proof, proofs_match, server_proof};
-use oximux_remote_proto::Transport;
+use trex_relay_proto::auth::{Nonce, client_proof, proofs_match, server_proof};
+use trex_remote_proto::Transport;
 use rand::RngCore;
 use rand::rngs::OsRng;
 use serde::{Deserialize, Serialize};
@@ -211,7 +211,7 @@ mod tests {
     use super::*;
     use futures::executor::block_on;
     use futures::future::join;
-    use oximux_remote_proto::testing::duplex_pair;
+    use trex_remote_proto::testing::duplex_pair;
 
     const TOKEN: &str = "0011223344556677";
     const SESSION_SECRET: &str = "8899aabbccddeeff";

@@ -1,5 +1,5 @@
-//! Auto-rename from the desktop: the host half of
-//! `oximux-worktree-ops::auto_rename`.
+﻿//! Auto-rename from the desktop: the host half of
+//! `trex-worktree-ops::auto_rename`.
 //!
 //! The crate decides *whether* a codename workspace should take the name of
 //! its work and *to what*; this decides *when*, which is "after the user has
@@ -16,8 +16,8 @@
 use std::path::PathBuf;
 
 use gpui::Context;
-use oximux_core::Workspace;
-use oximux_worktree_ops::{
+use trex_core::Workspace;
+use trex_worktree_ops::{
     AutoRenameProposal, RenameOutcome, auto_rename_with_rollback, is_generated_codename,
     preflight_auto_rename, propose_auto_rename,
 };
@@ -255,19 +255,19 @@ mod tests {
 
     #[test]
     fn the_offer_names_both_branches_and_the_new_label() {
-        let ws = row("amber", "oximux/amber");
+        let ws = row("amber", "TREX/amber");
         let proposal = propose_auto_rename(&ws, "Fix login redirect").unwrap();
         let text = offer_text(&ws, &proposal);
         assert!(text.contains("Fix login redirect"), "{text}");
-        assert!(text.contains("oximux/amber"), "{text}");
-        assert!(text.contains("oximux/fix-login-redirect"), "{text}");
+        assert!(text.contains("TREX/amber"), "{text}");
+        assert!(text.contains("TREX/fix-login-redirect"), "{text}");
     }
 
     #[test]
     fn the_success_toast_is_old_arrow_new() {
         assert_eq!(
-            renamed_text("oximux/amber", "oximux/fix-login-redirect"),
-            "Renamed \u{201c}oximux/amber\u{201d} \u{2192} \u{201c}oximux/fix-login-redirect\u{201d}"
+            renamed_text("TREX/amber", "TREX/fix-login-redirect"),
+            "Renamed \u{201c}TREX/amber\u{201d} \u{2192} \u{201c}TREX/fix-login-redirect\u{201d}"
         );
     }
 }

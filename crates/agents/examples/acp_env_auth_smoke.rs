@@ -1,4 +1,4 @@
-//! Headless verification of the ACP EnvVar-auth flow: an agent that wants an
+﻿//! Headless verification of the ACP EnvVar-auth flow: an agent that wants an
 //! ENV-VAR credential must (1) surface the EnvVar method when spawned WITHOUT it,
 //! and (2) open the session when RESPAWNED with the var set — proving the env
 //! override reaches the child process and the worker's auto-authenticate closes
@@ -9,16 +9,16 @@
 //! `spawn_with_env` with the key set + the method to auto-authenticate (asserts
 //! `SessionInit`). Exits non-zero otherwise.
 //!
-//! Run: `cargo run -p oximux-agents --example acp_env_auth_smoke`
+//! Run: `cargo run -p trex-agents --example acp_env_auth_smoke`
 
 use std::sync::mpsc::{Receiver, RecvTimeoutError};
 use std::time::{Duration, Instant};
 
-use oximux_agents::thread::acp::AcpConnection;
-use oximux_agents::thread::connection::AgentConnection;
-use oximux_agents::thread::event::{AuthMethodKind, ThreadEvent};
+use trex_agents::thread::acp::AcpConnection;
+use trex_agents::thread::connection::AgentConnection;
+use trex_agents::thread::event::{AuthMethodKind, ThreadEvent};
 
-const KEY_VAR: &str = "OXIMUX_MOCK_KEY";
+const KEY_VAR: &str = "TREX_MOCK_KEY";
 
 fn main() {
     let agent_bin = std::env::current_exe()
@@ -27,7 +27,7 @@ fn main() {
         .expect("locate mock_acp_env_auth_agent");
     if !agent_bin.exists() {
         eprintln!(
-            "FAIL: {} not built — run `cargo build -p oximux-agents --example mock_acp_env_auth_agent` first",
+            "FAIL: {} not built — run `cargo build -p trex-agents --example mock_acp_env_auth_agent` first",
             agent_bin.display()
         );
         std::process::exit(1);

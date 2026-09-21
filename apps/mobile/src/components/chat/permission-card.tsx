@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react-native';
+﻿import { Check, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
@@ -101,7 +101,7 @@ export function PermissionCard({ call, request, onAllow, onDeny, onAllowWith }: 
           disabled={busy}
           onPress={() => {
             tick();
-            decide(() => onDeny(request.request_id, 'Denied from the OxiMux mobile app.'));
+            decide(() => onDeny(request.request_id, 'Denied from the TREX mobile app.'));
           }}
         />
 

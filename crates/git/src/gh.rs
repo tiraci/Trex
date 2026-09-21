@@ -1,4 +1,4 @@
-//! Tokio-based wrapper around the GitHub CLI (`gh`).
+﻿//! Tokio-based wrapper around the GitHub CLI (`gh`).
 //!
 //! Mirrors [`crate::process::GitCmd`] in spirit — off-thread invocation, a hard
 //! timeout, and `kill_on_drop` so a cancelled future leaves no zombie — but
@@ -13,7 +13,7 @@
 //! non-zero when the branch has no open PR), so no JSON parser is pulled in.
 
 use crate::error::{GitError, Result};
-use oximux_core::PrState;
+use trex_core::PrState;
 use serde::Deserialize;
 use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
@@ -177,13 +177,13 @@ fn parse_pr_state(stdout: &str) -> PrState {
 /// typed text stands.
 pub async fn item_title(
     cwd: impl AsRef<Path>,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u32,
     repo: Option<&str>,
 ) -> Option<String> {
     let subcommand = match kind {
-        oximux_core::ForgeRefKind::Issue => "issue",
-        oximux_core::ForgeRefKind::Pull => "pr",
+        trex_core::ForgeRefKind::Issue => "issue",
+        trex_core::ForgeRefKind::Pull => "pr",
     };
     let mut cmd = GhCmd::new(cwd).args([
         subcommand,
@@ -208,13 +208,13 @@ pub async fn item_title(
 /// already has from the list, without a body.
 pub async fn item_detail(
     cwd: impl AsRef<Path>,
-    kind: oximux_core::ForgeRefKind,
+    kind: trex_core::ForgeRefKind,
     number: u64,
     repo: Option<&str>,
 ) -> Option<ItemDetail> {
     let subcommand = match kind {
-        oximux_core::ForgeRefKind::Issue => "issue",
-        oximux_core::ForgeRefKind::Pull => "pr",
+        trex_core::ForgeRefKind::Issue => "issue",
+        trex_core::ForgeRefKind::Pull => "pr",
     };
     let mut cmd = GhCmd::new(cwd).args([
         subcommand,

@@ -1,8 +1,8 @@
-//! Pure-unit tests for the status bar's git-zone label.
+﻿//! Pure-unit tests for the status bar's git-zone label.
 
-use oximux_app::shell::status_bar::git_zone_label;
-use oximux_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
-use oximux_git::{GitError, PollState};
+use trex_app::shell::status_bar::git_zone_label;
+use trex_core::{FileStatus, GitState, IndexStatus, WorktreeStatus};
+use trex_git::{GitError, PollState};
 
 // `GitError::parse` is crate-private; reach the same variant via the
 // public Parse fields.

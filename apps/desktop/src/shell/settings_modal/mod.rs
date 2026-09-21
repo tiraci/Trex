@@ -1,4 +1,4 @@
-//! Settings modal — minimal panes wiring settings that already round-trip
+﻿//! Settings modal — minimal panes wiring settings that already round-trip
 //! to disk (terminal + AI commit-message), plus read-only reference panes
 //! (keybindings, appearance, about). Opened via the left-rail cog or
 //! `Cmd+,`. Mirrors the `project_picker` modal pattern: open/close +
@@ -53,11 +53,11 @@ use gpui::{
 use gpui_component::input::{InputEvent, InputState, TextareaState};
 
 use crate::shell::left_rail::open_in;
-use oximux_settings::{
+use trex_settings::{
     AgentLaunchSettings, CommitMessageAiSettings, ComputerUseSettings, Density, DictationSettings,
     TerminalSettings, Theme, Typography,
 };
-use oximux_storage::SettingsRepo;
+use trex_storage::SettingsRepo;
 
 use crate::notifier::{AgentNotifySettings, Notifier};
 
@@ -87,7 +87,7 @@ pub struct SettingsModal {
     /// Working copy of the AI commit-message settings; same contract.
     pub(crate) ai: CommitMessageAiSettings,
     /// Working copy of the git settings; same contract, writing `git.toml`.
-    pub(crate) git: oximux_settings::git::GitSettings,
+    pub(crate) git: trex_settings::git::GitSettings,
     /// The window's active project root, pushed by [`WorkspaceRoot`] on every
     /// project switch.
     ///
@@ -130,9 +130,9 @@ pub struct SettingsModal {
     /// at `open()` and after each edit rather than per frame: resolving the
     /// built-in list stats application bundles (or walks `PATH`), which is
     /// not a thing to do on every paint.
-    pub(super) git_open_in_shown: Vec<oximux_settings::OpenInApp>,
+    pub(super) git_open_in_shown: Vec<trex_settings::OpenInApp>,
     /// Working copy of the rate-limit retry settings.
-    pub(crate) retry: oximux_settings::agent_retry::AgentRetrySettings,
+    pub(crate) retry: trex_settings::agent_retry::AgentRetrySettings,
     /// Working copy of the per-agent launch defaults; reseeded from the live
     /// global at each `open()`. Edits mutate this, then write
     /// `agent_launch.toml`; the watcher reloads + swaps the global.
@@ -190,7 +190,7 @@ pub struct SettingsModal {
     ///
     /// Not platform-gated: the installer runs on every platform the desktop app
     /// ships on. What differs is the row that renders it and the gate it waits
-    /// on — see `oximux_computer_use::install::platform`.
+    /// on — see `trex_computer_use::install::platform`.
     pub(super) driver_install: Option<crate::shell::driver_install::InstallHandle>,
     /// What the Driver row renders for the install affordance.
     pub(super) driver_install_ui: crate::shell::driver_install::DriverInstallUi,
@@ -262,7 +262,7 @@ pub struct SettingsModal {
     /// tri-state the launcher's picker models: `None` until the first detection
     /// answers, `Some(vec![])` when it timed out, `Some(list)` otherwise.
     /// `agent_detect_running` drives the in-flight label.
-    pub(super) agent_detect: Option<Vec<oximux_agents::registry::RegistryEntry>>,
+    pub(super) agent_detect: Option<Vec<trex_agents::registry::RegistryEntry>>,
     /// PATH availability of each `ACP_PRESETS` entry, positionally parallel to
     /// it — the launcher's convention, detected under the same timeout.
     pub(super) preset_detect: Option<Vec<bool>>,
@@ -293,7 +293,7 @@ pub struct SettingsModal {
     pub(super) recording_sub: Option<Subscription>,
     /// Shared schedule store — the same connection the scheduler ticker reads,
     /// so a schedule created or removed here is visible to it within one tick.
-    pub(super) schedule_store: oximux_agents::schedule::ScheduleStore,
+    pub(super) schedule_store: trex_agents::schedule::ScheduleStore,
     /// Schedules + their recent run history, reloaded from the store at each
     /// `open()` and after every create/delete/toggle so the pane never reads
     /// SQLite mid-paint.
@@ -353,7 +353,7 @@ impl SettingsModal {
         notify: Arc<AgentNotifySettings>,
         notify_repo: SettingsRepo,
         notifier: Arc<dyn Notifier>,
-        schedule_store: oximux_agents::schedule::ScheduleStore,
+        schedule_store: trex_agents::schedule::ScheduleStore,
         cx: &mut Context<Self>,
     ) -> Self {
         Self {
@@ -369,7 +369,7 @@ impl SettingsModal {
             typography,
             terminal: TerminalSettings::default(),
             ai: CommitMessageAiSettings::default(),
-            git: oximux_settings::git::GitSettings::shipped(),
+            git: trex_settings::git::GitSettings::shipped(),
             project_root: None,
             git_prefix_input: None,
             git_prefix_seed: String::new(),
@@ -382,7 +382,7 @@ impl SettingsModal {
             git_open_in_cmd_input: None,
             git_open_in_notice: None,
             git_open_in_shown: Vec::new(),
-            retry: oximux_settings::agent_retry::AgentRetrySettings::shipped(),
+            retry: trex_settings::agent_retry::AgentRetrySettings::shipped(),
             agent_launch: AgentLaunchSettings::default(),
             dictation: DictationSettings::default(),
             computer_use: ComputerUseSettings::default(),
@@ -463,9 +463,9 @@ impl SettingsModal {
             .unwrap_or_default();
         self.git = crate::git_settings::settings(cx);
         self.retry = cx
-            .try_global::<oximux_settings::agent_retry::AgentRetrySettings>()
+            .try_global::<trex_settings::agent_retry::AgentRetrySettings>()
             .copied()
-            .unwrap_or_else(oximux_settings::agent_retry::AgentRetrySettings::shipped);
+            .unwrap_or_else(trex_settings::agent_retry::AgentRetrySettings::shipped);
         self.agent_launch = cx
             .try_global::<AgentLaunchSettings>()
             .cloned()
@@ -493,7 +493,7 @@ impl SettingsModal {
         // restart the poll loop. A stale failure from a previous open is
         // cleared — the fresh resolve above is the truth now.
         if !self.driver_install_ui.is_running() {
-            self.driver_install_ui = match oximux_computer_use::install::status() {
+            self.driver_install_ui = match trex_computer_use::install::status() {
                 Some(stage) => crate::shell::driver_install::DriverInstallUi::Running { stage },
                 None => crate::shell::driver_install::DriverInstallUi::Idle,
             };
@@ -530,7 +530,7 @@ impl SettingsModal {
         let seed = self.dictation.custom_words.join(", ");
         let cw_input = cx.new(|cx| {
             InputState::new(window, cx)
-                .placeholder("e.g. OxiMux, ChargeBee, ChatGPT")
+                .placeholder("e.g. TREX, ChargeBee, ChatGPT")
                 .default_value(seed)
         });
         // Update the in-memory working copy on every keystroke, but only PERSIST
@@ -561,7 +561,7 @@ impl SettingsModal {
         self.git_prefix_seed = prefix_seed.clone();
         let prefix_input = cx.new(|cx| {
             InputState::new(window, cx)
-                .placeholder("e.g. oximux")
+                .placeholder("e.g. TREX")
                 .default_value(prefix_seed)
         });
         self._git_prefix_sub = Some(cx.subscribe(
@@ -990,7 +990,7 @@ impl SettingsModal {
     /// better of costs nothing to abandon.
     pub(super) fn prefill_open_in_app(
         &mut self,
-        app: &oximux_settings::OpenInApp,
+        app: &trex_settings::OpenInApp,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -1100,7 +1100,7 @@ impl SettingsModal {
             Some(entries) => AdapterDetection::Done(entries),
             None => {
                 registered =
-                    oximux_agents::registry::AdapterRegistry::with_builtin_adapters()
+                    trex_agents::registry::AdapterRegistry::with_builtin_adapters()
                         .entries_without_detection();
                 AdapterDetection::Pending(&registered)
             }
@@ -1186,15 +1186,15 @@ impl SettingsModal {
                 tracing::debug!("settings: no Tokio runtime; skipping agent detection");
                 return;
             }
-            let registry = oximux_agents::registry::AdapterRegistry::with_builtin_adapters();
+            let registry = trex_agents::registry::AdapterRegistry::with_builtin_adapters();
             // Adapters and presets under ONE timeout: both are `which`-style
             // PATH probes, so a slow mount caps them together rather than
             // twice over.
             let detect = async {
                 let entries = registry.detect_available().await;
-                let mut presets = Vec::with_capacity(oximux_settings::ACP_PRESETS.len());
-                for preset in oximux_settings::ACP_PRESETS {
-                    presets.push(oximux_agents::cli::which_on_path(preset.command).await);
+                let mut presets = Vec::with_capacity(trex_settings::ACP_PRESETS.len());
+                for preset in trex_settings::ACP_PRESETS {
+                    presets.push(trex_agents::cli::which_on_path(preset.command).await);
                 }
                 (entries, presets)
             };
@@ -1212,7 +1212,7 @@ impl SettingsModal {
                         // detection is what failed.
                         m.agent_detect.get_or_insert_with(Vec::new);
                         m.preset_detect.get_or_insert_with(|| {
-                            vec![false; oximux_settings::ACP_PRESETS.len()]
+                            vec![false; trex_settings::ACP_PRESETS.len()]
                         });
                         tracing::warn!(
                             "settings: agent detection timed out after 500ms; \
@@ -1249,7 +1249,7 @@ impl SettingsModal {
     /// flag and model chip in the launch card above calls `entry_mut` and so
     /// always writes the default; the card below has a profile selected, and
     /// writing the default from there is exactly the hole this closes.
-    pub(super) fn selected_launch_mut(&mut self) -> &mut oximux_settings::PerAgentLaunch {
+    pub(super) fn selected_launch_mut(&mut self) -> &mut trex_settings::PerAgentLaunch {
         let agent = self.env_agent.clone();
         let profile = self.env_profile.clone();
         self.agent_launch.profile_entry_mut(&agent, profile.as_deref())
@@ -1427,7 +1427,7 @@ impl SettingsModal {
         self.env_notice = None;
         if let ProfileNameMode::Rename(name) | ProfileNameMode::Duplicate(name) = &mode {
             let name = name.clone();
-            let target = (name != oximux_settings::DEFAULT_PROFILE).then_some(name);
+            let target = (name != trex_settings::DEFAULT_PROFILE).then_some(name);
             self.select_env_profile(target, window, cx);
         }
         let seed = mode.seed();
@@ -1561,7 +1561,7 @@ mod env_editor_tests {
     use super::*;
     use crate::notifier::null::NullNotifier;
     use gpui::TestAppContext;
-    use oximux_settings::DEFAULT_PROFILE;
+    use trex_settings::DEFAULT_PROFILE;
 
     /// A modal mounted the way the real app mounts one: inside a
     /// `gpui_component::Root`. Not a formality — `InputState` reaches for the
@@ -1574,9 +1574,9 @@ mod env_editor_tests {
         cx: &mut TestAppContext,
     ) -> (gpui::WindowHandle<gpui_component::Root>, Entity<SettingsModal>) {
         cx.update(gpui_component::init);
-        let db = oximux_storage::open_memory().expect("in-memory db");
+        let db = trex_storage::open_memory().expect("in-memory db");
         let repo = SettingsRepo::new(db.clone());
-        let schedules = oximux_agents::schedule::ScheduleStore::new(db.conn());
+        let schedules = trex_agents::schedule::ScheduleStore::new(db.conn());
         let built: std::cell::RefCell<Option<Entity<SettingsModal>>> =
             std::cell::RefCell::new(None);
         let window = cx.add_window(|window, cx| {
@@ -1632,8 +1632,8 @@ mod env_editor_tests {
         w.update(&mut vcx.cx, |_root, _window, cx| {
             m.update(cx, |m, cx| {
                 m.git.open_in = vec![
-                    oximux_settings::OpenInApp { name: "Zed".into(), command: "zed".into() },
-                    oximux_settings::OpenInApp {
+                    trex_settings::OpenInApp { name: "Zed".into(), command: "zed".into() },
+                    trex_settings::OpenInApp {
                         name: "VS Code".into(),
                         command: "open -a \"Visual Studio Code\"".into(),
                     },

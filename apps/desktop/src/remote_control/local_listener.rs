@@ -1,4 +1,4 @@
-//! The local control listener's lifecycle: accept CLI connections on the
+﻿//! The local control listener's lifecycle: accept CLI connections on the
 //! owner-only socket, map each authenticated claim onto a dispatcher scope,
 //! and take everything down — listener AND in-flight connections — the moment
 //! the handle drops.
@@ -10,8 +10,8 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use oximux_remote_host::{Dispatcher, LocalScope};
-use oximux_remote_local::{LocalClaim, LocalControlListener};
+use trex_remote_host::{Dispatcher, LocalScope};
+use trex_remote_local::{LocalClaim, LocalControlListener};
 
 /// The running listener. Dropping it aborts the accept loop, which drops the
 /// bound socket (unlinking the node) and the `JoinSet` of per-connection
@@ -27,7 +27,7 @@ pub struct LocalHandle {
 impl LocalHandle {
     /// Mint the credential confining one agent process to `session_id`,
     /// returning the secret to inject into that process's environment beside
-    /// [`SESSION_ENV_VAR`](oximux_remote_local::SESSION_ENV_VAR).
+    /// [`SESSION_ENV_VAR`](trex_remote_local::SESSION_ENV_VAR).
     ///
     /// The agent spawner calls this; nothing else should. A secret handed to
     /// two processes confines neither.
@@ -60,7 +60,7 @@ pub fn start(
     runtime_dir: PathBuf,
     rt: tokio::runtime::Handle,
 ) -> anyhow::Result<LocalHandle> {
-    let token = oximux_remote_local::generate_token();
+    let token = trex_remote_local::generate_token();
     let listener = {
         // `interprocess`'s tokio listener registers with the reactor at bind.
         let _guard = rt.enter();
@@ -79,7 +79,7 @@ pub fn start(
                         // the accept path. The handshake is the first I/O the
                         // peer controls, so a caller that connects and then says
                         // nothing would otherwise hold this loop and starve every
-                        // later `oximux` invocation until the app restarted.
+                        // later `TREX` invocation until the app restarted.
                         conns.spawn(async move {
                             let (transport, claim) = match pending.authenticate().await {
                                 Ok(authenticated) => authenticated,

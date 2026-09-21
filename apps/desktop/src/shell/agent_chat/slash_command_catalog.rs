@@ -1,4 +1,4 @@
-//! Enrichment for the slash-command palette: the stream-json `init` message
+﻿//! Enrichment for the slash-command palette: the stream-json `init` message
 //! advertises command *names* only, so descriptions + grouping are recovered by
 //! scanning the on-disk command/skill definitions (`~/.claude/skills/*/SKILL.md`,
 //! plugin commands/skills under `~/.claude/plugins/cache`, project
@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-use oximux_agents::thread::connection::SlashCommandInfo;
+use trex_agents::thread::connection::SlashCommandInfo;
 
 /// Which section a command sorts under in the palette.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

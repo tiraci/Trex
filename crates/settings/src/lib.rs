@@ -1,4 +1,4 @@
-//! oximux-settings
+﻿//! trex-settings
 //!
 //! Theme tokens, density constants, and typography scale. Single source of
 //! truth for the visual identity defined in `docs/design-guidelines.md`.

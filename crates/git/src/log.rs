@@ -1,4 +1,4 @@
-//! `git log` wrapper backing the commit-graph panel.
+﻿//! `git log` wrapper backing the commit-graph panel.
 //!
 //! Uses `-z` so records are NUL-terminated, paired with a unit-separator
 //! (`\x1f`) between fields. NUL records let `%b` (commit body) carry its
@@ -10,7 +10,7 @@
 use crate::error::{GitError, Result};
 use crate::process::GitCmd;
 use crate::repository::Repository;
-use oximux_core::{CommitInfo, RefLabel};
+use trex_core::{CommitInfo, RefLabel};
 use std::time::Duration;
 
 const LOG_TIMEOUT: Duration = Duration::from_secs(15);

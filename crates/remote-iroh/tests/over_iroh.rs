@@ -1,4 +1,4 @@
-//! The over-the-wire proof: the real client [`RemoteSession`] pairs with and
+﻿//! The over-the-wire proof: the real client [`RemoteSession`] pairs with and
 //! drives the real `remote-host` `Dispatcher` across a **real iroh QUIC link
 //! between two endpoints on this machine** — the same code the loopback test
 //! exercises, now carried by the production transport instead of an in-memory
@@ -9,12 +9,12 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use futures::future::join;
-use oximux_agents::session_registry::SessionRegistry;
-use oximux_agents::thread::{AgentCapabilities, PermissionKind, StubConnection, ThreadEvent};
-use oximux_remote_host::{AuthStore, Dispatcher, PairingSlot};
-use oximux_remote_iroh::{IrohConnector, accept, bind_client, bind_host};
-use oximux_remote_proto::PairingTicket;
-use oximux_remote_session::{ClientSigner, Connector, RemoteSession};
+use trex_agents::session_registry::SessionRegistry;
+use trex_agents::thread::{AgentCapabilities, PermissionKind, StubConnection, ThreadEvent};
+use trex_remote_host::{AuthStore, Dispatcher, PairingSlot};
+use trex_remote_iroh::{IrohConnector, accept, bind_client, bind_host};
+use trex_remote_proto::PairingTicket;
+use trex_remote_session::{ClientSigner, Connector, RemoteSession};
 use serde_json::json;
 
 const SECRET: [u8; 16] = [0x22; 16];
@@ -126,7 +126,7 @@ async fn client_pairs_and_drives_a_session_over_real_iroh_quic() {
 /// deliberately:
 ///
 /// ```text
-/// cargo test -p oximux-remote-iroh --test over_iroh -- --ignored --nocapture
+/// cargo test -p trex-remote-iroh --test over_iroh -- --ignored --nocapture
 /// ```
 ///
 /// Note what this does and does not prove. It exercises **discovery** — publish,

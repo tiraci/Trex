@@ -1,7 +1,7 @@
-//! The decision an agent's screen-control call gets.
+﻿//! The decision an agent's screen-control call gets.
 //!
 //! Called synchronously from the permission handler, which is the one place
-//! OxiMux is actually in the path: the driver runs as its own process that the
+//! TREX is actually in the path: the driver runs as its own process that the
 //! agent talks to directly, so nothing here sits between the agent and the
 //! driver. What we get is the `can_use_tool` round-trip, and what we can
 //! inspect is exactly the fields present in that call's input JSON.
@@ -57,7 +57,7 @@ pub struct PolicyContext<'a> {
     pub grants: &'a GrantTable,
     /// What this agent built for itself, when it has a resolvable worktree.
     pub provenance: Option<&'a Provenance>,
-    /// The OxiMux binary this policy is protecting.
+    /// The TREX binary this policy is protecting.
     ///
     /// `None` means "whatever process is running this", which is right in the
     /// app and in tests and *wrong* in the gate, where the running process is
@@ -341,12 +341,12 @@ mod tests {
     use serde_json::json;
 
     fn ns(tool: &str) -> String {
-        format!("mcp__oximux-computer-use__{tool}")
+        format!("mcp__trex-computer-use__{tool}")
     }
 
     /// A live process standing in for "some app the agent wants to drive".
     ///
-    /// The obvious candidate — our own pid — is not usable: OxiMux is refused
+    /// The obvious candidate — our own pid — is not usable: TREX is refused
     /// outright, because an agent that can drive us can approve its own consent
     /// cards. So these tests spawn a real child and target that, which is also
     /// closer to what they claim to be testing.
@@ -599,7 +599,7 @@ mod tests {
 
     #[test]
     fn a_shell_command_that_drives_the_gui_is_refused() {
-        // The bypass measured on this project: the accessibility grant OxiMux
+        // The bypass measured on this project: the accessibility grant TREX
         // takes for the Escape kill switch is inherited by the agent's shell,
         // in every project, whatever the per-project setting says.
         //
@@ -750,14 +750,14 @@ mod tests {
     #[test]
     fn a_call_claiming_another_sessions_id_is_refused() {
         // Capture scope is per-session and immutable. Borrowing a different
-        // session id is how a call would escape the scope OxiMux pinned.
+        // session id is how a call would escape the scope TREX pinned.
         let f = Fixture::new();
         let target = Target::spawn();
         let pid = target.pid();
         f.grants.grant(pid, &f.session);
         let reason = refusal(&f.decide(
             "click",
-            json!({ "pid": pid, "session": "oximux-someone-else" }),
+            json!({ "pid": pid, "session": "trex-someone-else" }),
         ))
         .to_string();
         assert!(reason.contains("does not belong to this chat"), "{reason}");
@@ -867,7 +867,7 @@ mod tests {
     }
 
     #[test]
-    fn oximuxs_own_window_may_not_be_captured_either() {
+    fn trexs_own_window_may_not_be_captured_either() {
         // `get_window_state` returns a screenshot of the window it names, by
         // default and alongside the tree. So refusing the click while allowing
         // the picture would leave the agent reading its own consent card and
@@ -878,7 +878,7 @@ mod tests {
             json!({ "pid": std::process::id() }),
         ))
         .to_string();
-        assert!(reason.contains("OxiMux itself"), "{reason}");
+        assert!(reason.contains("TREX itself"), "{reason}");
     }
 
     #[test]
@@ -938,7 +938,7 @@ mod tests {
     }
 
     #[test]
-    fn oximux_is_refused_however_it_is_addressed() {
+    fn trex_is_refused_however_it_is_addressed() {
         // The consent model assumes the user answers the card. An agent that
         // can click our own window answers it for them, so this refusal has to
         // survive a correctly addressed, background-delivered, window-scoped
@@ -949,7 +949,7 @@ mod tests {
             json!({ "pid": std::process::id(), "scope": "window", "delivery_mode": "background" }),
         ))
         .to_string();
-        assert!(reason.contains("OxiMux itself"), "{reason}");
+        assert!(reason.contains("TREX itself"), "{reason}");
         assert!(f.grants.granted_to(&f.session).is_empty());
     }
 

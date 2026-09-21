@@ -1,4 +1,4 @@
-use super::*;
+﻿use super::*;
 
 impl TerminalView {
     pub(crate) fn on_search(&mut self, _: &Search, _window: &mut Window, cx: &mut Context<Self>) {
@@ -733,7 +733,7 @@ impl TerminalView {
         };
         Some(
             div()
-                .id("oximux-terminal-scrollbar")
+                .id("trex-terminal-scrollbar")
                 .absolute()
                 .top_0()
                 .right_0()
@@ -741,7 +741,7 @@ impl TerminalView {
                 .w(px(SCROLLBAR_WIDTH))
                 .child(
                     div()
-                        .id("oximux-terminal-scrollbar-thumb")
+                        .id("trex-terminal-scrollbar-thumb")
                         .absolute()
                         .top(relative(top))
                         .h(relative(height))
@@ -916,7 +916,7 @@ impl TerminalView {
         //
         // No `#[gpui::test]` can cover this: the test platform has no
         // `NSTextInputContext`, so the second delivery does not exist there.
-        // `cargo run -p oximux-app --example key_double_repro` shows both
+        // `cargo run -p trex-app --example key_double_repro` shows both
         // halves against a real window.
         cx.stop_propagation();
     }
@@ -1032,7 +1032,7 @@ impl TerminalView {
         // Clone so the cwd survives a failed promote (see
         // `respawn_if_dormant`): the pane stays dormant + retryable. The env
         // re-injects the SAME context ids on the inline wake path too, so a
-        // respawned shell keeps its OXIMUX_SURFACE_ID / TAB_ID.
+        // respawned shell keeps its trex_SURFACE_ID / TAB_ID.
         let mut cfg = shell_spawn_config(
             cwd.clone(),
             self.ids.env(),
@@ -1183,7 +1183,7 @@ impl TerminalView {
         // `max_lines`. Fall back to the visible snapshot when the backend has no
         // grid (relay attach mid-handshake).
         let grid = self.with_backend(|be| be.search_grid(self.session_id));
-        let rows: &[Vec<oximux_pty::Cell>] =
+        let rows: &[Vec<trex_pty::Cell>] =
             if grid.is_empty() { &self.snapshot.cells } else { &grid };
         if rows.is_empty() {
             return (String::new(), false);

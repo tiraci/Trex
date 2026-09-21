@@ -1,4 +1,4 @@
-//! Rendering for [`SettingsModal`]: the full-window overlay, the modal
+﻿//! Rendering for [`SettingsModal`]: the full-window overlay, the modal
 //! card (left nav + active pane body), and pane-body dispatch. State +
 //! persistence live in the parent module.
 
@@ -7,7 +7,7 @@ use gpui::{
     MouseButton, MouseDownEvent, ParentElement, Render, StatefulInteractiveElement, Styled,
     Window, div, px,
 };
-use oximux_settings::{Density, Typography};
+use trex_settings::{Density, Typography};
 
 use super::{
     CARD_HEIGHT, CARD_WIDTH, SettingsModal, SettingsPane, layout, nav, pane_about, pane_agents,
@@ -130,7 +130,7 @@ impl SettingsModal {
 
 impl Render for SettingsModal {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

@@ -1,4 +1,4 @@
-//! Agent-launch section of the Agents pane — edits the `AgentLaunchSettings`
+﻿//! Agent-launch section of the Agents pane — edits the `AgentLaunchSettings`
 //! working copy (default agent, per-agent enabled / skip-permissions / model).
 //! Applies immediately: mutate the copy, write `agent_launch.toml`, watcher
 //! reloads + swaps the global. These are the defaults the one-click launcher
@@ -12,7 +12,7 @@ use gpui_component::Sizable as _;
 use gpui_component::input::{Input, Textarea};
 use std::collections::BTreeMap;
 
-use oximux_settings::{
+use trex_settings::{
     DEFAULT_PROFILE, Density, OpenMode, PerAgentLaunch, Theme, Typography, split_args,
 };
 
@@ -122,7 +122,7 @@ impl ProfileNameMode {
 /// resolves them — a check that folded case would refuse a name the launcher
 /// would happily treat as distinct.
 ///
-/// [`AgentLaunchSettings::profile_names`]: oximux_settings::AgentLaunchSettings::profile_names
+/// [`AgentLaunchSettings::profile_names`]: trex_settings::AgentLaunchSettings::profile_names
 pub(super) fn validate_profile_name(raw: &str, existing: &[String]) -> Result<String, SharedString> {
     let name = raw.trim();
     if name.is_empty() {
@@ -213,7 +213,7 @@ impl EnvReject {
             }
             Self::BlankKey { line } => format!("Line {line} has no name before its “=”."),
             Self::Reserved { line, key } => format!(
-                "Line {line}: “{key}” is set by OxiMux and can't be overridden here — \
+                "Line {line}: “{key}” is set by TREX and can't be overridden here — \
                  it would break the launch."
             ),
         }
@@ -248,7 +248,7 @@ pub(super) fn reject_message(rejects: &[EnvReject]) -> Option<String> {
 /// - Key and value are both trimmed. A trailing space in a key is a *different*
 ///   variable than the one the user meant, which is the failure this prevents.
 ///
-/// [`PerAgentLaunch::env`]: oximux_settings::PerAgentLaunch::env
+/// [`PerAgentLaunch::env`]: trex_settings::PerAgentLaunch::env
 pub(super) fn parse_env_draft(raw: &str) -> (BTreeMap<String, String>, Vec<EnvReject>) {
     let mut out = BTreeMap::new();
     let mut rejects = Vec::new();
@@ -268,7 +268,7 @@ pub(super) fn parse_env_draft(raw: &str) -> (BTreeMap<String, String>, Vec<EnvRe
             rejects.push(EnvReject::BlankKey { line: n });
             continue;
         }
-        if oximux_settings::is_reserved_env_key(k) {
+        if trex_settings::is_reserved_env_key(k) {
             rejects.push(EnvReject::Reserved { line: n, key: k.to_string() });
         }
         out.insert(k.to_string(), v.trim().to_string());
@@ -1622,7 +1622,7 @@ fn summary_parts(launch: Option<&PerAgentLaunch>) -> Vec<String> {
     match l
         .env
         .keys()
-        .filter(|k| !k.trim().is_empty() && !oximux_settings::is_reserved_env_key(k))
+        .filter(|k| !k.trim().is_empty() && !trex_settings::is_reserved_env_key(k))
         .count()
     {
         0 => {}
@@ -1980,7 +1980,7 @@ mod tests {
         // Kept, so reopening the pane does not silently delete the line the
         // user typed. Resolution is what refuses to apply it.
         assert_eq!(env.len(), 2);
-        assert!(oximux_settings::is_reserved_env_key("PATH"));
+        assert!(trex_settings::is_reserved_env_key("PATH"));
     }
 
     #[test]
@@ -2022,7 +2022,7 @@ mod tests {
             for line in env_placeholder(agent).lines() {
                 let Some((key, _)) = line.split_once('=') else { continue };
                 assert!(
-                    !oximux_settings::is_reserved_env_key(key),
+                    !trex_settings::is_reserved_env_key(key),
                     "{agent}'s placeholder demonstrates the reserved key {key}",
                 );
             }
@@ -2088,12 +2088,12 @@ mod tests {
         // Every agent the catalog can offer, not a hard-coded four — an ACP
         // agent reaching a placeholder written for Claude is the fault this
         // guards against.
-        let registered = oximux_agents::registry::AdapterRegistry::with_builtin_adapters()
+        let registered = trex_agents::registry::AdapterRegistry::with_builtin_adapters()
             .entries_without_detection();
         let catalog = crate::shell::agent_ui::agent_catalog::agent_catalog(
             crate::shell::agent_ui::agent_catalog::AdapterDetection::Pending(&registered),
             None,
-            &oximux_settings::AgentLaunchSettings::default(),
+            &trex_settings::AgentLaunchSettings::default(),
         );
         for id in catalog.iter().map(|a| a.id.to_string()) {
             let id = id.as_str();

@@ -1,4 +1,4 @@
-//! Integration tests for the auto-rename path — a real `git` binary in a
+﻿//! Integration tests for the auto-rename path — a real `git` binary in a
 //! tempdir plus an in-memory storage DB, in the style of
 //! `workspace_rename_rollback.rs`.
 //!
@@ -12,9 +12,9 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use oximux_git::Repository;
-use oximux_storage::{ProjectRepo, WorkspaceRepo, open_memory};
-use oximux_worktree_ops::{
+use trex_git::Repository;
+use trex_storage::{ProjectRepo, WorkspaceRepo, open_memory};
+use trex_worktree_ops::{
     Ineligible, RenameOutcome, RenameRefusal, auto_rename_with_rollback, propose_auto_rename,
     rename_with_rollback,
 };
@@ -48,10 +48,10 @@ struct Fixture {
     project_root: PathBuf,
     wt_path: PathBuf,
     workspace_repo: WorkspaceRepo,
-    workspace: oximux_core::Workspace,
+    workspace: trex_core::Workspace,
 }
 
-/// A repo with one linked worktree at `oximux/<slug>` and a matching row.
+/// A repo with one linked worktree at `TREX/<slug>` and a matching row.
 async fn fixture(slug: &str, minted: bool) -> Fixture {
     let tmp = tempfile::tempdir().expect("tempdir");
     let project_root = tmp.path().to_path_buf();
@@ -60,7 +60,7 @@ async fn fixture(slug: &str, minted: bool) -> Fixture {
     let wt_root = tempfile::tempdir().expect("wt tempdir");
     let wt_path = wt_root.path().join(slug);
     let repo = Repository::open(&project_root).await.expect("open repo");
-    repo.add_worktree(&wt_path, &format!("oximux/{slug}")).await.expect("add worktree");
+    repo.add_worktree(&wt_path, &format!("TREX/{slug}")).await.expect("add worktree");
 
     let db = open_memory().expect("open memory");
     let project = ProjectRepo::new(db.clone())
@@ -72,7 +72,7 @@ async fn fixture(slug: &str, minted: bool) -> Fixture {
             &project.id,
             slug,
             slug,
-            &format!("oximux/{slug}"),
+            &format!("TREX/{slug}"),
             &wt_path.to_string_lossy(),
             minted,
         )
@@ -115,8 +115,8 @@ async fn auto_rename_moves_branch_and_row_but_leaves_the_directory() {
 
     // Branch: renamed. Directory: exactly where it was.
     let branches = branch_names(&f.project_root).await;
-    assert!(branches.contains(&"oximux/fix-login-redirect".to_string()), "{branches:?}");
-    assert!(!branches.contains(&"oximux/amber".to_string()), "{branches:?}");
+    assert!(branches.contains(&"TREX/fix-login-redirect".to_string()), "{branches:?}");
+    assert!(!branches.contains(&"TREX/amber".to_string()), "{branches:?}");
     assert!(f.wt_path.is_dir(), "the codename directory must still exist");
     assert_eq!(renamed.worktree_path, f.wt_path.to_string_lossy());
 
@@ -129,13 +129,13 @@ async fn auto_rename_moves_branch_and_row_but_leaves_the_directory() {
         .into_iter()
         .find(|w| std::fs::canonicalize(&w.path).ok() == std::fs::canonicalize(&f.wt_path).ok())
         .expect("worktree listed");
-    assert_eq!(wt.branch.as_deref(), Some("oximux/fix-login-redirect"));
+    assert_eq!(wt.branch.as_deref(), Some("TREX/fix-login-redirect"));
 
     // Row: name, slug and branch all follow.
     let row = f.workspace_repo.get_by_id(&f.workspace.id).unwrap().unwrap();
     assert_eq!(row.name, "Fix login redirect");
     assert_eq!(row.slug, "fix-login-redirect");
-    assert_eq!(row.branch, "oximux/fix-login-redirect");
+    assert_eq!(row.branch, "TREX/fix-login-redirect");
     assert_eq!(row.worktree_path, f.wt_path.to_string_lossy());
 }
 
@@ -176,7 +176,7 @@ async fn a_live_holder_blocks_a_move_but_not_a_same_path_rename() {
     .await;
     assert!(matches!(same_path, RenameOutcome::Renamed(_)), "{same_path:?}");
     assert!(f.wt_path.is_dir());
-    assert!(branch_names(&f.project_root).await.contains(&"oximux/fix-login".to_string()));
+    assert!(branch_names(&f.project_root).await.contains(&"TREX/fix-login".to_string()));
 }
 
 #[tokio::test]
@@ -204,7 +204,7 @@ async fn auto_rename_runs_at_most_once_per_workspace() {
         Err(Ineligible::NotACodename)
     );
     let branches = branch_names(&f.project_root).await;
-    assert!(branches.contains(&"oximux/fix-login-redirect".to_string()));
+    assert!(branches.contains(&"TREX/fix-login-redirect".to_string()));
     assert!(!branches.iter().any(|b| b.contains("something-else")), "{branches:?}");
 }
 
@@ -217,7 +217,7 @@ async fn a_pushed_codename_branch_is_refused_by_the_engine() {
         &f.project_root,
         &["remote", "add", "origin", &remote.path().to_string_lossy()],
     );
-    run_git(&f.project_root, &["push", "-q", "-u", "origin", "oximux/amber"]);
+    run_git(&f.project_root, &["push", "-q", "-u", "origin", "TREX/amber"]);
 
     let proposal = propose_auto_rename(&f.workspace, "Fix login redirect").unwrap();
     let outcome =
@@ -225,7 +225,7 @@ async fn a_pushed_codename_branch_is_refused_by_the_engine() {
             .await;
     match outcome {
         RenameOutcome::Refused(RenameRefusal::Pushed { upstream }) => {
-            assert_eq!(upstream, "origin/oximux/amber");
+            assert_eq!(upstream, "origin/TREX/amber");
         }
         other => panic!("expected Pushed refusal, got {other:?}"),
     }

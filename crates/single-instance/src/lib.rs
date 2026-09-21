@@ -1,6 +1,6 @@
-//! Which process owns a per-data-directory role, decided by an advisory lock.
+﻿//! Which process owns a per-data-directory role, decided by an advisory lock.
 //!
-//! Two OxiMux processes pointed at the same on-disk data directory must not
+//! Two TREX processes pointed at the same on-disk data directory must not
 //! both perform certain roles: two GUI instances race the per-window layout
 //! store and both attach the same relay PTYs, and two schedule tickers would
 //! double-fire every due schedule. This crate answers "who owns the role" with

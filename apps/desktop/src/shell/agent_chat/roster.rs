@@ -1,9 +1,9 @@
-//! Connection-independent chat-agent roster for the unified "New Agent" composer.
+﻿//! Connection-independent chat-agent roster for the unified "New Agent" composer.
 //!
 //! The unified composer lets the user pick a coding agent **and** a model before
 //! any subprocess exists, so it cannot read the live `AgentConnection::models()`
 //! (which only reports after a session is bound). This module assembles that
-//! pre-bind vocabulary from the two static sources OxiMux already owns:
+//! pre-bind vocabulary from the two static sources TREX already owns:
 //!
 //! - the detected adapter registry — built-in Claude/Codex, carrying their
 //!   declared static model/effort lists (`RegistryEntry::models`/`::efforts`),
@@ -14,8 +14,8 @@
 //! (which-detection) and the live post-bind model list are layered on by the UI;
 //! this module is a pure, connection-independent lookup.
 //!
-//! Placed in the app crate because `oximux-agents` (model lists) and
-//! `oximux-settings` (transport + presets) are sibling crates that don't see
+//! Placed in the app crate because `trex-agents` (model lists) and
+//! `trex-settings` (transport + presets) are sibling crates that don't see
 //! each other — the app is the one place both are visible, alongside the sibling
 //! resolver `chat_backend_for`.
 
@@ -35,11 +35,11 @@ use gpui_component::button::{Button, ButtonVariants};
 
 use super::composer::WorktreeDraft;
 use gpui_component::input::{InputEvent, InputState};
-use oximux_agents::thread::{claude_model_choices, ChatImage, ModelChoice};
-use oximux_agents::{AdapterRegistry, RegistryEntry};
-use oximux_core::AgentAdapter;
-use oximux_git::validate_slug;
-use oximux_settings::{AgentLaunchSettings, Transport, ACP_PRESETS};
+use trex_agents::thread::{claude_model_choices, ChatImage, ModelChoice};
+use trex_agents::{AdapterRegistry, RegistryEntry};
+use trex_core::AgentAdapter;
+use trex_git::validate_slug;
+use trex_settings::{AgentLaunchSettings, Transport, ACP_PRESETS};
 
 use super::AgentChatView;
 
@@ -74,7 +74,7 @@ impl ChatRosterEntry {
 
 /// The pre-bind model vocabulary for a built-in adapter. Claude's static list
 /// carries pretty labels + capability blurbs (the single source lives in
-/// `oximux-agents`); it is the seed painted until the draft's catalog probe
+/// `trex-agents`); it is the seed painted until the draft's catalog probe
 /// brings back the installed CLI's own `/model` rows, which then replace it.
 ///
 /// Codex offers **no** pre-bind models on purpose: its real catalog only arrives
@@ -189,7 +189,7 @@ pub(crate) enum WorktreeCreateState {
 /// retry rolls a fresh word. Always passes `validate_slug`, by the codename
 /// module's own test.
 pub(crate) fn default_worktree_slug() -> String {
-    oximux_worktree_ops::select_codename(&[])
+    trex_worktree_ops::select_codename(&[])
 }
 
 /// The slug a failed create should Retry with, when it should not be the
@@ -205,20 +205,20 @@ pub(crate) fn default_worktree_slug() -> String {
 /// slug was not the problem.
 pub(crate) fn reroll_slug_for_retry(current: &str, failure: &str) -> Option<String> {
     let current = current.trim();
-    if !oximux_worktree_ops::is_generated_codename(current) {
+    if !trex_worktree_ops::is_generated_codename(current) {
         return None;
     }
     if !failure.contains("already exists") {
         return None;
     }
-    Some(oximux_worktree_ops::select_codename(&[current.to_string()]))
+    Some(trex_worktree_ops::select_codename(&[current.to_string()]))
 }
 
 /// Turn a raw worktree-create failure into a headline a person can act on, plus
 /// an optional second line.
 ///
 /// The raw chain reads e.g. `add_worktree: git exited with code 255: Preparing
-/// worktree (new branch 'oximux/x')\nfatal: a branch named 'oximux/x' already
+/// worktree (new branch 'TREX/x')\nfatal: a branch named 'TREX/x' already
 /// exists` — an internal fn name, an exit code, and git's own progress chatter
 /// wrapped around the one clause that matters. Showing that verbatim asks the
 /// user to parse our stack trace.
@@ -233,7 +233,7 @@ pub(crate) fn reroll_slug_for_retry(current: &str, failure: &str) -> Option<Stri
 /// and passes through what it doesn't.
 fn humanize_worktree_error(raw: &str, branch: &str) -> (String, Option<String>) {
     const PICK_ANOTHER: &str = "Pick a different branch name, or continue without a worktree.";
-    // git: "fatal: a branch named 'oximux/x' already exists"
+    // git: "fatal: a branch named 'TREX/x' already exists"
     if raw.contains("a branch named") && raw.contains("already exists") {
         return (format!("Branch {branch} already exists"), Some(PICK_ANOTHER.to_string()));
     }
@@ -322,7 +322,7 @@ impl AgentChatView {
                     .placeholder("slug")
                     .default_value(default_worktree_slug())
             });
-            // Re-push on every keystroke so the live `oximux/<slug>` preview /
+            // Re-push on every keystroke so the live `TREX/<slug>` preview /
             // validation error / pill label track what the user is typing. A
             // bare `cx.notify()` is NOT enough now that those render inside the
             // composer: the hint is computed here and pushed across, so without
@@ -710,16 +710,16 @@ impl AgentChatView {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_core::AgentAdapter;
+    use trex_core::AgentAdapter;
 
     /// The real failure a user hits: the branch already exists. The headline must
     /// name the branch and say nothing about `add_worktree` or exit codes.
     #[test]
     fn humanize_branch_exists_names_the_branch_and_drops_the_git_chatter() {
         let raw = "add_worktree: git exited with code 255: Preparing worktree (new branch \
-                   'oximux/xxx')\nfatal: a branch named 'oximux/xxx' already exists";
-        let (headline, detail) = humanize_worktree_error(raw, "oximux/xxx");
-        assert_eq!(headline, "Branch oximux/xxx already exists");
+                   'TREX/xxx')\nfatal: a branch named 'TREX/xxx' already exists";
+        let (headline, detail) = humanize_worktree_error(raw, "TREX/xxx");
+        assert_eq!(headline, "Branch TREX/xxx already exists");
         assert_eq!(
             detail.as_deref(),
             Some("Pick a different branch name, or continue without a worktree.")
@@ -738,9 +738,9 @@ mod tests {
     /// so "branch already exists" would send the user to the wrong fix.
     #[test]
     fn humanize_path_collision_reports_the_folder() {
-        let raw = "add_worktree: git exited with code 128: fatal: '/tmp/oximux-wt-x' already exists";
-        let (headline, _) = humanize_worktree_error(raw, "oximux/x");
-        assert_eq!(headline, "A folder for oximux/x already exists");
+        let raw = "add_worktree: git exited with code 128: fatal: '/tmp/trex-wt-x' already exists";
+        let (headline, _) = humanize_worktree_error(raw, "TREX/x");
+        assert_eq!(headline, "A folder for TREX/x already exists");
     }
 
     /// An UNRECOGNIZED failure must still surface git's own diagnostic. Swallowing
@@ -750,7 +750,7 @@ mod tests {
     fn humanize_unknown_error_passes_through_gits_own_line() {
         let raw = "add_worktree: git exited with code 128: some progress noise\n\
                    fatal: could not create work tree dir 'x': Permission denied";
-        let (headline, detail) = humanize_worktree_error(raw, "oximux/x");
+        let (headline, detail) = humanize_worktree_error(raw, "TREX/x");
         assert_eq!(headline, "Couldn't create the worktree");
         assert_eq!(
             detail.as_deref(),
@@ -763,7 +763,7 @@ mod tests {
     /// showing an empty detail.
     #[test]
     fn humanize_unknown_error_without_a_fatal_line_keeps_the_raw_text() {
-        let (headline, detail) = humanize_worktree_error("something strange happened", "oximux/x");
+        let (headline, detail) = humanize_worktree_error("something strange happened", "TREX/x");
         assert_eq!(headline, "Couldn't create the worktree");
         assert_eq!(detail.as_deref(), Some("something strange happened"));
     }
@@ -924,7 +924,7 @@ mod tests {
             let slug = default_worktree_slug();
             assert!(validate_slug(&slug).is_ok(), "{slug:?} should validate");
             assert!(
-                oximux_worktree_ops::is_generated_codename(&slug),
+                trex_worktree_ops::is_generated_codename(&slug),
                 "{slug:?} must be a codename"
             );
         }
@@ -934,10 +934,10 @@ mod tests {
     /// a typed slug, or any other failure, keeps what is in the field.
     #[test]
     fn retry_rerolls_only_a_colliding_codename() {
-        let collided = "add_worktree: git exited with code 128: fatal: a branch named 'oximux/amber' already exists";
+        let collided = "add_worktree: git exited with code 128: fatal: a branch named 'TREX/amber' already exists";
         let fresh = reroll_slug_for_retry("amber", collided).expect("a codename that collided is re-rolled");
         assert_ne!(fresh, "amber");
-        assert!(oximux_worktree_ops::is_generated_codename(&fresh));
+        assert!(trex_worktree_ops::is_generated_codename(&fresh));
         assert!(validate_slug(&fresh).is_ok());
         // Whitespace around the field's value is not a different slug.
         assert!(reroll_slug_for_retry("  amber ", collided).is_some());

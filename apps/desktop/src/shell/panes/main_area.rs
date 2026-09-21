@@ -1,4 +1,4 @@
-//! Main area — center pane shown when no project is active (welcome state).
+﻿//! Main area — center pane shown when no project is active (welcome state).
 //!
 //! Delegates to `welcome_view::view` so the empty state is a proper card
 //! (logo, brand, action stubs, keyboard hints) instead of a placeholder
@@ -6,7 +6,7 @@
 //! selection state.
 
 use gpui::IntoElement;
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::shell::welcome_view;
 

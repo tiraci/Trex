@@ -1,4 +1,4 @@
-//! Row builder + run grouping for `TerminalView` render.
+﻿//! Row builder + run grouping for `TerminalView` render.
 //!
 //! Lifted out of `terminal_view.rs` to keep that file under the 500-LOC
 //! warn cap and to isolate the pure rendering math (cursor + match
@@ -6,8 +6,8 @@
 //! touches GPUI listeners or focus — it's a leaf-level pixel function.
 
 use gpui::{ParentElement, Pixels, SharedString, Styled, div};
-use oximux_pty::{Cell, CellColor};
-use oximux_settings::Theme;
+use trex_pty::{Cell, CellColor};
+use trex_settings::Theme;
 
 use crate::shell::terminal_palette::{ColorRole, resolve};
 use crate::shell::terminal_search_state::{MatchHit, MatchKind};

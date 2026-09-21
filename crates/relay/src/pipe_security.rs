@@ -1,4 +1,4 @@
-//! Owner-only access control for the Windows named pipe.
+﻿//! Owner-only access control for the Windows named pipe.
 //!
 //! A unix-domain socket inherits the protection of the directory holding it, so
 //! the relay's socket is unreachable to other accounts without anything being
@@ -13,7 +13,7 @@
 //! the pipe without it: a relay that refuses to start is a visible problem,
 //! while a relay listening on an open pipe is an invisible one.
 //!
-//! The descriptor itself comes from `oximux-owner-only`, which the token and
+//! The descriptor itself comes from `trex-owner-only`, which the token and
 //! key files use too — the pipe and those files are protected by one definition
 //! of "only this account", not three that can drift apart.
 
@@ -24,7 +24,7 @@ use widestring::U16CString;
 /// Build a security descriptor granting the current user full control and
 /// nobody else any access at all.
 pub fn owner_only_descriptor() -> Result<SecurityDescriptor> {
-    let sddl = oximux_owner_only::owner_only_sddl().context("build owner-only SDDL")?;
+    let sddl = trex_owner_only::owner_only_sddl().context("build owner-only SDDL")?;
     let wide =
         U16CString::from_str(&sddl).context("security descriptor string is not valid UTF-16")?;
     // Rejects a malformed descriptor here rather than at pipe creation, which is

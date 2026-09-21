@@ -1,4 +1,4 @@
-//! Command Palette + Quick Open modal shell.
+﻿//! Command Palette + Quick Open modal shell.
 //!
 //! Keyboard nav (↑/↓/Enter/Esc), live filtering, built-in and custom
 //! command dispatch. Focus management mirrors `project_picker.rs`.
@@ -17,7 +17,7 @@ use gpui::{
     App, Context, EventEmitter, FocusHandle, Focusable, InteractiveElement, IntoElement,
     KeyDownEvent, Render, Task, Window, div,
 };
-use oximux_settings::{CustomCommand, Density, Theme, Typography};
+use trex_settings::{CustomCommand, Density, Theme, Typography};
 use tokio::sync::oneshot;
 
 use crate::actions::{ActivateWorkspaceFromJump, OpenFileFromContextMenu, SendTextToActiveAgent};
@@ -447,7 +447,7 @@ impl Focusable for PaletteModal {
 
 impl Render for PaletteModal {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }
@@ -696,7 +696,7 @@ impl Render for PaletteModal {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_settings::CustomCommand;
+    use trex_settings::CustomCommand;
 
     fn custom_cmd(name: &str, prompt: &str) -> CustomCommand {
         CustomCommand {

@@ -1,4 +1,4 @@
-//! Unit-level coverage for `PaneContent` discriminator semantics.
+﻿//! Unit-level coverage for `PaneContent` discriminator semantics.
 //!
 //! Construction of either variant requires a live GPUI runtime (TerminalView
 //! mounts a PTY, EditorView reads a file + builds an InputState), which the
@@ -23,6 +23,6 @@
 fn pane_content_module_exports_are_stable() {
     // Compile-time check: the enum and its accessor surface remain
     // exported under the public path the host depends on.
-    use oximux_app::shell::pane_content::PaneContent;
+    use trex_app::shell::pane_content::PaneContent;
     let _ = std::mem::size_of::<PaneContent>();
 }

@@ -1,4 +1,4 @@
-//! Drag plumbing for tab chips — payload type + floating preview view.
+﻿//! Drag plumbing for tab chips — payload type + floating preview view.
 //!
 //! The chip's `.on_drag` hands a `TabDragPayload` to GPUI; matching
 //! `.on_drag_move::<TabDragPayload>` / `.on_drop::<TabDragPayload>`
@@ -70,9 +70,9 @@ impl Render for TabDragPreview {
         // this the one part of the ghost that could show the previous theme.
         // Every measure below is the chip's own, because a preview that does
         // not match what you picked up is worse than no preview.
-        let theme = oximux_settings::appearance::theme(cx);
-        let density = oximux_settings::appearance::density(cx);
-        let typography = oximux_settings::appearance::typography(cx);
+        let theme = trex_settings::appearance::theme(cx);
+        let density = trex_settings::appearance::density(cx);
+        let typography = trex_settings::appearance::typography(cx);
         // Color dot mirrors the chip's color tag, when set.
         let color_dot = self.color.map(|c| {
             div()

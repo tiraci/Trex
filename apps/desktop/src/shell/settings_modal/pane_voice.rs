@@ -1,4 +1,4 @@
-//! Voice-dictation settings pane — edits the `DictationSettings` working copy
+﻿//! Voice-dictation settings pane — edits the `DictationSettings` working copy
 //! and drives model downloads through the dictation service. Every control
 //! applies immediately: it mutates the copy and writes `dictation.toml` (the
 //! watcher re-applies), or calls the service for download/delete.
@@ -19,11 +19,11 @@ use gpui_component::input::Input;
 // A plain `Button` with `dropdown_caret(true)` keeps the same chevron look
 // while making the entire surface the trigger.
 use gpui_component::menu::{DropdownMenu as _, PopupMenuItem};
-use oximux_dictation::{
+use trex_dictation::{
     DEFAULT_MODEL_ID, Family, ModelSpec, ModelStatus, catalog, list_input_devices,
     recommended_model_id, spec_for,
 };
-use oximux_settings::{
+use trex_settings::{
     Density, DictationMode, ModelUnloadTimeout, Theme, Typography, WHISPER_LANGUAGES,
     language_display_name,
 };
@@ -925,7 +925,7 @@ mod tests {
     #[test]
     fn settings_and_catalog_agree_on_the_default_model() {
         assert_eq!(
-            oximux_settings::dictation::DEFAULT_MODEL_ID,
+            trex_settings::dictation::DEFAULT_MODEL_ID,
             DEFAULT_MODEL_ID,
             "settings default drifted from the catalog default"
         );
@@ -940,7 +940,7 @@ mod tests {
     /// the user has to download while the one they have looks second-best.
     #[test]
     fn the_default_language_recommends_the_default_model() {
-        let fresh = oximux_settings::dictation::DictationSettings::default();
+        let fresh = trex_settings::dictation::DictationSettings::default();
         assert_eq!(fresh.language, "auto");
         assert_eq!(recommended_model_id(&fresh.language), fresh.model_id);
     }

@@ -1,5 +1,5 @@
-[package]
-name = "oximux-remote-proto"
+﻿[package]
+name = "trex-remote-proto"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -15,7 +15,7 @@ rust-version.workspace = true
 # aarch64-linux-android with no desktop-only deps. The host (`remote-host`) and
 # the phone's Rust core (`mobile-core` via `remote-session`) both speak it.
 [dependencies]
-oximux-agent-core = { workspace = true }
+trex-agent-core = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 postcard = { workspace = true, features = ["use-std"] }

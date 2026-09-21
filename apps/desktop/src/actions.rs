@@ -1,4 +1,4 @@
-//! Workspace-level actions, surfaced via key bindings.
+﻿//! Workspace-level actions, surfaced via key bindings.
 //!
 //! Defined as unit-struct actions via `gpui::actions!`. Bindings register
 //! once at app boot (`main.rs` after `gpui_component::init`); handlers live
@@ -13,7 +13,7 @@ use gpui::{Action, actions};
 /// absolute window coordinates so the shared `PaneActionsMenu` can anchor
 /// itself to the chip instead of the workspace's top-right edge.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenPaneActionsAt {
     pub x: f32,
     pub y: f32,
@@ -36,7 +36,7 @@ pub struct OpenPaneActionsAt {
 /// `Default` is hand-written because `Option::None` is the keyboard
 /// fallback — both `derive(Default)` and dispatcher tests rely on it.
 #[derive(Clone, Debug, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 #[derive(Default)]
 pub struct RequestOpenAdapterPicker {
     pub x: Option<f32>,
@@ -47,7 +47,7 @@ pub struct RequestOpenAdapterPicker {
 /// the shared `TabContextMenu` knows which (group, tab) the user picked
 /// even if focus moves before they select an item.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenTabContextMenuAt {
     pub x: f32,
     pub y: f32,
@@ -70,7 +70,7 @@ pub struct OpenTabContextMenuAt {
 /// `link` is a `String` because `PathBuf`/enums aren't `Action`-compatible;
 /// the receiver re-classifies it as URL vs `path:line:col` when opening.
 #[derive(Clone, Debug, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 #[derive(Default)]
 pub struct OpenTerminalContextMenuAt {
     pub x: f32,
@@ -84,7 +84,7 @@ pub struct OpenTerminalContextMenuAt {
 /// (group_id, tab_idx) so `WorkspaceRoot` can switch the active pane group
 /// AND activate the right tab within it.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct ActivateGroupTab {
     pub group_id: u64,
     pub tab_idx: u32,
@@ -95,7 +95,7 @@ pub struct ActivateGroupTab {
 /// modal targeted at that tab regardless of which group has focus when
 /// the user clicks the row.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct RequestRenameTabAt {
     pub group_id: u64,
     pub tab_idx: u32,
@@ -108,7 +108,7 @@ pub struct RequestRenameTabAt {
 ///   - axis: 0 = Horizontal (left/right), 1 = Vertical (up/down)
 ///   - insert_before: true = Left/Up (insert before), false = Right/Down
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct SplitGroupAt {
     pub group_id: u64,
     pub axis: u8,
@@ -120,7 +120,7 @@ pub struct SplitGroupAt {
 /// chip even after focus moves. The action is a toggle — render reads
 /// `is_pinned(tab_idx)` to pick the row label.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct TogglePinTabAt {
     pub group_id: u64,
     pub tab_idx: u32,
@@ -137,7 +137,7 @@ pub struct TogglePinTabAt {
 /// Non-terminal tabs and terminal tabs whose backend has no external relay
 /// id (in-process fallback) render this item disabled/hidden.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct MoveTabToNewWindow {
     pub group_id: u64,
     pub tab_idx: u32,
@@ -152,7 +152,7 @@ pub struct MoveTabToNewWindow {
 /// `PathBuf` doesn't implement `Action`, so the path is shipped as a
 /// `String`; receivers parse via `PathBuf::from`.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenFileTreeContextMenuAt {
     pub x: f32,
     pub y: f32,
@@ -165,7 +165,7 @@ pub struct OpenFileTreeContextMenuAt {
 /// before opening. Lives at the workspace level so the menu doesn't
 /// need a weak self-handle into `ProjectPanes`.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenFileFromContextMenu {
     pub path: String,
     pub split_right: bool,
@@ -176,7 +176,7 @@ pub struct OpenFileFromContextMenu {
 /// builds the target `Workspace` without re-resolving (synthesized "primary"
 /// rows are not DB rows). Dispatched at the workspace level.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct ActivateWorkspaceFromJump {
     pub workspace_id: String,
     pub project_id: String,
@@ -188,7 +188,7 @@ pub struct ActivateWorkspaceFromJump {
 /// "New Folder" at the workspace root without the path being inferred
 /// from a row.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenFileTreeBackgroundMenuAt {
     pub x: f32,
     pub y: f32,
@@ -200,7 +200,7 @@ pub struct OpenFileTreeBackgroundMenuAt {
 /// to a `<rel>/**` include glob and switches the right sidebar's
 /// active tab to Search.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct FindInFolder {
     pub path: String,
 }
@@ -208,7 +208,7 @@ pub struct FindInFolder {
 /// Open the active project's root (or a specific subdirectory) in
 /// VS Code. Falls back to a tracing warning when `code` isn't on PATH.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenInVSCode {
     pub path: String,
 }
@@ -216,7 +216,7 @@ pub struct OpenInVSCode {
 /// Open a directory in Finder (not Reveal — used by the toolbar
 /// overflow "Open in Finder" item, which targets the workspace root).
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenInFinder {
     pub path: String,
 }
@@ -226,26 +226,26 @@ pub struct OpenInFinder {
 /// confirm-dialog, and fs ops behind it. Today the handler logs to
 /// tracing so the end-to-end click → action → handler path is testable.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct FileTreeNewFile {
     /// Parent directory the new file should land in.
     pub parent: String,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct FileTreeNewFolder {
     pub parent: String,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct FileTreeRename {
     pub path: String,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct FileTreeDelete {
     pub path: String,
 }
@@ -253,7 +253,7 @@ pub struct FileTreeDelete {
 /// Duplicate a file or folder next to itself with a collision-free
 /// " copy" name. Dispatched from the file-tree context menu's Duplicate row.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct FileTreeDuplicate {
     pub path: String,
 }
@@ -272,7 +272,7 @@ pub struct FileTreeDuplicate {
 /// ride as `String` / `Vec<String>` and receivers parse via
 /// `PathBuf::from`.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenGitRowContextMenuAt {
     pub x: f32,
     pub y: f32,
@@ -293,7 +293,7 @@ pub struct OpenGitRowContextMenuAt {
 /// `FileTreeContextMenu` and `GitRowContextMenu`) so dismissal +
 /// peer-overlay close-on-open behavior is shared.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenCommitContextMenuAt {
     pub x: f32,
     pub y: f32,
@@ -308,7 +308,7 @@ pub struct OpenCommitContextMenuAt {
 /// user reviews and presses Enter, while custom-command palette entries
 /// append `\n` so the prompt auto-submits.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct SendTextToActiveAgent {
     pub text: String,
 }
@@ -323,7 +323,7 @@ pub struct SendTextToActiveAgent {
 /// `SendTextToActiveAgent` with `markdown` alone when no chat tab is open, so a
 /// terminal-only workspace keeps the behavior it had.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct SendPickToActiveChat {
     /// The element block from `browser_view::agent_context::format_pick`.
     pub markdown: String,
@@ -339,10 +339,10 @@ pub struct SendPickToActiveChat {
 /// the active project's directory when the log omits one) and threads
 /// resume/fork into the spawn.
 #[derive(Clone, Debug, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct ResumeAgentSession {
     pub session_id: String,
-    pub adapter: oximux_core::AgentAdapter,
+    pub adapter: trex_core::AgentAdapter,
     /// Import-provider preset id (`opencode`/`copilot`/`pi`) for a row whose
     /// store the index scanned directly. When set, the resume spawns a `Custom`
     /// PTY via `import_resume_command` instead of a native adapter launch.
@@ -359,7 +359,7 @@ pub struct ResumeAgentSession {
 /// group, which imports the transcript from `path` (empty → resume with no
 /// pre-rendered history) and spawns a resumed chat rooted at `cwd`.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenChatSession {
     pub session_id: String,
     pub path: String,
@@ -367,7 +367,7 @@ pub struct OpenChatSession {
     /// Which agent produced the session — routes the reopen to the matching
     /// transport + transcript importer (Claude `--resume` + JSONL, Codex
     /// `thread/resume` + rollout). Defaults to Claude for older call sites.
-    pub adapter: oximux_core::AgentAdapter,
+    pub adapter: trex_core::AgentAdapter,
     /// Import-provider preset id (`opencode`/`pi`) for a row whose store the
     /// index scanned directly. When set, the reopen builds a transcript-only
     /// **bridge** chat (seeded via `load_import_provider_transcript`, no live
@@ -381,7 +381,7 @@ pub struct OpenChatSession {
 /// root owns the panes, the card does not. The failure path already opened
 /// this file once — the button re-activates it after the user closed it.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OpenProvisioningTranscript {
     /// The project the create belonged to — the tab opens in THAT project's
     /// panes, even if the user has switched projects since the card appeared.
@@ -396,7 +396,7 @@ pub struct OpenProvisioningTranscript {
 /// to rename its branch from `summary` (Phase 8 auto-rename). A row the user
 /// named, or one already renamed once, is ignored.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct OfferWorkspaceAutoRename {
     pub cwd: std::path::PathBuf,
     pub summary: String,
@@ -411,15 +411,15 @@ pub struct OfferWorkspaceAutoRename {
 /// staged send resumes at the new worktree cwd. Mirrors the
 /// [`SendTextToActiveAgent`] "resolve the active agent on the spot" shape.
 #[derive(Clone, Debug, Default, PartialEq, Action)]
-#[action(namespace = oximux, no_json)]
+#[action(namespace = TREX, no_json)]
 pub struct CreateWorktreeWorkspaceForActiveChat {
     /// Pre-validated slug (`validate_slug` ran in the roster before this fired);
-    /// the branch is `oximux/<slug>`.
+    /// the branch is `TREX/<slug>`.
     pub slug: String,
 }
 
 actions!(
-    oximux,
+    TREX,
     [
         /// Toggle the prompt composer bar over the active agent pane — an
         /// elevated multi-line draft with `@file` autocomplete. No-op when the
@@ -642,7 +642,7 @@ actions!(
         /// new terminal group is spawned. Tab content is preserved.
         ApplyLayoutBottomTerminal,
         /// Re-read `commands.toml` from the global app data dir and the
-        /// active project's `.oximux/commands.toml`, merging them into the
+        /// active project's `.trex/commands.toml`, merging them into the
         /// palette's custom command list. No file watcher — reload is
         /// manual via this palette entry.
         ReloadCustomCommands,
@@ -657,7 +657,7 @@ actions!(
         /// appearance/about pane. Also reachable via the left-rail cog.
         OpenSettings,
         /// Open the settings modal directly at the About pane — version, app
-        /// data dir, and the update controls. The menu's "About OxiMux" on
+        /// data dir, and the update controls. The menu's "About TREX" on
         /// both platforms; not bound to a chord, because About is a thing you
         /// go looking for once, not a thing you reach for.
         OpenAbout,

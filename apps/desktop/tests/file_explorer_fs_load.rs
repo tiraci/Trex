@@ -1,4 +1,4 @@
-//! Integration tests for `file_explorer::fs_load::read_dir_filtered`.
+﻿//! Integration tests for `file_explorer::fs_load::read_dir_filtered`.
 //!
 //! Builds tempdir fixtures and asserts: excluded names dropped, dirs-first
 //! sort, case-insensitive ordering, `relative_path` computed from `repo_root`.
@@ -6,7 +6,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use oximux_app::shell::file_explorer::fs_load::read_dir_filtered;
+use trex_app::shell::file_explorer::fs_load::read_dir_filtered;
 
 /// Build a fixture tree under `root`:
 ///   .git/HEAD

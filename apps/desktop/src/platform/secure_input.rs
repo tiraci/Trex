@@ -1,4 +1,4 @@
-//! Whether macOS is currently withholding keyboard events from every event tap.
+﻿//! Whether macOS is currently withholding keyboard events from every event tap.
 //!
 //! While any process holds **secure event input** — a password field, the lock
 //! screen, some terminals — the window server stops delivering key events to
@@ -58,7 +58,7 @@ pub fn holder_pid() -> Option<u32> {
 /// [`crate::platform::escape_tap`] grew a `WH_KEYBOARD_LL` implementation it
 /// stopped being true: a low-level hook can be starved of the very key it
 /// exists to catch, by the secure desktop (UAC consent, Ctrl+Alt+Del, the lock
-/// screen) and by UIPI when the foreground window outranks OxiMux.
+/// screen) and by UIPI when the foreground window outranks TREX.
 ///
 /// What Windows does not offer is a way to *ask*. There is no `IOConsoleUsers`
 /// equivalent to read, so this cannot distinguish "nothing is withholding keys"

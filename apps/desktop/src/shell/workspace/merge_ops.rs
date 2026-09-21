@@ -1,4 +1,4 @@
-//! The `Merge into <default>` row action: pre-flight, dispatch, and what the
+﻿//! The `Merge into <default>` row action: pre-flight, dispatch, and what the
 //! outcome means on screen.
 //!
 //! Two halves, split so the interesting one is testable without a window:
@@ -20,9 +20,9 @@ use std::collections::HashSet;
 use std::path::PathBuf;
 
 use gpui::{Context, WeakEntity, Window};
-use oximux_core::{MergeOutcome, Project, StashRef, Workspace};
-use oximux_git::Repository;
-use oximux_worktree_ops::{MergeRefusal, MergeResult};
+use trex_core::{MergeOutcome, Project, StashRef, Workspace};
+use trex_git::Repository;
+use trex_worktree_ops::{MergeRefusal, MergeResult};
 
 use crate::shell::confirm_dialog::{ConfirmCallback, ConfirmPrompt, ConfirmSecondary};
 use crate::shell::workspace::merge_notices::{
@@ -163,7 +163,7 @@ pub fn report_for(outcome: MergeOutcome, branch: &str, default_branch: &str) -> 
         // shaped to prevent.
         MergeOutcome::AutoStashed { .. } => MergeReport {
             kind: MergeReportKind::NothingToMerge,
-            headline: "The merge finished in a state OxiMux could not read. \
+            headline: "The merge finished in a state TREX could not read. \
                        Check Source Control before continuing."
                 .to_string(),
             conflicts: Vec::new(),
@@ -346,7 +346,7 @@ impl WorkspaceRoot {
         let proj = project.clone();
 
         cx.spawn_in(window, async move |_, cx| {
-            let plan = oximux_worktree_ops::preflight_merge(
+            let plan = trex_worktree_ops::preflight_merge(
                 &project_root,
                 &ws,
                 &default_branch,
@@ -377,7 +377,7 @@ impl WorkspaceRoot {
                         .unwrap_or_default()
                 })
                 .unwrap_or_default();
-            let result = oximux_worktree_ops::apply_merge(&plan, &holders_now).await;
+            let result = trex_worktree_ops::apply_merge(&plan, &holders_now).await;
             let _ = cx.update(|window, cx| {
                 let _ = weak.update(cx, |this, cx| {
                     this.finish_merge(&ws, &proj, result, window, cx);
@@ -445,7 +445,7 @@ impl WorkspaceRoot {
                 // raw text is in the log above for anyone debugging.
                 let detail = if stranded_auto_stash {
                     "Your uncommitted changes could not be put back and are still stashed \
-                     \u{2014} OxiMux will offer to restore them."
+                     \u{2014} TREX will offer to restore them."
                         .to_string()
                 } else {
                     error
@@ -500,7 +500,7 @@ impl WorkspaceRoot {
         if report.stranded.is_some() {
             text.push_str(
                 " Your uncommitted changes are still stashed \u{2014} \
-                 OxiMux will offer to restore them.",
+                 TREX will offer to restore them.",
             );
         }
         crate::shell::toast::toast(cx, kind, text);
@@ -618,7 +618,7 @@ impl WorkspaceRoot {
                 &project.id,
                 &project.root_path,
                 &workspace.branch,
-                oximux_git::AUTO_STASH_MESSAGE,
+                trex_git::AUTO_STASH_MESSAGE,
                 reason,
             ),
         );
@@ -771,7 +771,7 @@ impl WorkspaceRoot {
                 ),
                 StashLookup::Ambiguous(n) => (
                     format!(
-                        "{n} stashes carry that description, so OxiMux can\u{2019}t tell which is \
+                        "{n} stashes carry that description, so TREX can\u{2019}t tell which is \
                          yours. Restore it from Source Control \u{2192} Stashes."
                     ),
                     crate::shell::toast::ToastKind::Warning,
@@ -829,7 +829,7 @@ mod tests {
             branch_minted: true,
             name: "fix".into(),
             slug: "fix".into(),
-            branch: "oximux/fix".into(),
+            branch: "TREX/fix".into(),
             worktree_path: format!("/repos/{project_id}-wt/fix"),
             status: "active".into(),
             created_at: String::new(),

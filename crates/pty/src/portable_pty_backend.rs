@@ -1,4 +1,4 @@
-//! `portable-pty` concrete `TerminalBackend`.
+﻿//! `portable-pty` concrete `TerminalBackend`.
 //!
 //! Design:
 //! - One `Session` per spawn. Owns master, writer, a clone-killer for the
@@ -23,7 +23,7 @@
 
 use crate::conpty_c0::ConptyC0Filter;
 use anyhow::{Context, Result};
-use oximux_shell_env::{clear_inherited_colour_suppression, seed_utf8_locale};
+use trex_shell_env::{clear_inherited_colour_suppression, seed_utf8_locale};
 use portable_pty::{Child, ChildKiller, CommandBuilder, MasterPty, PtySize, native_pty_system};
 use std::collections::{HashMap, VecDeque};
 use std::io::{Read, Write};
@@ -175,7 +175,7 @@ impl TerminalBackend for PortablePtyBackend {
         command.env("TERM", "xterm-256color");
         command.env("COLORTERM", "truecolor");
         // Host-terminal identity so tools/agents can detect the emulator.
-        command.env("TERM_PROGRAM", "oximux");
+        command.env("TERM_PROGRAM", "TREX");
         // Which way the window reads, for the programs that check the
         // environment instead of querying OSC 11 (see `crate::polarity`).
         // Before the caller loop, so an explicit `cfg.env` entry still wins.
@@ -313,7 +313,7 @@ impl TerminalBackend for PortablePtyBackend {
         command.env("TERM", "xterm-256color");
         command.env("COLORTERM", "truecolor");
         // Host-terminal identity so tools/agents can detect the emulator.
-        command.env("TERM_PROGRAM", "oximux");
+        command.env("TERM_PROGRAM", "TREX");
         // Which way the window reads, for the programs that check the
         // environment instead of querying OSC 11 (see `crate::polarity`).
         // Before the caller loop, so an explicit `cfg.env` entry still wins.

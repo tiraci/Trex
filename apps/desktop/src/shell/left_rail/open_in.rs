@@ -1,4 +1,4 @@
-//! `Open in ▸` — hand a worktree directory to an external application.
+﻿//! `Open in ▸` — hand a worktree directory to an external application.
 //!
 //! The list the submenu offers comes from `git.toml` (`[[open_in]]`), and when
 //! that is empty from a built-in list resolved here at menu-open time: the
@@ -15,8 +15,8 @@
 
 use std::path::Path;
 
-use oximux_settings::OpenInApp;
-use oximux_settings::git::GitSettings;
+use trex_settings::OpenInApp;
+use trex_settings::git::GitSettings;
 
 /// The apps the submenu should offer: the configured list, or the built-in
 /// one when nothing usable is configured.
@@ -303,8 +303,8 @@ mod tests {
     /// rather than panicking or silently succeeding.
     #[test]
     fn launching_a_missing_program_reports_the_program() {
-        let err = launch(&app("Nope", "oximux-no-such-program-4f2a"), Path::new("/tmp"))
+        let err = launch(&app("Nope", "trex-no-such-program-4f2a"), Path::new("/tmp"))
             .unwrap_err();
-        assert!(err.contains("oximux-no-such-program-4f2a"), "{err}");
+        assert!(err.contains("trex-no-such-program-4f2a"), "{err}");
     }
 }

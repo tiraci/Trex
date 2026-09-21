@@ -1,4 +1,4 @@
-//! The `maintain_connection` driver end-to-end: it dials via a [`Connector`],
+﻿//! The `maintain_connection` driver end-to-end: it dials via a [`Connector`],
 //! runs the real handshake + demux pump, and reconnects on loss per the backoff
 //! policy. Two scripted worlds drive it deterministically with no network and no
 //! real time — a scripted host that completes a handshake then drops the link, and
@@ -15,11 +15,11 @@ use async_trait::async_trait;
 use futures::channel::oneshot;
 use futures::executor::block_on;
 use futures::future::{Either, join, select};
-use oximux_remote_proto::messages::HelloAckWire;
-use oximux_remote_proto::proto::{MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Response};
-use oximux_remote_proto::{PairingTicket, Transport};
-use oximux_remote_proto::testing::{DuplexTransport, duplex_pair};
-use oximux_remote_session::{
+use trex_remote_proto::messages::HelloAckWire;
+use trex_remote_proto::proto::{MIN_COMPATIBLE_VERSION, PROTOCOL_VERSION, Response};
+use trex_remote_proto::{PairingTicket, Transport};
+use trex_remote_proto::testing::{DuplexTransport, duplex_pair};
+use trex_remote_session::{
     Bootstrap, ClientSigner, ConnState, Connector, ConnectError, Sleeper, maintain_connection,
 };
 

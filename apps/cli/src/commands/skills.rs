@@ -1,4 +1,4 @@
-//! `oximux skills` — the agent-facing guides, served from the binary itself.
+﻿//! `TREX skills` — the agent-facing guides, served from the binary itself.
 //!
 //! Entirely offline. The guides are `include_str!`d, so `skills get` needs no
 //! runtime, no network, and no host, and a guide can never describe a verb the
@@ -13,7 +13,7 @@
 
 use std::path::PathBuf;
 
-use oximux_agent_hooks::agent_hook_dialects::{DIALECTS, HookDialect};
+use trex_agent_hooks::agent_hook_dialects::{DIALECTS, HookDialect};
 use serde_json::{Value, json};
 
 use crate::cli::exit;
@@ -35,14 +35,14 @@ pub struct Guide {
 /// guide tells you to read first.
 pub const GUIDES: &[Guide] = &[
     Guide {
-        topic: "oximux-cli",
+        topic: "trex-cli",
         summary: "Start sessions, watch them finish, decide their permission requests, manage worktrees",
-        text: include_str!("../../../../docs/skills/oximux-cli.md"),
+        text: include_str!("../../../../docs/skills/trex-cli.md"),
     },
     Guide {
-        topic: "oximux-team",
+        topic: "trex-team",
         summary: "Run several agents on one task with roles, worktrees, and the state blackboard",
-        text: include_str!("../../../../docs/skills/oximux-team.md"),
+        text: include_str!("../../../../docs/skills/trex-team.md"),
     },
 ];
 
@@ -81,7 +81,7 @@ fn guide_for(topic: &str) -> Result<&'static Guide, Failure> {
             exit::USAGE,
             format!("unknown topic {topic:?} — must be {}", known_topics()),
         )
-        .with_steps(["`oximux skills ls` prints every topic with a summary".into()])
+        .with_steps(["`TREX skills ls` prints every topic with a summary".into()])
     })
 }
 
@@ -144,7 +144,7 @@ pub fn get(topic: &str, full: bool) -> Result<(Value, String), Failure> {
 /// `skills install [--agent <slug>]`.
 ///
 /// Writes into agents that are already on this machine and nowhere else, the
-/// same rule `agent hooks on` follows: OxiMux adds to an agent's own config
+/// same rule `agent hooks on` follows: TREX adds to an agent's own config
 /// directory and never conjures one, so an agent you have never run is
 /// reported and skipped rather than given a directory it did not ask for.
 ///
@@ -154,7 +154,7 @@ pub fn get(topic: &str, full: bool) -> Result<(Value, String), Failure> {
 /// `--agent` overrides that: the user has said where they want it, so the
 /// directory is created if it is missing.
 ///
-/// A guide OxiMux wrote before is overwritten — that is the point, since a
+/// A guide TREX wrote before is overwritten — that is the point, since a
 /// stale guide is the failure this whole verb exists to prevent. A file that
 /// is NOT one of ours is left alone and reported, because the assumption that
 /// nothing else could own that path is an assumption, not an invariant.
@@ -167,7 +167,7 @@ pub fn install(agent: Option<&str>) -> Result<(Value, String), Failure> {
                     exit::USAGE,
                     format!(
                         "unknown agent {slug:?} — must be {}",
-                        oximux_agent_hooks::agent_hook_dialects::known_slugs()
+                        trex_agent_hooks::agent_hook_dialects::known_slugs()
                     ),
                 )
             })?;
@@ -182,7 +182,7 @@ pub fn install(agent: Option<&str>) -> Result<(Value, String), Failure> {
                 )
                 .with_steps([
                     format!("run {} once so it creates its own config directory", dialect.slug),
-                    "`oximux skills install` with no --agent installs into the agents that are here".into(),
+                    "`TREX skills install` with no --agent installs into the agents that are here".into(),
                 ]));
             }
             vec![dialect]
@@ -269,7 +269,7 @@ fn row(dialect: &HookDialect, topic: &str, outcome: &str, path: Option<&std::pat
 
 /// Why this path must not be written, or `None` when it is ours to write.
 ///
-/// Ownership is read off the frontmatter OxiMux itself wrote, so it needs no
+/// Ownership is read off the frontmatter TREX itself wrote, so it needs no
 /// side-car marker file and keeps the installed bytes identical to the source
 /// guide. An unreadable file counts as foreign: refusing to clobber something
 /// we cannot even inspect is the safe direction.
@@ -283,7 +283,7 @@ fn foreign_file(path: &std::path::Path) -> Option<String> {
         }
         Ok(_) => match std::fs::read_to_string(path) {
             Ok(existing) if is_ours(&existing) => None,
-            Ok(_) => Some("a file OxiMux did not write".to_string()),
+            Ok(_) => Some("a file TREX did not write".to_string()),
             Err(err) => Some(format!("unreadable ({err})")),
         },
     }
@@ -329,7 +329,7 @@ mod tests {
                 for invocation in invocations(&span) {
                     checked += 1;
                     let mut cmd = &root;
-                    let mut walked: Vec<&str> = vec!["oximux"];
+                    let mut walked: Vec<&str> = vec!["TREX"];
                     for word in &invocation {
                         // A command with no subcommands is a leaf: everything
                         // after it is a positional argument, and
@@ -403,7 +403,7 @@ mod tests {
                         flags_checked += 1;
                         assert!(
                             longs.contains(&flag) || globals.contains(&flag),
-                            "guide {:?} names `--{flag}` on `oximux {}`, which does not accept it\n  accepts: {:?}\n  in: {}",
+                            "guide {:?} names `--{flag}` on `TREX {}`, which does not accept it\n  accepts: {:?}\n  in: {}",
                             guide.topic,
                             path.join(" "),
                             longs,
@@ -458,17 +458,17 @@ mod tests {
         );
     }
 
-    /// The team guide's worked example is inside `RUN=$(oximux …)`, which the
+    /// The team guide's worked example is inside `RUN=$(TREX …)`, which the
     /// extractor once skipped entirely — four flags and two verbs unchecked.
     #[test]
     fn a_command_substitution_is_still_an_invocation() {
-        assert!(is_oximux_token("RUN=$(oximux"));
-        assert!(is_oximux_token("$(oximux"));
-        assert!(is_oximux_token("oximux"));
-        assert!(!is_oximux_token("oximuxx"));
-        assert!(!is_oximux_token("--oximux"));
+        assert!(is_trex_token("RUN=$(TREX"));
+        assert!(is_trex_token("$(TREX"));
+        assert!(is_trex_token("TREX"));
+        assert!(!is_trex_token("TREXx"));
+        assert!(!is_trex_token("--TREX"));
 
-        let found = invocations_with_flags("RUN=$(oximux team run --name x --json | jq -r .data.id)");
+        let found = invocations_with_flags("RUN=$(TREX team run --name x --json | jq -r .data.id)");
         assert_eq!(found.len(), 1, "the substitution is one invocation");
         assert_eq!(found[0].0, vec!["team", "run"]);
         assert_eq!(found[0].1, vec!["name".to_string(), "json".to_string()]);
@@ -477,18 +477,18 @@ mod tests {
     /// A quoted value with spaces is one argument, not several.
     #[test]
     fn quotes_survive_tokenising() {
-        let tokens = shell_tokens(r#"oximux heartbeat create "sweep it" --cron "*/15 * * * *""#);
+        let tokens = shell_tokens(r#"TREX heartbeat create "sweep it" --cron "*/15 * * * *""#);
         assert_eq!(
             tokens,
-            vec!["oximux", "heartbeat", "create", "sweep it", "--cron", "*/15 * * * *"]
+            vec!["TREX", "heartbeat", "create", "sweep it", "--cron", "*/15 * * * *"]
         );
     }
 
-    /// Only code carries commands; prose may say "the oximux CLI" freely.
+    /// Only code carries commands; prose may say "the TREX CLI" freely.
     ///
     /// Callers pass the BODY, not the whole file: a guide's YAML `description`
     /// names verb families so an agent runtime can decide when to load it
-    /// ("when the task involves `oximux team`"), and those are discovery
+    /// ("when the task involves `TREX team`"), and those are discovery
     /// blurbs rather than lines anyone runs.
     ///
     /// Fenced blocks are taken whole, and outside them only inline-code spans
@@ -541,12 +541,12 @@ mod tests {
         spans
     }
 
-    /// The subcommand path of every `oximux …` invocation in one span.
+    /// The subcommand path of every `TREX …` invocation in one span.
     fn invocations(span: &str) -> Vec<Vec<String>> {
         invocations_with_flags(span).into_iter().map(|(path, _)| path).collect()
     }
 
-    /// Each `oximux …` invocation as (subcommand path, long flags named).
+    /// Each `TREX …` invocation as (subcommand path, long flags named).
     ///
     /// The path ends at the first token that cannot be a subcommand — an
     /// option, a placeholder, a shell variable, a quoted string. Every command
@@ -560,7 +560,7 @@ mod tests {
         let mut out = Vec::new();
         let mut i = 0;
         while i < tokens.len() {
-            if !is_oximux_token(tokens[i]) {
+            if !is_trex_token(tokens[i]) {
                 i += 1;
                 continue;
             }
@@ -570,7 +570,7 @@ mod tests {
             let mut in_path = true;
             while i < tokens.len() {
                 let token = tokens[i];
-                if is_terminator(token) || is_oximux_token(token) {
+                if is_terminator(token) || is_trex_token(token) {
                     break;
                 }
                 if let Some(long) = token.strip_prefix("--") {
@@ -634,22 +634,22 @@ mod tests {
         out
     }
 
-    /// Every `oximux …` invocation in one span, as the argv the shell would
+    /// Every `TREX …` invocation in one span, as the argv the shell would
     /// hand the binary — placeholders replaced with something that parses.
     fn argvs(span: &str) -> Vec<Vec<String>> {
         let tokens = shell_tokens(span);
         let mut out = Vec::new();
         let mut i = 0;
         while i < tokens.len() {
-            if !is_oximux_token(&tokens[i]) {
+            if !is_trex_token(&tokens[i]) {
                 i += 1;
                 continue;
             }
             i += 1;
-            let mut argv = vec!["oximux".to_string()];
+            let mut argv = vec!["TREX".to_string()];
             while i < tokens.len() {
                 let token = tokens[i].as_str();
-                if is_terminator(token) || is_oximux_token(token) {
+                if is_terminator(token) || is_trex_token(token) {
                     break;
                 }
                 let ends_command = token.ends_with(';');
@@ -685,7 +685,7 @@ mod tests {
     /// A token that could be a subcommand name: lowercase letters, digits and
     /// hyphens only. Placeholders (`<ID>`, `$RUN`, `"…"`) and options are all
     /// excluded by construction. A trailing `;` or `)` is shell punctuation,
-    /// not part of the name — without stripping it, `oximux team ls; jq .`
+    /// not part of the name — without stripping it, `TREX team ls; jq .`
     /// hid `ls` from the gate entirely.
     fn is_verb_word(token: &str) -> bool {
         let token = token.trim_end_matches([';', ')']);
@@ -707,32 +707,32 @@ mod tests {
     /// Whether a token is an invocation of this CLI.
     ///
     /// Shell wraps the command name in ways that are invisible to a plain
-    /// equality test: `RUN=$(oximux …)` is the shape the team guide's own
+    /// equality test: `RUN=$(TREX …)` is the shape the team guide's own
     /// worked example uses, and before this the whole block — four flags and
     /// two verbs — was silently unchecked. Strips an assignment prefix and any
     /// opening substitution, quoting or grouping punctuation.
-    fn is_oximux_token(token: &str) -> bool {
+    fn is_trex_token(token: &str) -> bool {
         let token = token.trim_end_matches([';', ')']);
         let token = match token.split_once('=') {
-            // `VAR=$(oximux` — an assignment, not a flag (which starts `-`).
+            // `VAR=$(TREX` — an assignment, not a flag (which starts `-`).
             Some((lhs, rhs)) if !lhs.starts_with('-') && !lhs.is_empty() => rhs,
             _ => token,
         };
-        token.trim_start_matches(['$', '(', '`', '"', '\'']) == "oximux"
+        token.trim_start_matches(['$', '(', '`', '"', '\'']) == "TREX"
     }
 
     /// The extractor must actually find the commands, or both gates above pass
     /// by finding nothing.
     #[test]
     fn the_extractor_finds_commands_in_both_code_shapes() {
-        let fenced = command_spans("text\n```sh\noximux team run --name x\n```\nmore").join(" ");
+        let fenced = command_spans("text\n```sh\nTREX team run --name x\n```\nmore").join(" ");
         assert_eq!(invocations(&fenced), vec![vec!["team", "run"]]);
 
-        let inline = command_spans("run `oximux worktree set <ID> --phase done` when finished").join(" ");
+        let inline = command_spans("run `TREX worktree set <ID> --phase done` when finished").join(" ");
         assert_eq!(invocations(&inline), vec![vec!["worktree", "set"]]);
 
         // Prose outside backticks is not scanned, or "CLI" would be a verb.
-        assert!(command_spans("the oximux CLI is offline").is_empty());
+        assert!(command_spans("the TREX CLI is offline").is_empty());
     }
 
     /// A shell continuation is one command, so its later flags are checked.
@@ -743,7 +743,7 @@ mod tests {
     /// worse than no gate — it is trusted.
     #[test]
     fn a_line_continuation_is_one_invocation() {
-        let spans = command_spans("```sh\noximux team run \\\n  --role a=b \\\n  --worktree-each\n```");
+        let spans = command_spans("```sh\nTREX team run \\\n  --role a=b \\\n  --worktree-each\n```");
         let joined = spans.join("\n");
         let found = invocations_with_flags(&joined);
         assert_eq!(found.len(), 1, "joined into one invocation: {spans:?}");
@@ -759,9 +759,9 @@ mod tests {
     /// to loosen it until it caught nothing.
     #[test]
     fn a_placeholder_is_not_read_as_a_subcommand() {
-        assert_eq!(invocations("oximux permit allow \"$S\" \"$REQ\""), vec![vec!["permit", "allow"]]);
-        assert_eq!(invocations("oximux worktree rm <ID>"), vec![vec!["worktree", "rm"]]);
-        assert_eq!(invocations("oximux run \"do the thing\""), vec![vec!["run"]]);
+        assert_eq!(invocations("TREX permit allow \"$S\" \"$REQ\""), vec![vec!["permit", "allow"]]);
+        assert_eq!(invocations("TREX worktree rm <ID>"), vec![vec!["worktree", "rm"]]);
+        assert_eq!(invocations("TREX run \"do the thing\""), vec![vec!["run"]]);
     }
 
     /// Two invocations on one line are two checks, not one.
@@ -770,20 +770,20 @@ mod tests {
         // The extractor is deliberately greedy — `k` is a positional of
         // `state get`, and it is the WALKER that stops at a leaf command
         // rather than the extractor, which has no view of the tree.
-        let found = invocations("oximux team ls --json | jq . && oximux state get k");
+        let found = invocations("TREX team ls --json | jq . && TREX state get k");
         assert_eq!(found, vec![vec!["team", "ls"], vec!["state", "get", "k"]]);
     }
 
     /// Flags are attributed to the command they were written on.
     #[test]
     fn flags_are_read_against_their_own_command() {
-        let found = invocations_with_flags("oximux worktree set <ID> --comment x --phase done");
+        let found = invocations_with_flags("TREX worktree set <ID> --comment x --phase done");
         assert_eq!(found.len(), 1);
         assert_eq!(found[0].0, vec!["worktree", "set"]);
         assert_eq!(found[0].1, vec!["comment".to_string(), "phase".to_string()]);
 
         // `--role a=b` keeps the flag name and drops the value.
-        let roles = invocations_with_flags("oximux team run --role a=b --json");
+        let roles = invocations_with_flags("TREX team run --role a=b --json");
         assert_eq!(roles[0].1, vec!["role".to_string(), "json".to_string()]);
     }
 
@@ -807,10 +807,10 @@ mod tests {
     /// `--full` prints the file as installed; plain `get` prints the prose.
     #[test]
     fn get_strips_the_frontmatter_unless_full() {
-        let (_, body) = get("oximux-cli", false).expect("a known topic");
-        let (_, full) = get("oximux-cli", true).expect("a known topic");
+        let (_, body) = get("trex-cli", false).expect("a known topic");
+        let (_, full) = get("trex-cli", true).expect("a known topic");
 
-        assert!(full.starts_with("---\nname: oximux-cli"), "--full keeps the frontmatter");
+        assert!(full.starts_with("---\nname: trex-cli"), "--full keeps the frontmatter");
         assert!(!body.starts_with("---"), "the body has none: {:?}", &body[..40.min(body.len())]);
         assert!(body.starts_with("# "), "the body opens on the heading: {:?}", &body[..40.min(body.len())]);
         assert!(full.len() > body.len());
@@ -827,9 +827,9 @@ mod tests {
     /// An unknown topic is a usage error that names the real ones.
     #[test]
     fn an_unknown_topic_lists_the_known_ones() {
-        let failure = get("oximux-nope", false).expect_err("unknown topic");
+        let failure = get("trex-nope", false).expect_err("unknown topic");
         assert_eq!(failure.exit, exit::USAGE);
-        assert!(failure.message.contains("oximux-cli"), "{}", failure.message);
+        assert!(failure.message.contains("trex-cli"), "{}", failure.message);
     }
 
     /// Every guide carries the frontmatter an agent runtime discovers it by,
@@ -876,13 +876,13 @@ mod tests {
         assert!(!keeps_skills(dialect) || skills_dir(dialect).is_some());
 
         // The path shape is the convention every skills-reading agent shares.
-        if let Some(path) = install_path(dialect, "oximux-cli") {
-            assert!(path.ends_with("skills/oximux-cli/SKILL.md"), "unexpected path {path:?}");
+        if let Some(path) = install_path(dialect, "trex-cli") {
+            assert!(path.ends_with("skills/trex-cli/SKILL.md"), "unexpected path {path:?}");
         }
         drop(home);
     }
 
-    /// A file OxiMux did not write is never clobbered.
+    /// A file TREX did not write is never clobbered.
     ///
     /// The doc comment this guards used to *assert* that nothing else could
     /// own the path. That was an assumption; the sibling `agent hooks` verb
@@ -904,7 +904,7 @@ mod tests {
         assert!(foreign_file(&path).is_some(), "a foreign file must be refused");
 
         // A near-miss — right shape, wrong name — is still not ours.
-        std::fs::write(&path, "---\nname: oximux-clip\n---\n").expect("write");
+        std::fs::write(&path, "---\nname: trex-clip\n---\n").expect("write");
         assert!(foreign_file(&path).is_some(), "only an exact topic name is ours");
     }
 
@@ -930,7 +930,7 @@ mod tests {
     #[test]
     fn write_guide_creates_its_directory() {
         let dir = tempfile::tempdir().expect("a temp dir");
-        let path = dir.path().join("skills").join("oximux-cli").join("SKILL.md");
+        let path = dir.path().join("skills").join("trex-cli").join("SKILL.md");
         write_guide(&path, GUIDES[0].text).expect("writes through a missing directory");
         assert_eq!(std::fs::read_to_string(&path).expect("read"), GUIDES[0].text);
 
@@ -946,7 +946,7 @@ mod tests {
         // A FILE where the directory should be: `create_dir_all` must fail.
         let blocker = dir.path().join("skills");
         std::fs::write(&blocker, "not a directory").expect("write");
-        let path = blocker.join("oximux-cli").join("SKILL.md");
+        let path = blocker.join("trex-cli").join("SKILL.md");
         assert!(write_guide(&path, "x").is_err(), "must report, not panic");
     }
 

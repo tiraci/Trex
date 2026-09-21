@@ -1,4 +1,4 @@
-//! Filesystem mutations for the file explorer: duplicate and move-to-Trash.
+﻿//! Filesystem mutations for the file explorer: duplicate and move-to-Trash.
 //!
 //! Kept separate from the menu/render code so the path math (collision-free
 //! duplicate name) and the macOS Trash FFI stay independently testable and
@@ -167,7 +167,7 @@ pub fn move_to_trash(path: &Path) -> Result<(), String> {
         pFrom: wide.as_ptr(),
         pTo: std::ptr::null(),
         // ALLOWUNDO is the Recycle Bin itself; the three UI suppressions make
-        // this silent like the macOS call — OxiMux's confirm dialog already
+        // this silent like the macOS call — TREX's confirm dialog already
         // asked, so a second shell-owned prompt would be noise. windows-sys
         // types the constants u32 but the struct field is the header's WORD.
         fFlags: (FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT | FOF_NOERRORUI) as u16,
@@ -230,7 +230,7 @@ mod tests {
         static SEQ: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
         let mut dir = std::env::temp_dir();
         dir.push(format!(
-            "oximux-dup-test-{}-{}",
+            "trex-dup-test-{}-{}",
             std::process::id(),
             SEQ.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         ));

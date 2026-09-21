@@ -1,4 +1,4 @@
-// Disk-checkpoint lifecycle against a real PTY registry: a live shell
+﻿// Disk-checkpoint lifecycle against a real PTY registry: a live shell
 // gets a checkpoint dir at spawn and scrollback on the tick; every
 // clean end (deliberate close, natural exit) removes it. Whatever
 // remains on disk is therefore an unclean death — the exact contract
@@ -7,10 +7,10 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use oximux_shell_env::test_support::{lines, test_cwd, test_shell};
-use oximux_relay::checkpoint::CheckpointStore;
-use oximux_relay::registry::{PtyRegistry, SpawnArgs};
-use oximux_relay_proto::Notification;
+use trex_shell_env::test_support::{lines, test_cwd, test_shell};
+use trex_relay::checkpoint::CheckpointStore;
+use trex_relay::registry::{PtyRegistry, SpawnArgs};
+use trex_relay_proto::Notification;
 use tempfile::TempDir;
 use tokio::time::timeout;
 
@@ -56,14 +56,14 @@ async fn checkpoint_written_on_tick_and_removed_on_close() {
     // Parsed on every platform so a malformed meta.json fails the suite
     // anywhere; only the pid assertions below are Unix-shaped.
     #[cfg_attr(not(unix), allow(unused_variables))]
-    let meta: oximux_relay::checkpoint::CheckpointMeta =
+    let meta: trex_relay::checkpoint::CheckpointMeta =
         serde_json::from_slice(&std::fs::read(pty_dir.join("meta.json")).expect("read meta"))
             .expect("parse meta");
     #[cfg(unix)]
     assert!(meta.pid.is_some(), "child pid recorded at spawn");
     #[cfg(target_os = "macos")]
     assert!(
-        meta.pid.and_then(oximux_proc_cwd::cwd_of_pid).is_some(),
+        meta.pid.and_then(trex_proc_cwd::cwd_of_pid).is_some(),
         "recorded pid must be a live process with a resolvable cwd"
     );
 
@@ -145,7 +145,7 @@ async fn checkpoint_meta_tracks_live_shell_cwd() {
         std::fs::read(&meta_path)
             .ok()
             .and_then(|raw| {
-                serde_json::from_slice::<oximux_relay::checkpoint::CheckpointMeta>(&raw).ok()
+                serde_json::from_slice::<trex_relay::checkpoint::CheckpointMeta>(&raw).ok()
             })
             .map(|meta| meta.cwd == want)
             .unwrap_or(false)

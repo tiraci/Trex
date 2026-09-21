@@ -1,4 +1,4 @@
-//! Scrollback search — Phase 1 step 8.
+﻿//! Scrollback search — Phase 1 step 8.
 //!
 //! Pure scan over a row-major cell grid. The grid is whatever
 //! `TerminalBackend::search_grid` hands back (history rows + visible rows
@@ -15,7 +15,7 @@
 //! ~400k cells (5000 history + ~32 rows × 200 cols) and a flood test
 //! against `yes` still scans under 1 ms.
 
-use oximux_pty::Cell;
+use trex_pty::Cell;
 use regex::RegexBuilder;
 
 /// Half-open cell range within a row of the search grid.
@@ -247,7 +247,7 @@ fn is_word_char(ch: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_pty::{Cell, CellColor};
+    use trex_pty::{Cell, CellColor};
 
     fn row_from_str(s: &str) -> Vec<Cell> {
         s.chars()

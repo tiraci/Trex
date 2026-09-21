@@ -1,4 +1,4 @@
-//! Real-git tests for `ahead_behind_vs_base`: the base-resolution order and
+﻿//! Real-git tests for `ahead_behind_vs_base`: the base-resolution order and
 //! the one property the rail depends on — "cannot compute" is `None`, never
 //! a zero pair.
 
@@ -7,7 +7,7 @@ mod common;
 use std::path::Path;
 
 use common::{init_repo, run_git, write};
-use oximux_git::{AheadBehind, ahead_behind_against, ahead_behind_vs_base};
+use trex_git::{AheadBehind, ahead_behind_against, ahead_behind_vs_base};
 
 fn commit(p: &Path, name: &str) {
     write(&p.join(name), name);

@@ -1,13 +1,13 @@
-//! Row types — direct mirror of V001 schema columns. Each `from_row`
+﻿//! Row types — direct mirror of V001 schema columns. Each `from_row`
 //! reads positional columns matching the `SELECT … FROM …` clauses used
 //! by repositories; the `From<XxxRow> for Xxx` conversions translate to
-//! the `oximux-core` domain types that callers see.
+//! the `trex-core` domain types that callers see.
 //!
-//! Living storage-side keeps `oximux-core` from learning about
+//! Living storage-side keeps `trex-core` from learning about
 //! `rusqlite::Row`; storage already depends on core, so the conversion
 //! direction is the natural one.
 
-use oximux_core::{AgentSession, AgentStatus, PaneSession, Project, Workspace, WorktreeSettings};
+use trex_core::{AgentSession, AgentStatus, PaneSession, Project, Workspace, WorktreeSettings};
 use rusqlite::Row;
 
 // `Eq` is intentionally not derived: `sort_order: f64` is only `PartialEq`.

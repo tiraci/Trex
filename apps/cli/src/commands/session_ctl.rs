@@ -1,8 +1,8 @@
-//! `oximux stop` / `oximux steer` — the two one-shot session controls. Stop
+﻿//! `TREX stop` / `TREX steer` — the two one-shot session controls. Stop
 //! interrupts the in-flight turn (the session stays open); steer injects
 //! guidance into a running turn on backends that support it.
 
-use oximux_remote_proto::proto::{Request, Response};
+use trex_remote_proto::proto::{Request, Response};
 use serde_json::{Value, json};
 
 use crate::client::{Client, rpc_failure, unexpected_reply};
@@ -25,8 +25,8 @@ pub async fn stop(client: &Client, session: &str) -> Result<(Value, String), Fai
 /// The same shape as `term`'s own mapper: a verb with a single knowable cause supplies
 /// its own sentence, while the shared [`rpc_failure`] stays generic for every verb that
 /// has no such certainty.
-fn steer_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
-    use oximux_remote_proto::proto::RpcError;
+fn steer_failure(err: trex_remote_proto::proto::RpcError) -> Failure {
+    use trex_remote_proto::proto::RpcError;
     if matches!(err, RpcError::Unsupported) {
         return Failure::new(
             "unsupported",
@@ -34,8 +34,8 @@ fn steer_failure(err: oximux_remote_proto::proto::RpcError) -> Failure {
             "this session's agent cannot take guidance mid-turn",
         )
         .with_steps([
-            "wait for the turn to end, then use `oximux send`".into(),
-            "or `oximux stop` to interrupt it and send a fresh prompt".into(),
+            "wait for the turn to end, then use `TREX send`".into(),
+            "or `TREX stop` to interrupt it and send a fresh prompt".into(),
             "mid-turn steering needs a backend with a message queue (pi); \
              claude and codex have none"
                 .into(),

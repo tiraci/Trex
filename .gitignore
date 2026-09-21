@@ -1,4 +1,4 @@
-/target/
+﻿/target/
 /dist/
 **/*.rs.bk
 *.pdb
@@ -12,7 +12,7 @@
 *.iml
 
 # Build artifacts
-*.app/Contents/MacOS/oximux
+*.app/Contents/MacOS/TREX
 
 # Local config
 .env

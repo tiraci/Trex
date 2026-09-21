@@ -1,4 +1,4 @@
-//! Host-side voice transcription for the remote-control dispatcher.
+﻿//! Host-side voice transcription for the remote-control dispatcher.
 //!
 //! Implements [`AudioTranscriber`] by routing a clip the phone recorded through
 //! the *same* speech pipeline the desktop composer drives — [`Engine`], the
@@ -22,11 +22,11 @@
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
-use oximux_dictation::engine::is_silent;
-use oximux_dictation::resample::{TARGET_SAMPLE_RATE, resample_linear};
-use oximux_dictation::{Engine, ModelManager};
-use oximux_remote_host::transcribe::{AudioTranscriber, TranscribeError};
-use oximux_settings::DictationSettings;
+use trex_dictation::engine::is_silent;
+use trex_dictation::resample::{TARGET_SAMPLE_RATE, resample_linear};
+use trex_dictation::{Engine, ModelManager};
+use trex_remote_host::transcribe::{AudioTranscriber, TranscribeError};
+use trex_settings::DictationSettings;
 
 /// The desktop's speech engine, exposed to the remote host.
 ///
@@ -40,7 +40,7 @@ pub struct HostTranscriber {
     /// Warm recognizer, rebuilt when the configured model changes. `Arc<Mutex>`
     /// so the blocking decode closure can own a clone.
     engine: Arc<Mutex<Option<Engine>>>,
-    /// `<data>/dev.nhtera.oximux/speech-models` — its parent is the settings
+    /// `<data>/dev.tiraci.trex/speech-models` — its parent is the settings
     /// dir (`dictation.toml`), and the VAD model downloads alongside the speech
     /// models here.
     models_dir: std::path::PathBuf,
@@ -237,8 +237,8 @@ fn load_settings(models_dir: &Path) -> DictationSettings {
 /// VAD miss on non-silent audio is treated as a miss (return the original) so a
 /// whole utterance is never silently dropped.
 fn vad_trim(models_dir: &Path, samples: Vec<f32>) -> Vec<f32> {
-    let vad = oximux_dictation::vad::ensure_downloaded(models_dir)
-        .and_then(|p| oximux_dictation::vad::Vad::load(&p));
+    let vad = trex_dictation::vad::ensure_downloaded(models_dir)
+        .and_then(|p| trex_dictation::vad::Vad::load(&p));
     let mut vad = match vad {
         Ok(v) => v,
         Err(e) => {
@@ -257,16 +257,16 @@ fn vad_trim(models_dir: &Path, samples: Vec<f32>) -> Vec<f32> {
 /// uppercase-only models first, filter fillers/hallucinations, then correct
 /// toward the user's custom-word dictionary.
 fn post_process(settings: &DictationSettings, text: String) -> String {
-    let text = match oximux_dictation::spec_for(&settings.model_id) {
-        Some(spec) if spec.uppercase_output => oximux_dictation::text_filter::sentence_case(&text),
+    let text = match trex_dictation::spec_for(&settings.model_id) {
+        Some(spec) if spec.uppercase_output => trex_dictation::text_filter::sentence_case(&text),
         _ => text,
     };
-    let filtered = oximux_dictation::text_filter::filter(
+    let filtered = trex_dictation::text_filter::filter(
         &text,
         &settings.language,
         settings.filler_filter_enabled,
     );
-    oximux_dictation::custom_words::apply(
+    trex_dictation::custom_words::apply(
         &filtered,
         &settings.custom_words,
         settings.word_correction_threshold,

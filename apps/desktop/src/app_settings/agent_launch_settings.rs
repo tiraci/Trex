@@ -1,4 +1,4 @@
-//! App-side loader + live-reload watcher for [`AgentLaunchSettings`].
+﻿//! App-side loader + live-reload watcher for [`AgentLaunchSettings`].
 //!
 //! On startup we read `agent_launch.toml` from the app data dir (seeding a
 //! commented default if absent), install it as a GPUI global, and reload on
@@ -18,7 +18,7 @@ use notify_debouncer_full::{
     DebounceEventResult, Debouncer, FileIdMap, new_debouncer,
     notify::{RecommendedWatcher, RecursiveMode},
 };
-use oximux_settings::AgentLaunchSettings;
+use trex_settings::AgentLaunchSettings;
 use tokio::sync::mpsc;
 
 

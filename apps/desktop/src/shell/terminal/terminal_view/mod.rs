@@ -1,4 +1,4 @@
-//! TerminalView — single-pane PTY render.
+﻿//! TerminalView — single-pane PTY render.
 //!
 //! Owns a `PortablePtyBackend` and one session. A background polling task
 //! ticks every `POLL_INTERVAL_MS`, drains the event queue, copies the latest
@@ -29,12 +29,12 @@ use gpui::{
     MouseMoveEvent, MouseUpEvent, ParentElement, Pixels, Point, Render, ScrollWheelEvent, Styled,
     Task, TouchPhase, UTF16Selection, WeakEntity, Window, canvas, div, point, px, relative, size,
 };
-use oximux_agents::SharedBackend;
-use oximux_pty::{
+use trex_agents::SharedBackend;
+use trex_pty::{
     CommandMarkKind, PortablePtyBackend, SpawnConfig, TerminalBackend, TerminalEvent,
     TerminalSessionId, TerminalSnapshot,
 };
-use oximux_settings::{BellStyle, Density, TerminalSettings, Theme, Typography};
+use trex_settings::{BellStyle, Density, TerminalSettings, Theme, Typography};
 
 use crate::actions::{
     FindNextMatch, FindPrevMatch, OpenTerminalContextMenuAt, Search, SendLastCommandOutputToAgent,
@@ -78,9 +78,9 @@ const fn poll_interval_ms(visible: bool) -> u64 {
     }
 }
 
-/// Debug-only keystroke→echo latency probe. Off unless `OXIMUX_INPUT_TRACE` is
+/// Debug-only keystroke→echo latency probe. Off unless `trex_INPUT_TRACE` is
 /// set in the environment; when on, appends `<unix_micros> <msg>` lines to
-/// `/tmp/oximux_input_trace.log` at the input-arrival and echo-render points,
+/// `/tmp/trex_input_trace.log` at the input-arrival and echo-render points,
 /// so a reproduction can be timed without sample-window coordination — the gaps
 /// between `key_down`/`ime_commit`/`send_bytes` and `echo_render` are the felt
 /// latency. Compiled out of release builds.
@@ -88,11 +88,11 @@ const fn poll_interval_ms(visible: bool) -> u64 {
 fn input_trace(msg: &str) {
     use std::io::Write as _;
     use std::sync::OnceLock;
-    // Opt-in via `OXIMUX_INPUT_TRACE=1` so normal debug runs pay nothing. When
-    // set, appends the input→echo→frame timeline to `/tmp/oximux_input_trace.log`
+    // Opt-in via `trex_INPUT_TRACE=1` so normal debug runs pay nothing. When
+    // set, appends the input→echo→frame timeline to `/tmp/trex_input_trace.log`
     // for latency profiling. Compiled out of release entirely.
     static ENABLED: OnceLock<bool> = OnceLock::new();
-    if !*ENABLED.get_or_init(|| std::env::var_os("OXIMUX_INPUT_TRACE").is_some()) {
+    if !*ENABLED.get_or_init(|| std::env::var_os("TREX_INPUT_TRACE").is_some()) {
         return;
     }
     let micros = std::time::SystemTime::now()
@@ -102,7 +102,7 @@ fn input_trace(msg: &str) {
     if let Ok(mut f) = std::fs::OpenOptions::new()
         .create(true)
         .append(true)
-        .open("/tmp/oximux_input_trace.log")
+        .open("/tmp/trex_input_trace.log")
     {
         let _ = writeln!(f, "{micros} {msg}");
     }
@@ -120,7 +120,7 @@ pub const DEFAULT_ROWS: u16 = 32;
 /// to shadow the host's global Tab / Shift+Tab focus-navigation bindings (see
 /// [`register_terminal_key_bindings`]) so those keys reach the shell instead
 /// of cycling UI focus.
-const TERMINAL_KEY_CONTEXT: &str = "OximuxTerminal";
+const TERMINAL_KEY_CONTEXT: &str = "TREXTerminal";
 
 /// Bind Tab / Shift+Tab to no-ops within the terminal's key context.
 ///
@@ -528,7 +528,7 @@ pub struct TerminalView {
     visible: bool,
     /// Set when an UNFOCUSED pane raises a signal — today a terminal BEL
     /// (`TerminalEvent::Bell`); later also agent WaitingForInput/NeedsApproval
-    /// and `oximux notify`. Drives the blue attention ring overlay; cleared
+    /// and `TREX notify`. Drives the blue attention ring overlay; cleared
     /// when the pane gains focus (`on_focus`).
     attention: bool,
     /// Per-pane search overlay state. See `terminal_search_state.rs` for
@@ -640,7 +640,7 @@ pub struct TerminalView {
     /// raises pane attention when unfocused.
     progress: Option<(u8, u8)>,
     /// Stable identity triple (workspace / surface / tab). Injected into
-    /// the spawn env as `OXIMUX_*`, persisted alongside the pane layout,
+    /// the spawn env as `trex_*`, persisted alongside the pane layout,
     /// and re-injected verbatim when a dormant pane respawns its shell so
     /// the ids survive an app quit -> reattach for the same surface.
     ids: SurfaceIds,
@@ -674,7 +674,7 @@ pub struct TerminalView {
     /// the first agent reading (a plain shell never writes).
     last_persisted_ambient: Option<crate::shell::ambient_agent_scan::AmbientSideband>,
     /// Names the agent CLI running in this terminal by walking the shell's
-    /// process tree. The sideband above covers only the CLI OxiMux installs
+    /// process tree. The sideband above covers only the CLI TREX installs
     /// hooks for, and both it and the title are events — this is the presence
     /// signal that holds while an agent sits idle. Read by
     /// [`agent_process`](Self::agent_process).
@@ -778,7 +778,7 @@ fn order_points(a: (usize, usize), b: (usize, usize)) -> (usize, usize, usize, u
 /// Inclusive column span of the word at `col`. A word is a run of
 /// alphanumeric or `_` cells; any other glyph (whitespace, punctuation,
 /// `\0` blanks) yields a single-cell span.
-fn word_range_at(row: &[oximux_pty::Cell], col: usize) -> (usize, usize) {
+fn word_range_at(row: &[trex_pty::Cell], col: usize) -> (usize, usize) {
     if col >= row.len() {
         return (col, col);
     }
@@ -817,7 +817,7 @@ fn extract_selection_text(
 /// the last command's output from the history grid, neither of which fits in
 /// the visible snapshot.
 fn extract_selection_text_cells(
-    rows: &[Vec<oximux_pty::Cell>],
+    rows: &[Vec<trex_pty::Cell>],
     (start_row, start_col, end_row, end_col): (usize, usize, usize, usize),
 ) -> String {
     if rows.is_empty() {
@@ -1099,7 +1099,7 @@ fn build_scroll_indicator(
     typo: &Typography,
 ) -> gpui::Stateful<gpui::Div> {
     div()
-        .id("oximux-scroll-to-tail")
+        .id("trex-scroll-to-tail")
         .absolute()
         .top(px(6.0))
         .right(px(10.0))
@@ -1363,7 +1363,7 @@ mod restore_lifecycle_tests {
 #[cfg(test)]
 mod selection_tests {
     use super::*;
-    use oximux_pty::{Cell, CellColor};
+    use trex_pty::{Cell, CellColor};
 
     fn cell(ch: char) -> Cell {
         Cell {
@@ -1387,7 +1387,7 @@ mod selection_tests {
             cursor: (0, 0),
             cells,
             display_offset: 0,
-            cursor_shape: oximux_pty::CursorShapeKind::Block,
+            cursor_shape: trex_pty::CursorShapeKind::Block,
             history_len: 0,
             links: Vec::new(),
         }
@@ -1483,7 +1483,7 @@ mod selection_tests {
             cursor: (0, 0),
             cells: vec![row],
             display_offset: 0,
-            cursor_shape: oximux_pty::CursorShapeKind::Block,
+            cursor_shape: trex_pty::CursorShapeKind::Block,
             history_len: 0,
             links: Vec::new(),
         };

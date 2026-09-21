@@ -1,10 +1,10 @@
-//! Round-trip tests for `PaneRelayIdRepo` (Phase 5 step 5; V005 adds
+﻿//! Round-trip tests for `PaneRelayIdRepo` (Phase 5 step 5; V005 adds
 //! window_id keying so two windows on the same project store independent
 //! relay PTY id rows).
 
-use oximux_storage::{PaneRelayIdRepo, ProjectRepo, open_memory};
+use trex_storage::{PaneRelayIdRepo, ProjectRepo, open_memory};
 
-fn seed_project(db: &oximux_storage::Db) -> String {
+fn seed_project(db: &trex_storage::Db) -> String {
     let repo = ProjectRepo::new(db.clone());
     let root = format!("/tmp/{}", uuid::Uuid::new_v4());
     repo.insert("p", &root, "main").unwrap().id

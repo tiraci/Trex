@@ -1,7 +1,7 @@
-//! Integration tests for `StatusPoller`. Uses real git CLI in tempdirs and
+﻿//! Integration tests for `StatusPoller`. Uses real git CLI in tempdirs and
 //! short tick intervals to keep wall-clock cost low.
 
-use oximux_git::{GitCmd, PollState, Repository, StatusPoller};
+use trex_git::{GitCmd, PollState, Repository, StatusPoller};
 use std::fs;
 use std::time::Duration;
 use tempfile::tempdir;
@@ -9,7 +9,7 @@ use tokio::time::timeout;
 
 /// Test helper — extract the `GitState` out of a `Ready` channel value or
 /// panic. Keeps the assertion sites readable.
-fn ready(state: &PollState) -> &oximux_core::GitState {
+fn ready(state: &PollState) -> &trex_core::GitState {
     match state {
         PollState::Ready(s) => s,
         other => panic!("expected Ready, got {other:?}"),

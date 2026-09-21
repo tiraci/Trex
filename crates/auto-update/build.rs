@@ -1,4 +1,4 @@
-//! Compiles the release signing key into the crate that verifies with it.
+﻿//! Compiles the release signing key into the crate that verifies with it.
 //!
 //! The key is read from `packaging/release-pubkey.txt` rather than written here
 //! as a literal, because several places must carry the same key and a rotation
@@ -13,11 +13,11 @@ fn main() {
     // where anything derived from the host would name the wrong asset in a
     // release manifest.
     let target = std::env::var("TARGET").unwrap_or_else(|_| "unknown".into());
-    println!("cargo:rustc-env=OXIMUX_TARGET={target}");
+    println!("cargo:rustc-env=TREX_TARGET={target}");
 
     let key_file = workspace_root().join("packaging/release-pubkey.txt");
     println!("cargo:rerun-if-changed={}", key_file.display());
-    println!("cargo:rustc-env=OXIMUX_RELEASE_PUBKEY={}", release_pubkey(&key_file));
+    println!("cargo:rustc-env=TREX_RELEASE_PUBKEY={}", release_pubkey(&key_file));
 }
 
 /// `crates/auto-update` → the workspace root. Two levels up, not a search: a

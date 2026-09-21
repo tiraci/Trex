@@ -1,4 +1,4 @@
-//! Deciding *why* a turn failed, from the typed signals the backend gave.
+﻿//! Deciding *why* a turn failed, from the typed signals the backend gave.
 //!
 //! The rule this module exists to enforce: a failure is retried only when
 //! something machine-readable says waiting will help. Everything else — an
@@ -7,7 +7,7 @@
 //! untouched. Under-retrying costs a click; over-retrying spends money or
 //! hammers an account that is already refusing requests.
 
-use oximux_agent_core::thread::event::RateLimitInfo;
+use trex_agent_core::thread::event::RateLimitInfo;
 
 /// Why a turn failed, reduced to what the retry policy needs to know.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

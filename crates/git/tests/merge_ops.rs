@@ -1,4 +1,4 @@
-//! Integration tests for merge operations on `Repository`: `merge_branch`
+﻿//! Integration tests for merge operations on `Repository`: `merge_branch`
 //! with auto-stash recovery. Tempdir + real `git` binary on PATH.
 //!
 //! Tests `merge_dirty_auto_stash_conflict` and
@@ -9,8 +9,8 @@
 mod common;
 
 use common::{init_repo, run_git, write};
-use oximux_core::MergeOutcome;
-use oximux_git::{GitError, Repository};
+use trex_core::MergeOutcome;
+use trex_git::{GitError, Repository};
 
 /// Helper: init repo with one base commit on `main` and a `feature` branch
 /// pointing at the same SHA. Sync (no Repository::open) — each test opens

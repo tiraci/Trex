@@ -1,4 +1,4 @@
-//! `ClaudeStreamJsonConnection` — drives a `claude` subprocess in the
+﻿//! `ClaudeStreamJsonConnection` — drives a `claude` subprocess in the
 //! persistent stream-json mode and surfaces decoded `ThreadEvent`s on a channel.
 //!
 //! Transport (confirmed in the Phase-1 spike, see `spike-findings.md`): a plain
@@ -184,7 +184,7 @@ pub fn build_args(model: Option<&str>) -> Vec<String> {
 /// What the *host* adds to a launch, on top of the session's own flags.
 ///
 /// One struct rather than three more parameters because the three are one
-/// decision: OxiMux declares a sidecar server, registers the hook that polices
+/// decision: TREX declares a sidecar server, registers the hook that polices
 /// its tools, and removes the ones no policy can make safe. Passing the first
 /// without the others hands an agent a capability with nothing watching it, so
 /// they are built together by whoever decides to grant it and travel from there
@@ -194,7 +194,7 @@ pub fn build_args(model: Option<&str>) -> Vec<String> {
 /// pre-seam invocation: no field set emits no flag.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct HostInjection<'a> {
-    /// Servers OxiMux supplies and supervises, rendered into `--mcp-config`.
+    /// Servers TREX supplies and supervises, rendered into `--mcp-config`.
     pub mcp_servers: &'a [McpServerSpec],
     /// Inline JSON for `--settings`. Additive to `--setting-sources`, which
     /// keeps loading the user's own settings; this is the per-session layer.
@@ -231,7 +231,7 @@ pub struct HostInjection<'a> {
 /// Permission mode and effort are both fixed at spawn (like `--model`), so a live
 /// switch of either respawns via this same path.
 ///
-/// `host` is what OxiMux itself adds — see [`HostInjection`]. An empty one emits
+/// `host` is what TREX itself adds — see [`HostInjection`]. An empty one emits
 /// no extra flags at all, so that invocation stays byte-identical to the
 /// pre-seam one — asserted by `no_host_injection_emits_no_flags`. Host servers
 /// are additive, not exclusive: `--strict-mcp-config` is deliberately NOT
@@ -344,7 +344,7 @@ pub struct ClaudeStreamJsonConnection {
     // connection's life: the job's kill-on-close limit means an app crash reaps
     // the tree instead of stranding it.
     #[cfg(windows)]
-    job: Option<oximux_job_object::JobObject>,
+    job: Option<trex_job_object::JobObject>,
 }
 
 impl ClaudeStreamJsonConnection {
@@ -391,7 +391,7 @@ impl ClaudeStreamJsonConnection {
     /// Spawn an already-built command (the real `claude` command, or a fake in
     /// tests) and wire stdout → `decode_line` → the returned receiver.
     pub fn spawn_command(mut cmd: Command) -> Result<(Self, Receiver<ThreadEvent>)> {
-        use oximux_no_window::NoWindow as _;
+        use trex_no_window::NoWindow as _;
         cmd.stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -459,7 +459,7 @@ impl ClaudeStreamJsonConnection {
         // agent still works, and what is lost is the guarantee about its tool
         // children, not the session.
         #[cfg(windows)]
-        let job = match oximux_job_object::JobObject::adopt(&child) {
+        let job = match trex_job_object::JobObject::adopt(&child) {
             Ok(job) => Some(job),
             Err(e) => {
                 tracing::warn!(?e, "could not put claude in a job object");
@@ -589,7 +589,7 @@ fn take_stderr_diagnostic(ring: &Arc<Mutex<VecDeque<u8>>>, error_text: Option<&s
 }
 
 /// Strip secret-shaped values from a diagnostic before it reaches any UI or
-/// persisted surface. The child inherits OxiMux's full environment (no
+/// persisted surface. The child inherits TREX's full environment (no
 /// `env_clear`), so an auth/config error could echo a live token. Redacts (a)
 /// the value of every currently-set `*_API_KEY` / `*_TOKEN` / `*_SECRET` env var
 /// and (b) known secret-shaped tokens (`sk-ant-…`, `sk-…`).
@@ -989,8 +989,8 @@ mod tests {
         // following argument that does not start with a dash. A flag appended
         // after it would be read as another tool name and silently lost.
         let tools = vec![
-            "mcp__oximux-computer-use__replay_trajectory".to_string(),
-            "mcp__oximux-computer-use__get_desktop_state".to_string(),
+            "mcp__trex-computer-use__replay_trajectory".to_string(),
+            "mcp__trex-computer-use__get_desktop_state".to_string(),
         ];
         let spec = McpServerSpec::new("srv", "bin");
         let a = build_args_with_resume(
@@ -1018,7 +1018,7 @@ mod tests {
     /// still passes (it only checks what we emit) — re-run the live probe.
     #[test]
     fn mcp_servers_emit_one_config_flag() {
-        let spec = McpServerSpec::new("oximux-computer-use", "cua-driver")
+        let spec = McpServerSpec::new("trex-computer-use", "cua-driver")
             .args(vec!["mcp".into(), "--socket".into(), "/tmp/s.sock".into()]);
         let a = build_args_with_resume(None, None, None, None, &HostInjection { mcp_servers: std::slice::from_ref(&spec), ..Default::default() });
 
@@ -1026,7 +1026,7 @@ mod tests {
         // One flag, one JSON payload — not a file path, not repeated per server.
         assert_eq!(a.iter().filter(|x| *x == "--mcp-config").count(), 1);
         let cfg: Value = serde_json::from_str(&a[i + 1]).expect("payload is valid json");
-        assert_eq!(cfg["mcpServers"]["oximux-computer-use"]["command"], "cua-driver");
+        assert_eq!(cfg["mcpServers"]["trex-computer-use"]["command"], "cua-driver");
 
         // Never paired with --strict-mcp-config: that would suppress the user's
         // own servers, which `--setting-sources user,project,local` exists to load.
@@ -1240,17 +1240,17 @@ mod tests {
         // A planted secret-suffixed env var value must be stripped from a
         // diagnostic; so must a bare sk-ant token that isn't sourced from env.
         // SAFETY: single-threaded test, restored immediately after.
-        unsafe { std::env::set_var("OXIMUX_TEST_API_KEY", "supersecretvalue12345") };
+        unsafe { std::env::set_var("TREX_TEST_API_KEY", "supersecretvalue12345") };
         let dirty = "auth failed for key supersecretvalue12345 and token sk-ant-abc123XYZ.";
         let clean = redact_secrets(dirty);
-        unsafe { std::env::remove_var("OXIMUX_TEST_API_KEY") };
+        unsafe { std::env::remove_var("TREX_TEST_API_KEY") };
         assert!(!clean.contains("supersecretvalue12345"), "env secret leaked: {clean}");
         assert!(!clean.contains("sk-ant-abc123XYZ"), "sk-ant token leaked: {clean}");
         assert!(clean.contains("[redacted]"));
         // A too-short env value must not blanket-replace common substrings.
-        unsafe { std::env::set_var("OXIMUX_TEST_TOKEN", "ab") };
+        unsafe { std::env::set_var("TREX_TEST_TOKEN", "ab") };
         let benign = redact_secrets("about the abstract abbey");
-        unsafe { std::env::remove_var("OXIMUX_TEST_TOKEN") };
+        unsafe { std::env::remove_var("TREX_TEST_TOKEN") };
         assert_eq!(benign, "about the abstract abbey", "short value must not redact");
     }
 

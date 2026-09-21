@@ -1,4 +1,4 @@
-import type { Schedule } from 'oximux-core';
+﻿import type { Schedule } from 'trex-core';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';

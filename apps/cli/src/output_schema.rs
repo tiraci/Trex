@@ -1,4 +1,4 @@
-//! `--output-schema`: hold an agent's final answer to a JSON Schema, and
+﻿//! `--output-schema`: hold an agent's final answer to a JSON Schema, and
 //! re-prompt it with the validation errors when it misses.
 //!
 //! **Entirely client-side.** The loop is `turn ends` → read the transcript's
@@ -240,7 +240,7 @@ pub async fn enforce(
             };
             return Err(Failure::new("schema-mismatch", exit::ERROR, detail).with_steps([
                 format!("{} correction attempts were made", MAX_RETRIES),
-                format!("inspect the answer with `oximux transcript {session}`"),
+                format!("inspect the answer with `TREX transcript {session}`"),
             ]));
         }
         attempt += 1;

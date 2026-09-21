@@ -1,4 +1,4 @@
-//! Branch picker popover — a single primitive that serves two surfaces:
+﻿//! Branch picker popover — a single primitive that serves two surfaces:
 //!
 //! - **Switch mode**: anchored to the toolbar branch chip; lists local
 //!   branches (current marked), offers "Create branch `<typed>` from HEAD"
@@ -25,7 +25,7 @@ use gpui::{
 use gpui_component::input::{
     Enter as InputEnter, Escape as InputEscape, Input, InputEvent, InputState, MoveDown, MoveUp,
 };
-use oximux_settings::{Density, Theme, Typography};
+use trex_settings::{Density, Theme, Typography};
 
 use crate::ui::FloatingSurface;
 
@@ -405,7 +405,7 @@ impl Focusable for BranchPicker {
 
 impl Render for BranchPicker {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        oximux_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
+        trex_settings::appearance::sync(&mut self.theme, &mut self.density, &mut self.typography, cx);
         if !self.open {
             return div().into_any_element();
         }

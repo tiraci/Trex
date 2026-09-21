@@ -1,4 +1,4 @@
-//! Inline commit composer mounted inside the Source Control panel.
+﻿//! Inline commit composer mounted inside the Source Control panel.
 //!
 //! Single multi-line `Message` textarea plus a full-width primary action
 //! button. The primary's label/icon adapts via the resolved `PrimaryAction`
@@ -22,10 +22,10 @@ use gpui_component::{
     input::{InputEvent, Textarea, TextareaState},
     menu::PopupMenuItem,
 };
-use oximux_core::FileStatus;
-use oximux_git::Repository;
-use oximux_settings::{CommitMessageAiMode, CommitMessageAiSettings, Density, Theme, Typography};
-use oximux_storage::WorktreeSettingsRepo;
+use trex_core::FileStatus;
+use trex_git::Repository;
+use trex_settings::{CommitMessageAiMode, CommitMessageAiSettings, Density, Theme, Typography};
+use trex_storage::WorktreeSettingsRepo;
 
 /// Conventional-commit prefix shortcuts surfaced as one-click chips
 /// above the message textarea. Click prepends the prefix + `: ` to the
@@ -302,7 +302,7 @@ impl CommitArea {
             cx.background_executor().timer(DRAFT_DEBOUNCE).await;
             if let Err(err) = repo.modify(&workspace_id, |s| s.commit_draft = to_write) {
                 tracing::warn!(
-                    target: "oximux_app::commit_area",
+                    target: "trex_app::commit_area",
                     error = %err,
                     workspace_id = %workspace_id,
                     "commit_draft upsert failed; draft will reset to last-persisted value on restart",
@@ -471,7 +471,7 @@ impl CommitArea {
     /// Abort button). Discards the partial merge/rebase/cherry-pick/revert
     /// and returns the worktree to its pre-op state; the next poll clears
     /// the banner.
-    pub fn abort_operation(&mut self, op: oximux_core::GitOperation, cx: &mut Context<Self>) {
+    pub fn abort_operation(&mut self, op: trex_core::GitOperation, cx: &mut Context<Self>) {
         super::commit_ops::run_op_recovery(
             self,
             super::commit_ops::OperationRecovery::Abort(op),
@@ -482,7 +482,7 @@ impl CommitArea {
     /// Continue the in-progress sequencer operation after the user staged
     /// their conflict resolutions (from the operation banner's Continue
     /// button). Only wired for ops where `supports_continue()` is true.
-    pub fn continue_operation(&mut self, op: oximux_core::GitOperation, cx: &mut Context<Self>) {
+    pub fn continue_operation(&mut self, op: trex_core::GitOperation, cx: &mut Context<Self>) {
         super::commit_ops::run_op_recovery(
             self,
             super::commit_ops::OperationRecovery::Continue(op),

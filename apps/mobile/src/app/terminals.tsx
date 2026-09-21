@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import type { TerminalInfo } from 'oximux-core';
+﻿import { router } from 'expo-router';
+import type { TerminalInfo } from 'trex-core';
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

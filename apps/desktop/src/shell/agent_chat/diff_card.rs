@@ -1,4 +1,4 @@
-//! Read-only inline diff for Edit/Write tool cards.
+﻿//! Read-only inline diff for Edit/Write tool cards.
 //!
 //! An Edit tool payload carries `old_string`/`new_string` (not a unified diff),
 //! so we synthesize a line-level diff with `similar` and render add/remove/
@@ -12,9 +12,9 @@ use gpui::{
     AnyElement, HighlightStyle, Hsla, IntoElement, ParentElement, SharedString, StyledText, Styled,
     div, px,
 };
-use oximux_agents::thread::ToolCall;
-use oximux_core::{DiffLine, DiffLineKind};
-use oximux_settings::{Density, Theme, Typography};
+use trex_agents::thread::ToolCall;
+use trex_core::{DiffLine, DiffLineKind};
+use trex_settings::{Density, Theme, Typography};
 use serde_json::Value;
 
 /// Cap on rendered diff rows so a huge edit can't blow up a card; the overflow
@@ -294,7 +294,7 @@ fn highlight_runs(content: &str, lang: syntax::Language, light: bool) -> Runs {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oximux_agents::thread::ToolCall;
+    use trex_agents::thread::ToolCall;
     use serde_json::json;
 
     #[test]
