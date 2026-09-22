@@ -90,6 +90,16 @@ crates/diff-annotate/   — Diff line comments
 ```
 
 ## Remaining
-- Push to `github.com/tiraci/Trex`
-- Wire new crates into trex-app UI
-- Add integration tests
+
+- ~~Push to `github.com/tiraci/Trex`~~ — done (main@origin, commits `0f12c407` + `10105090` + `84271427`)
+- ~~Wire new crates into trex-app UI~~ — done: Orchestration / Accounts / DiffAnnotation reachable from the left nav rail; CLI wired (_see below_)
+- ~~Add integration tests~~ — done: 38 tests across the six new crates (_see below_)
+
+## Post-ledger work (2026-09-22)
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Desktop UI wiring | done (`10105090`) | Orchestration / Accounts / DiffAnnotation singletons in the nav rail, mirroring Tasks/Automations. Verified: `cargo check -p trex-app` clean, nav_section tests 12 pass, ci-check green. |
+| Integration tests | done (`84271427`) | diff-annotate (6), accounts (6), automations (9), orchestration (7), ssh (5), skills (5) — run lifecycle, events, rate limits, DAG convergence, discovery/install, SSH state + reconnect ladder. ci-check green. |
+
+> Note: ledger's "mobile app" rename phase refers to `apps/mobile` (Expo RN + native module `apps/mobile/modules/trex-core`), which is in this repo alongside `apps/desktop`, `apps/cli`, `apps/landing`.
