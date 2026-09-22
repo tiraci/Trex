@@ -1,7 +1,20 @@
 # Rename Ledger: OxiMux → Trex
 
 Started: 2026-09-21
-Completed: 2026-09-21
+Completed: 2026-09-22
+
+## Status (2026-09-22)
+
+All items closed. `main` pushed to `github.com/tiraci/Trex`:
+
+| Area | Status | Commit |
+|------|--------|--------|
+| Rebrand OxiMux → Trex (1,012 files) | done | `0f12c407` |
+| 10 Orca feature ports + 6 new crates | done | `0f12c407` |
+| Workspace release builds (app/cli/relay) | done | — |
+| Desktop UI wiring (nav rail panels) | done | `10105090` |
+| Integration tests for new crates (38) | done | `84271427` |
+| Ledger closed out | done | `6cfaffa4` |
 
 ## Scope
 - 1,012 files, ~6,953 occurrences
@@ -91,7 +104,7 @@ crates/diff-annotate/   — Diff line comments
 
 ## Remaining
 
-- ~~Push to `github.com/tiraci/Trex`~~ — done (main@origin, commits `0f12c407` + `10105090` + `84271427`)
+- ~~Push to `github.com/tiraci/Trex`~~ — done (`main` == `origin/main`)
 - ~~Wire new crates into trex-app UI~~ — done: Orchestration / Accounts / DiffAnnotation reachable from the left nav rail; CLI wired (_see below_)
 - ~~Add integration tests~~ — done: 38 tests across the six new crates (_see below_)
 
