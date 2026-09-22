@@ -15,6 +15,7 @@ All items closed. `main` pushed to `github.com/tiraci/Trex`:
 | Desktop UI wiring (nav rail panels) | done | `10105090` |
 | Integration tests for new crates (38) | done | `84271427` |
 | Ledger closed out | done | `6cfaffa4` |
+| Orca feature parity reconciled vs `../orca` | done | — |
 
 ## Scope
 - 1,012 files, ~6,953 occurrences
@@ -74,6 +75,57 @@ crates/automations/     — Cron schedules + automation service
 crates/accounts/        — Multi-provider account management
 crates/diff-annotate/   — Diff line comments
 ```
+
+## Feature parity vs Orca (reconciled 2026-09-22 against `../orca`)
+
+The original 10-feature table above covers the first port wave. Trex also carries many Orca features that predate it — mapped here so the ledger is the single parity source. Evidence = crate/dir names in this repo.
+
+### Ported (present in Trex beyond the first wave)
+
+| Orca feature | Trex location |
+|---|---|
+| Terminal (PTY, scrollback, splits, OSC7, grid snapshots) | `crates/pty` + `shell/terminal` |
+| Session history & workspace restore | `session_restore/` + `shell/session_history` |
+| Editor / markdown / syntax / UI primitives | `crates/editor`, `crates/markdown`, `crates/syntax`, `crates/ui` |
+| Source control + PR create (gh/glab forge) | `shell/{git_panel,stash_panel,pr_dialog,commit_dialog,source_control}` + `crates/git` |
+| Computer use | `crates/computer-use` |
+| Dictation | `crates/dictation` |
+| Auto-update (channels, staging, sig verify) | `crates/auto-update` |
+| Notifications | `notifier/{mac,null}` |
+| Onboarding, usage/stats, ports panel | `shell/{onboarding,usage,ports_panel}` + `crates/proc-ports` |
+| Remote host/session runtime | `crates/remote-{host,session,local,iroh,proto}` + `remote_control/` |
+| In-app relay daemon (agent hooks, pty, terminals) | `crates/relay*` (relay, client, proto, supervisor, terminals) |
+| Settings surface (theme/typography/keybindings/dictation/computer-use/autosave/…) | `crates/settings` + `app_settings/` + `shell/settings_modal` |
+| Worktree ops | `crates/worktree-ops` |
+| Mobile companion | `apps/mobile` + `crates/mobile-core` (+ native module `apps/mobile/modules/trex-core`) |
+| Native chat / agent sessions | `shell/agent_chat` + `crates/agent-core`, `crates/agents` |
+| External-CLI integration health (gh/glab/rg) | `shell/integrations` |
+| Landing page | `apps/landing` |
+
+### Partial
+
+| Orca feature | Trex status |
+|---|---|
+| Browser pane | `shell/browser_view` exists; no Design Mode or agent-browser automation |
+| PR / issue surfaces | PR create dialog + CLI-gated Tasks page; no dedicated provider panels |
+| Notifications | macOS + null backends only; no badges/attention model |
+| Diff comments | Per-line via `trex-diff-annotate`; no multi-line range comments |
+
+### Missing (Orca features with no Trex counterpart)
+
+- Cloud relay stack (director / cell / fence-broker / ops console, terraform) — `cloud/` absent; Trex relay is in-process only
+- Push notifications gateway (APNs/FCM) + two-way audio
+- OTA phased web-shell migration (desktop-served mobile web bundle, host generation store, page routes)
+- Plugin system (marketplace, install trust, worker supervision, language packs, audit log)
+- i18n / translation catalog
+- Device emulator control (scrcpy / iOS simctl)
+- Agent hibernation (pause idle PTYs, auto-resume)
+- Telemetry / crash reporting / hang watchdog / diagnostics
+- Ephemeral per-workspace cloud VMs
+- Provider panels beyond gh/glab (GitHub PRs/checks, Linear, Jira, GitLab, Bitbucket, Azure DevOps, Gitea as first-class panels)
+- Rich markdown editor extras (Mermaid, wiki links, front-matter tables, slash menu)
+- Floating terminal / Floating Workspace
+- Workspace cleanup, multi-window cross-client sync, source-control AI recipes
 
 ## Build Results
 
