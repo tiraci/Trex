@@ -744,7 +744,10 @@ impl PaneGroup {
             | PaneContent::Browser(_)
             | PaneContent::Tasks(_)
             | PaneContent::Automations(_)
-            | PaneContent::AgentChat(_) => false,
+            | PaneContent::AgentChat(_)
+            | PaneContent::Orchestration(_)
+            | PaneContent::Accounts(_)
+            | PaneContent::DiffAnnotation(_) => false,
         })
     }
 

@@ -123,6 +123,16 @@ pub enum PaneGroupTabKind {
     /// the nav rail opens exactly one per group and re-activates it after.
     /// Not persisted — the nav re-opens it after a session restore.
     Automations,
+    /// Orchestration dashboard — active runs, task graphs, worker status.
+    /// Singleton on the same terms as [`Self::Tasks`]; the nav re-opens it
+    /// after a session restore. Not persisted.
+    Orchestration,
+    /// API account management — configured accounts, rate limits, usage.
+    /// Singleton on the same terms as [`Self::Tasks`]; not persisted.
+    Accounts,
+    /// Per-line diff comments for agent consumption.
+    /// Singleton on the same terms as [`Self::Tasks`]; not persisted.
+    DiffAnnotation,
     /// Structured Agent Chat session (Claude `stream-json`). Backed by its own
     /// headless subprocess; `cwd`/`model` are the launch context (retained for a
     /// future `--resume`). Sibling of `Agent` but rendered as chat, not a PTY.

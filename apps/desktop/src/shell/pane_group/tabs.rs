@@ -803,6 +803,144 @@ impl PaneGroup {
         new_idx
     }
 
+    /// Open or activate the singleton Orchestration tab (active runs + graph).
+    ///
+    /// Same singleton-dedup shape as the Tasks/Automations tabs: the view owns
+    /// its `trex_orchestration::Coordinator`, so the pane only needs focus.
+    pub fn open_or_activate_orchestration_tab(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> usize {
+        if let Some(idx) = self
+            .tabs
+            .iter()
+            .position(|t| matches!(&t.kind, PaneGroupTabKind::Orchestration))
+        {
+            self.set_active(idx, window, cx);
+            return idx;
+        }
+        let theme = self.theme;
+        let density = self.density;
+        let typography = self.typography.clone();
+        let view = cx.new(|cx| {
+            crate::shell::orchestration_view::OrchestrationView::new(theme, density, typography, cx)
+        });
+        let observer = Some(cx.observe(&view, |_this, _v, cx| cx.notify()));
+        let tab = PaneGroupTab {
+            label: SharedString::from("Orchestration"),
+            content: PaneContent::Orchestration(view),
+            kind: PaneGroupTabKind::Orchestration,
+            color: None,
+            custom_title: None,
+            pinned: false,
+            is_preview: false,
+            external_mutation: None,
+            restore_rank: None,
+            _observer: observer,
+            _status_task: None,
+        };
+        self.tabs.push(tab);
+        let new_idx = self.tabs.len() - 1;
+        self.tab_order.push(new_idx);
+        self.active = new_idx;
+        self.bump_mru(new_idx);
+        self.focus_active(window, cx);
+        self.pin_tab_strip_to_end();
+        cx.notify();
+        new_idx
+    }
+
+    /// Open or activate the singleton Accounts tab (API account management).
+    pub fn open_or_activate_accounts_tab(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> usize {
+        if let Some(idx) = self
+            .tabs
+            .iter()
+            .position(|t| matches!(&t.kind, PaneGroupTabKind::Accounts))
+        {
+            self.set_active(idx, window, cx);
+            return idx;
+        }
+        let theme = self.theme;
+        let density = self.density;
+        let typography = self.typography.clone();
+        let view = cx.new(|cx| {
+            crate::shell::accounts_view::AccountsView::new(theme, density, typography, cx)
+        });
+        let observer = Some(cx.observe(&view, |_this, _v, cx| cx.notify()));
+        let tab = PaneGroupTab {
+            label: SharedString::from("Accounts"),
+            content: PaneContent::Accounts(view),
+            kind: PaneGroupTabKind::Accounts,
+            color: None,
+            custom_title: None,
+            pinned: false,
+            is_preview: false,
+            external_mutation: None,
+            restore_rank: None,
+            _observer: observer,
+            _status_task: None,
+        };
+        self.tabs.push(tab);
+        let new_idx = self.tabs.len() - 1;
+        self.tab_order.push(new_idx);
+        self.active = new_idx;
+        self.bump_mru(new_idx);
+        self.focus_active(window, cx);
+        self.pin_tab_strip_to_end();
+        cx.notify();
+        new_idx
+    }
+
+    /// Open or activate the singleton Diff Annotation tab (per-line comments).
+    pub fn open_or_activate_diff_annotation_tab(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> usize {
+        if let Some(idx) = self
+            .tabs
+            .iter()
+            .position(|t| matches!(&t.kind, PaneGroupTabKind::DiffAnnotation))
+        {
+            self.set_active(idx, window, cx);
+            return idx;
+        }
+        let theme = self.theme;
+        let density = self.density;
+        let typography = self.typography.clone();
+        let view = cx.new(|cx| {
+            crate::shell::diff_annotation_view::DiffAnnotationView::new(theme, density, typography, cx)
+        });
+        let observer = Some(cx.observe(&view, |_this, _v, cx| cx.notify()));
+        let tab = PaneGroupTab {
+            label: SharedString::from("Diff Comments"),
+            content: PaneContent::DiffAnnotation(view),
+            kind: PaneGroupTabKind::DiffAnnotation,
+            color: None,
+            custom_title: None,
+            pinned: false,
+            is_preview: false,
+            external_mutation: None,
+            restore_rank: None,
+            _observer: observer,
+            _status_task: None,
+        };
+        self.tabs.push(tab);
+        let new_idx = self.tabs.len() - 1;
+        self.tab_order.push(new_idx);
+        self.active = new_idx;
+        self.bump_mru(new_idx);
+        self.focus_active(window, cx);
+        self.pin_tab_strip_to_end();
+        cx.notify();
+        new_idx
+    }
+
     /// Open a new Agent Chat tab in this group, backed by its own headless
     /// `claude` subprocess (separate PID). Not a singleton — each chat is its
     /// own session, so a second call opens a second chat. The label is a
@@ -2397,6 +2535,10 @@ impl PaneGroup {
             }
             // Agent Chat tabs notify the host on transcript/streaming changes.
             PaneContent::AgentChat(view) => Some(cx.observe(view, |_this, _v, cx| cx.notify())),
+            // The dashboard panels repaint on store reloads, like Tasks.
+            PaneContent::Orchestration(view) => Some(cx.observe(view, |_this, _v, cx| cx.notify())),
+            PaneContent::Accounts(view) => Some(cx.observe(view, |_this, _v, cx| cx.notify())),
+            PaneContent::DiffAnnotation(view) => Some(cx.observe(view, |_this, _v, cx| cx.notify())),
         };
         self.tabs.push(tab);
         self.tab_order.push(self.tabs.len() - 1);

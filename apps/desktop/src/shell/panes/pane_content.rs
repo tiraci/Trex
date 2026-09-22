@@ -19,6 +19,9 @@ use crate::shell::diff_view::DiffView;
 use crate::shell::pane_group::sub_pane::TerminalSplitTree;
 use crate::shell::tasks_view::TasksView;
 use crate::shell::terminal_view::TerminalView;
+use crate::shell::orchestration_view::OrchestrationView;
+use crate::shell::accounts_view::AccountsView;
+use crate::shell::diff_annotation_view::DiffAnnotationView;
 
 pub enum PaneContent {
     /// Tree of one or more sub-pane terminal views. A single-pane tab
@@ -49,6 +52,15 @@ pub enum PaneContent {
     /// transport, distinct from the raw-PTY `Agent` terminal kind. Owns its own
     /// headless subprocess (separate PID). No PTY, no relay.
     AgentChat(Entity<AgentChatView>),
+    /// Multi-agent orchestration panel. Displays active runs, task graphs,
+    /// and worker status. Singleton per group, opened from the nav rail.
+    Orchestration(Entity<OrchestrationView>),
+    /// API account management panel. Shows configured accounts, rate limits,
+    /// and usage tracking. Singleton per group, opened from the nav rail.
+    Accounts(Entity<AccountsView>),
+    /// Diff annotation panel. Manages per-line comments on diffs for agent
+    /// consumption. Singleton per group, opened from the nav rail.
+    DiffAnnotation(Entity<DiffAnnotationView>),
 }
 
 impl PaneContent {
@@ -68,6 +80,11 @@ impl PaneContent {
             // Focus the composer in chat view, or the companion terminal when the
             // chat is toggled to terminal view — whichever surface is showing.
             Self::AgentChat(view) => view.read(cx).active_focus_handle(cx),
+            // Orchestration, Accounts, DiffAnnotation are read-only
+            // panels — each holds its own focus handle.
+            Self::Orchestration(view) => view.read(cx).focus_handle(cx),
+            Self::Accounts(view) => view.read(cx).focus_handle(cx),
+            Self::DiffAnnotation(view) => view.read(cx).focus_handle(cx),
         }
     }
 
@@ -96,6 +113,9 @@ impl PaneContent {
             // The composer Input owns its own focus; the per-leaf bookkeeping
             // reports `false` like the diff/tasks views.
             Self::AgentChat(_) => false,
+            // No text input in any new panel — creation lives in Settings/
+            // is read-only — so none is a focus target either.
+            Self::Orchestration(_) | Self::Accounts(_) | Self::DiffAnnotation(_) => false,
         }
     }
 
@@ -110,7 +130,10 @@ impl PaneContent {
             | Self::Browser(_)
             | Self::Tasks(_)
             | Self::Automations(_)
-            | Self::AgentChat(_) => None,
+            | Self::AgentChat(_)
+            | Self::Orchestration(_)
+            | Self::Accounts(_)
+            | Self::DiffAnnotation(_) => None,
             Self::Editor(view) => Some(view.read(cx).file_path()),
         }
     }
@@ -127,7 +150,10 @@ impl PaneContent {
             | Self::Browser(_)
             | Self::Tasks(_)
             | Self::Automations(_)
-            | Self::AgentChat(_) => None,
+            | Self::AgentChat(_)
+            | Self::Orchestration(_)
+            | Self::Accounts(_)
+            | Self::DiffAnnotation(_) => None,
         }
     }
 }

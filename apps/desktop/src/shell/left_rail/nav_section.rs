@@ -1,9 +1,11 @@
-﻿//! Nav rows at the top of the left rail — Tasks / Automations / Agents / Search.
+﻿//! Nav rows at the top of the left rail — Tasks / Automations / Orchestration /
+//! Accounts / Diff Comments / Agents / Search.
 //!
-//! Two of these open a PANE tab rather than a rail body (Tasks, Automations):
-//! both are pages that need width, and the rail is 250px. Agents is a rail
-//! body. Search is still a shell — clicking it sets `active_nav` and the body
-//! falls through to the workspace list.
+//! Five of these open a PANE tab rather than a rail body (Tasks, Automations,
+//! Orchestration, Accounts, Diff Comments): each is a page that needs width,
+//! and the rail is 250px. Agents is a rail body. Search is still a shell —
+//! clicking it sets `active_nav` and the body falls through to the workspace
+//! list.
 
 use gpui::{
     App, Entity, Hsla, InteractiveElement, IntoElement, MouseButton, MouseDownEvent, ParentElement,
@@ -18,6 +20,9 @@ use crate::shell::left_rail::LeftRail;
 pub enum NavItem {
     Tasks,
     Automations,
+    Orchestration,
+    Accounts,
+    DiffAnnotations,
     Agents,
     Search,
 }
@@ -25,14 +30,24 @@ pub enum NavItem {
 const NAV_ICON_SIZE: f32 = 16.0;
 
 impl NavItem {
-    pub const ALL: [NavItem; 4] =
-        [NavItem::Tasks, NavItem::Automations, NavItem::Agents, NavItem::Search];
+    pub const ALL: [NavItem; 7] = [
+        NavItem::Tasks,
+        NavItem::Automations,
+        NavItem::Orchestration,
+        NavItem::Accounts,
+        NavItem::DiffAnnotations,
+        NavItem::Agents,
+        NavItem::Search,
+    ];
 
     /// Asset path for the row's leading icon. Resolved by `CompositeAssets`.
     pub fn icon_path(self) -> &'static str {
         match self {
             NavItem::Tasks => "icons/inbox.svg",
             NavItem::Automations => "icons/calendar.svg",
+            NavItem::Orchestration => "icons/columns.svg",
+            NavItem::Accounts => "icons/user.svg",
+            NavItem::DiffAnnotations => "icons/file-text.svg",
             NavItem::Agents => "icons/bot.svg",
             NavItem::Search => "icons/search.svg",
         }
@@ -43,6 +58,9 @@ impl NavItem {
         match self {
             NavItem::Tasks => "Tasks",
             NavItem::Automations => "Automations",
+            NavItem::Orchestration => "Orchestration",
+            NavItem::Accounts => "Accounts",
+            NavItem::DiffAnnotations => "Diff Comments",
             NavItem::Agents => "Agents",
             NavItem::Search => "Search",
         }
@@ -53,7 +71,14 @@ impl NavItem {
     /// here", and two competing highlights would disagree the moment the user
     /// switched tabs.
     pub fn opens_in_pane(self) -> bool {
-        matches!(self, NavItem::Tasks | NavItem::Automations)
+        matches!(
+            self,
+            NavItem::Tasks
+                | NavItem::Automations
+                | NavItem::Orchestration
+                | NavItem::Accounts
+                | NavItem::DiffAnnotations
+        )
     }
 }
 
@@ -275,7 +300,7 @@ mod tests {
 
     #[test]
     fn all_nav_items_covered() {
-        assert_eq!(NavItem::ALL.len(), 4);
+        assert_eq!(NavItem::ALL.len(), 7);
     }
 
     /// Every row needs a label and an icon: a nav row that renders as a blank
@@ -292,14 +317,17 @@ mod tests {
         }
     }
 
-    /// The pane-opening rows are exactly Tasks and Automations. Getting this
-    /// wrong is silent: a pane row that fell through to `select_nav` would set
-    /// `active_nav` and swap the rail body to the workspace list, which reads
-    /// as "the click did nothing".
+    /// The pane-opening rows are exactly the dashboard singletons. Getting
+    /// this wrong is silent: a pane row that fell through to `select_nav` would
+    /// set `active_nav` and swap the rail body to the workspace list, which
+    /// reads as "the click did nothing".
     #[test]
     fn only_the_page_rows_open_in_a_pane() {
         assert!(NavItem::Tasks.opens_in_pane());
         assert!(NavItem::Automations.opens_in_pane());
+        assert!(NavItem::Orchestration.opens_in_pane());
+        assert!(NavItem::Accounts.opens_in_pane());
+        assert!(NavItem::DiffAnnotations.opens_in_pane());
         assert!(!NavItem::Agents.opens_in_pane());
         assert!(!NavItem::Search.opens_in_pane());
     }

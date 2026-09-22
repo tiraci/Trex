@@ -38,6 +38,9 @@ pub mod tool_paths;
 pub mod usage;
 pub mod welcome;
 pub mod workspace;
+pub mod orchestration_view;
+pub mod accounts_view;
+pub mod diff_annotation_view;
 
 // Cross-cutting glue — tiny, genuinely cross-domain modules kept loose at the
 // shell/ root by design; foldering them into a concern folder buys nothing.

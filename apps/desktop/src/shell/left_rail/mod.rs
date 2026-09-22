@@ -1217,6 +1217,21 @@ impl LeftRail {
                     root.open_automations_tab(window, cx);
                 });
             }
+            NavItem::Orchestration => {
+                let _ = self.weak_root.update(cx, |root, cx| {
+                    root.open_orchestration_tab(window, cx);
+                });
+            }
+            NavItem::Accounts => {
+                let _ = self.weak_root.update(cx, |root, cx| {
+                    root.open_accounts_tab(window, cx);
+                });
+            }
+            NavItem::DiffAnnotations => {
+                let _ = self.weak_root.update(cx, |root, cx| {
+                    root.open_diff_annotation_tab(window, cx);
+                });
+            }
             NavItem::Agents | NavItem::Search => self.select_nav(item, cx),
         }
     }

@@ -25,6 +25,9 @@ impl PaneGroup {
             | PaneGroupTabKind::Browser { .. }
             | PaneGroupTabKind::Tasks
             | PaneGroupTabKind::Automations
+            | PaneGroupTabKind::Orchestration
+            | PaneGroupTabKind::Accounts
+            | PaneGroupTabKind::DiffAnnotation
             | PaneGroupTabKind::AgentChat { .. } => false,
         }) else {
             return false;
@@ -79,7 +82,10 @@ impl PaneGroup {
             | PaneContent::Browser(_)
             | PaneContent::Tasks(_)
             | PaneContent::Automations(_)
-            | PaneContent::AgentChat(_) => None,
+            | PaneContent::AgentChat(_)
+            | PaneContent::Orchestration(_)
+            | PaneContent::Accounts(_)
+            | PaneContent::DiffAnnotation(_) => None,
         }
     }
 
@@ -109,7 +115,10 @@ impl PaneGroup {
                 | PaneContent::Browser(_)
                 | PaneContent::Tasks(_)
                 | PaneContent::Automations(_)
-                | PaneContent::AgentChat(_) => {
+                | PaneContent::AgentChat(_)
+                | PaneContent::Orchestration(_)
+                | PaneContent::Accounts(_)
+                | PaneContent::DiffAnnotation(_) => {
                     out.push(Vec::new())
                 }
             }
@@ -129,7 +138,10 @@ impl PaneGroup {
                 | PaneContent::Browser(_)
                 | PaneContent::Tasks(_)
                 | PaneContent::Automations(_)
-                | PaneContent::AgentChat(_) => {
+                | PaneContent::AgentChat(_)
+                | PaneContent::Orchestration(_)
+                | PaneContent::Accounts(_)
+                | PaneContent::DiffAnnotation(_) => {
                     out.push(None)
                 }
             }

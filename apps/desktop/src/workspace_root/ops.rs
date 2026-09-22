@@ -331,6 +331,42 @@ impl WorkspaceRoot {
         });
     }
 
+    /// Open (or re-activate) the singleton Orchestration tab in the active
+    /// project's active pane group. Called from the nav rail's row. Same
+    /// toast-beats-no-op contract as Tasks/Automations.
+    pub(crate) fn open_orchestration_tab(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(panes) = self.active_project_panes() else {
+            self.push_toast(ToastKind::Info, "Open a project to see orchestration runs.", cx);
+            return;
+        };
+        panes.update(cx, |p, cx| {
+            p.open_orchestration_tab_in_active_group(window, cx);
+        });
+    }
+
+    /// Open (or re-activate) the singleton Accounts tab in the active group.
+    pub(crate) fn open_accounts_tab(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(panes) = self.active_project_panes() else {
+            self.push_toast(ToastKind::Info, "Open a project to manage accounts.", cx);
+            return;
+        };
+        panes.update(cx, |p, cx| {
+            p.open_accounts_tab_in_active_group(window, cx);
+        });
+    }
+
+    /// Open (or re-activate) the singleton Diff Annotation tab in the active
+    /// project's active pane group.
+    pub(crate) fn open_diff_annotation_tab(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let Some(panes) = self.active_project_panes() else {
+            self.push_toast(ToastKind::Info, "Open a project to see diff annotations.", cx);
+            return;
+        };
+        panes.update(cx, |p, cx| {
+            p.open_diff_annotation_tab_in_active_group(window, cx);
+        });
+    }
+
     /// Walk this window's terminals down to their listening ports and hand the
     /// result to the ports panel.
     ///

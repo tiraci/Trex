@@ -59,6 +59,9 @@ trex-markdown = { workspace = true }
 trex-syntax = { workspace = true }
 trex-storage = { workspace = true }
 trex-ui = { workspace = true }
+trex-orchestration = { workspace = true }
+trex-accounts = { workspace = true }
+trex-diff-annotate = { workspace = true }
 
 qrcode = { workspace = true }
 

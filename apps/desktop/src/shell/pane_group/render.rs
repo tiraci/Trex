@@ -166,6 +166,11 @@ impl Render for PaneGroup {
             PaneContent::Automations(view) => view.clone().into_any_element(),
             // Agent Chat renders its own transcript + composer, same pattern.
             PaneContent::AgentChat(view) => view.clone().into_any_element(),
+            // Dashboard panels render their view entity directly, same pattern
+            // as Diff/Browser/Tasks — each owns its own scroll and layout.
+            PaneContent::Orchestration(view) => view.clone().into_any_element(),
+            PaneContent::Accounts(view) => view.clone().into_any_element(),
+            PaneContent::DiffAnnotation(view) => view.clone().into_any_element(),
         });
 
         // Empty-pane placeholder: when the user closes the last tab of
@@ -414,6 +419,12 @@ enum PaneTabKindMarker {
     Tasks,
     /// Automations tab — calendar glyph, no agent status badge.
     Automations,
+    /// Orchestration dashboard — columns glyph, no agent status badge.
+    Orchestration,
+    /// Accounts tab — user glyph, no agent status badge.
+    Accounts,
+    /// Diff Annotation tab — file glyph, no agent status badge.
+    DiffAnnotation,
     /// Agent Chat tab — message glyph, no agent status badge (status is shown
     /// inline in the transcript, not on the chip).
     AgentChat,
@@ -508,6 +519,9 @@ fn kind_marker(kind: &PaneGroupTabKind) -> PaneTabKindMarker {
         PaneGroupTabKind::Browser { .. } => PaneTabKindMarker::Browser,
         PaneGroupTabKind::Tasks => PaneTabKindMarker::Tasks,
         PaneGroupTabKind::Automations => PaneTabKindMarker::Automations,
+        PaneGroupTabKind::Orchestration => PaneTabKindMarker::Orchestration,
+        PaneGroupTabKind::Accounts => PaneTabKindMarker::Accounts,
+        PaneGroupTabKind::DiffAnnotation => PaneTabKindMarker::DiffAnnotation,
         PaneGroupTabKind::AgentChat { .. } => PaneTabKindMarker::AgentChat,
     }
 }
@@ -1148,6 +1162,9 @@ fn render_tab_chip(
         PaneTabKindMarker::Browser => "icons/globe.svg",
         PaneTabKindMarker::Tasks => "icons/list-tree.svg",
         PaneTabKindMarker::Automations => "icons/calendar.svg",
+        PaneTabKindMarker::Orchestration => "icons/columns.svg",
+        PaneTabKindMarker::Accounts => "icons/user.svg",
+        PaneTabKindMarker::DiffAnnotation => "icons/file-text.svg",
         PaneTabKindMarker::AgentChat => "icons/sparkles.svg",
         PaneTabKindMarker::Agent(adapter_id) => agent_icon(adapter_id),
     };
@@ -1804,6 +1821,11 @@ fn render_mru_hud(
             PaneGroupTabKind::Tasks => "icons/list-tree.svg",
             // Automations matches its nav row and tab chip: the calendar.
             PaneGroupTabKind::Automations => "icons/calendar.svg",
+            // Orchestration / Accounts / DiffAnnotation reuse their tab-chip
+            // glyphs in the Ctrl+Tab switcher, like every other kind.
+            PaneGroupTabKind::Orchestration => "icons/columns.svg",
+            PaneGroupTabKind::Accounts => "icons/user.svg",
+            PaneGroupTabKind::DiffAnnotation => "icons/file-text.svg",
             // Agent Chat uses the sparkles glyph (AI convention), matching its
             // tab chip in the Ctrl+Tab switcher.
             PaneGroupTabKind::AgentChat { .. } => "icons/sparkles.svg",

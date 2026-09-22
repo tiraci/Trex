@@ -95,6 +95,73 @@ impl ProjectPanes {
         }
     }
 
+    /// Open or activate the singleton Orchestration tab in the active group.
+    /// Same group-resolution and dedup rules as the Tasks tab above.
+    pub fn open_orchestration_tab_in_active_group(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let target_id = self
+            .groups
+            .contains_key(&self.manager.active_group_id())
+            .then(|| self.manager.active_group_id())
+            .or_else(|| self.manager.in_order_groups().first().copied());
+        let Some(target_id) = target_id else {
+            return;
+        };
+        self.set_active_group(target_id, window, cx);
+        if let Some(target) = self.groups.get(&target_id).cloned() {
+            target.update(cx, |g, cx| {
+                g.open_or_activate_orchestration_tab(window, cx);
+            });
+        }
+    }
+
+    /// Open or activate the singleton Accounts tab in the active group.
+    pub fn open_accounts_tab_in_active_group(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let target_id = self
+            .groups
+            .contains_key(&self.manager.active_group_id())
+            .then(|| self.manager.active_group_id())
+            .or_else(|| self.manager.in_order_groups().first().copied());
+        let Some(target_id) = target_id else {
+            return;
+        };
+        self.set_active_group(target_id, window, cx);
+        if let Some(target) = self.groups.get(&target_id).cloned() {
+            target.update(cx, |g, cx| {
+                g.open_or_activate_accounts_tab(window, cx);
+            });
+        }
+    }
+
+    /// Open or activate the singleton Diff Annotation tab in the active group.
+    pub fn open_diff_annotation_tab_in_active_group(
+        &mut self,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        let target_id = self
+            .groups
+            .contains_key(&self.manager.active_group_id())
+            .then(|| self.manager.active_group_id())
+            .or_else(|| self.manager.in_order_groups().first().copied());
+        let Some(target_id) = target_id else {
+            return;
+        };
+        self.set_active_group(target_id, window, cx);
+        if let Some(target) = self.groups.get(&target_id).cloned() {
+            target.update(cx, |g, cx| {
+                g.open_or_activate_diff_annotation_tab(window, cx);
+            });
+        }
+    }
+
     /// Open a new Agent Chat tab in the active group (or the first group if the
     /// active id is stale). Not a singleton — each call opens a fresh chat
     /// session with its own headless subprocess. Routed to by the launch picker
@@ -548,7 +615,10 @@ impl ProjectPanes {
                     | PaneGroupTabKind::BranchFile { .. }
                     | PaneGroupTabKind::CombinedDiff { .. }
                     | PaneGroupTabKind::Tasks
-                    | PaneGroupTabKind::Automations => continue,
+                    | PaneGroupTabKind::Automations
+                    | PaneGroupTabKind::Orchestration
+                    | PaneGroupTabKind::Accounts
+                    | PaneGroupTabKind::DiffAnnotation => continue,
                     // Agent Chat: persist the tab kind (cwd/model/session id)
                     // plus, when a turn completed, the transcript blob (drained
                     // to its own settings key by `save_persisted_tabs`). A chat
